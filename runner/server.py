@@ -115,9 +115,12 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(503, {"error": "ocupado"})
             return
         try:
-            self.reply(200, execute(slot, code, mode, check))
+            out = execute(slot, code, mode, check)
         finally:
             FREE_SLOTS.put(slot)
+        # La ranura se libera antes de contestar. Así otra petición del cliente
+        # no puede encontrarla todavía ocupada.
+        self.reply(200, out)
 
 
 def main() -> None:
