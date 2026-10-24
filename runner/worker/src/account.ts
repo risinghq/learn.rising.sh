@@ -81,6 +81,25 @@ export async function sessionUser(
   return row.id;
 }
 
+// Si el usuario entró con una cuenta de GitHub cuyo id numérico está en `ids`.
+// La base guarda ese id como `subject` de la identidad.
+export async function isMaintainer(
+  db: D1Database,
+  userId: string,
+  ids: string[],
+): Promise<boolean> {
+  if (ids.length === 0) return false;
+  const row = await db
+    .prepare(
+      `SELECT 1 AS found FROM identities
+       WHERE user_id = ?1 AND provider = 'github'
+         AND subject IN (SELECT value FROM json_each(?2))`,
+    )
+    .bind(userId, JSON.stringify(ids))
+    .first<{ found: number }>();
+  return row !== null;
+}
+
 export async function closeSession(
   db: D1Database,
   cookieHeader: string | null,

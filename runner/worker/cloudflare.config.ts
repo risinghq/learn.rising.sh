@@ -15,6 +15,11 @@ import { WORKER_FIRST } from "./src/routes.ts";
 const miseVersion = (tool: string) =>
   execFileSync("mise", ["current", tool], { encoding: "utf8" }).trim();
 
+// El tipo de instancia y su número fijan lo que el Worker cuenta como gasto
+// (src/container.ts), así que se declaran aquí una sola vez y se pasan a `env`.
+const INSTANCE_TYPE = "standard-2";
+const INSTANCES = 2;
+
 const runner = defineContainer({
   name: "qg-runner",
   image: {
@@ -25,8 +30,8 @@ const runner = defineContainer({
       UV_VERSION: miseVersion("uv"),
     },
   },
-  instanceType: "standard-2",
-  maxInstances: 3,
+  instanceType: INSTANCE_TYPE,
+  maxInstances: INSTANCES,
 });
 
 export default defineConfig({
@@ -65,10 +70,20 @@ export default defineConfig({
       RATE_PER_MINUTE: bindings.text("30"),
       RATE_PER_DAY: bindings.text("1000"),
       MAX_CODE_BYTES: bindings.text("20000"),
-      MONTHLY_BUDGET_USD: bindings.text("20"),
-      USD_PER_BUSY_SECOND: bindings.text("0.000035"),
+      // El gasto estimado del mes no pasa de este tope. La factura de Workers
+      // Paid (5 USD) no cuenta en él.
+      MONTHLY_BUDGET_USD: bindings.text("2"),
+      // Quien no mantiene el sitio gasta hasta esta parte del presupuesto, y de ella
+      // no más de 1/PUBLIC_BUDGET_DAYS en un día. Lo demás es de los mantenedores.
+      PUBLIC_BUDGET_SHARE: bindings.text("0.75"),
+      PUBLIC_BUDGET_DAYS: bindings.text("15"),
+      INSTANCE_TYPE: bindings.text(INSTANCE_TYPE),
+      INSTANCES: bindings.text(String(INSTANCES)),
       // 10 s de trabajo, el arranque de la instancia y un reintento tras un 503.
       RESERVED_BUSY_SECONDS: bindings.text("30"),
+      // Ids numéricos de GitHub, separados por comas, de quienes mantienen el sitio.
+      // 20960328 es el de totallynotdavid.
+      MAINTAINERS: bindings.text("20960328"),
       SESSION_HOURS: bindings.text("8"),
     },
     exports: {

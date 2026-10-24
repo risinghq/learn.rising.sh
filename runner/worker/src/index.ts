@@ -1,30 +1,36 @@
-import { Container, getRandom } from "@cloudflare/containers";
+import { Container } from "@cloudflare/containers";
 
-import { sessionUser } from "./account.ts";
+import { isMaintainer, sessionUser } from "./account.ts";
 import { handleApi } from "./api.ts";
 import { recordAttempt, toAttempt } from "./attempts.ts";
 import { handleAuth } from "./auth.ts";
+import { type Rates, SLEEP_AFTER_SECONDS } from "./container.ts";
 import { fail } from "./http.ts";
 import { ConfigError, type Env, type Limits, loadLimits } from "./limits.ts";
 import { type Entry, logFailure, logRun } from "./log.ts";
-import { Budget, RateLimiter, type Verdict } from "./meters.ts";
+import {
+  Budget,
+  type Hold,
+  RateLimiter,
+  type Verdict,
+  type Who,
+} from "./meters.ts";
 import { purge } from "./purge.ts";
 import { hasSession, issueSession, verifyTurnstile } from "./session.ts";
 import { take } from "./throttle.ts";
 
 export { Budget, RateLimiter };
 
-const INSTANCES = 3;
-// Cloudflare cobra el tiempo del contenedor en pasos de 10 ms.
-const BILLING_STEP_MS = 10;
-
 // Una instancia atiende un trabajo a la vez (runner/server.py). El Worker reparte
-// entre INSTANCES y reintenta una vez cuando la elegida responde 503.
+// entre `INSTANCES` y reintenta una vez en la siguiente cuando la elegida
+// responde 503.
 export class Runner extends Container {
   defaultPort = 8080;
-  sleepAfter = "5m";
+  sleepAfter = `${SLEEP_AFTER_SECONDS}s`;
   enableInternet = false;
 }
+
+const instanceName = (index: number) => `instance-${index}`;
 
 interface Exports {
   Runner: DurableObjectNamespace<Runner>;
@@ -110,31 +116,66 @@ async function readBody(request: Request, limits: Limits): Promise<Uint8Array> {
   return body;
 }
 
-// Lo que se puede cobrar de una petición ya aceptada. Se calcula tras el
-// trabajo, con el tiempo que el Worker esperó a la instancia (arranque incluido),
-// y nunca pasa de lo que la petición apartó.
-function busyCost(limits: Limits, busyMs: number): number {
-  const steps = Math.max(1, Math.ceil(busyMs / BILLING_STEP_MS));
-  const cost = Math.round(
-    ((steps * BILLING_STEP_MS) / 1000) * limits.nanoPerBusySecond,
-  );
-  return Math.min(cost, limits.reserveNano);
-}
-
-// Cambia la reserva por el coste medido. Un fallo se registra y no se propaga.
-// La reserva sin ajustar cuenta de más, nunca de menos, y no debe tapar el error
-// que la petición ya traía.
+// Cambia la reserva por el coste medido y devuelve lo cobrado. Un fallo se
+// registra y no se propaga: la reserva sin ajustar cuenta de más, nunca de menos,
+// y no debe tapar el error que la petición ya traía.
 async function settle(
   budget: DurableObjectStub<Budget>,
-  month: string,
-  reserved: number,
-  actual: number,
-): Promise<void> {
+  rates: Rates,
+  hold: Hold,
+  ran?: { busyMs: number; endedAt: number },
+): Promise<number> {
   try {
-    await budget.settle(month, reserved, actual);
+    return await budget.settle(hold, rates, ran);
   } catch (error) {
     logFailure(error, "settle");
+    return hold.nano;
   }
+}
+
+// Una reserva de esta petición en una instancia, y cuándo se le mandó el trabajo.
+interface Attempt {
+  hold: Hold;
+  reservedAt: number;
+  sentAt?: number;
+  endedAt?: number;
+  settled?: boolean;
+}
+
+const MARIMO = "Los cuadernos de marimo siguen funcionando en tu equipo.";
+
+// `entry` es el de la petición: se completa con el tiempo y el coste antes de
+// registrarse, también cuando el tope llega en el reintento.
+function overBudget(
+  entry: Entry,
+  reason: "budget" | "budget_day",
+  now: number,
+): Refusal {
+  const at = new Date(now);
+  entry.outcome = reason;
+  entry.status = 503;
+  if (reason === "budget_day") {
+    const retryAfter = Math.ceil(
+      (Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate() + 1) -
+        now) /
+        1000,
+    );
+    return new Refusal(
+      entry,
+      reason,
+      `El corredor alcanzó su presupuesto de hoy y no ejecuta más código hasta mañana. Puedes volver a ejecutar en ${wait(retryAfter)}. ${MARIMO}`,
+      { "Retry-After": String(retryAfter) },
+    );
+  }
+  const retryAfter = Math.ceil(
+    (Date.UTC(at.getUTCFullYear(), at.getUTCMonth() + 1, 1) - now) / 1000,
+  );
+  return new Refusal(
+    entry,
+    reason,
+    `El corredor alcanzó su presupuesto de este mes y no ejecuta más código hasta que empiece el siguiente. ${MARIMO}`,
+    { "Retry-After": String(retryAfter) },
+  );
 }
 
 async function run(
@@ -146,10 +187,31 @@ async function run(
   const now = Date.now();
   const ip = request.headers.get("cf-connecting-ip") ?? "";
   const entry: Entry = { outcome: "ok", status: 0 };
-  const month = new Date(now).toISOString().slice(0, 7);
   const budget = exports.Budget.get(exports.Budget.idFromName("budget"));
-  // La reserva sigue pendiente mientras la petición no ha pasado al contenedor.
-  let holding = false;
+  // Las reservas de la petición. Una sigue abierta mientras no se ajusta.
+  const attempts: Attempt[] = [];
+  // Ajusta las reservas abiertas al coste medido y devuelve lo cobrado. Una a la
+  // que no se mandó trabajo devuelve todo.
+  const close = async (): Promise<number> => {
+    const end = Date.now();
+    const costs = await Promise.all(
+      attempts
+        .filter((attempt) => !attempt.settled)
+        .map((attempt) => {
+          attempt.settled = true;
+          const endedAt = attempt.endedAt ?? end;
+          return settle(
+            budget,
+            limits.rates,
+            attempt.hold,
+            attempt.sentAt === undefined
+              ? undefined
+              : { busyMs: endedAt - attempt.sentAt, endedAt },
+          );
+        }),
+    );
+    return costs.reduce((sum, cost) => sum + cost, 0);
+  };
 
   try {
     const userId = await sessionUser(
@@ -157,6 +219,10 @@ async function run(
       request.headers.get("cookie"),
       now,
     );
+    const maintainer =
+      userId !== null &&
+      (await isMaintainer(env.DB, userId, limits.maintainers));
+    const who: Who = maintainer ? "maintainer" : "public";
     // Quien tiene cuenta comparte la IP con su clase: su tope por IP es mayor y el
     // que lo acota es el suyo propio.
     const ipFactor = userId ? limits.signedInIpFactor : 1;
@@ -172,7 +238,8 @@ async function run(
         limits.perDay * ipFactor,
       ),
     );
-    if (userId) {
+    // Quien mantiene el sitio no tiene tope diario propio: lo acota el presupuesto.
+    if (userId && !maintainer) {
       throwIfLimited(
         await take(
           exports.RateLimiter,
@@ -219,29 +286,32 @@ async function run(
       );
     }
 
-    holding = await budget.reserve(
-      month,
-      limits.reserveNano,
-      limits.budgetNano,
-    );
-    if (!holding) {
-      const next = new Date(now);
-      const retryAfter = Math.ceil(
-        (Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 1) - now) /
-          1000,
-      );
-      throw new Refusal(
-        { ...entry, outcome: "budget", status: 503 },
-        "budget",
-        "El corredor alcanzó su presupuesto de este mes y no ejecuta más código hasta que empiece el siguiente. Los cuadernos de marimo siguen funcionando en tu equipo.",
-        { "Retry-After": String(retryAfter) },
-      );
-    }
+    // Aparta lo que costaría la ejecución en esa instancia: su CPU y el tiempo
+    // que la deja encendida. Va antes de Turnstile para no gastar una
+    // verificación cuando ya no hay presupuesto.
+    const reserve = async (index: number): Promise<Attempt> => {
+      const reservedAt = Date.now();
+      const reserved = await budget.reserve({
+        who,
+        instance: instanceName(index),
+        now: reservedAt,
+        runMs: limits.reserveMs,
+        rates: limits.rates,
+        caps: limits.caps,
+      });
+      if (!reserved.ok) throw overBudget(entry, reserved.reason, reservedAt);
+      const attempt: Attempt = { hold: reserved.hold, reservedAt };
+      attempts.push(attempt);
+      return attempt;
+    };
+    const firstIndex = Math.floor(Math.random() * limits.instances);
+    const first = await reserve(firstIndex);
 
     let cookie: string | undefined;
-    // Una cuenta ya pasó por Google o GitHub y tiene su propio limitador.
+    // Quien mantiene el sitio entra con GitHub y no pasa por Turnstile. Los demás,
+    // con cuenta o sin ella, lo pasan una vez por sesión.
     if (
-      !userId &&
+      !maintainer &&
       !(await hasSession(
         env.TURNSTILE_SECRET,
         ip,
@@ -292,32 +362,53 @@ async function run(
     // otro alumno, y detenerla lo mataría.
     let pending = undefined as DurableObjectStub<Runner> | undefined;
     let stopped = false;
-    const send = async () => {
-      const instance = await getRandom(exports.Runner, INSTANCES);
+    const send = async (index: number, attempt: Attempt) => {
+      const instance = exports.Runner.get(
+        exports.Runner.idFromName(instanceName(index)),
+      );
       // Una instancia elegida después del tope no debe llegar a arrancar.
       if (stopped) throw new Error("run stopped");
       pending = instance;
-      const response = await instance.fetch(
-        new Request(new URL("/run", request.url), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-        }),
-      );
-      pending = undefined;
-      return response;
+      attempt.sentAt = Date.now();
+      try {
+        const response = await instance.fetch(
+          new Request(new URL("/run", request.url), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body,
+          }),
+        );
+        pending = undefined;
+        return response;
+      } finally {
+        attempt.endedAt ??= Date.now();
+      }
     };
     const started = Date.now();
     let result: Response | undefined;
-    holding = false;
-    // La reserva es un tope: la ejecución, con su reintento, tiene RESERVED_BUSY_SECONDS.
+    // La ejecución, con su reintento, tiene RESERVED_BUSY_SECONDS desde que se
+    // apartó, y Turnstile ya gastó parte de ese tiempo. Pasado ese tope, la
+    // reserva no cubriría el tiempo que la instancia seguiría encendida.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const ceiling = new Promise<undefined>((resolve) => {
-      timer = setTimeout(() => resolve(undefined), limits.reserveMs);
+      timer = setTimeout(
+        () => resolve(undefined),
+        Math.max(0, limits.reserveMs - (started - first.reservedAt)),
+      );
     });
     const work = (async () => {
-      const first = await send();
-      return first.status === 503 ? send() : first;
+      const response = await send(firstIndex, first);
+      if (response.status !== 503) return response;
+      // Esa instancia atiende a otro alumno: se prueba la siguiente.
+      const next = (firstIndex + 1) % limits.instances;
+      if (stopped) throw new Error("run stopped");
+      const retry = await reserve(next);
+      // El tope pudo llegar mientras se apartaba: nadie ajustará esta reserva.
+      if (stopped) {
+        await close();
+        throw new Error("run stopped");
+      }
+      return send(next, retry);
     })();
     // Si gana el tope, el rechazo tardío de `work` no tiene a quién llegar.
     work.catch(() => {});
@@ -330,10 +421,9 @@ async function run(
     } finally {
       clearTimeout(timer);
       entry.busyMs = Date.now() - started;
-      entry.costNano = busyCost(limits, entry.busyMs);
       // Si falla el registro del coste, la reserva se queda y el error del
       // contenedor, si lo hubo, sigue su camino.
-      await settle(budget, month, limits.reserveNano, entry.costNano);
+      entry.costNano = await close();
     }
     if (!result) {
       throw new Refusal(
@@ -366,7 +456,7 @@ async function run(
     }
     return new Response(text, { status: result.status, headers });
   } catch (error) {
-    if (holding) await settle(budget, month, limits.reserveNano, 0);
+    await close();
     if (error instanceof Refusal) {
       logRun(error.entry);
       return refuse(error);

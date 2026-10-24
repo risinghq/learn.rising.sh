@@ -11,6 +11,7 @@ export type Outcome =
   | "turnstile_failed"
   | "turnstile_unavailable"
   | "budget"
+  | "budget_day"
   | "run_too_long"
   | "internal_error";
 
