@@ -20,8 +20,12 @@ export const VARS = {
   RATE_PER_DAY: "100000",
   MAX_CODE_BYTES: "20000",
   MONTHLY_BUDGET_USD: "1000",
-  USD_PER_BUSY_SECOND: "0.0000075",
+  PUBLIC_BUDGET_SHARE: "0.75",
+  PUBLIC_BUDGET_DAYS: "1",
+  INSTANCE_TYPE: "standard-2",
+  INSTANCES: "2",
   RESERVED_BUSY_SECONDS: "30",
+  MAINTAINERS: "",
   SESSION_HOURS: "8",
   AUTH_PER_MINUTE: "1000",
   AUTH_SESSION_DAYS: "30",
@@ -93,6 +97,8 @@ export interface Harness {
   runnerCalls(): { path: string; headers: string[] }[];
   // Cuántas veces el Worker detuvo una instancia.
   runnerStops(): number;
+  // Adelanta `ms` el reloj detenido de la opción `FAKE_CLOCK`.
+  advance(ms: number): Promise<void>;
   siteverify: Siteverify;
   dispose(): Promise<void>;
 }
@@ -115,11 +121,12 @@ function fakeSiteverify(siteverify: Siteverify, down: boolean) {
 }
 
 export interface Options {
-  // FAKE_SETTLE_FAILS hace fallar el ajuste del presupuesto y FAKE_PICKS elige las
-  // instancias del contenedor (test/entry.ts).
+  // FAKE_SETTLE_FAILS hace fallar el ajuste del presupuesto, FAKE_PICKS elige las
+  // instancias del contenedor y FAKE_CLOCK detiene el reloj (test/entry.ts).
   vars?: Partial<typeof VARS> & {
     FAKE_SETTLE_FAILS?: string;
     FAKE_PICKS?: string;
+    FAKE_CLOCK?: string;
   };
   // Sin esto el Worker llama al servicio real de Turnstile.
   siteverify?: "fake" | "down" | "real";
@@ -263,6 +270,9 @@ export async function start(options: Options = {}): Promise<Harness> {
     workerLogs: () => logs.filter((line) => !line.startsWith("FAKE_RUNNER_")),
     runnerStops: () =>
       logs.filter((line) => line === "FAKE_RUNNER_STOP").length,
+    advance: async (ms) => {
+      await mf.dispatchFetch(`http://runner.test/clock?advance=${ms}`);
+    },
     runnerCalls: () =>
       logs
         .filter((line) => line.startsWith("FAKE_RUNNER_CALL"))

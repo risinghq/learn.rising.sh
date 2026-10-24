@@ -7,7 +7,8 @@ import {
   clearOfMinuteEnd,
   start as startWorker,
 } from "./harness.ts";
-import { PII, type ProviderName } from "./provider.ts";
+import { PII } from "./provider.ts";
+import { begin, cookieOf, setCookies, signIn } from "./signin.ts";
 
 const open: Harness[] = [];
 
@@ -43,41 +44,6 @@ async function dump(h: Harness): Promise<string> {
     TABLES.map((table) => h.db.prepare(`SELECT * FROM ${table}`).all()),
   );
   return JSON.stringify(rows.map((r) => r.results));
-}
-
-const cookieOf = (setCookie: string[], name: string) =>
-  setCookie
-    .map((line) => line.split(";")[0])
-    .find((pair) => pair.startsWith(`${name}=`));
-
-const setCookies = (headers: Headers) => headers.getSetCookie();
-
-// El alumno pulsa «entrar», aprueba en el proveedor y el navegador vuelve.
-async function begin(h: Harness, provider: ProviderName, query = "") {
-  const start = await h.request("GET", `/auth/${provider}${query}`);
-  const location = start.headers.get("location");
-  const flow = cookieOf(setCookies(start.headers), "qg_oauth");
-  return { start, location, flow };
-}
-
-async function signIn(
-  h: Harness,
-  provider: ProviderName,
-  subject: string,
-  query = "?return=/lesson.html",
-) {
-  const { location, flow } = await begin(h, provider, query);
-  const code = h.provider.consent(location!, subject);
-  const state = new URL(location!).searchParams.get("state")!;
-  const back = await h.request(
-    "GET",
-    `/auth/${provider}/callback?code=${code}&state=${state}`,
-    {
-      headers: { cookie: flow! },
-    },
-  );
-  const cookie = cookieOf(setCookies(back.headers), "qg_auth");
-  return { back, cookie, code, state, flow: flow! };
 }
 
 describe("inicio de sesión con OAuth", () => {
@@ -465,19 +431,76 @@ describe("cerrar sesión y caducidad", () => {
   });
 });
 
+// Quien entró y no mantiene el sitio ejecuta con su cookie y el token de Turnstile.
+const signedIn = (cookie: string, extra: Record<string, string> = {}) => ({
+  cookie,
+  "x-turnstile-token": TOKEN,
+  ...extra,
+});
+
 describe("/run con cuenta", () => {
   const check = { code: "print(1)", mode: "check", exercise: "intro/uno" };
 
-  it("sin token de Turnstile, con sesión, responde 200", async () => {
-    const h = await worker();
-    const { cookie } = await signIn(h, "google", "sub-1");
-    const reply = await h.post(check, { headers: { cookie: cookie! } });
-    expect(reply.status).toBe(200);
-    expect(reply.body.passed).toBe(true);
+  it("con sesión pero sin ser mantenedor, Turnstile sigue siendo necesario", async () => {
+    const h = await worker({ vars: { MAINTAINERS: "20960328" } });
+    const { cookie } = await signIn(h, "github", "4242");
+    const without = await h.post(check, { headers: { cookie: cookie! } });
+    expect(without.status).toBe(403);
+    expect(without.body.reason).toBe("turnstile_missing");
+    expect(h.runnerCalls()).toHaveLength(0);
+
+    const verified = await h.post(check, { headers: signedIn(cookie!) });
+    expect(verified.status).toBe(200);
+    expect(h.siteverify.calls).toHaveLength(1);
+  });
+
+  it("un mantenedor de GitHub ejecuta sin Turnstile ni límite por usuario", async () => {
+    await clearOfMinuteEnd();
+    const h = await worker({
+      vars: {
+        MAINTAINERS: "7,20960328",
+        RATE_PER_MINUTE: "2",
+        SIGNED_IN_IP_FACTOR: "100",
+      },
+    });
+    const { cookie } = await signIn(h, "github", "20960328");
+    const statuses: number[] = [];
+    for (let i = 0; i < 4; i++)
+      statuses.push(
+        (await h.post(check, { headers: { cookie: cookie! } })).status,
+      );
+    expect(statuses).toEqual([200, 200, 200, 200]);
     expect(h.siteverify.calls).toHaveLength(0);
-    expect(
-      setCookies(reply.headers).find((line) => line.startsWith("qg_session=")),
-    ).toBeUndefined();
+    expect(await count(h, "attempts", "user_id IS NOT NULL")).toBe(4);
+  });
+
+  it("el mismo número en Google no hace mantenedor, y el límite por usuario sí le llega", async () => {
+    await clearOfMinuteEnd();
+    const h = await worker({
+      vars: {
+        MAINTAINERS: "20960328",
+        RATE_PER_MINUTE: "2",
+        SIGNED_IN_IP_FACTOR: "100",
+      },
+    });
+    // El primer intento, sin token, ya cuenta en el límite del usuario.
+    const { cookie } = await signIn(h, "google", "20960328");
+    const reply = await h.post(check, { headers: { cookie: cookie! } });
+    expect(reply.status).toBe(403);
+    expect(reply.body.reason).toBe("turnstile_missing");
+    const statuses = [];
+    for (let i = 0; i < 2; i++)
+      statuses.push(
+        (await h.post(check, { headers: signedIn(cookie!) })).status,
+      );
+    expect(statuses).toEqual([200, 429]);
+  });
+
+  it("MAINTAINERS con un nombre de usuario en vez de un id es un error de configuración", async () => {
+    const h = await worker({ vars: { MAINTAINERS: "totallynotdavid" } });
+    const reply = await h.post(check, { headers: signedIn("qg_auth=x") });
+    expect(reply.status).toBe(500);
+    expect(h.workerLogs().join("\n")).toContain("MAINTAINERS");
   });
 
   it("sin sesión y sin token sigue respondiendo 403", async () => {
@@ -505,7 +528,7 @@ describe("/run con cuenta", () => {
     const statuses = async (cookie: string) => {
       const out: number[] = [];
       for (let i = 0; i < 3; i++)
-        out.push((await h.post(check, { headers: { cookie } })).status);
+        out.push((await h.post(check, { headers: signedIn(cookie) })).status);
       return out;
     };
     expect(await statuses(ada.cookie!)).toEqual([200, 200, 429]);
@@ -523,12 +546,10 @@ describe("/run con cuenta", () => {
     );
     const statuses: number[] = [];
     for (const user of users) {
-      statuses.push(
-        (await h.post(check, { headers: { cookie: user.cookie! } })).status,
-      );
-      statuses.push(
-        (await h.post(check, { headers: { cookie: user.cookie! } })).status,
-      );
+      for (let i = 0; i < 2; i++)
+        statuses.push(
+          (await h.post(check, { headers: signedIn(user.cookie!) })).status,
+        );
     }
     // Ocho ejecuciones caben; la novena de la misma IP ya no.
     expect(statuses.slice(0, 8)).toEqual(Array(8).fill(200));
@@ -562,7 +583,7 @@ describe("intentos", () => {
     const code = `# FALLA ${MARKER}\nprint('${MARKER}')`;
     const reply = await h.post(
       { code, mode: "check", exercise: "intro/uno" },
-      { headers: { cookie: cookie!, "x-hints": "2" } },
+      { headers: signedIn(cookie!, { "x-hints": "2" }) },
     );
     expect(reply.status).toBe(200);
     // El corredor sí repite el marcador en lo que le devuelve a la página.
@@ -591,7 +612,7 @@ describe("intentos", () => {
     const { cookie } = await signIn(h, "google", "sub-1");
     await h.post(
       { code: `ERROR ${MARKER}`, mode: "run", exercise: "intro/uno" },
-      { headers: { cookie: cookie! } },
+      { headers: signedIn(cookie!) },
     );
     const [row] = await attempts(h);
     expect(row).toMatchObject({
@@ -1024,7 +1045,7 @@ describe("/api", () => {
       });
       await h.post(
         { code: "FALLA", mode: "check", exercise: "intro/uno" },
-        { headers: { cookie: who.cookie } },
+        { headers: signedIn(who.cookie) },
       );
     }
     await h.post(
@@ -1112,7 +1133,7 @@ describe("limpieza diaria", () => {
     const today = Math.floor(Date.now() / 86_400_000);
     await h.post(
       { code: "print(1)", mode: "run", exercise: "intro/uno" },
-      { headers: { cookie: old.cookie! } },
+      { headers: signedIn(old.cookie!) },
     );
     await h.db
       .prepare(

@@ -10,23 +10,32 @@ export { RateLimiter } from "../src/index.ts";
 // lo pide con la variable FAKE_SETTLE_FAILS.
 export class Budget extends RealBudget {
   override async settle(
-    month: string,
-    reserved: number,
-    actual: number,
-  ): Promise<void> {
+    ...args: Parameters<RealBudget["settle"]>
+  ): Promise<number> {
     if ((this.env as { FAKE_SETTLE_FAILS?: string }).FAKE_SETTLE_FAILS) {
       throw new Error("StorageDown: el almacenamiento no responde");
     }
-    return super.settle(month, reserved, actual);
+    return super.settle(...args);
   }
 }
 
 interface TestEnv {
   // Instancias que elige el Worker, en orden, separadas por comas ("0,1").
   FAKE_PICKS?: string;
+  INSTANCES: string;
+  // Fecha ISO en que se detiene el reloj. Solo avanza con /clock?advance=<ms> y con
+  // el trabajo del corredor falso ("TRABAJO-<ms>").
+  FAKE_CLOCK?: string;
 }
 
 let picked = false;
+let frozen: number | undefined;
+
+function freeze(env: TestEnv): void {
+  if (!env.FAKE_CLOCK || frozen !== undefined) return;
+  frozen = Date.parse(env.FAKE_CLOCK);
+  Date.now = () => frozen!;
+}
 
 // El corredor repite en `stdout`, en el `message` de los casos y en `error` lo que
 // recibió: así las pruebas ven si el Worker deja pasar algo de eso a la base.
@@ -90,8 +99,14 @@ export default {
     const runners = (
       ctx as unknown as { exports: { Runner: DurableObjectNamespace } }
     ).exports.Runner;
+    freeze(env);
+    const url = new URL(request.url);
+    if (url.pathname === "/clock") {
+      frozen = (frozen ?? Date.now()) + Number(url.searchParams.get("advance"));
+      return Response.json({ now: frozen });
+    }
     // Otro alumno que ya tiene un trabajo en la instancia 0, sin pasar por el Worker.
-    if (new URL(request.url).pathname === "/other-learner") {
+    if (url.pathname === "/other-learner") {
       return runners.get(runners.idFromName("instance-0")).fetch(
         new Request("http://runner/run", {
           method: "POST",
@@ -103,7 +118,7 @@ export default {
       picked = true;
       const picks = env.FAKE_PICKS.split(",").map(Number);
       // getRandom elige con Math.random: así la prueba decide qué instancia toca.
-      Math.random = () => ((picks.shift() ?? 0) + 0.5) / 3;
+      Math.random = () => ((picks.shift() ?? 0) + 0.5) / Number(env.INSTANCES);
     }
     return real.fetch(request, env as never, ctx);
   },
@@ -137,6 +152,9 @@ export class Runner extends DurableObject {
     } else {
       // Un trabajo que no termina a tiempo: solo el Worker puede cortarlo.
       await scheduler.wait(code === "colgar" ? 1500 : 15);
+      // Un trabajo que dura tanto como dice el código, en el reloj detenido.
+      const work = /TRABAJO-(\d+)/.exec(code);
+      if (work && frozen !== undefined) frozen += Number(work[1]);
     }
     return Response.json(answer(code));
   }

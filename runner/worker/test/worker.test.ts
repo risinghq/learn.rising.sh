@@ -10,6 +10,7 @@ import {
   clearOfMinuteEnd,
   start,
 } from "./harness.ts";
+import { signIn } from "./signin.ts";
 
 const open: Harness[] = [];
 
@@ -302,52 +303,93 @@ describe("tamaño del código", () => {
   });
 });
 
+// Los precios de las pruebas son los de `standard-2` con `sleepAfter` de 60 s:
+// 20 000 nanodólares por segundo de CPU y 15 840 por segundo encendida (6 GiB y
+// 12 GB). Una ejecución aislada de 2 s cuesta 2 × 20 000 de CPU y 62 × 15 840 de
+// instancia encendida, que son 1 022 080. Reservar una ejecución aislada aparta
+// 30 × 20 000 + 90 × 15 840 = 2 025 600.
+const CLOCK = "2026-10-15T12:00:00Z";
+const ISOLATED_2S = 1_022_080;
+
+const work = (ms: number) => ({ code: `TRABAJO-${ms}`, mode: "run" });
+
+function costs(h: Harness): number[] {
+  return h
+    .workerLogs()
+    .map((line) => JSON.parse(line))
+    .filter((line) => line.event === "run" && line.cost_nano_usd !== undefined)
+    .map((line) => line.cost_nano_usd);
+}
+
 describe("presupuesto mensual", () => {
-  // A 1000 USD por segundo la reserva de 0,05 s son 50 USD. Una ejecución que se
-  // cuelga se detiene a los 50 ms; sin tope costaría los 1500 ms que tarda.
-  const ceiling = (budget: string) => ({
-    vars: {
-      MONTHLY_BUDGET_USD: budget,
-      USD_PER_BUSY_SECOND: "1000",
-      RESERVED_BUSY_SECONDS: "0.05",
-    },
-  });
+  // Con una reserva de 0,05 s una ejecución que se cuelga se detiene a los 50 ms;
+  // sin tope costaría los 1500 ms que tarda.
   const hang = { code: "colgar", mode: "run" };
 
-  it("detiene una ejecución que pasa de lo apartado y cobra exactamente la reserva", async () => {
-    const h = await worker(ceiling("120"));
-    for (let i = 0; i < 2; i++) {
-      const reply = await h.post(hang, verified);
-      expect(reply.status).toBe(504);
-      expect(reply.body.reason).toBe("run_too_long");
-    }
-    expect(h.runnerStops()).toBe(2);
+  it("cobra la ventana encendida de una ejecución aislada y solo la ampliación de la siguiente", async () => {
+    // Instancias elegidas: 0, 0, 1 y 0.
+    const h = await worker({
+      vars: { FAKE_CLOCK: CLOCK, FAKE_PICKS: "0,0,1,0" },
+    });
+    await h.post(work(2000), verified);
+    // Dentro de la ventana de la primera: 1 s de CPU y el segundo que alarga la
+    // ventana encendida (1 × 20 000 + 1 × 15 840).
+    await h.post(work(1000), verified);
+    // Otra instancia no comparte la ventana.
+    await h.post(work(2000), verified);
+    // Pasada la ventana, la instancia 0 se apagó y vuelve a cobrar entera.
+    await h.advance(600_000);
+    await h.post(work(2000), verified);
 
-    const lines = h.workerLogs().map((line) => JSON.parse(line));
-    const runs = lines.filter((line) => line.outcome === "run_too_long");
-    expect(runs).toHaveLength(2);
-    for (const line of runs) {
-      expect(line.cost_nano_usd).toBe(50e9);
-      expect(line.busy_ms).toBeLessThan(1000);
-    }
+    expect(costs(h)).toEqual([ISOLATED_2S, 35_840, ISOLATED_2S, ISOLATED_2S]);
+  });
 
-    // Se gastaron 100 de 120 USD: no cabe otra reserva de 50 y no llega al contenedor.
-    const refused = await h.post(run, verified);
-    expect(refused.status).toBe(503);
-    expect(refused.body.reason).toBe("budget");
-    expect(h.runnerCalls()).toHaveLength(2);
+  it.each([
+    { type: "lite", nano: 49_930 },
+    { type: "standard-1", nano: 674_720 },
+    { type: "standard-2", nano: ISOLATED_2S },
+    { type: "standard-4", nano: 2_106_800 },
+  ])("el precio sale del tipo de instancia: $type", async ({ type, nano }) => {
+    const h = await worker({
+      vars: { FAKE_CLOCK: CLOCK, INSTANCE_TYPE: type },
+    });
+    await h.post(work(2000), verified);
+    expect(costs(h)).toEqual([nano]);
+  });
+
+  it("responde 500 con un tipo de instancia que no existe", async () => {
+    const h = await worker({ vars: { INSTANCE_TYPE: "gigante" } });
+    const reply = await h.post(run, verified);
+    expect(reply.status).toBe(500);
+    expect(h.workerLogs().join("\n")).toContain("INSTANCE_TYPE");
+  });
+
+  it("detiene una ejecución que pasa de lo apartado y no cobra más que la reserva", async () => {
+    // La reserva son 0,05 × 20 000 de CPU y 60,05 × 15 840 de instancia encendida.
+    const reserved = 952_192;
+    const h = await worker({
+      vars: { RESERVED_BUSY_SECONDS: "0.05", FAKE_PICKS: "0" },
+    });
+    const reply = await h.post(hang, verified);
+    expect(reply.status).toBe(504);
+    expect(reply.body.reason).toBe("run_too_long");
+    expect(h.runnerStops()).toBe(1);
+
+    const line = h
+      .workerLogs()
+      .map((entry) => JSON.parse(entry))
+      .find((entry) => entry.outcome === "run_too_long");
+    expect(line.busy_ms).toBeLessThan(1000);
+    // Lo cobrado es la ventana apartada, no la que habría durado el trabajo.
+    expect(line.cost_nano_usd).toBeLessThanOrEqual(reserved);
+    expect(line.cost_nano_usd).toBeGreaterThan(900_000);
   });
 
   it("al llegar al tope solo detiene la instancia de la petición, no la que atiende a otro alumno", async () => {
     // El primer intento cae en la instancia 0, que atiende a otro alumno y responde
     // 503; el reintento cae en la 1, donde el trabajo se cuelga.
     const h = await worker({
-      vars: {
-        MONTHLY_BUDGET_USD: "1000",
-        USD_PER_BUSY_SECOND: "1000",
-        RESERVED_BUSY_SECONDS: "0.4",
-        FAKE_PICKS: "0,1",
-      },
+      vars: { RESERVED_BUSY_SECONDS: "0.4", FAKE_PICKS: "0,1" },
     });
     const other = h.get("/other-learner");
     while (h.runnerCalls().length < 1)
@@ -366,28 +408,20 @@ describe("presupuesto mensual", () => {
   });
 
   it("no ejecuta si la reserva de una ejecución ya no cabe", async () => {
-    const h = await worker({
-      vars: {
-        MONTHLY_BUDGET_USD: "5",
-        USD_PER_BUSY_SECOND: "1000",
-        RESERVED_BUSY_SECONDS: "1",
-      },
-    });
+    // Con 0,001 USD el público dispone de 750 000 nanodólares y la reserva de una
+    // ejecución aislada son 2 025 600.
+    const h = await worker({ vars: { MONTHLY_BUDGET_USD: "0.001" } });
     const reply = await h.post(run, verified);
     expect(reply.status).toBe(503);
     expect(reply.body.reason).toBe("budget");
+    expect(reply.body.error).toContain("mes");
     expect(h.runnerCalls()).toHaveLength(0);
   });
 
   it("con sitio para una sola ejecución, de varias simultáneas solo una llega al contenedor", async () => {
-    // Reserva de 1000 USD y presupuesto de 1500: cabe una reserva, no dos.
-    const h = await worker({
-      vars: {
-        MONTHLY_BUDGET_USD: "1500",
-        USD_PER_BUSY_SECOND: "1000",
-        RESERVED_BUSY_SECONDS: "1",
-      },
-    });
+    // El público dispone de 2 100 000 nanodólares: cabe una reserva aislada
+    // (2 025 600) y ninguna otra, ni en su instancia ni en la contigua.
+    const h = await worker({ vars: { MONTHLY_BUDGET_USD: "0.0028" } });
     const replies = await Promise.all(
       Array.from({ length: 8 }, () => h.post(run, verified)),
     );
@@ -400,37 +434,33 @@ describe("presupuesto mensual", () => {
   });
 
   it("al terminar cambia la reserva por el coste medido y deja sitio a la siguiente", async () => {
-    // Cada reserva es de 1000 USD y el presupuesto de 1500: la segunda solo cabe si
-    // la primera devolvió lo que no gastó.
+    // El público dispone de 3 000 000 de nanodólares. Cada ejecución en su
+    // instancia aparta 2 025 600 y la primera gasta 950 400 (el reloj no avanza):
+    // la segunda solo cabe si la primera devolvió lo que no gastó.
     const h = await worker({
       vars: {
-        MONTHLY_BUDGET_USD: "1500",
-        USD_PER_BUSY_SECOND: "1000",
-        RESERVED_BUSY_SECONDS: "1",
+        MONTHLY_BUDGET_USD: "0.004",
+        FAKE_CLOCK: CLOCK,
+        FAKE_PICKS: "0,1",
       },
     });
     expect((await h.post(run, verified)).status).toBe(200);
     expect((await h.post(run, verified)).status).toBe(200);
     expect(h.runnerCalls()).toHaveLength(2);
+    expect(costs(h)).toEqual([950_400, 950_400]);
   });
 
   it("devuelve la reserva si Turnstile rechaza la petición", async () => {
-    const h = await worker({
-      vars: {
-        MONTHLY_BUDGET_USD: "1500",
-        USD_PER_BUSY_SECOND: "1000",
-        RESERVED_BUSY_SECONDS: "1",
-      },
-    });
+    // El público dispone de 2 250 000 nanodólares: cabe una reserva y no dos.
+    const h = await worker({ vars: { MONTHLY_BUDGET_USD: "0.003" } });
     for (let i = 0; i < 3; i++) expect((await h.post(run)).status).toBe(403);
     expect((await h.post(run, verified)).status).toBe(200);
   });
 
   it("no gasta una verificación de Turnstile cuando ya no hay presupuesto", async () => {
-    const h = await worker(ceiling("60"));
-    expect((await h.post(hang, verified)).status).toBe(504);
+    const h = await worker({ vars: { MONTHLY_BUDGET_USD: "0.001" } });
     expect((await h.post(run, verified)).status).toBe(503);
-    expect(h.siteverify.calls).toHaveLength(1);
+    expect(h.siteverify.calls).toHaveLength(0);
   });
 
   it("sigue ejecutando mientras el gasto está bajo el presupuesto", async () => {
@@ -460,6 +490,112 @@ describe("presupuesto mensual", () => {
     expect(
       lines.filter((line) => line.outcome === "internal_error" && !line.where),
     ).toHaveLength(1);
+  });
+});
+
+describe("topes del presupuesto", () => {
+  const MAINTAINER = "1001";
+
+  async function maintainer(h: Harness) {
+    const { cookie } = await signIn(h, "github", MAINTAINER);
+    return { headers: { cookie: cookie! } };
+  }
+
+  it("el público para al 75 % del presupuesto y un mantenedor sigue hasta el 100 %", async () => {
+    // El público dispone de 3 075 000 de los 4 100 000 nanodólares. Una ejecución
+    // aislada de 2 s gasta 1 022 080 y la reserva de la siguiente cabe (3 047 680);
+    // otra en la instancia 0 aparta 1 106 880 más, que pasa del 75 % y no del total.
+    const h = await worker({
+      vars: {
+        MONTHLY_BUDGET_USD: "0.0041",
+        MAINTAINERS: MAINTAINER,
+        FAKE_CLOCK: CLOCK,
+        FAKE_PICKS: "0,1,0,0,0",
+      },
+    });
+    const staff = await maintainer(h);
+    expect((await h.post(work(2000), verified)).status).toBe(200);
+    expect((await h.post(work(2000), verified)).status).toBe(200);
+
+    const refused = await h.post(work(1000), verified);
+    expect(refused.status).toBe(503);
+    expect(refused.body.reason).toBe("budget");
+
+    const allowed = await h.post(work(1000), staff);
+    expect(allowed.status).toBe(200);
+    expect(h.siteverify.calls).toHaveLength(2);
+    // 1 s de CPU y los 3 s que alargan la ventana de la instancia 0.
+    expect(costs(h)).toEqual([ISOLATED_2S, ISOLATED_2S, 67_520]);
+
+    // Empieza otro mes: el público vuelve a ejecutar.
+    await h.advance(20 * 86_400_000);
+    expect((await h.post(work(1000), verified)).status).toBe(200);
+  });
+
+  it("el público para en su tope diario, un mantenedor no, y al día siguiente vuelve", async () => {
+    // 1/10 de los 30 000 000 del público son 3 000 000 al día: cabe una ejecución
+    // aislada (1 022 080 gastados) y la reserva de otra (2 025 600) ya no.
+    const h = await worker({
+      vars: {
+        MONTHLY_BUDGET_USD: "0.04",
+        PUBLIC_BUDGET_DAYS: "10",
+        MAINTAINERS: MAINTAINER,
+        FAKE_CLOCK: CLOCK,
+        FAKE_PICKS: "0,1,1,1",
+      },
+    });
+    const staff = await maintainer(h);
+    expect((await h.post(work(2000), verified)).status).toBe(200);
+
+    const refused = await h.post(work(2000), verified);
+    expect(refused.status).toBe(503);
+    expect(refused.body.reason).toBe("budget_day");
+    expect(refused.body.error).toContain("hoy");
+    // Faltan 12 h menos los 2 s de la ejecución para la medianoche UTC.
+    expect(refused.headers.get("retry-after")).toBe("43198");
+
+    expect((await h.post(work(2000), staff)).status).toBe(200);
+
+    await h.advance(13 * 3_600_000);
+    expect((await h.post(work(2000), verified)).status).toBe(200);
+  });
+
+  it("al llegar al 100 % ni un mantenedor ejecuta", async () => {
+    // Una ejecución aislada gasta 950 400 y la siguiente aparta 2 025 600: 2 976 000
+    // pasan de los 2 800 000 del presupuesto.
+    const h = await worker({
+      vars: {
+        MONTHLY_BUDGET_USD: "0.0028",
+        MAINTAINERS: MAINTAINER,
+        FAKE_CLOCK: CLOCK,
+        FAKE_PICKS: "0,1",
+      },
+    });
+    const staff = await maintainer(h);
+    expect((await h.post(run, staff)).status).toBe(200);
+
+    const refused = await h.post(run, staff);
+    expect(refused.status).toBe(503);
+    expect(refused.body.reason).toBe("budget");
+    expect(h.runnerCalls()).toHaveLength(1);
+  });
+
+  it("si falla el ajuste el gasto se queda en lo apartado y solo puede sobrar", async () => {
+    // Con el ajuste, dos ejecuciones aisladas gastan 950 400 y apartan 2 025 600:
+    // 2 976 000 caben en los 3 000 000 del público. Sin él, la primera se queda
+    // en 2 025 600 y la segunda ya no cabe.
+    const h = await worker({
+      vars: {
+        MONTHLY_BUDGET_USD: "0.004",
+        FAKE_SETTLE_FAILS: "1",
+        FAKE_CLOCK: CLOCK,
+        FAKE_PICKS: "0,1",
+      },
+    });
+    expect((await h.post(run, verified)).status).toBe(200);
+    const refused = await h.post(run, verified);
+    expect(refused.status).toBe(503);
+    expect(refused.body.reason).toBe("budget");
   });
 });
 
