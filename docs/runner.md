@@ -242,9 +242,10 @@ de sesión de Turnstile es `SameSite=Strict`.
   Una ruta de `/auth/*` o de `/api/*` que no existe la responde el Worker con
   404 y `reason` `not_found`.
 - Una clase `Runner` que extiende `Container` (`@cloudflare/containers`) reparte
-  las peticiones de `/run` entre tres instancias. Si la instancia elegida
-  responde 503, repite la petición una vez. La instancia no tiene salida a
-  internet (`enableInternet = false`) y se apaga a los 5 minutos sin peticiones.
+  las peticiones de `/run` entre dos instancias. Si la instancia elegida
+  responde 503, repite la petición una vez en la otra. La instancia no tiene
+  salida a internet (`enableInternet = false`) y se apaga a los 60 segundos sin
+  peticiones.
 
 Un solo `cf deploy` construye la imagen, empaqueta el Worker y sube `site/` como
 una versión. Para publicar un cambio de las lecciones hay que volver a
@@ -501,11 +502,12 @@ comprobaciones van en este orden, y la primera que falla responde sin que el
 contenedor reciba nada:
 
 1. El límite por IP.
-2. El límite por usuario, si la petición trae una sesión de cuenta (`qg_auth`).
+2. El límite por usuario, si la petición trae una sesión de cuenta (`qg_auth`)
+   que no es de un mantenedor.
 3. El tamaño del cuerpo y del código.
-4. El presupuesto del mes.
-5. Turnstile, si la petición no trae una sesión de cuenta ni una de Turnstile
-   válida.
+4. El presupuesto del mes y del día ([Presupuesto](#presupuesto)).
+5. Turnstile, si la petición no es de un mantenedor ni trae una sesión de
+   Turnstile válida.
 
 Una negativa lleva `{"error": "...", "reason": "..."}`. El editor muestra el
 texto de `error` tal cual. Todos los valores salen de `env` en
@@ -561,53 +563,137 @@ no trae `code` como texto responde 400 (`bad_request`). El contenedor repite la
 comprobación con `MAX_CODE` de `qgcheck/runner.py`; para cambiar el tope hay que
 cambiar los dos.
 
-### Presupuesto mensual
+### Presupuesto
 
-| Variable                | Valor    | Significa                                                           |
-| ----------------------- | -------- | ------------------------------------------------------------------- |
-| `MONTHLY_BUDGET_USD`    | 20       | Gasto estimado del mes UTC que no se supera.                        |
-| `USD_PER_BUSY_SECOND`   | 0.000035 | Coste de un segundo con una instancia ocupada.                      |
-| `RESERVED_BUSY_SECONDS` | 30       | Segundos que una ejecución aparta del presupuesto antes de empezar. |
+Cloudflare no tiene un tope de gasto: sus alertas de presupuesto solo mandan un
+correo ([deploy.md](deploy.md#10-pon-alertas-de-gasto)). Por eso el Worker
+cuenta lo que gasta y se niega a ejecutar cuando el gasto estimado del mes
+llegaría a `MONTHLY_BUDGET_USD`. La cuenta es una cota superior de lo que
+factura Cloudflare Containers. No incluye los 5 USD al mes del plan Workers
+Paid, que se pagan aparte.
 
-Antes de arrancar el contenedor, el Worker aparta en el Durable Object `Budget`
-`RESERVED_BUSY_SECONDS` por `USD_PER_BUSY_SECOND`. Si con esa reserva el total
-del mes pasaría de `MONTHLY_BUDGET_USD`, no ejecuta: responde 503 con
-`Retry-After` hasta el día 1 del mes siguiente y `reason` `budget`. Comprobar y
-apartar es una sola operación del objeto, así que varias peticiones simultáneas
-no pueden apartar a la vez lo que solo cabe una vez. Al terminar, cambia la
-reserva por el coste medido: el tiempo que esperó al contenedor (el arranque
-incluido), en pasos de 10 ms y con un mínimo de un paso, por
-`USD_PER_BUSY_SECOND`, y nunca más de lo apartado. Una petición que se rechaza
-después de apartar (por Turnstile) devuelve la reserva entera. El total del mes
-anterior se descarta. El alumno ve «El corredor alcanzó su presupuesto de este
-mes y no ejecuta más código hasta que empiece el siguiente. Los cuadernos de
-marimo siguen funcionando en tu equipo.»
+| Variable                | Valor      | Significa                                                           |
+| ----------------------- | ---------- | ------------------------------------------------------------------- |
+| `MONTHLY_BUDGET_USD`    | 2          | Gasto estimado del mes UTC que no se supera.                        |
+| `PUBLIC_BUDGET_SHARE`   | 0.75       | Parte del presupuesto que gasta quien no mantiene el sitio.         |
+| `PUBLIC_BUDGET_DAYS`    | 15         | Un día de gasto público no pasa de 1/15 de esa parte.               |
+| `INSTANCE_TYPE`         | standard-2 | Tipo de instancia. De él salen los precios.                         |
+| `INSTANCES`             | 2          | Instancias entre las que el Worker reparte las ejecuciones.         |
+| `RESERVED_BUSY_SECONDS` | 30         | Segundos que una ejecución aparta del presupuesto antes de empezar. |
+| `MAINTAINERS`           | ids        | Ver [Mantenedores](#mantenedores).                                  |
+
+`INSTANCE_TYPE` e `INSTANCES` se declaran una vez en
+[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts), que los usa
+para la instancia que despliega y para el Worker. No hay un precio que editar:
+[`src/container.ts`](../runner/worker/src/container.ts) tiene la tarifa de
+Cloudflare y las medidas de cada tipo, y de ahí sale el precio del segundo de
+CPU y el del segundo de instancia encendida.
+
+#### Qué cuesta una ejecución
+
+Cloudflare factura la CPU solo mientras la instancia trabaja, y la memoria y el
+disco durante todo el tiempo que está encendida, trabaje o no. La instancia se
+apaga `sleepAfter` (60 s) después de su última petición. Con `standard-2` (1
+vCPU, 6 GiB y 12 GB) un segundo cuesta:
+
+| Concepto             | Cuenta                          | USD por segundo |
+| -------------------- | ------------------------------- | --------------- |
+| CPU, solo trabajando | 1 × 0,00002                     | 0,00002         |
+| Encendida, siempre   | 6 × 0,0000025 + 12 × 0,00000007 | 0,00001584      |
+
+El Worker aparta y cobra así, en el Durable Object `Budget`, que guarda por
+instancia el instante en que se espera que se apague (`awakeUntil`):
+
+1. Antes de arrancar el contenedor aparta la ejecución más cara que cabe en
+   `RESERVED_BUSY_SECONDS`: esos segundos de CPU y los segundos encendida desde
+   `max(ahora, awakeUntil)` hasta `ahora + RESERVED_BUSY_SECONDS + sleepAfter`.
+   Una instancia que ya estaba encendida solo cobra lo que la ejecución alarga
+   su ventana. Los segundos se cobran en pasos de 10 ms.
+2. Si la reserva no cabe, no ejecuta ([Qué se rechaza](#qué-se-rechaza)).
+   Comprobar y apartar es una sola operación del objeto, así que varias
+   peticiones simultáneas no pueden apartar a la vez lo que solo cabe una vez.
+3. Al terminar cambia la reserva por el coste medido: el tiempo que esperó al
+   contenedor (el arranque incluido) a la tarifa de CPU y la ventana encendida
+   hasta `sleepAfter` después de que respondió, y nunca más de lo apartado. Solo
+   la reserva que fijó `awakeUntil` lo acorta; si otra lo alargó después, esa
+   parte sigue cobrada, porque esa otra cobró desde donde esta acababa.
+4. Una petición que se rechaza después de apartar (por Turnstile) devuelve la
+   reserva entera. El total del mes y el del día anteriores se descartan.
 
 `RESERVED_BUSY_SECONDS` es un tope y no una estimación. Cubre los 10 s de
 trabajo de [Límites](#límites), el arranque de una instancia y el reintento tras
 un 503. Si la ejecución, con su reintento, llega a ese tiempo, el Worker detiene
-la instancia que aún no había respondido, cobra exactamente lo apartado y
-responde 504 con `reason` `run_too_long`. Una instancia que respondió 503
-atiende el trabajo de otro alumno y no se detiene. El alumno ve «La ejecución
-tardó más de lo que el corredor permite y se detuvo. Revisa si el código tiene
-un bucle sin fin.» Como cada ejecución cuesta como mucho lo que apartó y solo se
-aparta si cabe, el gasto medido del mes no pasa de `MONTHLY_BUDGET_USD`. Si el
-Worker se interrumpe entre apartar y terminar, o falla el almacenamiento al
-terminar (se registra con `where: "settle"` y la respuesta no cambia), la
-reserva se queda y el mes cuenta de más, nunca de menos.
+la instancia que aún no había respondido, cobra lo apartado y responde 504 con
+`reason` `run_too_long`. Una instancia que respondió 503 atiende el trabajo de
+otro alumno y no se detiene. El reintento aparta su propia reserva en la
+instancia siguiente. El alumno ve «La ejecución tardó más de lo que el corredor
+permite y se detuvo. Revisa si el código tiene un bucle sin fin.» Como cada
+ejecución cuesta como mucho lo que apartó y solo se aparta si cabe, el gasto
+estimado no pasa del presupuesto. Si el Worker se interrumpe entre apartar y
+terminar, o falla el almacenamiento al terminar (se registra con
+`where: "settle"` y la respuesta no cambia), la reserva se queda y el mes cuenta
+de más, nunca de menos.
 
-El valor por defecto de `USD_PER_BUSY_SECOND` es el de la instancia `standard-2`
-(1 vCPU y 6 GiB) con la CPU siempre activa: 1 × 0,00002 + 6 × 0,0000025. Es una
-cota superior, porque la CPU solo se factura mientras trabaja. Con otro tipo de
-instancia hay que cambiar este valor. Los precios son los de
-[Cloudflare Containers](https://developers.cloudflare.com/containers/pricing/).
+#### Un ejemplo con `standard-2`
 
-Lo que la estimación no cuenta:
+Cifras que salen de las tarifas anteriores, con `RESERVED_BUSY_SECONDS` de 30:
 
-- La memoria de una instancia encendida sin trabajo (`sleepAfter`, 5 minutos
-  tras la última petición). Con tres instancias encendidas todo el mes son unos
-  117 USD (3 × 6 × 0,0000025 × 2 592 000 s). La factura de Containers puede
-  llegar al presupuesto más esa cifra.
+- **Una ejecución aislada de 2 s**, sin otra en los 60 s anteriores: 2 × 0,00002
+  de CPU más 62 s encendida (2 s de trabajo y 60 de espera) × 0,00001584. Son
+  0,00102 USD. Una de 1 s cuesta 0,00099 USD y una de 10 s, 0,00131 USD: casi
+  todo es la espera, no el trabajo. Antes de empezar aparta 0,0020256 USD.
+- **100 ejecuciones de 1 s en un minuto**, repartidas entre las dos instancias y
+  seguidas (50 s de trabajo cada una): 100 × 0,00002 de CPU más 2 instancias
+  encendidas 110 s (50 de trabajo y 60 de espera) × 0,00001584. Son 0,0055 USD,
+  menos de lo que cuestan 6 ejecuciones aisladas, porque las ejecuciones que
+  llegan con la instancia encendida solo alargan su ventana. Las mismas 100
+  ejecuciones, cada una con más de 60 s de diferencia de la anterior, cuestan
+  0,099 USD.
+- **Cuántas ejecuciones aisladas de 2 s caben en 2 USD**: 1955 en total. Quien
+  no mantiene el sitio dispone de 1,5 USD, que son 1466; los 0,5 USD restantes
+  son de los mantenedores. En un día el gasto público no pasa de 0,10 USD (1,5
+  USD entre 15), que son 96 ejecuciones aisladas.
+
+#### Qué se rechaza
+
+| Quién      | Tope                                     | `reason`     |
+| ---------- | ---------------------------------------- | ------------ |
+| Público    | 75 % del presupuesto, gastado por todos  | `budget`     |
+| Público    | 1/15 de ese 75 %, gastado en el día UTC  | `budget_day` |
+| Mantenedor | El presupuesto entero, gastado por todos | `budget`     |
+
+Un mantenedor no tiene tope diario, y lo que gasta cuenta en el 75 % del
+público. Todas las negativas son 503 con `Retry-After` en segundos. `budget`
+espera al día 1 del mes siguiente y `budget_day` a la medianoche UTC. El alumno
+ve:
+
+- `budget`: «El corredor alcanzó su presupuesto de este mes y no ejecuta más
+  código hasta que empiece el siguiente. Los cuadernos de marimo siguen
+  funcionando en tu equipo.»
+- `budget_day`: «El corredor alcanzó su presupuesto de hoy y no ejecuta más
+  código hasta mañana. Puedes volver a ejecutar en 5 h. Los cuadernos de marimo
+  siguen funcionando en tu equipo.»
+
+#### Mantenedores
+
+`MAINTAINERS` es una lista de ids numéricos de GitHub separados por comas, sin
+logins: un login se puede renombrar y otra persona puede quedárselo, y el id no
+cambia. Quien entró con GitHub y tiene su id en la lista es mantenedor. No pasa
+por Turnstile, no tiene el límite por usuario de [Límite por IP](#límite-por-ip)
+y gasta del presupuesto entero. El límite por IP y el tamaño del código siguen
+valiendo para él. Una cuenta de Google nunca es mantenedora, aunque su
+identificador sea el mismo número. Un valor que no sea una lista de ids hace que
+el Worker responda 500 y registre `MAINTAINERS`.
+[deploy.md](deploy.md#9-elige-los-mantenedores) dice cómo ver el id de una
+cuenta.
+
+#### Lo que la estimación no cuenta
+
+La cuenta es una cota superior: ignora las cuotas mensuales incluidas en Workers
+Paid, y cobra la CPU de todo el tiempo que la petición esperó al contenedor, el
+arranque incluido, aunque Cloudflare solo la factura mientras trabaja. Lo que
+puede quedar fuera:
+
 - Una instancia que el Worker no logra detener al llegar al tope (se registra
   con `where: "stop"`). Cloudflare la factura hasta que se apague sola.
 - Una instancia que sigue arrancando cuando se llega al tope no ha respondido
@@ -618,15 +704,14 @@ La suma de `cost_nano_usd` en el registro da el gasto estimado del mes.
 
 ### Turnstile
 
-Cloudflare Turnstile se verifica en la primera ejecución de una sesión anónima.
-Quien entró con una cuenta no pasa por Turnstile: su sesión `qg_auth` ya
-distingue a una persona, y la petición ni llama a `siteverify` ni recibe
-`qg_session`. Una petición sin sesión y sin token recibe 403 `turnstile_missing`
-con la clave del sitio en el campo `sitekey`. Con ella, `site/exercise.js` carga
-el widget, y repite la petición con el token del widget en la cabecera
-`X-Turnstile-Token`. El Worker lo comprueba con `siteverify`, al que envía solo
-el secreto y el token, y si vale responde con la cookie `qg_session` además del
-resultado:
+Cloudflare Turnstile se verifica en la primera ejecución de cada sesión, con
+cuenta o sin ella. Solo un [mantenedor](#mantenedores) no pasa por Turnstile: la
+petición ni llama a `siteverify` ni recibe `qg_session`. Una petición sin sesión
+de Turnstile y sin token recibe 403 `turnstile_missing` con la clave del sitio
+en el campo `sitekey`. Con ella, `site/exercise.js` carga el widget, y repite la
+petición con el token del widget en la cabecera `X-Turnstile-Token`. El Worker
+lo comprueba con `siteverify`, al que envía solo el secreto y el token, y si
+vale responde con la cookie `qg_session` además del resultado:
 
 ```text
 qg_session=<caducidad>.<mac>; Max-Age=28800; Path=/run; HttpOnly; Secure; SameSite=Strict
@@ -682,14 +767,14 @@ El Worker escribe estos registros y ningún otro. Todos tienen campos fijos, que
      "exercise": "p1-quickstart/ghz",
      "code_bytes": 212,
      "busy_ms": 930,
-     "cost_nano_usd": 6975
+     "cost_nano_usd": 983732
    }
    ```
 
    `outcome` es `ok`, `rate_minute`, `rate_day`, `bad_request`, `too_large`,
-   `budget`, `turnstile_missing`, `turnstile_failed`, `turnstile_unavailable` o
-   `run_too_long`. `mode` y `exercise` se copian solo si tienen la forma de un
-   valor del contrato.
+   `budget`, `budget_day`, `turnstile_missing`, `turnstile_failed`,
+   `turnstile_unavailable` o `run_too_long`. `mode` y `exercise` se copian solo
+   si tienen la forma de un valor del contrato.
 
 2. Una línea de error, en lugar de la anterior, cuando la petición falla por un
    error del Worker o de la configuración y responde 500 `internal_error`:
@@ -726,15 +811,18 @@ de su red no depende del Worker.
 ### Por qué estos valores
 
 Los valores salen de las tarifas de Containers con la instancia `standard-2` y
-de tres instancias que atienden un trabajo cada una:
+de dos instancias que atienden un trabajo cada una (las cifras de
+[Presupuesto](#presupuesto)):
 
-- Un segundo de instancia ocupada cuesta como mucho 0,000035 USD. Una ejecución
-  que agota los 10 s de [Límites](#límites) cuesta 0,00035 USD.
+- Dos instancias encendidas todo el mes costarían unos 82 USD (2 × 0,00001584 ×
+  2 592 000 s). Con `sleepAfter` de 60 s y el tope de 2 USD, el Worker no puede
+  dejar que eso ocurra: cada segundo encendido se cuenta.
 - 30 por minuto es una ejecución cada 2 s. Con ejecuciones de 1 s una IP ocupa
-  30 s de los 180 s de instancia que hay cada minuto.
-- 1000 por día, todas de 10 s, cuestan 0,35 USD a una IP; de 1 s, 0,035 USD.
-- 20 USD son 570 000 segundos de instancia ocupada, o 290 000 ejecuciones de 2
-  s. Un atacante con muchas IPs llega antes al presupuesto que a una factura sin
-  tope.
+  30 s de los 120 s de instancia que hay cada minuto.
+- 1000 por día, todas de 1 s y aisladas, costarían a una IP 0,99 USD. El tope
+  diario público (0,10 USD) la para antes.
+- Un atacante con muchas IPs gasta como mucho 0,10 USD al día, que son 96
+  ejecuciones aisladas de 2 s, así que la parte pública del mes le dura al menos
+  15 días. Los mantenedores conservan el último 25 %.
 
 Son cálculos con esas tarifas, no medidas del Worker desplegado.

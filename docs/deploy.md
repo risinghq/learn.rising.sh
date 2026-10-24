@@ -174,3 +174,43 @@ cada proveedor y ejecuta un ejercicio.
 
 El cron diario de [Retención](runner.md#retención) se declara en
 `cloudflare.config.ts` y se despliega con el Worker.
+
+## 9. Elige los mantenedores
+
+Un mantenedor ejecuta código sin Turnstile ni límite por usuario, y gasta del
+presupuesto entero ([runner.md](runner.md#mantenedores)). `MAINTAINERS` en
+`worker.env` de `cloudflare.config.ts` es una lista de ids numéricos de GitHub
+separados por comas. Un login no sirve: se puede renombrar.
+
+Para ver el id de una cuenta de GitHub:
+
+```sh
+gh api users/<login> --jq .id
+```
+
+Pon los ids en `MAINTAINERS` (por ejemplo `"1234,5678"`; con la lista vacía
+nadie es mantenedor) y vuelve a ejecutar `mise run deploy`. El mantenedor entra
+con GitHub desde el sitio: el Worker compara la lista con el id que GitHub
+devuelve al entrar.
+
+## 10. Pon alertas de gasto
+
+El Worker se niega a ejecutar cuando el gasto estimado del mes llega a
+`MONTHLY_BUDGET_USD` (2 USD), pero Cloudflare no tiene un tope de gasto que pare
+nada. Una alerta de presupuesto es un segundo aviso, fuera del Worker, y solo
+manda un correo: no pausa ni limita el uso.
+
+1. Abre el [panel de Cloudflare](https://dash.cloudflare.com/), elige la cuenta
+   y ve a **Manage Account** > **Billing** > **Billable Usage**.
+2. Pulsa **Create budget alert**.
+3. Pon un nombre (por ejemplo `qiskit-guides 1 USD`), en **Budget threshold
+   (USD)** `1` y tu correo en **Email recipients**. Pulsa **Save**.
+4. Repite con el nombre `qiskit-guides 2 USD` y el umbral `2`.
+
+Las alertas miden el gasto por uso de toda la cuenta, no solo el de este Worker,
+y solo existen en cuentas de pago por uso. Si recibes la de 1 USD, mira
+**Billable Usage** y la suma de `cost_nano_usd` en los registros del Worker
+([runner.md](runner.md#presupuesto)).
+
+Los 5 USD al mes del plan Workers Paid no están en los 2 USD: son una cuota fija
+que se paga aparte de lo que el Worker gasta en Containers.

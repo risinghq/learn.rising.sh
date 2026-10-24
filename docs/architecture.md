@@ -124,8 +124,8 @@ libres, en `server.py`.
   escribe `peak` y `killed` (`killed` antes de `tripped`); `run_job` los lee
   tras `tripped` o tras unir el hilo.
 - Las instancias de Cloudflare no comparten nada: cada una tiene su cola. El
-  Worker elige una de tres y, si responde 503, repite la petición una vez, que
-  puede llegar a la misma instancia.
+  Worker elige una de dos y, si responde 503, repite la petición una vez en la
+  otra, con su propia reserva del presupuesto.
 - El Worker guarda su estado en dos Durable Objects de
   `runner/worker/src/meters.ts` ([runner.md](runner.md#protección-del-worker)
   explica los límites). Cada objeto atiende una llamada a la vez, y sus métodos
@@ -145,17 +145,23 @@ peticiones de ese minuto y del día).
   sin esperar a ningún evento. El contador del día sigue hasta la alarma.
 - Solo `take` escribe `count`, y solo `alarm` lo borra.
 
-`Budget` hay uno en total. Su estado es el registro `spent` (mes UTC y
-nanodólares).
+`Budget` hay uno en total. Su estado son tres tipos de registro: `month` y `day`
+(periodo UTC y nanodólares gastados; `day` cuenta solo el gasto público) y, por
+instancia, `awake:<instancia>` (el instante en que se espera que se apague y la
+reserva que lo fijó).
 
-| Estado    | Significa                                                                                 | Quién lo deja y cuándo                                                                                                                                       |
-| --------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| mes nuevo | No hay `spent`, o su mes no es el actual: el total del mes es 0.                          | El paso del reloj al día 1 UTC. No hay temporizador: el primer `reserve` del mes nuevo lo sobrescribe.                                                       |
-| reservado | El total incluye lo apartado por ejecuciones que aún no terminaron.                       | `reserve`, que el Worker llama antes de arrancar el contenedor. Suma la reserva solo si el total más la reserva no pasa del presupuesto; si pasa, no cambia. |
-| ajustado  | El total cambia la reserva de una ejecución por su coste medido, con tope en lo apartado. | `settle`, en el `finally` de la ejecución y, con coste 0, cuando Turnstile rechaza una petición que ya había apartado. No hace nada si el mes ya cambió.     |
+| Estado        | Significa                                                                | Quién lo deja y cuándo                                                                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| periodo nuevo | No hay `month` (o `day`), o su periodo no es el actual: el total es 0.   | El paso del reloj al día 1 UTC, o a un día nuevo. No hay temporizador: el primer `reserve` del periodo nuevo lo sobrescribe.                                                                     |
+| reservado     | El total incluye lo apartado por ejecuciones que aún no terminaron.      | `reserve`, que el Worker llama antes de arrancar el contenedor. Suma la reserva solo si caben el tope del mes (el del público o el total) y, para el público, el del día; si no, no cambia nada. |
+| ajustado      | El total cambia la reserva por el coste medido, con tope en lo apartado. | `settle`, al terminar la ejecución y, sin coste, cuando Turnstile rechaza una petición que ya había apartado. No hace nada si el periodo ya cambió.                                              |
 
-- Una petición tiene a lo sumo una reserva: la aparta una vez y la cambia una
-  vez, o se interrumpe y la reserva se queda en el total.
+- `reserve` suma la ventana encendida desde `max(ahora, awakeUntil)` y deja
+  `awakeUntil` en `ahora` más la reserva más `sleepAfter`. `settle` solo lo
+  acorta si la reserva que lo fijó sigue siendo la dueña; si otra lo alargó, esa
+  parte sigue cobrada.
+- Una petición tiene una reserva por intento, y cada una se aparta una vez y se
+  cambia una vez; o se interrumpe y la reserva se queda en el total.
 - Un `settle` que falla se registra y no cambia la respuesta de la petición.
 
 `DB` es la base D1 de las cuentas ([runner.md](runner.md#cuentas) da los
