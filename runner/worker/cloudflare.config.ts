@@ -25,7 +25,7 @@ const runner = defineContainer({
       UV_VERSION: miseVersion("uv"),
     },
   },
-  instanceType: "basic",
+  instanceType: "standard-2",
   maxInstances: 3,
 });
 
