@@ -14,6 +14,7 @@ import time
 import urllib.error
 import urllib.request
 from collections.abc import Iterator
+from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -83,6 +84,37 @@ def test_report_keeps_only_a_valid_hint_number() -> None:
     assert report is not None
     _, tests = report
     assert [t["hint"] for t in tests] == [2, None, None, None, None, None]
+
+
+def test_slot_is_free_before_the_client_hears_the_result(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Quien recibe el resultado y envía otra petición no ve la ranura ocupada."""
+    import server
+
+    jobs = server.FREE_SLOTS.qsize()
+    free_at_reply: list[int] = []
+    reply = server.Handler.reply
+
+    def spy(self: server.Handler, status: int, payload: dict[str, Any]) -> None:
+        free_at_reply.append(server.FREE_SLOTS.qsize())
+        reply(self, status, payload)
+
+    monkeypatch.setattr(server, "execute", lambda *_: {"passed": True})
+    monkeypatch.setattr(server.Handler, "reply", spy)
+    http = ThreadingHTTPServer(("127.0.0.1", 0), server.Handler)
+    threading.Thread(target=http.serve_forever, daemon=True).start()
+    try:
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{http.server_address[1]}/run",
+            json.dumps({"code": "print(1)"}).encode(),
+            {"Content-Type": "application/json"},
+        )
+        assert urllib.request.urlopen(request, timeout=5).status == 200
+    finally:
+        http.shutdown()
+        http.server_close()
+    assert free_at_reply == [jobs]
 
 
 def test_run_returns_the_output_of_both_streams(runner: local.Container) -> None:
