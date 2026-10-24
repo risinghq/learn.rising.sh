@@ -566,7 +566,7 @@ cambiar los dos.
 | Variable                | Valor     | Significa                                                           |
 | ----------------------- | --------- | ------------------------------------------------------------------- |
 | `MONTHLY_BUDGET_USD`    | 20        | Gasto estimado del mes UTC que no se supera.                        |
-| `USD_PER_BUSY_SECOND`   | 0.0000075 | Coste de un segundo con una instancia ocupada.                      |
+| `USD_PER_BUSY_SECOND`   | 0.000035  | Coste de un segundo con una instancia ocupada.                      |
 | `RESERVED_BUSY_SECONDS` | 30        | Segundos que una ejecución aparta del presupuesto antes de empezar. |
 
 Antes de arrancar el contenedor, el Worker aparta en el Durable Object `Budget`
@@ -596,8 +596,8 @@ Worker se interrumpe entre apartar y terminar, o falla el almacenamiento al
 terminar (se registra con `where: "settle"` y la respuesta no cambia), la
 reserva se queda y el mes cuenta de más, nunca de menos.
 
-El valor por defecto de `USD_PER_BUSY_SECOND` es el de la instancia `basic` (¼
-vCPU y 1 GiB) con la CPU siempre activa: 0,25 × 0,00002 + 1 × 0,0000025. Es una
+El valor por defecto de `USD_PER_BUSY_SECOND` es el de la instancia `standard-2` (1
+vCPU y 6 GiB) con la CPU siempre activa: 1 × 0,00002 + 6 × 0,0000025. Es una
 cota superior, porque la CPU solo se factura mientras trabaja. Con otro tipo de
 instancia hay que cambiar este valor. Los precios son los de
 [Cloudflare Containers](https://developers.cloudflare.com/containers/pricing/).
@@ -606,7 +606,7 @@ Lo que la estimación no cuenta:
 
 - La memoria de una instancia encendida sin trabajo (`sleepAfter`, 5 minutos
   tras la última petición). Con tres instancias encendidas todo el mes son unos
-  20 USD (3 × 0,0000025 × 2 592 000 s). La factura de Containers puede llegar al
+  117 USD (3 × 6 × 0,0000025 × 2 592 000 s). La factura de Containers puede llegar al
   presupuesto más esa cifra.
 - Una instancia que el Worker no logra detener al llegar al tope (se registra
   con `where: "stop"`). Cloudflare la factura hasta que se apague sola.
@@ -725,15 +725,15 @@ de su red no depende del Worker.
 
 ### Por qué estos valores
 
-Los valores salen de las tarifas de Containers con la instancia `basic` y de
+Los valores salen de las tarifas de Containers con la instancia `standard-2` y de
 tres instancias que atienden un trabajo cada una:
 
-- Un segundo de instancia ocupada cuesta como mucho 0,0000075 USD. Una ejecución
-  que agota los 10 s de [Límites](#límites) cuesta 0,000075 USD.
+- Un segundo de instancia ocupada cuesta como mucho 0,000035 USD. Una ejecución
+  que agota los 10 s de [Límites](#límites) cuesta 0,00035 USD.
 - 30 por minuto es una ejecución cada 2 s. Con ejecuciones de 1 s una IP ocupa
   30 s de los 180 s de instancia que hay cada minuto.
-- 1000 por día, todas de 10 s, cuestan 0,075 USD a una IP; de 1 s, 0,0075 USD.
-- 20 USD son 2,7 millones de segundos de instancia ocupada, o 1,3 millones de
+- 1000 por día, todas de 10 s, cuestan 0,35 USD a una IP; de 1 s, 0,035 USD.
+- 20 USD son 570 000 segundos de instancia ocupada, o 290 000
   ejecuciones de 2 s. Un atacante con muchas IPs llega antes al presupuesto que
   a una factura sin tope.
 

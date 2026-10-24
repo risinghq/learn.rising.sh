@@ -66,7 +66,7 @@ export default defineConfig({
       RATE_PER_DAY: bindings.text("1000"),
       MAX_CODE_BYTES: bindings.text("20000"),
       MONTHLY_BUDGET_USD: bindings.text("20"),
-      USD_PER_BUSY_SECOND: bindings.text("0.0000075"),
+      USD_PER_BUSY_SECOND: bindings.text("0.000035"),
       // 10 s de trabajo, el arranque de la instancia y un reintento tras un 503.
       RESERVED_BUSY_SECONDS: bindings.text("30"),
       SESSION_HOURS: bindings.text("8"),
