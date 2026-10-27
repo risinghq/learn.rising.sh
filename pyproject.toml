@@ -27,7 +27,6 @@ dev = [
 tools = [
     "edge-tts",
     "playwright",
-    "pillow",
 ]
 
 runner = [

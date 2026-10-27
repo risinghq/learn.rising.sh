@@ -16,6 +16,12 @@
         "eslint/no-await-in-loop": "off",
         "unicorn/consistent-function-scoping": "off"
       }
+    },
+    {
+      "files": ["tools/**", "tests/**"],
+      "rules": {
+        "eslint/no-await-in-loop": "off"
+      }
     }
   ],
   "ignorePatterns": ["site/vendor/**", ".cache/**", "**/node_modules/**"]

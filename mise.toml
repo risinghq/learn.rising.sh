@@ -13,11 +13,13 @@ _.path = ["runner/worker/node_modules/.bin", "editor/node_modules/.bin"]
 description = "Install Python and JavaScript dependencies from the lockfiles, the site's KaTeX and fonts, the Playwright browser and the upstream guides"
 run = [
   "uv sync --locked --all-groups",
+  "bun install --frozen-lockfile",
   "bun install --cwd editor --frozen-lockfile",
   "mise run generate:vendor",
   "mise run generate:scripts",
   "bun install --cwd runner/worker --frozen-lockfile",
   "uv run --group tools playwright install ${CI:+--with-deps} chromium",
+  "bunx playwright install chromium",
   "uv run python tools/fetch_docs.py",
 ]
 
@@ -59,8 +61,8 @@ description = "Check Python types with mypy in strict mode"
 run = "uv run mypy"
 
 [tasks."typecheck:ts"]
-description = "Check the TypeScript of the Worker, the editor and the site with tsc"
-run = ["tsc -p runner/worker", "tsc -p editor", "tsc -p site"]
+description = "Check the TypeScript of the Worker, the editor, the site, the tools and the tests with tsc"
+run = ["tsc -p runner/worker", "tsc -p editor", "tsc -p site", "tsc -p ."]
 
 [tasks.typecheck]
 description = "Run every type check"
@@ -71,7 +73,7 @@ description = "Run the pytest suites that need no browser"
 # The grader tests time learner code against a 10 s limit. This suite runs only beside the notebooks,
 # each on its own core, and the browser, Worker and lesson suites wait for it.
 wait_for = ["lint", "typecheck", "build"]
-run ="uv run pytest tests/exercises_test.py tests/dashboard_test.py"
+run ="uv run pytest tests/exercises_test.py"
 
 [tasks."test:notebooks"]
 description = "Run the practice notebooks with solutions and controls at both bounds, and check every exercise"
@@ -87,9 +89,14 @@ wait_for = ["test:py"]
 run = [
   "uv run python tests/exercise_ui_test.py",
   "uv run python tests/proyecto_test.py",
-  "uv run python tests/account_ui_test.py",
-  "uv run python tests/theme_test.py",
+  "bun tests/account_ui_test.ts",
+  "bun tests/theme_test.ts",
 ]
+
+[tasks."test:tools"]
+description = "Test the dashboard tool against a local D1 database"
+wait_for = ["test:py"]
+run = "bunx vitest run"
 
 [tasks."test:worker"]
 description = "Test the runner Worker's limits and accounts against a fake container"
@@ -108,7 +115,7 @@ run = "uv run pytest tests/runner_test.py"
 
 [tasks.test]
 description = "Run every test that needs no service, network or secret"
-depends = ["test:py", "test:notebooks", "test:ui", "test:worker", "test:lessons"]
+depends = ["test:py", "test:notebooks", "test:ui", "test:tools", "test:worker", "test:lessons"]
 
 [tasks."generate:lessons"]
 description = "Rewrite site/qiskit/lessons/*/lesson.json and site/qiskit/course.json from lessons_src"

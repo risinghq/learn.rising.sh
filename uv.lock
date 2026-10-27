@@ -1669,7 +1669,6 @@ runner = [
 ]
 tools = [
     { name = "edge-tts" },
-    { name = "pillow" },
     { name = "playwright" },
 ]
 
@@ -1703,7 +1702,6 @@ runner = [
 ]
 tools = [
     { name = "edge-tts" },
-    { name = "pillow" },
     { name = "playwright" },
 ]
 
