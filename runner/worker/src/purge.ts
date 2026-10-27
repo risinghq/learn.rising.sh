@@ -1,9 +1,9 @@
 import { DAY_MS, unixSeconds } from "./account.ts";
 import type { Limits } from "./limits.ts";
 
-// La limpieza diaria (cron). Los intentos y las cuentas sin visitas se borran al
-// pasar su plazo; una cuenta borrada arrastra su progreso y sus intentos por las
-// claves foráneas.
+// The daily purge (cron). Attempts and accounts with no visits are deleted once
+// their period passes; a deleted account takes its progress and attempts with it
+// through the foreign keys.
 export async function purge(
   db: D1Database,
   limits: Limits,

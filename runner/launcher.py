@@ -1,9 +1,9 @@
-"""Pone límites al trabajo y ejecuta el comando del alumno.
+"""Put limits on the job and run the learner's command.
 
-    python -S launcher.py UID CPU_S DATA_BYTES FSIZE_BYTES NPROC -- COMANDO...
+    python -S launcher.py UID CPU_S DATA_BYTES FSIZE_BYTES NPROC -- COMMAND...
 
-`sandbox.py` lo lanza como root. Fija los rlimits, baja de uid, limita los
-sockets a AF_UNIX con seccomp y ejecuta el comando. Si falla el `exec`, no arranca.
+`sandbox.py` launches it as root. It sets the rlimits, drops the uid, restricts
+sockets to AF_UNIX with seccomp and runs the command. If the `exec` fails, nothing starts.
 """
 
 import ctypes
@@ -29,7 +29,7 @@ EACCES = 13
 AF_UNIX = 1
 X32_SYSCALL_BIT = 0x40000000
 
-# machine -> (AUDIT_ARCH, número de la llamada socket)
+# machine -> (AUDIT_ARCH, number of the socket syscall)
 ARCHES = {
     "x86_64": (0xC000003E, 41),
     "aarch64": (0xC00000B7, 198),
@@ -37,24 +37,24 @@ ARCHES = {
 
 
 def socket_filter() -> tuple[bytes, int]:
-    """Deja pasar todo salvo socket(dominio != AF_UNIX), que da EACCES."""
+    """Allow everything except socket(domain != AF_UNIX), which gets EACCES."""
     machine = platform.machine()
     if machine not in ARCHES:
-        raise SystemExit(f"launcher: sin filtro de red para {machine}")
+        raise SystemExit(f"launcher: no network filter for {machine}")
     arch, sys_socket = ARCHES[machine]
-    # Cada tupla contiene código, jt, jf y k.
-    # Los saltos son relativos a la instrucción siguiente.
+    # Each tuple holds code, jt, jf and k.
+    # Jumps are relative to the next instruction.
     prog = [
         (BPF_LD_W_ABS, 0, 0, 4),  # 0 arch
-        (BPF_JEQ_K, 0, 7, arch),  # 1 otra arquitectura: matar
-        (BPF_LD_W_ABS, 0, 0, 0),  # 2 número de llamada
-        (BPF_JGE_K, 3, 0, X32_SYSCALL_BIT),  # 3 ABI x32: denegar
-        (BPF_JEQ_K, 0, 3, sys_socket),  # 4 no es socket: permitir
-        (BPF_LD_W_ABS, 0, 0, 16),  # 5 args[0], el dominio
-        (BPF_JEQ_K, 1, 0, AF_UNIX),  # 6 AF_UNIX: permitir
-        (BPF_RET_K, 0, 0, RET_ERRNO | EACCES),  # 7 denegar
-        (BPF_RET_K, 0, 0, RET_ALLOW),  # 8 permitir
-        (BPF_RET_K, 0, 0, RET_KILL_PROCESS),  # 9 matar
+        (BPF_JEQ_K, 0, 7, arch),  # 1 other architecture: kill
+        (BPF_LD_W_ABS, 0, 0, 0),  # 2 syscall number
+        (BPF_JGE_K, 3, 0, X32_SYSCALL_BIT),  # 3 x32 ABI: deny
+        (BPF_JEQ_K, 0, 3, sys_socket),  # 4 not socket: allow
+        (BPF_LD_W_ABS, 0, 0, 16),  # 5 args[0], the domain
+        (BPF_JEQ_K, 1, 0, AF_UNIX),  # 6 AF_UNIX: allow
+        (BPF_RET_K, 0, 0, RET_ERRNO | EACCES),  # 7 deny
+        (BPF_RET_K, 0, 0, RET_ALLOW),  # 8 allow
+        (BPF_RET_K, 0, 0, RET_KILL_PROCESS),  # 9 kill
     ]
     return b"".join(struct.pack("=HBBI", *ins) for ins in prog), len(prog)
 

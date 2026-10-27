@@ -1,10 +1,10 @@
-"""Ejecuta un trabajo del alumno bajo límites y devuelve lo que produjo.
+"""Run a learner's job under limits and return what it produced.
 
-El proceso que llama corre como root. Cada trabajo recibe el uid de su ranura
-(`slot_uid`), un directorio de trabajo nuevo y los límites de `launcher.py`. Aquí
-se vigilan los límites que el kernel no aplica solo: reloj, memoria total,
-tamaño del directorio y volumen de salida. Al terminar se matan todos los procesos de ese
-uid y se borran sus archivos, también los de /scratch, /tmp, /var/tmp y /dev/shm.
+The calling process runs as root. Each job gets the uid of its slot (`slot_uid`), a new
+working directory and the limits of `launcher.py`. This module watches the limits the kernel
+does not enforce by itself: clock, total memory, directory size and output volume. When the job
+ends, all processes of that uid are killed and its files are deleted, including those in
+/scratch, /tmp, /var/tmp and /dev/shm.
 """
 
 import contextlib
@@ -65,9 +65,9 @@ def _pids_of(uid: int) -> Iterator[int]:
 
 
 def _rss_bytes(uid: int) -> int:
-    """Memoria residente de los procesos de `uid`.
+    """Resident memory of the processes of `uid`.
 
-    Es una cota superior del PSS y permite evitar la lectura costosa de PSS.
+    It is an upper bound of the PSS and lets us avoid the costly PSS read.
     """
     total = 0
     for pid in _pids_of(uid):
@@ -80,13 +80,12 @@ def _rss_bytes(uid: int) -> int:
 
 
 def _pss_bytes(uid: int) -> int:
-    """Memoria proporcional (PSS) de los procesos de `uid`.
+    """Proportional memory (PSS) of the processes of `uid`.
 
-    Una página compartida entre procesos se reparte entre ellos. El proceso
-    del alumno comparte memoria con el verificador, del que se bifurcó, y no la
-    cuenta dos veces. Leer
-    `smaps_rollup` entre uids exige `CAP_SYS_PTRACE`; sin ella la lectura falla
-    con `PermissionError` en vez de contar cero.
+    A page shared among processes is split among them. The learner's process shares memory
+    with the checker it forked from, and does not count it twice. Reading `smaps_rollup`
+    across uids requires `CAP_SYS_PTRACE`; without it the read fails with `PermissionError`
+    instead of counting zero.
     """
     total = 0
     for pid in _pids_of(uid):
@@ -102,7 +101,7 @@ def _pss_bytes(uid: int) -> int:
 
 
 def kill_uid(uid: int) -> None:
-    """Mata todos los procesos de `uid`, también los que hicieron setsid."""
+    """Kill all processes of `uid`, including those that called setsid."""
     deadline = time.monotonic() + 3
     while time.monotonic() < deadline:
         pids = list(_pids_of(uid))
@@ -115,7 +114,7 @@ def kill_uid(uid: int) -> None:
 
 
 def _tree_bytes(root: Path) -> int | None:
-    """Bytes en disco bajo `root`; None si hay demasiadas entradas."""
+    """Bytes on disk under `root`; None if there are too many entries."""
     total = 0
     seen = 0
     stack = [str(root)]
@@ -136,7 +135,7 @@ def _tree_bytes(root: Path) -> int | None:
 
 
 def _remove_owned(uid: int, root: str) -> None:
-    """Borra de `root` lo que pertenece a `uid`, sin seguir enlaces."""
+    """Delete from `root` what belongs to `uid`, without following links."""
     for dirpath, dirnames, filenames in os.walk(root, topdown=False, followlinks=False):
         for name in filenames + dirnames:
             path = os.path.join(dirpath, name)
@@ -152,10 +151,10 @@ def _remove_owned(uid: int, root: str) -> None:
 
 
 class _Scan(threading.Thread):
-    """Vigila memoria y disco en su propio hilo.
+    """Watch memory and disk in its own thread.
 
-    Recorrer /proc puede tardar segundos mientras un fork bomb crea procesos; así
-    el reloj de `run_job` sigue su curso. `killed` se escribe antes de `tripped`.
+    Walking /proc can take seconds while a fork bomb creates processes; this way the
+    clock of `run_job` keeps running. `killed` is written before `tripped`.
     """
 
     def __init__(self, uid: int, work: Path, limits: Limits) -> None:
@@ -174,7 +173,7 @@ class _Scan(threading.Thread):
             try:
                 reason, next_disk, next_peak = self._pass(next_disk, next_peak)
             except Exception:
-                # Sin vigilancia no hay límites. El trabajo se mata, no sigue.
+                # Without watching there are no limits. The job is killed, not left running.
                 traceback.print_exc()
                 reason = "scan"
             if reason:
@@ -183,11 +182,11 @@ class _Scan(threading.Thread):
                 return
 
     def _pass(self, next_disk: float, next_peak: float) -> tuple[str | None, float, float]:
-        """Una vuelta de vigilancia: devuelve el motivo de la muerte y las próximas citas.
+        """One watch pass: return the reason for the kill and the next due times.
 
-        El PSS nunca pasa del RSS, así que mientras el RSS cabe en el tope el
-        trabajo no puede pasarlo y basta el RSS. El PSS se lee al pasar el RSS
-        del tope para decidir, y cada `PEAK_POLL_S` para anotar el pico.
+        The PSS never exceeds the RSS, so while the RSS fits under the cap the job
+        cannot exceed it and the RSS is enough. The PSS is read when the RSS passes
+        the cap, to decide, and every `PEAK_POLL_S`, to record the peak.
         """
         now = time.monotonic()
         if _rss_bytes(self.uid) > self.mem_cap or now >= next_peak:
@@ -216,13 +215,13 @@ def run_job(
     env: Mapping[str, str],
     report: bool = False,
 ) -> Outcome:
-    """Ejecuta `argv` con `files` escritos en un directorio nuevo.
+    """Run `argv` with `files` written to a new directory.
 
-    `argv` y los valores de `env` pueden usar `{dir}`, la ruta del directorio.
-    Con `report=True` el hijo hereda un pipe, cuyo número va en QG_REPORT_FD.
-    La salida estándar y la de errores van juntas, en el orden en que se escribieron.
-    `killed` es `time`, `memory`, `disk` u `output` si el trabajo pasó ese límite,
-    o `scan` si la vigilancia falló y el trabajo se mató sin poder medirlo.
+    `argv` and the values of `env` may use `{dir}`, the path of the directory.
+    With `report=True` the child inherits a pipe, whose number goes in QG_REPORT_FD.
+    Standard output and standard error go together, in the order they were written.
+    `killed` is `time`, `memory`, `disk` or `output` if the job passed that limit,
+    or `scan` if the watch failed and the job was killed without being measured.
     """
     uid = slot_uid(slot)
     start = time.monotonic()

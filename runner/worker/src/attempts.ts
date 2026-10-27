@@ -1,10 +1,10 @@
 import { unixSeconds } from "./account.ts";
 import { EXERCISE } from "./contract.ts";
 
-// Lo que el Worker anota de una ejecución. Sale del JSON del contenedor, que
-// califica el código: la página no puede falsear un resultado. Nunca lleva el
-// código, `stdout`, el texto del error ni el `message` de un caso, que pueden
-// repetir lo que escribió el alumno.
+// What the Worker records about a run. It comes from the container's JSON, which
+// grades the code: the page cannot fake a result. It never carries the code,
+// `stdout`, the error text or the `message` of a case, which may repeat what the
+// learner wrote.
 export interface Attempt {
   exercise: string;
   mode: "run" | "check";
@@ -19,14 +19,14 @@ export interface Attempt {
 const MAX_FAILED = 50;
 const MAX_CASE_CHARS = 120;
 const KILLED = new Set(["time", "memory", "disk", "output", "scan"]);
-// El nombre de una excepción de Python; cualquier otro texto de error es «other».
+// The name of a Python exception; any other error text is "other".
 const EXCEPTION = /^([A-Za-z]{1,40}(?:Error|Exception))\b/;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-// `request` es lo que la página mandó (solo `mode` y `exercise` se usan) y `result`
-// el cuerpo con que respondió el contenedor. Devuelve null si no hay nada que anotar.
+// `request` is what the page sent (only `mode` and `exercise` are used) and `result`
+// the body the container replied with. Returns null if there is nothing to record.
 export function toAttempt(
   request: { mode?: unknown; exercise?: unknown },
   codeBytes: number,

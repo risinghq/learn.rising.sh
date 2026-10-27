@@ -1,8 +1,10 @@
-"""Servidor HTTP del corredor: POST /run y GET /health.
+"""HTTP server of the runner: POST /run and GET /health.
 
-No depende del anfitrión: lo mismo corre en Cloudflare Containers que en Docker.
-El contrato está en docs/runner.md y el ciclo de las ranuras en
-docs/architecture.md. Si no queda una ranura libre, responde 503.
+It does not depend on the host: it runs the same on Cloudflare Containers and on Docker.
+The contract is in docs/runner.md and the slot cycle in docs/architecture.md.
+If no slot is free, it answers 503.
+
+The `error` texts of the replies are in Spanish: the site shows them to the learner.
 """
 
 import json
@@ -18,7 +20,7 @@ from qgcheck import spec
 from qgcheck.runner import MAX_CODE, job_argv, result, stopped
 
 PORT = int(os.environ.get("PORT", "8080"))
-# Un carácter de control ocupa 6 bytes escapado en JSON; el resto es la envoltura.
+# A control character takes 6 bytes escaped in JSON; the rest is the envelope.
 MAX_BODY_BYTES = 6 * MAX_CODE + 1024
 LIMITS = sandbox.Limits(
     wall_s=float(os.environ.get("QG_WALL_S", "10")),
@@ -118,8 +120,8 @@ class Handler(BaseHTTPRequestHandler):
             out = execute(slot, code, mode, check)
         finally:
             FREE_SLOTS.put(slot)
-        # La ranura se libera antes de contestar. Así otra petición del cliente
-        # no puede encontrarla todavía ocupada.
+        # The slot is released before replying. This way the client's next request
+        # cannot find it still busy.
         self.reply(200, out)
 
 

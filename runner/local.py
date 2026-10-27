@@ -1,14 +1,14 @@
-"""Construye y ejecuta la imagen del corredor con Docker, con las banderas de aislamiento.
+"""Build and run the runner image with Docker, with the isolation flags.
 
     python runner/local.py build
     python runner/local.py serve [--runtime runc|runsc]
 
-`serve` construye la imagen si falta, imprime la URL del contenedor y lo deja
-corriendo hasta Ctrl-C. El contenedor va en una red interna de Docker, sin salida
-a internet, y se alcanza por su IP; eso funciona en Linux.
+`serve` builds the image if it is missing, prints the container URL and leaves it
+running until Ctrl-C. The container runs on an internal Docker network, with no access
+to the internet, and is reached by its IP; this works on Linux.
 
-`QG_DOCKER` cambia el comando de Docker (por ejemplo `sudo docker`). `build` lee las
-versiones de Python y de uv de mise.toml con `mise current`.
+`QG_DOCKER` changes the Docker command (for example `sudo docker`). `build` reads the
+Python and uv versions from mise.toml with `mise current`.
 """
 
 import argparse
@@ -41,7 +41,7 @@ def default_runtime() -> str:
 
 
 def mise_version(tool: str) -> str:
-    """La versión que mise.toml fija para `tool`."""
+    """The version mise.toml pins for `tool`."""
     proc = subprocess.run(["mise", "current", tool], check=True, text=True, capture_output=True)
     return proc.stdout.strip()
 
@@ -63,7 +63,7 @@ def build(image: str = IMAGE) -> None:
 
 
 def ensure_image(image: str = IMAGE) -> None:
-    """Construye la imagen si Docker no la tiene."""
+    """Build the image if Docker does not have it."""
     if not docker("image", "inspect", "--format", "{{.Id}}", image, check=False):
         build(image)
 
@@ -78,7 +78,7 @@ class Container:
         docker("rm", "-f", self.name, check=False)
 
     def exec(self, *argv: str) -> str:
-        """Ejecuta un comando dentro del contenedor, como root."""
+        """Run a command inside the container, as root."""
         return docker("exec", self.name, *argv)
 
 
@@ -88,10 +88,10 @@ def start(
     egress: bool = False,
     caps: tuple[str, ...] = CAPS,
 ) -> Container:
-    """Arranca el contenedor, construyendo antes la imagen si falta, y espera a /health.
+    """Start the container, building the image first if it is missing, and wait for /health.
 
-    Con `egress=True` usa la red por defecto de Docker, que sí sale a internet.
-    Sirve para comprobar que el alumno no sale aunque la red lo permita.
+    With `egress=True` it uses Docker's default network, which does reach the internet.
+    It serves to check that the learner's code cannot get out even when the network allows it.
     """
     ensure_image(image)
     runtime = runtime or default_runtime()
@@ -155,7 +155,7 @@ def wait_healthy(url: str, timeout: int = 60) -> None:
                     return
         except OSError:
             time.sleep(0.02)
-    raise TimeoutError(f"{url}/health no responde tras {timeout} s")
+    raise TimeoutError(f"{url}/health did not answer within {timeout} s")
 
 
 def main() -> None:
@@ -167,9 +167,7 @@ def main() -> None:
         build()
         return
     container = start(runtime=args.runtime)
-    print(
-        f"{container.url}  (runtime {container.runtime}, contenedor {container.name})", flush=True
-    )
+    print(f"{container.url}  (runtime {container.runtime}, container {container.name})", flush=True)
     try:
         while True:
             time.sleep(3600)

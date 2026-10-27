@@ -1,8 +1,8 @@
 # check=skip=InvalidDefaultArgInFrom
-# Contexto de construcción: la raíz del repositorio. Las versiones de Python y de
-# uv son argumentos sin valor por defecto a propósito; salen de mise.toml
-# (`mise current`) y las pasan runner/local.py y runner/worker/cloudflare.config.ts.
-# Un valor por defecto sería una segunda copia que se desfasa.
+# Build context: the repository root. The Python and uv versions are arguments
+# with no default on purpose; they come from mise.toml (`mise current`) and
+# runner/local.py and runner/worker/cloudflare.config.ts pass them.
+# A default would be a second copy that drifts.
 #   docker build -f runner/Dockerfile -t qg-runner \
 #     --build-arg PYTHON_VERSION=$(mise current python) \
 #     --build-arg UV_VERSION=$(mise current uv) .
@@ -17,8 +17,8 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends tini \
  && rm -rf /var/lib/apt/lists/*
 
-# Las versiones salen de uv.lock, grupo `runner` de pyproject.toml. El sistema de
-# archivos es de solo lectura en ejecución, así que el bytecode se compila aquí.
+# The versions come from uv.lock, group `runner` of pyproject.toml. The file
+# system is read-only at run time, so the bytecode is compiled here.
 COPY pyproject.toml uv.lock /tmp/lock/
 RUN --mount=from=uv,source=/uv,target=/usr/local/bin/uv \
     uv export --project /tmp/lock --frozen --no-emit-project --no-default-groups \
@@ -31,7 +31,7 @@ COPY qgcheck/ /app/qgcheck/
 COPY exercises/ /app/exercises/
 RUN python -m compileall -q /app/qgcheck
 
-# Nada es escribible por el alumno salvo su directorio de trabajo en /scratch.
+# The learner can write nothing except their working directory in /scratch.
 RUN mkdir /scratch && chmod 755 /scratch /tmp /var/tmp /app
 
 WORKDIR /app

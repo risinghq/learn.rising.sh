@@ -3,9 +3,9 @@ import { mac } from "./session.ts";
 
 const DAY_MS = 86_400_000;
 
-// Cuenta una petición en el contador de `key` bajo `label`. El nombre del objeto es
-// un HMAC del día y de la clave (una IP o un usuario), así que no se puede volver
-// a ellos sin el secreto. Las etiquetas separan los contadores de una misma clave.
+// Count a request in the counter of `key` under `label`. The object name is an
+// HMAC of the day and the key (an IP or a user), so it cannot be traced back to
+// them without the secret. Labels keep the counters of one key apart.
 export async function take(
   limiters: DurableObjectNamespace<RateLimiter>,
   secret: string,

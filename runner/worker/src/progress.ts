@@ -1,17 +1,17 @@
 import { unixSeconds } from "./account.ts";
 import { EXERCISE } from "./contract.ts";
 
-// El progreso de un alumno, con la forma que la página manda y recibe. Las claves
-// de `kv` son las de localStorage; `done` es `qiskit:done` y `exercises` son los
-// `qiskit:exercise:<id>`. Lo que no está aquí (preferencias, `reflect`) no sale del
-// navegador.
+// A learner's progress, in the shape the page sends and receives. The keys
+// of `kv` are those of localStorage; `done` is `qiskit:done` and `exercises` are the
+// `qiskit:exercise:<id>`. What is not here (preferences, `reflect`) never leaves the
+// browser.
 export interface ExerciseState {
-  // Solo el alumno que lo permite manda su código.
+  // Only a learner who allows it sends their code.
   code?: string | null;
   hints: number;
   checks: number;
   passed: boolean;
-  // Milisegundos Unix de la última edición: gana el código más reciente.
+  // Unix milliseconds of the last edit: the most recent code wins.
   at: number;
 }
 
@@ -40,9 +40,9 @@ const list = (
 ): value is unknown[] =>
   Array.isArray(value) && value.length <= MAX_ITEMS && value.every(accepts);
 
-// Cada familia de claves de `kv`: qué forma tiene su valor y cómo se juntan el
-// guardado y el que llega. La unión y el máximo no dependen del orden, así que dos
-// pestañas que se sincronizan acaban en el mismo estado.
+// Each family of `kv` keys: the shape of its value and how the stored value and
+// the incoming one are merged. Union and maximum do not depend on order, so two
+// tabs that sync end in the same state.
 interface Family {
   key: RegExp;
   valid(value: unknown): boolean;
@@ -91,7 +91,7 @@ const FAMILIES: Family[] = [
     merge: (stored, incoming) => Math.max(stored as number, incoming as number),
   },
   {
-    // Una apuesta no se cambia: la primera que se guarda es la que vale.
+    // A bet is not changed: the first one saved is the one that counts.
     key: /^qiskit:predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}$/,
     valid: isInt,
     merge: (stored) => stored,
@@ -104,7 +104,7 @@ const FAMILIES: Family[] = [
       Object.entries(value).every(
         ([id, item]) => /^[A-Za-z0-9_.:-]{1,100}$/.test(id) && isBox(item),
       ),
-    // Por pregunta, la caja más alta; con la misma caja, la que vence antes.
+    // Per question, the highest box; with the same box, the one that is due sooner.
     merge: (stored, incoming) => {
       const merged = {
         ...(stored as Record<string, { box: number; due: number }>),
@@ -129,8 +129,8 @@ const familyOf = (key: string) =>
 
 const utf8Length = (text: string) => new TextEncoder().encode(text).length;
 
-// Devuelve el progreso validado o el motivo por el que no vale. No acepta campos
-// que el servidor no entiende: un error de la página se ve en vez de perderse.
+// Returns the validated progress or the reason it is not valid. It accepts no fields
+// the server does not understand: a page bug shows up instead of being lost.
 export function parseProgress(input: unknown): Progress | string {
   if (!isRecord(input)) return "El cuerpo debe ser un objeto JSON.";
   const unknown = Object.keys(input).find(
@@ -193,8 +193,8 @@ export function parseProgress(input: unknown): Progress | string {
   return progress;
 }
 
-// El progreso guardado y la versión con que se leyó, o null si el usuario ya no
-// existe. Los cuatro SELECT van en un lote: ven el mismo estado.
+// The stored progress and the version it was read with, or null if the user does not
+// exist. The four SELECTs run in one batch: they see the same state.
 async function readState(
   db: D1Database,
   userId: string,
@@ -245,7 +245,7 @@ function mergeExercise(
 ): ExerciseState {
   if (!stored) return incoming;
   const newer = incoming.at > stored.at;
-  // Sin código (`undefined` o null) la página no lo manda: no borra el guardado.
+  // Without code (`undefined` or null) the page did not send it: it does not erase the stored one.
   const code =
     newer && typeof incoming.code === "string" ? incoming.code : stored.code;
   return {
@@ -258,18 +258,18 @@ function mergeExercise(
 }
 
 export class TooMuch extends Error {}
-// El usuario se borró (DELETE /api/me o la limpieza) mientras corría la petición.
+// The user was deleted (DELETE /api/me or the purge) while the request ran.
 export class Gone extends Error {}
-// Otras escrituras del mismo usuario ganaron todas las veces.
+// Other writes of the same user won every time.
 export class Contended extends Error {}
 
 const MAX_TRIES = 10;
 
-// Junta `incoming` con lo guardado y devuelve el estado resultante. Lee, calcula y
-// escribe en un lote cuyas sentencias solo actúan si `progress_version` sigue siendo
-// la leída; la última la sube. D1 ejecuta el lote sin intercalar otras escrituras,
-// así que si otra petición del mismo usuario escribió en medio, la última sentencia
-// no cambia ninguna fila y se vuelve a leer. Ninguna escritura pisa a otra.
+// Merges `incoming` with the stored state and returns the resulting state. It reads,
+// computes and writes in a batch whose statements act only if `progress_version` is
+// still the one read; the last one raises it. D1 runs the batch without interleaving
+// other writes, so if another request of the same user wrote in between, the last
+// statement changes no row and the state is read again. No write overwrites another.
 export async function mergeProgress(
   db: D1Database,
   userId: string,
@@ -277,7 +277,7 @@ export async function mergeProgress(
   now: number,
 ): Promise<Progress> {
   for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
-    // oxlint-disable-next-line eslint/no-await-in-loop -- Cada intento relee el estado que dejó el anterior.
+    // oxlint-disable-next-line eslint/no-await-in-loop -- Each attempt rereads the state the previous one left.
     const state = await readState(db, userId);
     if (!state) throw new Gone();
     const { merged, statements } = plan(db, userId, state, incoming, now);
@@ -289,7 +289,7 @@ export async function mergeProgress(
         )
         .bind(userId, state.version),
     );
-    // oxlint-disable-next-line eslint/no-await-in-loop -- El siguiente intento depende de este resultado.
+    // oxlint-disable-next-line eslint/no-await-in-loop -- The next attempt depends on this result.
     const results = await db.batch(statements);
     if (results[results.length - 1].meta.changes === 1) return merged;
   }
@@ -346,8 +346,8 @@ function plan(
     throw new TooMuch();
   }
 
-  // Una sola sentencia por tabla: json_each reparte el arreglo en filas. El WHERE
-  // es la guarda de versión (?4 en todas).
+  // One statement per table: json_each spreads the array into rows. The WHERE
+  // is the version guard (?4 in all of them).
   const current = "(SELECT progress_version FROM users WHERE id = ?1) = ?4";
   const statements: D1PreparedStatement[] = [];
   const seconds = unixSeconds(now);

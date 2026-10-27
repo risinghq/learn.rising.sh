@@ -2,10 +2,10 @@ import { type Rates, isInstanceType, ratesOf } from "./container.ts";
 import type { Caps } from "./meters.ts";
 
 export interface Env {
-  // El Worker entrega archivos estáticos para las rutas que no son de la plataforma.
+  // The Worker serves static files for the routes that are not the platform's.
   ASSETS: Fetcher;
   TURNSTILE_SECRET: string;
-  // La página recibe la clave pública en la respuesta `turnstile_missing`.
+  // The page receives the public key in the `turnstile_missing` reply.
   TURNSTILE_SITE_KEY: string;
   RATE_PER_MINUTE: string;
   RATE_PER_DAY: string;
@@ -16,7 +16,7 @@ export interface Env {
   RESERVED_BUSY_SECONDS: string;
   INSTANCE_TYPE: string;
   INSTANCES: string;
-  // Ids numéricos de GitHub separados por comas. Puede estar vacía.
+  // Numeric GitHub ids separated by commas. It may be empty.
   MAINTAINERS: string;
   SESSION_HOURS: string;
   AUTH_PER_MINUTE: string;
@@ -25,7 +25,7 @@ export interface Env {
   ATTEMPT_RETENTION_DAYS: string;
   ACCOUNT_RETENTION_DAYS: string;
   DB: D1Database;
-  // Secretos de los clientes OAuth. Un proveedor sin ellos responde 503.
+  // Secrets of the OAuth clients. A provider without them answers 503.
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   GITHUB_CLIENT_ID?: string;
@@ -52,24 +52,24 @@ export interface Limits {
   perMinute: number;
   perDay: number;
   maxCodeBytes: number;
-  // El cuerpo admite seis veces el código más la envoltura JSON de 1024 bytes.
-  // Es el mismo tope que runner/server.py.
+  // The body allows six times the code plus the 1024-byte JSON envelope.
+  // It is the same cap as runner/server.py.
   maxBodyBytes: number;
   caps: Caps;
-  // Lo que cuesta un segundo de instancia, según `INSTANCE_TYPE`.
+  // What one instance second costs, according to `INSTANCE_TYPE`.
   rates: Rates;
-  // Instancias entre las que el Worker reparte las ejecuciones.
+  // Instances among which the Worker spreads the runs.
   instances: number;
-  // El tiempo de contenedor que una ejecución aparta antes de empezar. Es un
-  // tope: al llegar a `reserveMs` se detiene la instancia.
+  // The container time that a run sets aside before it starts. It is a
+  // cap: when `reserveMs` is reached the instance is stopped.
   reserveMs: number;
-  // Ids de GitHub de quienes mantienen el sitio.
+  // GitHub ids of the people who maintain the site.
   maintainers: string[];
   sessionMs: number;
-  // Peticiones por minuto y por IP a /auth/*.
+  // Requests per minute and per IP to /auth/*.
   authPerMinute: number;
   authSessionMs: number;
-  // El tope por IP de quien tiene cuenta es este múltiplo del anónimo.
+  // The per-IP cap for a signed-in user is this multiple of the anonymous one.
   signedInIpFactor: number;
   attemptRetentionMs: number;
   accountRetentionMs: number;
@@ -86,27 +86,27 @@ function positive(env: Env, name: NumericVar, integer: boolean): number {
   const n = Number(env[name]);
   if (!Number.isFinite(n) || n <= 0 || (integer && !Number.isInteger(n))) {
     throw new ConfigError(
-      `${name} debe ser un número positivo${integer ? " entero" : ""}`,
+      `${name} must be a positive${integer ? " integer" : " number"}`,
     );
   }
   return n;
 }
 
-// Un login de GitHub se puede renombrar y otra persona puede quedárselo.
-// El id numérico no cambia.
+// A GitHub login can be renamed and another person can take it.
+// The numeric id does not change.
 function maintainerIds(list: string | undefined): string[] {
   const ids = (list ?? "")
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
   if (list === undefined || !ids.every((id) => /^[1-9][0-9]{0,14}$/.test(id))) {
-    throw new ConfigError("MAINTAINERS debe listar ids numéricos de GitHub");
+    throw new ConfigError("MAINTAINERS must list numeric GitHub ids");
   }
   return ids;
 }
 
-// Todos los valores salen de `env` (cloudflare.config.ts); un valor ausente o
-// inválido es un error de configuración, no un valor por defecto.
+// Every value comes from `env` (cloudflare.config.ts); a missing or invalid
+// value is a configuration error, not a default.
 export function loadLimits(env: Env): Limits {
   const maxCodeBytes = positive(env, "MAX_CODE_BYTES", true);
   const budgetNano = Math.round(
@@ -114,11 +114,11 @@ export function loadLimits(env: Env): Limits {
   );
   const share = positive(env, "PUBLIC_BUDGET_SHARE", false);
   if (share > 1) {
-    throw new ConfigError("PUBLIC_BUDGET_SHARE no puede pasar de 1");
+    throw new ConfigError("PUBLIC_BUDGET_SHARE cannot exceed 1");
   }
   const publicNano = Math.round(budgetNano * share);
   if (!isInstanceType(env.INSTANCE_TYPE)) {
-    throw new ConfigError("INSTANCE_TYPE no es un tipo de instancia conocido");
+    throw new ConfigError("INSTANCE_TYPE is not a known instance type");
   }
   return {
     perMinute: positive(env, "RATE_PER_MINUTE", true),

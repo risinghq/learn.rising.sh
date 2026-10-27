@@ -21,9 +21,9 @@ import { take } from "./throttle.ts";
 
 export { Budget, RateLimiter };
 
-// Una instancia atiende un trabajo a la vez (runner/server.py). El Worker reparte
-// entre `INSTANCES` y reintenta una vez en la siguiente cuando la elegida
-// responde 503.
+// An instance serves one job at a time (runner/server.py). The Worker spreads
+// runs among `INSTANCES` and retries once on the next one when the chosen one
+// answers 503.
 export class Runner extends Container {
   defaultPort = 8080;
   sleepAfter = `${SLEEP_AFTER_SECONDS}s`;
@@ -95,12 +95,12 @@ async function readBody(request: Request, limits: Limits): Promise<Uint8Array> {
   if (request.body) {
     const reader = request.body.getReader();
     for (;;) {
-      // oxlint-disable-next-line eslint/no-await-in-loop -- Los fragmentos de un flujo se leen en orden.
+      // oxlint-disable-next-line eslint/no-await-in-loop -- The chunks of a stream are read in order.
       const { done, value } = await reader.read();
       if (done) break;
       total += value.length;
       if (total > limits.maxBodyBytes) {
-        // oxlint-disable-next-line eslint/no-await-in-loop -- Se cancela una sola vez y el bucle termina.
+        // oxlint-disable-next-line eslint/no-await-in-loop -- It is cancelled once and the loop ends.
         await reader.cancel();
         throw tooLarge();
       }
@@ -116,9 +116,9 @@ async function readBody(request: Request, limits: Limits): Promise<Uint8Array> {
   return body;
 }
 
-// Cambia la reserva por el coste medido y devuelve lo cobrado. Un fallo se
-// registra y no se propaga: la reserva sin ajustar cuenta de más, nunca de menos,
-// y no debe tapar el error que la petición ya traía.
+// Swaps the reservation for the measured cost and returns what was charged. A failure is
+// logged and not propagated: an unadjusted reservation counts too much, never too little,
+// and must not hide the error the request already carried.
 async function settle(
   budget: DurableObjectStub<Budget>,
   rates: Rates,
@@ -133,7 +133,7 @@ async function settle(
   }
 }
 
-// Una reserva de esta petición en una instancia, y cuándo se le mandó el trabajo.
+// A reservation of this request on an instance, and when the work was sent to it.
 interface Attempt {
   hold: Hold;
   reservedAt: number;
@@ -144,8 +144,8 @@ interface Attempt {
 
 const MARIMO = "Los cuadernos de marimo siguen funcionando en tu equipo.";
 
-// `entry` es el de la petición: se completa con el tiempo y el coste antes de
-// registrarse, también cuando el tope llega en el reintento.
+// `entry` is the request's: it is completed with the time and the cost before it
+// is logged, also when the cap is hit on the retry.
 function overBudget(
   entry: Entry,
   reason: "budget" | "budget_day",
@@ -188,10 +188,10 @@ async function run(
   const ip = request.headers.get("cf-connecting-ip") ?? "";
   const entry: Entry = { outcome: "ok", status: 0 };
   const budget = exports.Budget.get(exports.Budget.idFromName("budget"));
-  // Las reservas de la petición. Una sigue abierta mientras no se ajusta.
+  // The request's reservations. One stays open until it is adjusted.
   const attempts: Attempt[] = [];
-  // Ajusta las reservas abiertas al coste medido y devuelve lo cobrado. Una a la
-  // que no se mandó trabajo devuelve todo.
+  // Adjusts the open reservations to the measured cost and returns what was charged.
+  // One that was sent no work returns everything.
   const close = async (): Promise<number> => {
     const end = Date.now();
     const costs = await Promise.all(
@@ -223,8 +223,8 @@ async function run(
       userId !== null &&
       (await isMaintainer(env.DB, userId, limits.maintainers));
     const who: Who = maintainer ? "maintainer" : "public";
-    // Quien tiene cuenta comparte la IP con su clase: su tope por IP es mayor y el
-    // que lo acota es el suyo propio.
+    // A signed-in user shares the IP with their class: their per-IP cap is higher and
+    // what bounds them is their own cap.
     const ipFactor = userId ? limits.signedInIpFactor : 1;
     const secret = env.TURNSTILE_SECRET;
     throwIfLimited(
@@ -238,7 +238,7 @@ async function run(
         limits.perDay * ipFactor,
       ),
     );
-    // Quien mantiene el sitio no tiene tope diario propio: lo acota el presupuesto.
+    // A maintainer has no daily cap of their own: the budget bounds them.
     if (userId && !maintainer) {
       throwIfLimited(
         await take(
@@ -286,9 +286,9 @@ async function run(
       );
     }
 
-    // Aparta lo que costaría la ejecución en esa instancia: su CPU y el tiempo
-    // que la deja encendida. Va antes de Turnstile para no gastar una
-    // verificación cuando ya no hay presupuesto.
+    // Sets aside what the run would cost on that instance: its CPU and the time
+    // it keeps the instance on. It goes before Turnstile so as not to spend a
+    // verification when there is no budget left.
     const reserve = async (index: number): Promise<Attempt> => {
       const reservedAt = Date.now();
       const reserved = await budget.reserve({
@@ -308,8 +308,8 @@ async function run(
     const first = await reserve(firstIndex);
 
     let cookie: string | undefined;
-    // Quien mantiene el sitio entra con GitHub y no pasa por Turnstile. Los demás,
-    // con cuenta o sin ella, lo pasan una vez por sesión.
+    // A maintainer signs in with GitHub and skips Turnstile. Everyone else,
+    // signed in or not, passes it once per session.
     if (
       !maintainer &&
       !(await hasSession(
@@ -322,7 +322,7 @@ async function run(
       const token = request.headers.get("x-turnstile-token");
       if (!token) {
         if (!env.TURNSTILE_SITE_KEY)
-          throw new ConfigError("TURNSTILE_SITE_KEY debe estar definida");
+          throw new ConfigError("TURNSTILE_SITE_KEY must be defined");
         throw new Refusal(
           { ...entry, outcome: "turnstile_missing", status: 403 },
           "turnstile_missing",
@@ -355,18 +355,18 @@ async function run(
       );
     }
 
-    // El contenedor recibe solo el cuerpo y su tipo. No recibe la cookie, la IP
-    // ni el token de Turnstile.
-    // La instancia que aún no ha respondido a esta petición. Una que responde, 503
-    // incluido, deja de ser de la petición: el 503 dice que atiende el trabajo de
-    // otro alumno, y detenerla lo mataría.
+    // The container receives only the body and its type. It does not receive the cookie,
+    // the IP or the Turnstile token.
+    // The instance that has not answered this request yet. One that answers, 503
+    // included, stops belonging to the request: the 503 says it is serving another
+    // learner's job, and stopping it would kill that job.
     let pending = undefined as DurableObjectStub<Runner> | undefined;
     let stopped = false;
     const send = async (index: number, attempt: Attempt) => {
       const instance = exports.Runner.get(
         exports.Runner.idFromName(instanceName(index)),
       );
-      // Una instancia elegida después del tope no debe llegar a arrancar.
+      // An instance chosen after the cap must never start.
       if (stopped) throw new Error("run stopped");
       pending = instance;
       attempt.sentAt = Date.now();
@@ -386,9 +386,9 @@ async function run(
     };
     const started = Date.now();
     let result: Response | undefined;
-    // La ejecución, con su reintento, tiene RESERVED_BUSY_SECONDS desde que se
-    // apartó, y Turnstile ya gastó parte de ese tiempo. Pasado ese tope, la
-    // reserva no cubriría el tiempo que la instancia seguiría encendida.
+    // The run, with its retry, has RESERVED_BUSY_SECONDS from when it was set
+    // aside, and Turnstile has already used part of that time. Past that cap, the
+    // reservation would not cover the time the instance would stay on.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const ceiling = new Promise<undefined>((resolve) => {
       timer = setTimeout(
@@ -399,18 +399,18 @@ async function run(
     const work = (async () => {
       const response = await send(firstIndex, first);
       if (response.status !== 503) return response;
-      // Esa instancia atiende a otro alumno: se prueba la siguiente.
+      // That instance is serving another learner: try the next one.
       const next = (firstIndex + 1) % limits.instances;
       if (stopped) throw new Error("run stopped");
       const retry = await reserve(next);
-      // El tope pudo llegar mientras se apartaba: nadie ajustará esta reserva.
+      // The cap may have hit while setting aside: nobody will adjust this reservation.
       if (stopped) {
         await close();
         throw new Error("run stopped");
       }
       return send(next, retry);
     })();
-    // Si gana el tope, el rechazo tardío de `work` no tiene a quién llegar.
+    // If the cap wins, the late rejection of `work` has nobody to reach.
     work.catch(() => {});
     try {
       result = await Promise.race([work, ceiling]);
@@ -421,8 +421,8 @@ async function run(
     } finally {
       clearTimeout(timer);
       entry.busyMs = Date.now() - started;
-      // Si falla el registro del coste, la reserva se queda y el error del
-      // contenedor, si lo hubo, sigue su camino.
+      // If recording the cost fails, the reservation stays and the container's
+      // error, if there was one, carries on.
       entry.costNano = await close();
     }
     if (!result) {
@@ -441,7 +441,7 @@ async function run(
     if (cookie) headers.set("Set-Cookie", cookie);
     const text = await result.text();
     if (result.status === 200) {
-      // Anotar el intento no debe quitarle al alumno su resultado.
+      // Recording the attempt must not take the learner's result away.
       try {
         const attempt = toAttempt(
           parsed,
@@ -472,7 +472,7 @@ export default {
     ctx: ExecutionContext,
   ): Promise<Response> {
     const { pathname } = new URL(request.url);
-    // Responder aquí evita arrancar un contenedor por una petición sin límite.
+    // Answering here avoids starting a container for an unlimited request.
     if (pathname === "/health") return Response.json({ ok: true });
     const account = pathname.startsWith("/auth/")
       ? "auth"
@@ -491,7 +491,7 @@ export default {
         return fail(500, "internal_error", "Error interno.");
       }
     }
-    // Las rutas que no son de la plataforma se sirven desde site/.
+    // The routes that are not the platform's are served from site/.
     if (pathname !== "/run") return env.ASSETS.fetch(request);
     if (request.method !== "POST") {
       return Response.json(
@@ -514,7 +514,7 @@ export default {
     }
   },
 
-  // El cron diario de cloudflare.config.ts.
+  // The daily cron of cloudflare.config.ts.
   async scheduled(controller: ScheduledController, env: Env): Promise<void> {
     try {
       await purge(env.DB, loadLimits(env), controller.scheduledTime);

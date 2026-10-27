@@ -12,8 +12,8 @@ import {
 } from "./progress.ts";
 import { take } from "./throttle.ts";
 
-// D1 admite 2 MB por valor enlazado y la sentencia reenvía el cuerpo con otro nivel
-// de escapes; este tope deja margen.
+// D1 accepts 2 MB per bound value and the statement forwards the body with another
+// level of escapes; this cap leaves margin.
 const MAX_BODY_BYTES = 800_000;
 
 async function readJson(request: Request): Promise<unknown | Response> {

@@ -1,16 +1,16 @@
--- Esquema de la base D1 (binding DB). No hay migraciones: para cambiarlo se
--- borra la base, se crea otra y se aplica este archivo. D1 hace cumplir las
--- claves foráneas, así que borrar una fila de users borra todo lo suyo.
--- No se guarda correo, nombre, avatar ni contraseña.
--- Tiempos: *_day son días desde la época; exercise_state.updated_at son
--- milisegundos (el `at` que manda la página); los demás, segundos Unix.
+-- Schema of the D1 database (binding DB). There are no migrations: to change it,
+-- drop the database, create another and apply this file. D1 enforces foreign
+-- keys, so deleting a row of users deletes everything of that user.
+-- No email, name, avatar or password is stored.
+-- Times: *_day are days since the epoch; exercise_state.updated_at is in
+-- milliseconds (the `at` the page sends); the rest are Unix seconds.
 
 CREATE TABLE users (
   id          TEXT PRIMARY KEY,
   created_day INTEGER NOT NULL,
   seen_day    INTEGER NOT NULL,
-  -- Sube con cada escritura de progreso. Una escritura solo vale si la versión
-  -- sigue siendo la que leyó (ver mergeProgress).
+  -- Rises with each progress write. A write counts only if the version is
+  -- still the one it read (see mergeProgress).
   progress_version INTEGER NOT NULL DEFAULT 0
 );
 

@@ -1,11 +1,11 @@
-"""Mide la latencia fría y la templada de POST /run con Docker.
+"""Measure the cold and warm latency of POST /run with Docker.
 
     python runner/bench.py [--runs 50] [--runtime runc|runsc]
 
-Fría: desde `docker run` hasta la respuesta de la primera comprobación, en un
-contenedor nuevo. Templada: la misma petición en un contenedor que ya atendió
-una. Los tiempos son de cliente, en milisegundos. La imagen ya está en el
-disco, así que una fría no incluye bajarla.
+Cold: from `docker run` to the reply of the first check, in a new container.
+Warm: the same request in a container that has already served one. Times are
+client-side, in milliseconds. The image is already on disk, so a cold run does
+not include pulling it.
 """
 
 import argparse

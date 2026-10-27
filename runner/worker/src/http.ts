@@ -24,7 +24,7 @@ export function fail(status: number, reason: string, error: string): Response {
   return reply({ error, reason }, status);
 }
 
-// Una petición que cambia datos solo vale si la página es de este mismo origen.
+// A request that changes data counts only if the page is from this same origin.
 export function sameOrigin(request: Request): boolean {
   return request.headers.get("origin") === new URL(request.url).origin;
 }

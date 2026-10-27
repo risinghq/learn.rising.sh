@@ -25,9 +25,9 @@ export interface Entry {
   costNano?: number;
 }
 
-// Una línea por petición con campos fijos. Nunca recibe el código, la IP, el
-// token, la cookie ni el texto de un error: `mode` y `exercise` se copian solo si
-// tienen la forma de un valor del contrato, y lo demás son números y un nombre.
+// One line per request with fixed fields. It never receives the code, the IP, the
+// token, the cookie or the text of an error: `mode` and `exercise` are copied only if
+// they have the shape of a contract value, and the rest are numbers and a name.
 export function logRun(entry: Entry): void {
   console.log(
     JSON.stringify({
@@ -49,8 +49,8 @@ export function logRun(entry: Entry): void {
 
 export type Where = "settle" | "stop" | "attempt" | "auth" | "api" | "purge";
 
-// `where` nombra el paso que falló cuando la petición sigue su camino. `auth`,
-// `api` y `purge` no son pasos de /run: son su propio evento.
+// `where` names the step that failed when the request carries on. `auth`,
+// `api` and `purge` are not steps of /run: they are their own event.
 export function logFailure(error: unknown, where?: Where): void {
   const own = where === "auth" || where === "api" || where === "purge";
   console.error(
@@ -60,7 +60,7 @@ export function logFailure(error: unknown, where?: Where): void {
       status: where && !own ? undefined : 500,
       where: own ? undefined : where,
       error: error instanceof Error ? error.name : "unknown",
-      // Solo un error de configuración lleva texto: nombra una variable, no datos.
+      // Only a configuration error carries text: it names a variable, not data.
       detail: error instanceof ConfigError ? error.message : undefined,
     }),
   );

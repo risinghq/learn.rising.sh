@@ -19,15 +19,15 @@ const FLOW_COOKIE = "qg_oauth";
 const FLOW_SECONDS = 600;
 const PROVIDER_TIMEOUT_MS = 5000;
 const MAX_SUBJECT_CHARS = 255;
-// GitHub rechaza las peticiones de API sin User-Agent. Es un texto fijo: no dice
-// nada de quien opera el sitio.
+// GitHub rejects API requests without a User-Agent. It is a fixed text: it says
+// nothing about who runs the site.
 const USER_AGENT = "qiskit-guides";
 
 interface ProviderConfig {
   authorize: string;
   token: string;
   userinfo: string;
-  // Solo se pide el identificador del alumno: ni correo ni nombre.
+  // Only the learner's identifier is requested: no email, no name.
   scope?: string;
   credentials(env: Env): { id?: string; secret?: string };
   subject(info: Record<string, unknown>): string | null;
@@ -60,7 +60,7 @@ const PROVIDERS: Record<Provider, ProviderConfig> = {
 const isProvider = (name: string): name is Provider =>
   Object.hasOwn(PROVIDERS, name);
 
-// Lo que viaja en la cookie `qg_oauth` entre la salida y la vuelta del proveedor.
+// What travels in the `qg_oauth` cookie between leaving for the provider and coming back.
 interface Flow {
   provider: Provider;
   state: string;
@@ -68,17 +68,17 @@ interface Flow {
   next: string;
 }
 
-// Solo una ruta de este sitio: empieza por una sola «/» y no lleva «\» ni
-// caracteres de control. «//host» y «/\host» salen del sitio en los navegadores.
+// Only a path of this site: it starts with a single "/" and has no "\" or
+// control characters. "//host" and "/\host" leave the site in browsers.
 export function localPath(value: string | null): string | null {
   if (value === null || value === "") return "/";
-  // oxlint-disable-next-line no-control-regex -- los caracteres de control son justo lo que se rechaza
+  // oxlint-disable-next-line no-control-regex -- control characters are exactly what is rejected
   if (value.length > 200 || !/^\/(?![/\\])[^\\\x00-\x20\x7f]*$/.test(value))
     return null;
   return value;
 }
 
-// Un encabezado `Location` solo lleva ASCII: el resto va en porcentaje, en UTF-8.
+// A `Location` header carries only ASCII: the rest is percent-encoded, in UTF-8.
 const asciiPath = (path: string) =>
   path.replace(/\P{ASCII}+/gu, (run) =>
     Array.from(
@@ -98,7 +98,7 @@ function readFlow(cookieHeader: string | null): Flow | null {
       new TextDecoder().decode(fromBase64url(raw)),
     ) as Flow;
     const strings = [flow.provider, flow.state, flow.verifier, flow.next];
-    // `next` se valida otra vez: la cookie la lleva el navegador y puede venir alterada.
+    // `next` is validated again: the browser carries the cookie and it may arrive altered.
     return strings.every((part) => typeof part === "string") &&
       isProvider(flow.provider) &&
       localPath(flow.next) !== null
@@ -168,7 +168,7 @@ async function start(
 
 type Exchange = { subject: string } | "rejected" | "unavailable";
 
-// Cambia el código por un token y lee del proveedor el identificador del alumno.
+// Exchange the code for a token and read the learner's identifier from the provider.
 async function exchange(
   env: Env,
   provider: Provider,
@@ -194,7 +194,7 @@ async function exchange(
       signal: AbortSignal.timeout(PROVIDER_TIMEOUT_MS),
     });
     if (tokenResponse.status >= 500) return "unavailable";
-    // GitHub responde 200 con `error` cuando rechaza el código.
+    // GitHub answers 200 with `error` when it rejects the code.
     const token = (await tokenResponse.json().catch(() => null)) as {
       access_token?: unknown;
     } | null;
@@ -251,7 +251,7 @@ async function callback(
     );
   }
   if (url.searchParams.has("error")) {
-    // El alumno canceló en la pantalla del proveedor.
+    // The learner cancelled on the provider's screen.
     return redirect(asciiPath(flow.next), spent);
   }
   const code = url.searchParams.get("code");

@@ -31,8 +31,8 @@ export async function sha256(text: string): Promise<string> {
   );
 }
 
-// La cookie lleva un token al azar de 256 bits. La base guarda solo su hash, así
-// que leer la tabla no da una sesión.
+// The cookie carries a random 256-bit token. The database stores only its hash,
+// so reading the table does not give a session.
 export async function openSession(
   db: D1Database,
   userId: string,
@@ -52,8 +52,8 @@ export async function openSession(
 export const clearedCookie = () =>
   `${COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
 
-// El id del usuario de la cookie `qg_auth`, o null si no hay sesión vigente.
-// Marca el día de la visita: la limpieza borra las cuentas sin visitas.
+// The user id of the `qg_auth` cookie, or null if there is no live session.
+// It marks the day of the visit: the purge deletes accounts with no visits.
 export async function sessionUser(
   db: D1Database,
   cookieHeader: string | null,
@@ -72,7 +72,7 @@ export async function sessionUser(
   if (!row) return null;
   const day = Math.floor(now / DAY_MS);
   if (row.seen < day) {
-    // La condición va en la sentencia: otra petición pudo marcar un día posterior.
+    // The condition is in the statement: another request may have marked a later day.
     await db
       .prepare("UPDATE users SET seen_day = ?1 WHERE id = ?2 AND seen_day < ?1")
       .bind(day, row.id)
@@ -81,8 +81,8 @@ export async function sessionUser(
   return row.id;
 }
 
-// Si el usuario entró con una cuenta de GitHub cuyo id numérico está en `ids`.
-// La base guarda ese id como `subject` de la identidad.
+// Whether the user signed in with a GitHub account whose numeric id is in `ids`.
+// The database stores that id as the `subject` of the identity.
 export async function isMaintainer(
   db: D1Database,
   userId: string,
@@ -146,7 +146,7 @@ export async function userForIdentity(
     ]);
     return id;
   } catch (error) {
-    // Dos primeras entradas a la vez: la otra ganó y el lote entero se deshizo.
+    // Two first sign-ins at once: the other won and the whole batch was undone.
     const winner = await find();
     if (winner) return winner;
     throw error;

@@ -11,8 +11,8 @@ function hex(bytes: ArrayBuffer): string {
     .join("");
 }
 
-// HMAC-SHA256 con una clave derivada del secreto de Turnstile y de una etiqueta,
-// para que la cookie y el nombre del limitador no compartan clave.
+// HMAC-SHA256 with a key derived from the Turnstile secret and a label,
+// so the cookie and the limiter name do not share a key.
 export async function mac(
   secret: string,
   label: string,
@@ -36,7 +36,7 @@ export async function mac(
   return hex(await crypto.subtle.sign("HMAC", key, encoder.encode(message)));
 }
 
-// La cookie lleva solo la hora de caducidad y un MAC que cubre esa hora y la IP.
+// The cookie carries only the expiry time and a MAC that covers that time and the IP.
 // No identifica a nadie y no sirve desde otra IP.
 export async function issueSession(
   secret: string,
@@ -80,7 +80,7 @@ export async function hasSession(
 
 export type Verification = "ok" | "rejected" | "unavailable";
 
-// Solo se envían el secreto y el token; la IP del alumno no sale del Worker.
+// Only the secret and the token are sent; the learner's IP does not leave the Worker.
 export async function verifyTurnstile(
   secret: string,
   token: string,

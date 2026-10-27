@@ -8,8 +8,8 @@ export type Verdict =
 
 const MINUTE_MS = 60_000;
 
-// Un objeto por IP y día, nombrado con un HMAC de la IP en index.ts. Borra su
-// estado cuando termina el día.
+// One object per IP and day, named with an HMAC of the IP in index.ts. It deletes
+// its state when the day ends.
 export class RateLimiter extends DurableObject {
   async take(
     now: number,
@@ -55,9 +55,9 @@ export class RateLimiter extends DurableObject {
   }
 }
 
-// Topes de gasto en nanodólares. `total` vale para todos; `public` y `day` solo
-// para quien no es mantenedor, y `day` cuenta únicamente el gasto público de
-// un día UTC.
+// Spending caps in nanodollars. `total` applies to everyone; `public` and `day`
+// only to those who are not maintainers, and `day` counts only the public spend
+// of one UTC day.
 export interface Caps {
   total: number;
   public: number;
@@ -66,18 +66,18 @@ export interface Caps {
 
 export type Who = "public" | "maintainer";
 
-// Lo que una ejecución aparta en una instancia. Es el recibo que `settle`
-// devuelve ajustado, y no lleva nada de quien la pidió.
+// What a run sets aside on an instance. It is the receipt that `settle`
+// returns adjusted, and it carries nothing about who asked for the run.
 export interface Hold {
   id: string;
   month: string;
   day: string;
   who: Who;
   instance: string;
-  // Lo apartado, y la parte de ello que paga la memoria y el disco encendidos.
+  // What was set aside, and the part of it that pays for memory and disk while on.
   nano: number;
   idleNano: number;
-  // La ventana de encendido que esta reserva añadió: de `from` a `until`.
+  // The on-window that this reservation added: from `from` to `until`.
   from: number;
   until: number;
 }
@@ -93,22 +93,22 @@ interface Spend {
 
 interface Awake {
   until: number;
-  // La reserva que fijó `until`. Solo ella puede acortarlo al terminar.
+  // The reservation that set `until`. Only it can shorten it when it ends.
   owner: string;
 }
 
 const isoMonth = (ms: number) => new Date(ms).toISOString().slice(0, 7);
 const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-// Guarda el gasto estimado del mes y del día en nanodólares, y el instante en que
-// se espera que se apague cada instancia. Descarta los meses y días anteriores.
-// El gasto de una ejecución es su tiempo de CPU más el tiempo que su instancia
-// pasa encendida por su causa: desde el fin de lo que ya estaba cobrado hasta
-// `sleepAfter` después de que acaba.
+// Stores the estimated spend of the month and the day in nanodollars, and the
+// moment each instance is expected to shut down. It discards earlier months and days.
+// The spend of a run is its CPU time plus the time its instance
+// stays on because of it: from the end of what was already billed until
+// `sleepAfter` after it finishes.
 //
-// El objeto atiende una llamada a la vez, y `reserve` y `settle` no esperan nada
-// salvo su propio almacenamiento, así que comprobar y apartar es una sola
-// operación.
+// The object serves one call at a time, and `reserve` and `settle` wait for nothing
+// except their own storage, so checking and setting aside is a single
+// operation.
 export class Budget extends DurableObject {
   private async spent(key: "month" | "day", period: string): Promise<number> {
     const stored = await this.ctx.storage.get<Spend>(key);
@@ -124,7 +124,7 @@ export class Budget extends DurableObject {
     await this.ctx.storage.put(key, { period, nano: total + nano });
   }
 
-  // Devuelve `nano` solo si el periodo sigue siendo el de la reserva.
+  // Returns `nano` only if the period is still the one of the reservation.
   private async refund(
     key: "month" | "day",
     period: string,
@@ -138,8 +138,8 @@ export class Budget extends DurableObject {
     });
   }
 
-  // Aparta lo que costaría, como mucho, una ejecución de `runMs` en `instance` si
-  // cabe, y dice cuál tope lo impide si no.
+  // Sets aside what a run of `runMs` on `instance` would cost at most, if it
+  // fits, and says which cap prevents it if not.
   async reserve(request: {
     who: Who;
     instance: string;
@@ -180,10 +180,10 @@ export class Budget extends DurableObject {
     };
   }
 
-  // Cambia lo apartado por el coste medido, que nunca pasa de lo apartado. Sin
-  // `ran` se devuelve todo. El tiempo encendido solo se acorta si nadie lo
-  // alargó después, porque quien lo alargó cobró desde el fin de esta ventana.
-  // Si el mes o el día ya cambió, no hay nada que ajustar.
+  // Swaps what was set aside for the measured cost, which never exceeds what was set
+  // aside. Without `ran` everything is returned. The on-time is shortened only if
+  // nobody extended it afterwards, because whoever extended it was billed from the
+  // end of this window. If the month or the day has changed, there is nothing to adjust.
   async settle(
     hold: Hold,
     rates: Rates,
