@@ -14,12 +14,7 @@ const SUBSETS = new Set(["latin", "latin-ext"]);
 // Keep the family names used by the site's CSS. Variable fonts replace the
 // static weights requested by the pages.
 const FONTS = [
-  {
-    family: "Bricolage Grotesque",
-    pkg: "bricolage-grotesque",
-    css: "opsz.css",
-  },
-  { family: "Inter", pkg: "inter", css: "wght.css" },
+  { family: "Newsreader", pkg: "newsreader", css: "opsz.css" },
   { family: "JetBrains Mono", pkg: "jetbrains-mono", css: "wght.css" },
 ];
 
