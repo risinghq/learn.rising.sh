@@ -139,7 +139,7 @@ clears the cookie.
 
 ## On the site
 
-[`site/qiskit/account.js`](../site/qiskit/account.js) is the client. It puts the
+[`site/qiskit/account.ts`](../site/qiskit/account.ts) is the client. It puts the
 _Entrar_ menu in the header of the course home page, the lessons and
 [`privacidad.html`](../site/qiskit/privacidad.html), the page that says what is
 stored, for how long and how to delete it.

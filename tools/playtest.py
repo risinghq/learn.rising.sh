@@ -1,7 +1,7 @@
 """Real playback test (with audio and timings): advances, answers the lesson's first two
 questions (multiple-choice ones first wrong and then right) and moves to the next step.
 
-    python -m http.server 8810 -d site          # in another terminal
+    mise run serve                              # in another terminal
     uv run --group tools python tools/playtest.py [lesson]
 
 It uses Playwright's Chromium, which `mise run install` installs.

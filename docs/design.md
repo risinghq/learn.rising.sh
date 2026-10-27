@@ -15,15 +15,17 @@ surface come from the same hue as the accent.
 | File                    | Contents                                                |
 | ----------------------- | ------------------------------------------------------- |
 | `site/theme.css`        | Tokens, the top bar, the buttons and `<progress>`.      |
-| `site/theme.js`         | Sets the mode before paint and builds the theme button. |
+| `site/theme.ts`         | Sets the mode before paint and builds the theme button. |
 | `site/catalog.css`      | Catalog styles.                                         |
 | `site/qiskit/index.css` | Styles of the course home page and the privacy page.    |
 | `site/qiskit/app.css`   | Player styles.                                          |
 | `tests/theme_test.py`   | Browser test: contrast, pages, saved mode.              |
 
 Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`. The
-course pages link them as `../theme.css` and `../theme.js`. Every page has a
-link to skip to the content and a single `<main id="main">`.
+course pages link them as `../theme.css` and `../theme.js`. `theme.js` is the
+result of bundling `theme.ts` with `mise run generate:scripts`; Git does not
+version it. Every page has a link to skip to the content and a single
+`<main id="main">`.
 
 ## Mode
 
@@ -33,13 +35,13 @@ The reader picks light or dark and the choice is saved in `localStorage`:
 | -------------- | --------------- | ---------------------- |
 | `qiskit:theme` | `light`, `dark` | The system preference. |
 
-With a saved value, `theme.js` copies it to `data-theme` on `<html>` before the
+With a saved value, `theme.ts` copies it to `data-theme` on `<html>` before the
 browser paints. Without it, `<html>` has no `data-theme` and
 `color-scheme: light dark` makes every `light-dark()` follow the system. Every
 `[data-theme-ctl]` element gets a button that offers the other mode. Its text
 comes from the page's `lang` attribute: English in the catalog and Spanish in
-the course. When the mode changes, `theme.js` fires the `themechange` event on
-`window`; `engine.js` uses it to redraw the canvases.
+the course. When the mode changes, `theme.ts` fires the `themechange` event on
+`window`; `engine.ts` uses it to redraw the canvases.
 
 ## Color
 
@@ -72,7 +74,7 @@ The component sheets read roles, not steps:
 ### Named colors
 
 The player calls the lesson colors by name: `fg`, `muted`, `blue`, `gold`,
-`teal`, `red`, `violet`, `green`, `grid` and `axis`. `engine.js` turns them into
+`teal`, `red`, `violet`, `green`, `grid` and `axis`. `engine.ts` turns them into
 `var(--name)` and into the KaTeX macros `\fg{…}`, `\blue{…}` and the rest, which
 apply the `c-<name>` class of `app.css`:
 
@@ -118,7 +120,7 @@ their own.
   the course has an overall one. The style is in `theme.css`.
 - In the player, `#steps` is an `<input type="range">` with a label, "Paso N de
   M" and ", con pregunta" if the step has a question. Dragging it jumps to that
-  step. Its fill follows `--p`, which `engine.js` sets.
+  step. Its fill follows `--p`, which `engine.ts` sets.
 
 ## Rules of use
 
@@ -127,7 +129,7 @@ their own.
   `transparent`.
 - A new color is added to `theme.css` with its light value and its dark value
   and passes `tests/theme_test.py` before it is used.
-- In SVG presentation attributes `var(--x)` does not work: `engine.js` sets it
+- In SVG presentation attributes `var(--x)` does not work: `engine.ts` sets it
   as a style. A canvas reads the color with `cssv('name')` each time it draws.
 - Text sits on `--bg`, `--bg2`, `--card` or `--stage` and reaches 4.5:1 on all
   four. The accent colors used as text do too.

@@ -2,7 +2,7 @@
 
 A lesson of the Qiskit course is a sequence of steps with voice, subtitles,
 animations, code and questions. It is written in Python (`lessons_src/`), turned
-into JSON and played by `engine.js`. Practice is marimo notebooks (`practica/`)
+into JSON and played by `engine.ts`. Practice is marimo notebooks (`practica/`)
 and code exercises ([exercises.md](exercises.md)).
 
 ## From the source to the browser
@@ -10,7 +10,7 @@ and code exercises ([exercises.md](exercises.md)).
 ```text
 plan.py + parte*.py -> build.py -> lesson.json (and course.json)
 lesson.json -> tts.py -> audio/<step>.mp3 + timings.json
-lesson.json + timings.json + audio -> engine.js
+lesson.json + timings.json + audio -> engine.ts
 ```
 
 - `plan.py` defines `PARTS`: the ten parts, the order of the lessons and which
@@ -36,7 +36,7 @@ lesson.json + timings.json + audio -> engine.js
   (the subtitles with their start second). `content/<id>.cache.json` holds per
   clip the hash of what was said and the time of each word, so a clip that did
   not change is not synthesized again.
-- `engine.js` loads `lesson.json` and `timings.json`, plays the audio of each
+- `engine.ts` loads `lesson.json` and `timings.json`, plays the audio of each
   step and fires each action of `actions` at the second of its mark. The
   subtitles come from `cues`. `?beat=N` shows the final state of step N without
   audio.

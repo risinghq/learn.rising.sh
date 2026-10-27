@@ -1,6 +1,6 @@
 """Visual review: captures the final state of each beat (?beat=N mode) and builds contact sheets.
 
-    python -m http.server 8810 -d site          # in another terminal
+    mise run serve                              # in another terminal
     uv run --group tools python tools/review.py [lesson ...] [--port 8810]
 Output: shots/<lesson>/NN-<beat>-land.png, NN-<beat>-port.png and shots/<lesson>-hoja-{land,port}.png
 """

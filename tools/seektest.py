@@ -1,6 +1,6 @@
 """Tests seeking inside a step: a click in the middle of a timeline segment.
 
-    python -m http.server 8810 -d site          # in another terminal
+    mise run serve                              # in another terminal
     uv run --group tools python tools/seektest.py [lesson [step]]
 
 By default it uses the third step («construir») of p1-composer, a list that is revealed item by item.

@@ -226,7 +226,7 @@ or `null`. The fields are those of the runner contract
 
 ## Editor in the lesson
 
-[`exercise.js`](../site/qiskit/exercise.js) draws each `Exercise` block: the
+[`exercise.ts`](../site/qiskit/exercise.ts) draws each `Exercise` block: the
 statement, an editor with `starter.py` and the buttons **Ejecutar** (only runs
 the code), **Comprobar** (also runs the cases), **Pista** and **Empezar de
 nuevo**. It shows the output, the error, with its line marked in the editor if
@@ -244,7 +244,7 @@ response) has its own message.
 - A case that fails and names a hint with `@hint` shows that hint under its
   message. It does not count as a hint requested with the **Pista** button.
 - The editor is CodeMirror 6 with Python highlighting, with the colors of the
-  page theme ([design.md](design.md)). `exercise.js` loads it only in the
+  page theme ([design.md](design.md)). `exercise.ts` loads it only in the
   lessons that have an exercise.
 - **Pista** shows one hint of `hints` per press. There is no button to see the
   solution: `solution.py` never leaves `exercises/`.
@@ -277,8 +277,11 @@ On your machine, [`tools/serve.py`](../tools/serve.py) answers `POST /run`
 without Turnstile:
 
 ```sh
+mise run generate:scripts
 uv run python tools/serve.py [port]
 ```
+
+`mise run serve` does the same with port 8810.
 
 It serves `site/` on `127.0.0.1` (port 8810 by default) and rejects a `POST`
 that is not `application/json` or whose `Host` is not `localhost` or
@@ -287,23 +290,24 @@ machine.
 
 ### Rebuild the editor
 
-`site/qiskit/editor.js` is the result of bundling [`editor/`](../editor) with
-esbuild; it is versioned because `site/` is static. After changing
-`editor/src/`:
+`site/qiskit/editor.js` is the result of bundling
+[`editor/src/index.ts`](../editor/src/index.ts) with `bun build`. Git ignores
+it: `mise run install`, `mise run serve` and `mise run deploy` generate it.
+After changing `editor/src/`:
 
 ```sh
-mise run generate:editor
+mise run generate:scripts
 ```
 
-`mise run build:editor` fails if `site/qiskit/editor.js` does not match the
-bundle that `editor/src/` would produce.
+The same command bundles the page scripts. `mise run typecheck:ts` checks the
+types of the editor.
 
 ### Update KaTeX and the fonts
 
 `site/vendor/` holds KaTeX and the Newsreader and JetBrains Mono fonts, copied
 from the npm packages `katex` and `@fontsource-variable/*` of
 `editor/package.json`. Git ignores it: `mise run install` generates it with
-`editor/vendor.js`. To change a version:
+`editor/vendor.ts`. To change a version:
 
 ```sh
 bun add --cwd editor --exact katex@<version>

@@ -21,7 +21,8 @@ the repository or in a file you push to git.
 From the repository root, install the dependencies. `mise run install` installs
 those of the editor and of the Worker, which brings the `cf` CLI. During the
 deploy, `mise run deploy` copies KaTeX and the fonts from the editor to
-`site/vendor/`. The next steps run in `runner/worker`.
+`site/vendor/` and bundles the scripts of `site/` and `editor/src/` into
+JavaScript (`mise run generate:scripts`). The next steps run in `runner/worker`.
 
 ```sh
 mise run install

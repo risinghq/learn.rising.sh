@@ -20,14 +20,21 @@ mise run install
 ```
 
 It installs the Python and JavaScript dependencies from their lock files, copies
-KaTeX and the fonts to `site/vendor/`, and downloads Playwright's Chromium and
-the original Qiskit guides.
+KaTeX and the fonts to `site/vendor/`, bundles the scripts (see
+[View the course](#view-the-course)) and downloads Playwright's Chromium and the
+original Qiskit guides.
 
 ## View the course
 
 ```sh
-uv run python tools/serve.py
+mise run serve
 ```
+
+The browser scripts are written in TypeScript (`site/theme.ts`,
+`site/qiskit/*.ts` and `editor/src/`). `mise run generate:scripts` bundles them
+with `bun build` into `site/theme.js` and
+`site/qiskit/{account,notebooks,engine,editor}.js`, which the pages load and Git
+ignores; `mise run serve` runs it before serving.
 
 Open <http://localhost:8810/>: it is the catalog. The Qiskit course is at
 <http://localhost:8810/qiskit/>, and a lesson opens at
