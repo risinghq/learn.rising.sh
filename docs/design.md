@@ -1,150 +1,150 @@
-# Diseño
+# Design
 
-El catálogo (`site/index.html`), la portada del curso de Qiskit
-(`site/qiskit/index.html`), la página de privacidad y el reproductor
-(`site/qiskit/lesson.html`) comparten un solo tema. La marca del catálogo es
-«Duo» y la del curso, «Qubit a qubit». Este documento dice qué tokens existen,
-cómo se usan y qué medidas fijan la lectura.
+The catalog (`site/index.html`), the Qiskit course home page
+(`site/qiskit/index.html`), the privacy page and the player
+(`site/qiskit/lesson.html`) share one theme. The catalog brand is "Duo" and the
+course brand is "Qubit a qubit". This document lists the tokens, how they are
+used and the measures that fix legibility.
 
-La dirección es la de un programa de estudios impreso: una columna de lectura,
-un serif con matiz de libro, filetes finos en lugar de tarjetas y un solo acento
-violeta. La tinta y la superficie salen del mismo matiz que el acento.
+The direction is that of a printed syllabus: one reading column, a bookish
+serif, thin rules instead of cards and a single violet accent. The ink and the
+surface come from the same hue as the accent.
 
-## Archivos
+## Files
 
-| Archivo                 | Contenido                                                     |
-| ----------------------- | ------------------------------------------------------------- |
-| `site/theme.css`        | Tokens, la barra superior, los botones y `<progress>`.        |
-| `site/theme.js`         | Fija el modo antes de pintar y construye el botón de tema.    |
-| `site/catalog.css`      | Estilos del catálogo.                                         |
-| `site/qiskit/index.css` | Estilos de la portada del curso y de la página de privacidad. |
-| `site/qiskit/app.css`   | Estilos del reproductor.                                      |
-| `tests/theme_test.py`   | Prueba de navegador: contraste, páginas, modo guardado.       |
+| File                    | Contents                                                |
+| ----------------------- | ------------------------------------------------------- |
+| `site/theme.css`        | Tokens, the top bar, the buttons and `<progress>`.      |
+| `site/theme.js`         | Sets the mode before paint and builds the theme button. |
+| `site/catalog.css`      | Catalog styles.                                         |
+| `site/qiskit/index.css` | Styles of the course home page and the privacy page.    |
+| `site/qiskit/app.css`   | Player styles.                                          |
+| `tests/theme_test.py`   | Browser test: contrast, pages, saved mode.              |
 
-Cada página carga `theme.css` antes de su propia hoja y `theme.js` en `<head>`.
-Las del curso los enlazan como `../theme.css` y `../theme.js`. Todas tienen un
-enlace para saltar al contenido y un único `<main id="main">`.
+Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`. The
+course pages link them as `../theme.css` and `../theme.js`. Every page has a
+link to skip to the content and a single `<main id="main">`.
 
-## Modo
+## Mode
 
-El lector elige claro u oscuro y la elección se guarda en `localStorage`:
+The reader picks light or dark and the choice is saved in `localStorage`:
 
-| Clave          | Valores         | Sin guardar                 |
-| -------------- | --------------- | --------------------------- |
-| `qiskit:theme` | `light`, `dark` | La preferencia del sistema. |
+| Key            | Values          | Not saved              |
+| -------------- | --------------- | ---------------------- |
+| `qiskit:theme` | `light`, `dark` | The system preference. |
 
-Con un valor guardado, `theme.js` lo copia a `data-theme` de `<html>` antes de
-que el navegador pinte. Sin él, `<html>` no lleva `data-theme` y
-`color-scheme: light dark` hace que cada `light-dark()` siga al sistema. Todo
-elemento `[data-theme-ctl]` recibe un botón que ofrece el otro modo. Su texto
-sale del atributo `lang` de la página: inglés en el catálogo y español en el
-curso. Al cambiar de modo, `theme.js` lanza el evento `themechange` en `window`;
-`engine.js` lo usa para volver a dibujar los lienzos.
+With a saved value, `theme.js` copies it to `data-theme` on `<html>` before the
+browser paints. Without it, `<html>` has no `data-theme` and
+`color-scheme: light dark` makes every `light-dark()` follow the system. Every
+`[data-theme-ctl]` element gets a button that offers the other mode. Its text
+comes from the page's `lang` attribute: English in the catalog and Spanish in
+the course. When the mode changes, `theme.js` fires the `themechange` event on
+`window`; `engine.js` uses it to redraw the canvases.
 
 ## Color
 
-`theme.css` define el color en OKLCH con un solo matiz, `--hue` (290). Dos
-escalas de doce pasos salen de él: los neutros `--n1` a `--n12` y el acento
-`--a1` a `--a12`. `--k` ajusta la croma del acento a lo que cabe en sRGB para
-ese matiz. Cada paso guarda su valor claro y su valor oscuro con `light-dark()`.
-Cambiar `--hue` cambia el tema entero.
+`theme.css` defines color in OKLCH with a single hue, `--hue` (290). Two
+twelve-step scales come from it: the neutrals `--n1` to `--n12` and the accent
+`--a1` to `--a12`. `--k` fits the accent chroma to what sRGB holds for that hue.
+Each step stores its light value and its dark value with `light-dark()`.
+Changing `--hue` changes the whole theme.
 
-Las hojas de componentes leen los roles, no los pasos:
+The component sheets read roles, not steps:
 
-| Token                                     | Uso                                                                 |
-| ----------------------------------------- | ------------------------------------------------------------------- |
-| `--bg`                                    | Fondo de la página.                                                 |
-| `--bg2`                                   | Código en línea, botones y casillas. `--code-bg` vale lo mismo.     |
-| `--card`                                  | Paneles y tarjetas. `--fig-bg` y `--node` valen lo mismo.           |
-| `--stage`                                 | Escenario del reproductor. Es también el texto sobre un color dado. |
-| `--line`                                  | Filetes y separadores.                                              |
-| `--edge`                                  | Borde de un control. Alcanza 3:1 sobre las superficies.             |
-| `--ink`                                   | Texto principal. `--fg` vale lo mismo.                              |
-| `--muted`                                 | Texto secundario.                                                   |
-| `--acc`, `--acc-hover`, `--acc-ink`       | Relleno del botón principal, su estado al pasar y el texto encima.  |
-| `--acc-text`                              | El acento cuando es texto: enlaces y estados.                       |
-| `--bad`                                   | Error. `--red` vale lo mismo.                                       |
-| `--focus`                                 | Anillo de foco.                                                     |
-| `--blue`, `--teal`, `--violet`, `--green` | Colores con nombre del reproductor.                                 |
-| `--gold`                                  | Énfasis y etiquetas de pregunta.                                    |
-| `--font`, `--mono`                        | Newsreader para el texto y los títulos; JetBrains Mono para código. |
+| Token                                     | Use                                                             |
+| ----------------------------------------- | --------------------------------------------------------------- |
+| `--bg`                                    | Page background.                                                |
+| `--bg2`                                   | Inline code, buttons and boxes. `--code-bg` has the same value. |
+| `--card`                                  | Panels and cards. `--fig-bg` and `--node` have the same value.  |
+| `--stage`                                 | Player stage. It is also the text on a given color.             |
+| `--line`                                  | Rules and separators.                                           |
+| `--edge`                                  | Border of a control. It reaches 3:1 on the surfaces.            |
+| `--ink`                                   | Main text. `--fg` has the same value.                           |
+| `--muted`                                 | Secondary text.                                                 |
+| `--acc`, `--acc-hover`, `--acc-ink`       | Fill of the main button, its hover state and the text on it.    |
+| `--acc-text`                              | The accent when it is text: links and states.                   |
+| `--bad`                                   | Error. `--red` has the same value.                              |
+| `--focus`                                 | Focus ring.                                                     |
+| `--blue`, `--teal`, `--violet`, `--green` | Named colors of the player.                                     |
+| `--gold`                                  | Emphasis and question labels.                                   |
+| `--font`, `--mono`                        | Newsreader for text and titles; JetBrains Mono for code.        |
 
-### Colores con nombre
+### Named colors
 
-El reproductor llama a los colores de las lecciones por su nombre: `fg`,
-`muted`, `blue`, `gold`, `teal`, `red`, `violet`, `green`, `grid` y `axis`.
-`engine.js` los convierte en `var(--nombre)` y en las macros de KaTeX `\fg{…}`,
-`\blue{…}` y las demás, que aplican la clase `c-<nombre>` de `app.css`:
+The player calls the lesson colors by name: `fg`, `muted`, `blue`, `gold`,
+`teal`, `red`, `violet`, `green`, `grid` and `axis`. `engine.js` turns them into
+`var(--name)` and into the KaTeX macros `\fg{…}`, `\blue{…}` and the rest, which
+apply the `c-<name>` class of `app.css`:
 
-| Nombre                                    | Token de origen                   |
-| ----------------------------------------- | --------------------------------- |
-| `fg`                                      | `--ink`                           |
-| `muted`                                   | `--muted`                         |
-| `red`                                     | `--bad`                           |
-| `gold`, `blue`, `teal`, `violet`, `green` | El token del mismo nombre.        |
-| `grid`                                    | `--blue` mezclado con `--stage`.  |
-| `axis`                                    | `--muted` mezclado con `--stage`. |
+| Name                                      | Source token                    |
+| ----------------------------------------- | ------------------------------- |
+| `fg`                                      | `--ink`                         |
+| `muted`                                   | `--muted`                       |
+| `red`                                     | `--bad`                         |
+| `gold`, `blue`, `teal`, `violet`, `green` | The token of the same name.     |
+| `grid`                                    | `--blue` mixed with `--stage`.  |
+| `axis`                                    | `--muted` mixed with `--stage`. |
 
-Otros tokens, como `--wire`, `--emph-bg`, `--cursor` y `--barrier`, se derivan
-de los anteriores con `color-mix()` en `theme.css`. No tienen valor propio.
+Other tokens, such as `--wire`, `--emph-bg`, `--cursor` and `--barrier`, derive
+from the ones above with `color-mix()` in `theme.css`. They have no value of
+their own.
 
-## Tipografía y espacio
+## Type and space
 
-- Una familia de texto, Newsreader, y una de código, JetBrains Mono. Las páginas
-  las cargan de `site/vendor/fonts.css`, en variable y solo con los rangos
-  `latin` y `latin-ext`. Las fórmulas usan las fuentes de KaTeX.
-- Ocho tamaños, de `--t-xs` (12 px) a `--t-4xl` (48 px), en `rem`, para que el
-  tamaño de texto del navegador siga valiendo. Dos pesos: 400 y 600.
-- Nueve pasos de espacio, `--s1` (4 px) a `--s24` (96 px), y tres radios: `--r1`
-  4 px, `--r2` 8 px y `--r3` 16 px.
-- El escenario del reproductor mide 1280×720 y se escala por `transform`, así
-  que sus tamaños son píxeles de diseño y no `rem`.
+- One text family, Newsreader, and one code family, JetBrains Mono. The pages
+  load them from `site/vendor/fonts.css`, as variable fonts with only the
+  `latin` and `latin-ext` ranges. Formulas use the KaTeX fonts.
+- Eight sizes, from `--t-xs` (12 px) to `--t-4xl` (48 px), in `rem`, so the
+  browser's text size setting still applies. Two weights: 400 and 600.
+- Nine steps of space, `--s1` (4 px) to `--s24` (96 px), and three radii: `--r1`
+  4 px, `--r2` 8 px and `--r3` 16 px.
+- The player stage is 1280×720 and scales by `transform`, so its sizes are
+  design pixels and not `rem`.
 
-## Lectura
+## Reading
 
-- La portada y la página de privacidad son una columna de `46rem`, con filetes
-  entre secciones. No hay tarjetas ni insignias.
-- La lección es el escenario, el subtítulo y los controles. El subtítulo mide
-  `42rem` y cuatro líneas de alto fijo, para que el texto no mueva el escenario.
-- Un ejercicio o una misión ocupa el escenario con desplazamiento vertical; el
-  editor sigue a 16 px o más.
-- El código en línea va a `0.875em` sobre `--bg2`; el bloque de código, sobre
-  `--code-bg`.
+- The home page and the privacy page are one `46rem` column, with rules between
+  sections. There are no cards or badges.
+- The lesson is the stage, the subtitle and the controls. The subtitle is
+  `42rem` wide and four lines of fixed height, so the text does not move the
+  stage.
+- An exercise or a mission fills the stage with vertical scrolling; the editor
+  stays at 16 px or more.
+- Inline code is `0.875em` on `--bg2`; the code block is on `--code-bg`.
 
-## Progreso
+## Progress
 
-- En la portada, cada parte tiene un `<progress>` con sus lecciones completadas
-  y el curso tiene uno general. El estilo está en `theme.css`.
-- En el reproductor, `#steps` es un `<input type="range">` con una etiqueta,
-  «Paso N de M» y «, con pregunta» si el paso la tiene. Arrastrarlo salta a ese
-  paso. Su relleno sigue a `--p`, que fija `engine.js`.
+- On the home page, each part has a `<progress>` with its completed lessons and
+  the course has an overall one. The style is in `theme.css`.
+- In the player, `#steps` is an `<input type="range">` with a label, "Paso N de
+  M" and ", con pregunta" if the step has a question. Dragging it jumps to that
+  step. Its fill follows `--p`, which `engine.js` sets.
 
-## Reglas de uso
+## Rules of use
 
-- Un color de una hoja o de un script es un token: `var(--acc)`, nunca un valor
-  hexadecimal. Un fondo translúcido se escribe con `color-mix()` sobre
+- A color in a sheet or a script is a token: `var(--acc)`, never a hexadecimal
+  value. A translucent background is written with `color-mix()` over
   `transparent`.
-- Un color nuevo se añade a `theme.css` con su valor claro y su valor oscuro y
-  pasa `tests/theme_test.py` antes de usarse.
-- En atributos SVG de presentación `var(--x)` no vale: `engine.js` lo pone como
-  estilo. Un lienzo lee el color con `cssv('nombre')` cada vez que se dibuja.
-- El texto va sobre `--bg`, `--bg2`, `--card` o `--stage` y alcanza 4,5:1 en las
-  cuatro. Los colores de acento que se usan como texto también.
-- Los ejes, los cables y el borde de un control llevan significado y alcanzan
-  3:1 sobre las cuatro superficies. Las rejillas y los filetes son decoración y
-  no se miden.
-- Cada botón tiene un estado `:active`, y solo uno por pantalla va relleno con
+- A new color is added to `theme.css` with its light value and its dark value
+  and passes `tests/theme_test.py` before it is used.
+- In SVG presentation attributes `var(--x)` does not work: `engine.js` sets it
+  as a style. A canvas reads the color with `cssv('name')` each time it draws.
+- Text sits on `--bg`, `--bg2`, `--card` or `--stage` and reaches 4.5:1 on all
+  four. The accent colors used as text do too.
+- Axes, wires and the border of a control carry meaning and reach 3:1 on the
+  four surfaces. Grids and rules are decoration and are not measured.
+- Every button has an `:active` state, and only one per screen is filled with
   `--acc`.
-- La marca es `<a class="brand">Qubit a qubit</a>` en el curso y
-  `<a class="brand">Duo</a>` en el catálogo, con el estilo de `theme.css`.
+- The brand is `<a class="brand">Qubit a qubit</a>` in the course and
+  `<a class="brand">Duo</a>` in the catalog, styled by `theme.css`.
 
-## Contraste
+## Contrast
 
-Criterio: WCAG 2.x AA. El texto necesita 4,5:1; los ejes, los cables y el borde
-de un control, 3:1. `tests/theme_test.py` lee cada token en el navegador, en los
-dos modos, y falla si alguno queda por debajo. Cada celda es la peor razón entre
-las cuatro superficies (`--bg`, `--bg2`, `--card`, `--stage`), y `acc-ink/acc`
-es el texto del botón sobre su relleno.
+Criterion: WCAG 2.x AA. Text needs 4.5:1; axes, wires and the border of a
+control, 3:1. `tests/theme_test.py` reads each token in the browser, in both
+modes, and fails if any falls below. Each cell is the worst ratio among the four
+surfaces (`--bg`, `--bg2`, `--card`, `--stage`), and `acc-ink/acc` is the button
+text on its fill.
 
 | token         |  dark | light |
 | ------------- | ----: | ----: |
@@ -162,14 +162,14 @@ es el texto del botón sobre su relleno.
 | `wire`        |  4.60 |  3.76 |
 | `edge`        |  3.89 |  3.46 |
 
-Para repetir la medición:
+To repeat the measurement:
 
 ```sh
 mise run install
 uv run --group tools python tests/theme_test.py --table
 ```
 
-La misma prueba carga el catálogo, la portada del curso y tres lecciones, cada
-una en su primer y último paso, en los dos modos y a 1366x768 y 390x844. Exige
-que la consola no registre errores y que ningún `#scene > .blk` quede fuera de
-`#stage`. `--shots CARPETA` guarda una captura de cada carga.
+The same test loads the catalog, the course home page and three lessons, each at
+its first and last step, in both modes and at 1366x768 and 390x844. It requires
+that the console logs no errors and that no `#scene > .blk` falls outside
+`#stage`. `--shots FOLDER` saves a screenshot of each load.

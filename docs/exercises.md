@@ -1,24 +1,28 @@
-# Ejercicios de código
+# Code exercises
 
-Un ejercicio es código que el alumno escribe y un corrector comprueba. El
-corrector, `qgcheck`, corre en el equipo y no necesita red.
+An exercise is code that the learner writes and a grader checks. The grader,
+`qgcheck`, runs on the machine and needs no network.
 
-## Un ejercicio en disco
+Text the learner sees (statements, hints, case names, failure messages and
+button labels) is in Spanish, because the course is. The examples below keep it
+that way.
 
-Cada ejercicio es una carpeta `exercises/<lección>/<ejercicio>/`. El nombre de
-la carpeta de la lección es el `id` de la lección.
+## An exercise on disk
 
-| Archivo       | Contenido                                         | Llega a `site/`                        |
-| ------------- | ------------------------------------------------- | -------------------------------------- |
-| `starter.py`  | El código que el alumno ve al abrir el ejercicio. | Sí                                     |
-| `solution.py` | La referencia. Debe pasar todos los casos.        | No                                     |
-| `check.py`    | Los casos. Cada función `test_*` es un caso.      | Solo los nombres de los casos visibles |
+Each exercise is a folder `exercises/<lesson>/<exercise>/`. The name of the
+lesson folder is the `id` of the lesson.
 
-## Declararlo en la lección
+| File          | Contents                                             | Reaches `site/`                 |
+| ------------- | ---------------------------------------------------- | ------------------------------- |
+| `starter.py`  | The code the learner sees when opening the exercise. | Yes                             |
+| `solution.py` | The reference. It must pass every case.              | No                              |
+| `check.py`    | The cases. Each `test_*` function is a case.         | Only the names of visible cases |
 
-`Exercise()` de [`lib.py`](../lessons_src/lib.py) crea el bloque. Va en la
-escena de un paso, junto a la tarjeta `Mission`, y se revela con una acción
-`show` como cualquier bloque oculto:
+## Declare it in the lesson
+
+`Exercise()` from [`lib.py`](../lessons_src/lib.py) creates the block. It goes
+in the scene of a step, next to the `Mission` card, and is revealed with a
+`show` action like any hidden block:
 
 ```python
 Exercise(
@@ -32,20 +36,20 @@ Exercise(
 )
 ```
 
-| Campo   | Significado                                                                              |
-| ------- | ---------------------------------------------------------------------------------------- |
-| `level` | 1 reproducir, 2 modificar, 3 crear.                                                      |
-| `needs` | `"qiskit"` si el código corre solo con Qiskit, `"aer"` si también necesita `qiskit-aer`. |
-| `hints` | Pistas en orden, de la más vaga a la más concreta.                                       |
+| Field   | Meaning                                                                               |
+| ------- | ------------------------------------------------------------------------------------- |
+| `level` | 1 reproduce, 2 modify, 3 create.                                                      |
+| `needs` | `"qiskit"` if the code runs with Qiskit alone, `"aer"` if it also needs `qiskit-aer`. |
+| `hints` | Hints in order, from the vaguest to the most concrete.                                |
 
-[`build.py`](../lessons_src/build.py) completa el bloque con `starter` y con
-`cases`, la lista de nombres de los casos visibles, y lo escribe en
-`lesson.json`. No publica `solution.py` ni los casos ocultos. Falla si el
-ejercicio no está en la carpeta de su lección, si falta un archivo, si ningún
-caso es visible, si dos bloques usan el mismo ejercicio o si una carpeta de
-`exercises/` no aparece en ninguna lección.
+[`build.py`](../lessons_src/build.py) completes the block with `starter` and
+with `cases`, the list of names of the visible cases, and writes it to
+`lesson.json`. It does not publish `solution.py` or the hidden cases. It fails
+if the exercise is not in the folder of its lesson, if a file is missing, if no
+case is visible, if two blocks use the same exercise or if a folder of
+`exercises/` appears in no lesson.
 
-## Escribir `check.py`
+## Write `check.py`
 
 ```python
 from qgcheck import counts, learner, visible
@@ -58,31 +62,31 @@ def test_small():
         assert got == ["0" * n, "1" * n], f"Con n = {n} salen {got}."
 
 
-def test_larger():  # sin @visible: el caso es oculto
+def test_larger():  # no @visible: the case is hidden
     for n in (5, 7):
         got = sorted(counts(learner.ghz(n)))
         assert got == ["0" * n, "1" * n], f"Con n = {n} salen {got}."
 ```
 
-- El mensaje del `assert` es el texto de error que ve el alumno. Un caso oculto
-  se muestra como `caso oculto 1`, `caso oculto 2`… con su mensaje. Qué debe
-  decir lo fijan las [reglas de contenido](#reglas-de-contenido).
-- `@hint(n)` enlaza un caso, visible u oculto, con la pista `n` de `hints` (la
-  primera es la 1). Si el caso falla, el alumno ve esa pista junto a él.
-  `tools/exercises.py` rechaza un `n` mayor que el número de pistas del
-  ejercicio.
-- `learner.<nombre>` devuelve lo que el código del alumno definió. Si no lo
-  definió, el caso falla con «Falta definir `<nombre>` en tu código.». Se lee
-  dentro del caso, no al importar `check.py`: `build.py` importa el archivo para
-  leer los casos y `learner` aún no tiene el código de ningún alumno.
-- El código del alumno corre en otro proceso y a los casos solo llegan datos:
-  números, textos, listas, tuplas, diccionarios con claves de texto, `bytes`,
-  arreglos de NumPy, `Statevector`, `Operator`, `SparsePauliOp` y
-  `QuantumCircuit`. Un valor de otro tipo falla con «`<nombre>` contiene un
-  valor de tipo `<Tipo>` que no se puede comprobar.». Un caso que necesita pasar
-  una clase, un `PassManager` o un `Target`, o leer unos ejes, lo hace en una
-  función de `check.py` con `@inside`: corre en el proceso del alumno, lee
-  `learner` de ahí y recibe y devuelve datos.
+- The `assert` message is the error text the learner sees. A hidden case shows
+  as `caso oculto 1`, `caso oculto 2`… with its message. What it must say is set
+  by the [content rules](#content-rules).
+- `@hint(n)` links a case, visible or hidden, to hint `n` of `hints` (the first
+  is 1). If the case fails, the learner sees that hint next to it.
+  `tools/exercises.py` rejects an `n` greater than the number of hints of the
+  exercise.
+- `learner.<name>` returns what the learner's code defined. If it did not define
+  it, the case fails with "Falta definir `<name>` en tu código.". It is read
+  inside the case, not when importing `check.py`: `build.py` imports the file to
+  read the cases and `learner` does not yet have any learner's code.
+- The learner's code runs in another process and only data reaches the cases:
+  numbers, strings, lists, tuples, dictionaries with string keys, `bytes`, NumPy
+  arrays, `Statevector`, `Operator`, `SparsePauliOp` and `QuantumCircuit`. A
+  value of another type fails with "`<name>` contiene un valor de tipo `<Type>`
+  que no se puede comprobar.". A case that needs to pass a class, a
+  `PassManager` or a `Target`, or to read some axes, does it in a function of
+  `check.py` with `@inside`: it runs in the learner's process, reads `learner`
+  from there and receives and returns data.
 
   ```python
   from qgcheck import inside, learner, visible
@@ -98,83 +102,82 @@ def test_larger():  # sin @visible: el caso es oculto
       assert swaps_left(circuit_with_swaps()) == 0, "Todavía quedan swaps."
   ```
 
-  El alumno puede alterar lo que corre en su proceso, así que una función
-  `@inside` solo obtiene datos: la comparación con lo esperado y el `assert` van
-  fuera de ella.
+  The learner can alter what runs in their process, so an `@inside` function
+  only obtains data: the comparison with the expected value and the `assert` go
+  outside it.
 
-- Cualquier excepción distinta de `AssertionError` en un caso falla con «Tu
-  código lanzó `<Tipo>`: `<mensaje>`». Si el caso había llamado a una función
-  del alumno, añade «Pasó al usar `ghz(7)`.» con esa última llamada, para que un
-  caso oculto diga con qué entrada falló aunque el `assert` no llegara a
-  escribirse. Los ayudantes de `qgcheck` fallan igual: `counts` sin mediciones
-  da «El circuito no mide ningún qubit… Pasó al usar `ghz(7)`.».
-- Compara estados, no texto de circuitos: `state(circuito).equiv(...)` quita las
-  mediciones finales. Para muestreos usa una semilla fija y una tolerancia de al
-  menos cuatro desviaciones típicas.
-- Un ejercicio de predicción deja `prediccion` sin valor (`None` o `""`) en el
-  código inicial. El caso visible compara la apuesta con lo que calcula el
-  circuito del alumno, no con una constante, y un caso oculto comprueba que el
-  circuito de la lección sigue igual, para que no se pueda acertar cambiando el
-  circuito.
-- Un ejercicio que dibuja devuelve la figura o los ejes, y el caso lee lo que
-  hay detrás (por ejemplo `axes.patches` y las etiquetas del eje), no píxeles.
-  El corredor corre con `MPLBACKEND=Agg` y su imagen incluye `matplotlib`.
+- Any exception other than `AssertionError` in a case fails with "Tu código
+  lanzó `<Type>`: `<message>`". If the case had called a function of the
+  learner, it adds "Pasó al usar `ghz(7)`." with that last call, so a hidden
+  case says which input it failed with even if the `assert` was never reached.
+  The `qgcheck` helpers fail the same way: `counts` with no measurements gives
+  "El circuito no mide ningún qubit… Pasó al usar `ghz(7)`.".
+- Compare states, not circuit text: `state(circuit).equiv(...)` removes the
+  final measurements. For sampling, use a fixed seed and a tolerance of at least
+  four standard deviations.
+- A prediction exercise leaves `prediccion` with no value (`None` or `""`) in
+  the starter code. The visible case compares the bet with what the learner's
+  circuit computes, not with a constant, and a hidden case checks that the
+  lesson's circuit is unchanged, so the learner cannot be right by changing the
+  circuit.
+- An exercise that draws returns the figure or the axes, and the case reads what
+  is behind it (for example `axes.patches` and the axis labels), not pixels. The
+  runner runs with `MPLBACKEND=Agg` and its image includes `matplotlib`.
 
-Los ayudantes de [`qgcheck/__init__.py`](../qgcheck/__init__.py) importan Qiskit
-solo cuando se llaman:
+The helpers in [`qgcheck/__init__.py`](../qgcheck/__init__.py) import Qiskit
+only when called:
 
-| Ayudante                        | Devuelve                                                                                                      |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `counts(circuito)`              | Conteos del primer registro clásico con `StatevectorSampler`.                                                 |
-| `aer_counts(circuito)`          | Lo mismo con el `SamplerV2` de Aer, para circuitos con control de flujo.                                      |
-| `gates(circuito)`               | `Counter` de nombres de operación, con las de dentro de `if_test` y `while_loop`.                             |
-| `state(circuito)`               | `Statevector` del circuito sin sus mediciones finales.                                                        |
-| `unsupported(circuito, target)` | Lista de las instrucciones que el `Target` no admite donde están, como `['cz en 0-2']`.                       |
-| `operator(circuito)`            | `Operator` sobre los qubits virtuales: aplica el layout de un circuito transpilado, aunque sea de 156 qubits. |
+| Helper                         | Returns                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `counts(circuit)`              | Counts of the first classical register with `StatevectorSampler`.                                     |
+| `aer_counts(circuit)`          | The same with Aer's `SamplerV2`, for circuits with control flow.                                      |
+| `gates(circuit)`               | `Counter` of operation names, including those inside `if_test` and `while_loop`.                      |
+| `state(circuit)`               | `Statevector` of the circuit without its final measurements.                                          |
+| `unsupported(circuit, target)` | List of the instructions the `Target` does not allow where they are, such as `['cz en 0-2']`.         |
+| `operator(circuit)`            | `Operator` over the virtual qubits: applies the layout of a transpiled circuit, even a 156-qubit one. |
 
-## Reglas de contenido
+## Content rules
 
-Estas reglas valen para cada ejercicio y para el paso de la lección que lo
-contiene.
+These rules hold for each exercise and for the lesson step that contains it.
 
-1. **Una pregunta no adelanta el paso siguiente.** El texto de una pregunta
-   (`choice`, `numeric`, `reveal`, `predict`), su `why` y su `after` no dicen
-   qué hace el ejercicio que viene después. Si lo dicen, el ejercicio ya está
-   resuelto cuando se abre.
-2. **Las pistas van en este orden: idea, lugar, forma.** Primero dicen qué idea
-   usar, luego en qué parte del código va y por último la forma de la línea, con
-   huecos. Ninguna contiene la línea resuelta: eso es `solution.py`.
-3. **Un mensaje de caso oculto nombra la entrada que falló y lo que devolvió el
-   código del alumno, y nunca el valor esperado.** Por ejemplo,
-   `Con n = 7 salen ['0000000', '0000011'].` El alumno reproduce el fallo con
-   esa entrada sin leer la respuesta. Un mensaje que enseña el valor esperado
-   deja el caso oculto sin efecto.
-4. **Un enunciado de nivel 3 nombra cada argumento y la trampa, o sigue un caso
-   resuelto.** El alumno que crea código no puede adivinar el orden de los
-   argumentos ni lo que el corrector mide. El enunciado dice qué recibe y qué
-   devuelve la función, y avisa del error que el caso oculto sí detecta, o
-   incluye un ejemplo resuelto con valores.
-5. **Un paso con `Exercise` no habla de cuaderno ni de «marca verde».** El
-   ejercicio se comprueba con el botón **Comprobar** de la propia página. Esas
-   palabras son de `Mission`, que remite a un cuaderno de marimo.
-6. **Una parte con hito de proyecto en el navegador termina en una lección
-   `pN-cierre`.** Tiene un repaso corto, con preguntas `choice` y `numeric` de
-   las lecciones de la parte, y un ejercicio de nivel 3 sacado del hito, con
-   `solution.py` con la misma lógica que la solución del hito. Las partes cuyo
-   hito necesita una cuenta o un QPU no tienen lección de cierre.
+1. **A question does not give away the next step.** The text of a question
+   (`choice`, `numeric`, `reveal`, `predict`), its `why` and its `after` do not
+   say what the exercise that comes next does. If they do, the exercise is
+   already solved when it opens.
+2. **Hints go in this order: idea, place, shape.** First they say which idea to
+   use, then in which part of the code it goes and last the shape of the line,
+   with blanks. None contains the solved line: that is `solution.py`.
+3. **A hidden case message names the input that failed and what the learner's
+   code returned, and never the expected value.** For example,
+   `Con n = 7 salen ['0000000', '0000011'].` The learner reproduces the failure
+   with that input without reading the answer. A message that shows the expected
+   value leaves the hidden case with no effect.
+4. **A level 3 statement names each argument and the trap, or follows a solved
+   case.** A learner who creates code cannot guess the order of the arguments or
+   what the grader measures. The statement says what the function receives and
+   returns, and warns of the error that the hidden case does detect, or includes
+   a worked example with values.
+5. **A step with `Exercise` does not mention a notebook or a "green mark".** The
+   exercise is checked with the **Comprobar** button of the page itself. Those
+   words belong to `Mission`, which points to a marimo notebook.
+6. **A part with a project milestone in the browser ends in a `pN-cierre`
+   lesson.** It has a short review, with `choice` and `numeric` questions from
+   the lessons of the part, and a level 3 exercise taken from the milestone,
+   with a `solution.py` with the same logic as the milestone solution. The parts
+   whose milestone needs an account or a QPU have no closing lesson.
 
-## Corregir código
+## Grade code
 
 ```python
 from qgcheck import grade
 
-grade("p1-quickstart/ghz", codigo, mode="check")
+grade("p1-quickstart/ghz", code, mode="check")
 ```
 
-[`qgcheck/runner.py`](../qgcheck/runner.py) escribe el código en un directorio
-temporal y lo ejecuta con [`qgcheck/job.py`](../qgcheck/job.py) en un proceso
-aparte, el mismo trabajo que lanza el corredor. `mode="run"` solo ejecuta el
-código del alumno; `mode="check"` además corre los casos. Devuelve:
+[`qgcheck/runner.py`](../qgcheck/runner.py) writes the code to a temporary
+directory and runs it with [`qgcheck/job.py`](../qgcheck/job.py) in a separate
+process, the same job the runner launches. `mode="run"` only runs the learner's
+code; `mode="check"` also runs the cases. It returns:
 
 ```json
 {
@@ -201,140 +204,143 @@ código del alumno; `mode="check"` además corre los casos. Devuelve:
 }
 ```
 
-`hint` es el número de la pista que nombra el caso con `@hint`, o `null`.
+`hint` is the number of the hint that the case names with `@hint`, or `null`.
 
-- `error` trae el error del código del alumno, con su línea cuando el error nace
-  en una línea, por ejemplo
-  `NameError: name 'y' is not defined (línea 2: print(y))`. Un tiempo agotado no
-  tiene línea. Con un error, `tests` queda vacío.
-- El código no puede pesar más de 20 000 bytes y se detiene a los 10 s. Esos 10
-  s cuentan desde que arranca el proceso, con las bibliotecas que importan el
-  código y los casos incluidas. Si imprime más de 64 KiB, se detiene.
-- El parámetro `block=("qiskit_aer",)` hace que esos módulos no se puedan
-  importar en el proceso del alumno.
-- `grade` no aísla al alumno del equipo: no limita memoria, procesos ni red. El
-  código del alumno corre en un proceso distinto del que corre los casos, pero
-  con el mismo usuario. Un servicio expuesto a internet debe correrlo en un
-  contenedor sin red y con límites: [runner.md](runner.md) lo hace.
+- `error` carries the error of the learner's code, with its line when the error
+  comes from a line, for example
+  `NameError: name 'y' is not defined (línea 2: print(y))`. A timeout has no
+  line. With an error, `tests` stays empty.
+- The code may not weigh more than 20 000 bytes and stops at 10 s. Those 10 s
+  count from when the process starts, with the libraries that the code and the
+  cases import included. If it prints more than 64 KiB, it stops.
+- The parameter `block=("qiskit_aer",)` makes those modules impossible to import
+  in the learner's process.
+- `grade` does not isolate the learner from the machine: it limits no memory,
+  processes or network. The learner's code runs in a process distinct from the
+  one that runs the cases, but with the same user. A service exposed to the
+  internet must run it in a container with no network and with limits:
+  [runner.md](runner.md) does this.
 
-## Editor en la lección
+## Editor in the lesson
 
-[`exercise.js`](../site/qiskit/exercise.js) dibuja cada bloque `Exercise`: el
-enunciado, un editor con `starter.py` y los botones **Ejecutar** (solo corre el
-código), **Comprobar** (además corre los casos), **Pista** y **Empezar de
-nuevo**. Muestra la salida, el error, con su línea marcada en el editor si la
-tiene, y un ✓ o ✗ por caso; los casos ocultos aparecen como `caso oculto N`.
-Mientras espera al corredor, los botones quedan desactivados; si tarda, lo dice,
-y a los 30 s abandona. Cada fallo (timeout, corredor lleno, sin red, respuesta
-inválida) tiene su mensaje.
+[`exercise.js`](../site/qiskit/exercise.js) draws each `Exercise` block: the
+statement, an editor with `starter.py` and the buttons **Ejecutar** (only runs
+the code), **Comprobar** (also runs the cases), **Pista** and **Empezar de
+nuevo**. It shows the output, the error, with its line marked in the editor if
+it has one, and a ✓ or ✗ per case; hidden cases appear as `caso oculto N`. While
+waiting for the runner, the buttons are disabled; if it takes long, it says so,
+and at 30 s it gives up. Each failure (timeout, runner full, no network, invalid
+response) has its own message.
 
-- Tras **Comprobar**, el estado cuenta los casos visibles y los ocultos por
-  separado: `Pasan 2 de 2 visibles · 0 de 2 ocultos.` Un ejercicio sin casos
-  ocultos solo cuenta los visibles.
-- Si el código tiene un error, `tests` viene vacío. El panel muestra el error
-  (con su línea, si la tiene) y «No se pudo probar tu código», y no lista ningún
-  caso.
-- Un caso que falla y nombra una pista con `@hint` muestra esa pista bajo su
-  mensaje. No cuenta como pista pedida con el botón **Pista**.
-- El editor es CodeMirror 6 con resaltado de Python, con los colores del tema de
-  la página ([design.md](design.md)). Lo carga `exercise.js` solo en las
-  lecciones que tienen ejercicio.
-- **Pista** muestra una pista de `hints` por pulsación. No hay botón para ver la
-  solución: `solution.py` no sale de `exercises/`.
-- Ctrl+Intro (⌘+Intro) ejecuta, Ctrl+Mayús+Intro comprueba, Tab sangra y Esc
-  seguido de Tab sale del editor. Las teclas de la lección (espacio, flechas,
-  `c`) no actúan mientras se escribe.
-- Un paso con ejercicio no se escala como el resto del escenario: ocupa la
-  pantalla y se desplaza, para que el editor se pueda usar en el móvil. No pasa
-  solo al paso siguiente al terminar la narración; el botón **Continuar** lo
-  hace.
-- El código, el número de pistas y de comprobaciones y si quedó resuelto se
-  guardan en `localStorage`, bajo `qiskit:exercise:<ejercicio>`.
+- After **Comprobar**, the status counts the visible and the hidden cases
+  separately: `Pasan 2 de 2 visibles · 0 de 2 ocultos.` An exercise with no
+  hidden cases counts only the visible ones.
+- If the code has an error, `tests` comes back empty. The panel shows the error
+  (with its line, if it has one) and "No se pudo probar tu código", and lists no
+  case.
+- A case that fails and names a hint with `@hint` shows that hint under its
+  message. It does not count as a hint requested with the **Pista** button.
+- The editor is CodeMirror 6 with Python highlighting, with the colors of the
+  page theme ([design.md](design.md)). `exercise.js` loads it only in the
+  lessons that have an exercise.
+- **Pista** shows one hint of `hints` per press. There is no button to see the
+  solution: `solution.py` never leaves `exercises/`.
+- Ctrl+Enter (⌘+Enter) runs, Ctrl+Shift+Enter checks, Tab indents and Esc
+  followed by Tab leaves the editor. The lesson keys (space, arrows, `c`) do not
+  act while typing.
+- A step with an exercise is not scaled like the rest of the stage: it fills the
+  screen and scrolls, so the editor can be used on a phone. It does not move to
+  the next step by itself when the narration ends; the **Continuar** button does
+  it.
+- The code, the number of hints and checks and whether it was solved are saved
+  in `localStorage`, under `qiskit:exercise:<exercise>`.
 
-### Dónde corre el código
+### Where the code runs
 
-El editor envía `POST /run` con `{"exercise", "code", "mode"}` y recibe el
-resultado de `grade()`. La ruta es siempre `/run`, la del mismo origen que la
-página. El corredor de [runner.md](runner.md) no responde las peticiones
-`OPTIONS` ni envía cabeceras CORS, y su cookie de sesión es `SameSite=Strict`:
-la página y el corredor deben tener el mismo origen. En producción los sirve un
-solo Worker; ver [runner.md](runner.md#cloudflare-containers).
+The editor sends `POST /run` with `{"exercise", "code", "mode"}` and receives
+the result of `grade()`. The route is always `/run`, on the same origin as the
+page. The runner of [runner.md](runner.md) does not answer `OPTIONS` requests or
+send CORS headers, and its session cookie is `SameSite=Strict`: the page and the
+runner must have the same origin. In production a single Worker serves them; see
+[runner.md](runner.md#cloudflare-containers).
 
-Si el corredor responde 403 con `reason` `turnstile_missing`, la página carga el
-widget de Cloudflare Turnstile con la clave del sitio que trae esa respuesta, y
-repite la petición con el token en la cabecera `X-Turnstile-Token`. El widget
-solo se ve si Cloudflare necesita que el lector haga algo. Con la sesión abierta
-no se vuelve a pedir. Si el widget no carga, el panel lo dice y se puede
-reintentar.
+If the runner answers 403 with `reason` `turnstile_missing`, the page loads the
+Cloudflare Turnstile widget with the site key that response carries, and repeats
+the request with the token in the `X-Turnstile-Token` header. The widget shows
+only if Cloudflare needs the reader to do something. With the session open it is
+not requested again. If the widget does not load, the panel says so and the
+reader can retry.
 
-En tu equipo, [`tools/serve.py`](../tools/serve.py) responde `POST /run` sin
-Turnstile:
+On your machine, [`tools/serve.py`](../tools/serve.py) answers `POST /run`
+without Turnstile:
 
 ```sh
-uv run python tools/serve.py [puerto]
+uv run python tools/serve.py [port]
 ```
 
-Sirve `site/` en `127.0.0.1` (puerto 8810 por defecto) y rechaza un `POST` que
-no sea `application/json` o cuyo `Host` no sea `localhost` o `127.0.0.1`, para
-que otra web abierta en tu navegador no ejecute código en tu equipo.
+It serves `site/` on `127.0.0.1` (port 8810 by default) and rejects a `POST`
+that is not `application/json` or whose `Host` is not `localhost` or
+`127.0.0.1`, so another website open in your browser cannot run code on your
+machine.
 
-### Reconstruir el editor
+### Rebuild the editor
 
-`site/qiskit/editor.js` es el resultado de empaquetar [`editor/`](../editor) con
-esbuild; se versiona porque `site/` es estático. Tras cambiar `editor/src/`:
+`site/qiskit/editor.js` is the result of bundling [`editor/`](../editor) with
+esbuild; it is versioned because `site/` is static. After changing
+`editor/src/`:
 
 ```sh
 mise run generate:editor
 ```
 
-`mise run build:editor` falla si `site/qiskit/editor.js` no coincide con el
-paquete que saldría de `editor/src/`.
+`mise run build:editor` fails if `site/qiskit/editor.js` does not match the
+bundle that `editor/src/` would produce.
 
-### Actualizar KaTeX y las tipografías
+### Update KaTeX and the fonts
 
-`site/vendor/` guarda KaTeX y las fuentes Newsreader y JetBrains Mono, copiados
-de los paquetes npm `katex` y `@fontsource-variable/*` de `editor/package.json`.
-Git lo ignora: `mise run install` lo genera con `editor/vendor.js`. Para cambiar
-una versión:
+`site/vendor/` holds KaTeX and the Newsreader and JetBrains Mono fonts, copied
+from the npm packages `katex` and `@fontsource-variable/*` of
+`editor/package.json`. Git ignores it: `mise run install` generates it with
+`editor/vendor.js`. To change a version:
 
 ```sh
-bun add --cwd editor --exact katex@<versión>
+bun add --cwd editor --exact katex@<version>
 mise run generate:vendor
 ```
 
-## Comprobar los ejercicios
+## Check the exercises
 
 ```sh
 uv run python lessons_src/build.py
-uv run python tools/exercises.py [lección/ejercicio ...]
+uv run python tools/exercises.py [lesson/exercise ...]
 uv run pytest tests/exercises_test.py
 uv run --group tools python tests/exercise_ui_test.py
 ```
 
-[`tools/exercises.py`](../tools/exercises.py) lee de
-`site/qiskit/lessons/*/lesson.json` qué ejercicios existen, su `needs` y sus
-`hints`, por eso va después de `build.py`. Por cada ejercicio comprueba que:
+[`tools/exercises.py`](../tools/exercises.py) reads from
+`site/qiskit/lessons/*/lesson.json` which exercises exist, their `needs` and
+their `hints`, so it goes after `build.py`. For each exercise it checks that:
 
-1. `solution.py` pasa todos los casos.
-2. `starter.py` se ejecuta sin error y falla algún caso.
-3. `needs` es verdadero: con `"qiskit"`, `solution.py` pasa sin `qiskit_aer`;
-   con `"aer"`, no pasa sin él.
-4. Cada `@hint(n)` nombra una pista que el ejercicio tiene en `hints`.
+1. `solution.py` passes every case.
+2. `starter.py` runs without error and fails some case.
+3. `needs` is true: with `"qiskit"`, `solution.py` passes without `qiskit_aer`;
+   with `"aer"`, it does not pass without it.
+4. Each `@hint(n)` names a hint that the exercise has in `hints`.
 
-[`tests/exercises_test.py`](../tests/exercises_test.py) corre cada ejercicio con
-su solución y con una solución equivocada que debe fallar con un mensaje útil, y
-con los programas equivocados de `tests/mutants/<ejercicio>/` (los que hacen
-fallar cada caso oculto; son programas completos, sin depender del texto de
-`solution.py`), y comprueba que todo caso oculto que falla con el código inicial
-o con una solución equivocada nombra su entrada. También prueba el corrector, lo
-que publica `build.py`, las comprobaciones y `serve.py`.
-[`tests/exercise_ui_test.py`](../tests/exercise_ui_test.py) abre las lecciones
-en el navegador contra `serve.py`: escribe código equivocado y ve fallar un
-caso, lo corrige y lo ve pasar, recarga y comprueba que el progreso sigue.
-También escribe un error de sintaxis y un `ghz` que solo falla casos ocultos, y
-comprueba lo que muestra el panel. Lo repite en un móvil, y prueba el teclado,
-las pistas, el timeout, los errores y la comprobación de Turnstile, con un
-widget de prueba. `mise run test:ui` ejecuta las pruebas del navegador. Todas
-usan [`tests/offline.py`](../tests/offline.py): el navegador aborta cualquier
-petición que no vaya a `127.0.0.1` o `localhost` y la prueba termina con error
-que nombra la dirección.
+[`tests/exercises_test.py`](../tests/exercises_test.py) runs each exercise with
+its solution and with a wrong solution that must fail with a useful message, and
+with the wrong programs of `tests/mutants/<exercise>/` (the ones that make each
+hidden case fail; they are complete programs, independent of the text of
+`solution.py`), and checks that every hidden case that fails with the starter
+code or with a wrong solution names its input. It also tests the grader, what
+`build.py` publishes, the checks and `serve.py`.
+[`tests/exercise_ui_test.py`](../tests/exercise_ui_test.py) opens the lessons in
+the browser against `serve.py`: it writes wrong code and sees a case fail,
+corrects it and sees it pass, reloads and checks that the progress remains. It
+also writes a syntax error and a `ghz` that fails only hidden cases, and checks
+what the panel shows. It repeats this on a phone, and tests the keyboard, the
+hints, the timeout, the errors and the Turnstile check, with a test widget.
+`mise run test:ui` runs the browser tests. All of them use
+[`tests/offline.py`](../tests/offline.py): the browser aborts any request that
+does not go to `127.0.0.1` or `localhost` and the test ends with an error that
+names the address.

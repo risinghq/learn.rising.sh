@@ -1,274 +1,275 @@
-# Arquitectura
+# Architecture
 
-Duo es una página estática (`site/`) con un catálogo de cursos y un Worker que
-atiende lo que comparten los cursos. El curso de Qiskit reproduce lecciones
-descritas en JSON. Las lecciones se escriben en Python, el audio se sintetiza
-aparte y los cuadernos de práctica son archivos marimo. Este documento dice qué
-posee cada carpeta y por dónde pasa una lección.
+Duo is a static site (`site/`) with a course catalog and a Worker that serves
+what the courses share. The Qiskit course plays lessons described in JSON. The
+lessons are written in Python, the audio is synthesized separately and the
+practice notebooks are marimo files. This document says what each folder owns
+and how a lesson travels.
 
-## Quién posee qué
+## Who owns what
 
-| Carpeta        | Contenido                                                                                                                                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `lessons_src/` | Las lecciones como código Python y el programa que las convierte en JSON.                                                                                                      |
-| `tools/`       | Programas auxiliares: guías originales, narración, comprobaciones y pruebas de navegador.                                                                                      |
-| `site/`        | La página estática: el catálogo, el tema común y una carpeta por curso, con su portada, su reproductor de lecciones y los datos que lee.                                       |
-| `tests/`       | Pruebas de navegador (`theme_test.py`, `proyecto_test.py`, `exercise_ui_test.py`, `account_ui_test.py`) de ejercicios (`exercises_test.py`) y del corredor (`runner_test.py`). |
-| `practica/`    | Los cuadernos marimo de las misiones y sus soluciones.                                                                                                                         |
-| `exercises/`   | Los ejercicios de código: código inicial, solución y casos de cada uno.                                                                                                        |
-| `editor/`      | El paquete que compila `site/qiskit/editor.js` y copia KaTeX y las tipografías a `site/vendor/`.                                                                               |
-| `qgcheck/`     | El corrector de ejercicios: lee `exercises/`, ejecuta el código de un alumno y devuelve el resultado de cada caso.                                                             |
-| `content/`     | La caché de la síntesis de voz.                                                                                                                                                |
-| `runner/`      | El corredor de código del alumno: imagen, servidor `/run` y Worker. [runner.md](runner.md)                                                                                     |
+| Folder         | Contents                                                                                                                                                                    |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lessons_src/` | The lessons as Python code and the program that turns them into JSON.                                                                                                       |
+| `tools/`       | Helper programs: original guides, narration, checks and browser tests.                                                                                                      |
+| `site/`        | The static site: the catalog, the shared theme and one folder per course, with its home page, its lesson player and the data they read.                                     |
+| `tests/`       | Browser tests (`theme_test.py`, `proyecto_test.py`, `exercise_ui_test.py`, `account_ui_test.py`), exercise tests (`exercises_test.py`) and runner tests (`runner_test.py`). |
+| `practica/`    | The marimo notebooks of the missions and their solutions.                                                                                                                   |
+| `exercises/`   | The code exercises: starter code, solution and cases of each.                                                                                                               |
+| `editor/`      | The package that builds `site/qiskit/editor.js` and copies KaTeX and the fonts to `site/vendor/`.                                                                           |
+| `qgcheck/`     | The exercise grader: reads `exercises/`, runs a learner's code and returns the result of each case.                                                                         |
+| `content/`     | The speech synthesis cache.                                                                                                                                                 |
+| `runner/`      | The learner code runner: image, `/run` server and Worker. [runner.md](runner.md)                                                                                            |
 
 ### `lessons_src/`
 
-- `plan.py` define `PARTS`: las diez partes, el orden de las lecciones y qué
-  guías originales cubre cada una. Una guía aparece en exactamente una lección.
-- `parte1.py` a `parte10.py` definen `LESSONS`, la lista de lecciones de cada
-  parte, con las funciones de `lib.py`: `lesson()`, `beat()`, los bloques
-  (`Code`, `Out`, `Circ`, `Hist`…), las acciones (`A`) y las preguntas
+- `plan.py` defines `PARTS`: the ten parts, the order of the lessons and which
+  original guides each one covers. A guide appears in exactly one lesson.
+- `parte1.py` to `parte10.py` define `LESSONS`, the list of lessons of each
+  part, with the functions of `lib.py`: `lesson()`, `beat()`, the blocks
+  (`Code`, `Out`, `Circ`, `Hist`…), the actions (`A`) and the questions
   (`choice`, `numeric`, `reveal`, `predict`, `reflect`).
-- `build.py` une el plan con las lecciones y escribe los JSON de `site/qiskit/`.
-  Antes comprueba que cada guía del índice de Qiskit/documentation esté en el
-  plan, que no haya marcas `[[nombre]]` repetidas en una narración y que cada
-  acción apunte a una marca y a un objeto que existan. Falla si una lección del
-  plan no tiene módulo o si un módulo define una lección que el plan no
-  menciona. También completa cada bloque `Exercise` con lo que el sitio puede
-  mostrar de `exercises/` (ver [exercises.md](exercises.md)).
+- `build.py` joins the plan with the lessons and writes the JSON of
+  `site/qiskit/`. First it checks that every guide in the Qiskit/documentation
+  index is in the plan, that no `[[name]]` mark repeats in a narration and that
+  every action points at a mark and an object that exist. It fails if a lesson
+  in the plan has no module or if a module defines a lesson that the plan does
+  not mention. It also completes each `Exercise` block with what the site can
+  show from `exercises/` (see [exercises.md](exercises.md)).
 
 ### `tools/`
 
-| Programa                                             | Función                                                                                                                             |
+| Program                                              | Function                                                                                                                            |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `fetch_docs.py`                                      | Descarga `docs/guides` de Qiskit/documentation a `.cache/qiskit-docs`, en la versión de `qiskit-docs.commit`.                       |
-| `extract.py`                                         | Convierte esas guías en texto plano en `.cache/qiskit-docs/text`.                                                                   |
-| `tts.py`                                             | Sintetiza la narración de una lección y escribe `timings.json`.                                                                     |
-| `pronunciacion.py`                                   | Diccionario que reescribe siglas y nombres en inglés para que la voz los lea bien.                                                  |
-| `verify.py`                                          | Ejecuta el Python de las lecciones, salvo `norun`, y compara los `Out(…, check=True)`.                                              |
-| `practica.py`                                        | Ejecuta cada cuaderno con y sin soluciones. También prueba `mo.ui.slider`/`number` en mínimo y máximo. Un error de ejecución falla. |
-| `exercises.py`                                       | Corre la solución y el código inicial de cada ejercicio con `qgcheck` y comprueba su `needs`.                                       |
-| `serve.py`                                           | Sirve `site/` en 127.0.0.1:8810 y añade `POST /run`, que corrige un ejercicio con `qgcheck`.                                        |
-| `playtest.py`, `seektest.py`, `shot.py`, `review.py` | Pruebas y capturas con Playwright sobre el curso de Qiskit servido en el puerto 8810.                                               |
+| `fetch_docs.py`                                      | Downloads `docs/guides` of Qiskit/documentation to `.cache/qiskit-docs`, at the version in `qiskit-docs.commit`.                    |
+| `extract.py`                                         | Converts those guides to plain text in `.cache/qiskit-docs/text`.                                                                   |
+| `tts.py`                                             | Synthesizes the narration of a lesson and writes `timings.json`.                                                                    |
+| `pronunciacion.py`                                   | Dictionary that rewrites English acronyms and names so the voice reads them well.                                                   |
+| `verify.py`                                          | Runs the Python of the lessons, except `norun`, and compares the `Out(…, check=True)`.                                              |
+| `practica.py`                                        | Runs each notebook with and without solutions. It also tests `mo.ui.slider`/`number` at minimum and maximum. A runtime error fails. |
+| `exercises.py`                                       | Runs the solution and the starter code of each exercise with `qgcheck` and checks its `needs`.                                      |
+| `serve.py`                                           | Serves `site/` on 127.0.0.1:8810 and adds `POST /run`, which grades an exercise with `qgcheck`.                                     |
+| `playtest.py`, `seektest.py`, `shot.py`, `review.py` | Playwright tests and screenshots on the Qiskit course served on port 8810.                                                          |
 
-`qiskit-docs.commit` guarda el hash de Qiskit/documentation contra el que se
-comprueba la cobertura. Para actualizar las guías se cambia ese hash, se ejecuta
-`tools/fetch_docs.py` y se corrige `plan.py` hasta que `build.py` pase.
+`qiskit-docs.commit` holds the Qiskit/documentation hash that coverage is
+checked against. To update the guides, change that hash, run
+`tools/fetch_docs.py` and fix `plan.py` until `build.py` passes.
 
 ### `site/`
 
-En la raíz están el catálogo y lo que comparten los cursos:
+The root holds the catalog and what the courses share:
 
-- `index.html` y `catalog.css` son el catálogo, en inglés. Lee `courses.json`,
-  que tiene una entrada por curso (`slug`, `title`, `summary`, `language`), y de
-  cada `<slug>/course.json` el número de lecciones. Dibuja una tarjeta por curso
-  con un enlace a `<slug>/`. Añadir un curso es añadir su carpeta y su entrada.
-- `theme.css` y `theme.js` son el tema del catálogo y de los cursos: colores,
-  fuentes, y el modo que elige el lector. Las etiquetas del control de tema
-  siguen el `lang` de la página. [design.md](design.md) los describe.
-- `vendor/` son KaTeX y las dos tipografías, copiados de `editor/node_modules`
-  por `editor/vendor.js`. Git los ignora; `mise run install` y `mise run deploy`
-  los generan de nuevo y borran antes lo que hubiera. Ninguna página pide nada a
-  otro sitio salvo el script de Turnstile, que `exercise.js` descarga de
-  Cloudflare cuando el corredor lo exige.
+- `index.html` and `catalog.css` are the catalog, in English. It reads
+  `courses.json`, which has one entry per course (`slug`, `title`, `summary`,
+  `language`), and from each `<slug>/course.json` the number of lessons. It
+  draws one card per course with a link to `<slug>/`. Adding a course is adding
+  its folder and its entry.
+- `theme.css` and `theme.js` are the theme of the catalog and of the courses:
+  colors, fonts and the mode the reader picks. The labels of the theme control
+  follow the page's `lang`. [design.md](design.md) describes them.
+- `vendor/` is KaTeX and the two fonts, copied from `editor/node_modules` by
+  `editor/vendor.js`. Git ignores it; `mise run install` and `mise run deploy`
+  generate it again and first delete whatever was there. No page requests
+  anything from another site except the Turnstile script, which `exercise.js`
+  downloads from Cloudflare when the runner requires it.
 
-`qiskit/` es el curso de Qiskit. Sus páginas enlazan el tema y `vendor/` con
-`../`, y llaman a las rutas de la plataforma por su ruta absoluta:
+`qiskit/` is the Qiskit course. Its pages link the theme and `vendor/` with
+`../`, and call the platform routes by their absolute path:
 
-- `index.html` es la portada del curso, con los estilos de `index.css`. Lee
-  `course.json` y pide en paralelo los `lesson.json` de las lecciones
-  completadas para armar el repaso.
-- `lesson.html` carga `engine.js`, el reproductor, con los estilos de `app.css`.
-  `blocks.js` dibuja los bloques propios del curso, `exercise.js` el bloque de
-  ejercicio y `sfx.js` los sonidos. Las fórmulas las dibuja KaTeX. Las dos
-  páginas cargan KaTeX con `defer`, antes que sus propios scripts.
-- `account.js` es el menú de la cuenta y `privacidad.html` la página que dice
-  qué se guarda.
-- `editor.js` es el editor CodeMirror 6 de los ejercicios, empaquetado desde
-  `editor/`. Se describe en [exercises.md](exercises.md#editor-en-la-lección).
-- `notebooks.js` escribe la línea «cómo ejecutar los cuadernos» que acompaña a
-  cada comando de `marimo`.
-- `lessons/<id>/` contiene `lesson.json`, `timings.json` y `audio/<paso>.mp3`.
-- `course.json` es el índice: partes, lecciones, minutos y misiones.
+- `index.html` is the course home page, styled by `index.css`. It reads
+  `course.json` and requests in parallel the `lesson.json` of the completed
+  lessons to build the review.
+- `lesson.html` loads `engine.js`, the player, styled by `app.css`. `blocks.js`
+  draws the course's own blocks, `exercise.js` the exercise block and `sfx.js`
+  the sounds. KaTeX draws the formulas. Both pages load KaTeX with `defer`,
+  before their own scripts.
+- `account.js` is the account menu and `privacidad.html` the page that says what
+  is stored.
+- `editor.js` is the CodeMirror 6 editor of the exercises, bundled from
+  `editor/`. It is described in
+  [exercises.md](exercises.md#editor-in-the-lesson).
+- `notebooks.js` writes the "how to run the notebooks" line that goes with each
+  `marimo` command.
+- `lessons/<id>/` holds `lesson.json`, `timings.json` and `audio/<step>.mp3`.
+- `course.json` is the index: parts, lessons, minutes and missions.
 
 ### `practica/`
 
-Los cuadernos marimo son los `.py` de estas carpetas que contienen
-`marimo.App(`. Un cuaderno puede importar un módulo de su carpeta
-(`proyecto/ising.py`), porque `tools/practica.py` pone esa carpeta en
-`sys.path`. Cada misión de una lección nombra su cuaderno con `Mission(...)`.
-`soluciones/<cuaderno>.json` (con `__` en lugar de `/` para los cuadernos de
-subcarpetas) guarda los pares (texto, reemplazo) que `tools/practica.py` aplica
-para comprobar que todas las verificaciones dan ✅.
+The marimo notebooks are the `.py` files in these folders that contain
+`marimo.App(`. A notebook can import a module from its folder
+(`proyecto/ising.py`), because `tools/practica.py` puts that folder on
+`sys.path`. Each mission of a lesson names its notebook with `Mission(...)`.
+`soluciones/<notebook>.json` (with `__` instead of `/` for notebooks in
+subfolders) holds the (text, replacement) pairs that `tools/practica.py` applies
+to check that all the verifications give ✅.
 
-### `exercises/` y `qgcheck/`
+### `exercises/` and `qgcheck/`
 
-`exercises/<lección>/<ejercicio>/` guarda `starter.py`, `solution.py` y
-`check.py`. `qgcheck/spec.py` los localiza, `qgcheck/runner.py` lanza
-`qgcheck/job.py` en un proceso aparte (que a su vez lanza `qgcheck/host.py` con
-el código del alumno), y `qgcheck/__init__.py` ofrece a `check.py` sus
-ayudantes. El formato, el resultado de `grade()` y las comprobaciones están en
-[exercises.md](exercises.md). `site/qiskit/exercise.js` dibuja el editor de cada
-ejercicio y llama a `POST /run` en su propio origen.
+`exercises/<lesson>/<exercise>/` holds `starter.py`, `solution.py` and
+`check.py`. `qgcheck/spec.py` locates them, `qgcheck/runner.py` launches
+`qgcheck/job.py` in a separate process (which in turn launches `qgcheck/host.py`
+with the learner's code), and `qgcheck/__init__.py` gives `check.py` its
+helpers. The format, the result of `grade()` and the checks are in
+[exercises.md](exercises.md). `site/qiskit/exercise.js` draws the editor of each
+exercise and calls `POST /run` on its own origin.
 
 ### `content/`
 
-`<id>.cache.json` guarda, por cada clip de una lección, el hash de lo que se
-dijo y los tiempos de cada palabra. `tts.py` lo consulta para no volver a
-sintetizar un clip que no cambió.
+`<id>.cache.json` holds, for each clip of a lesson, the hash of what was said
+and the time of each word. `tts.py` consults it so it does not synthesize again
+a clip that did not change.
 
 ### `runner/`
 
-El servidor del corredor ([runner.md](runner.md)) ejecuta los trabajos en
-_ranuras_. Hay `QG_JOBS` ranuras, numeradas desde 0, y la ranura `n` usa siempre
-el uid `20000 + n`. El estado compartido es la cola `FREE_SLOTS` de ranuras
-libres, en `server.py`.
+The runner server ([runner.md](runner.md)) runs jobs in _slots_. There are
+`QG_JOBS` slots, numbered from 0, and slot `n` always uses uid `20000 + n`. The
+shared state is the `FREE_SLOTS` queue of free slots, in `server.py`.
 
-| Estado  | Significa                                     | Quién lo deja y cuándo                                                                                            |
-| ------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| libre   | Su número está en `FREE_SLOTS`.               | El hilo de una petición, en el `finally` de `do_POST`, cuando `run_job` ya volvió.                                |
-| ocupada | Un hilo de petición tiene su número y la usa. | El mismo hilo, tras validar la petición, con `get_nowait()`. Si la cola está vacía responde 503 y no espera nada. |
+| State | Meaning                                        | Who leaves it and when                                                                                                          |
+| ----- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| free  | Its number is in `FREE_SLOTS`.                 | A request thread, in the `finally` of `do_POST`, once `run_job` has returned.                                                   |
+| busy  | A request thread holds its number and uses it. | The same thread, after validating the request, with `get_nowait()`. If the queue is empty it answers 503 and waits for nothing. |
 
-- Solo el hilo que tomó una ranura la devuelve, y solo después de que `run_job`
-  matara los procesos de ese uid y borrara su directorio y sus archivos de
-  `/scratch`, `/tmp`, `/var/tmp` y `/dev/shm`. Ese borrado es lo que aísla a un
-  trabajo del anterior, porque el uid se reutiliza.
-- `run_job` lanza un hilo (`_Scan`) que mide memoria y disco. Solo ese hilo
-  escribe `peak` y `killed` (`killed` antes de `tripped`); `run_job` los lee
-  tras `tripped` o tras unir el hilo.
-- Las instancias de Cloudflare no comparten nada: cada una tiene su cola. El
-  Worker elige una de dos y, si responde 503, repite la petición una vez en la
-  otra, con su propia reserva del presupuesto.
-- El Worker guarda su estado en dos Durable Objects de
-  `runner/worker/src/meters.ts` ([runner.md](runner.md#protección-del-worker)
-  explica los límites). Cada objeto atiende una llamada a la vez, y sus métodos
-  solo esperan a su propio almacenamiento, así que leer y escribir dentro de un
-  método es una operación.
+- Only the thread that took a slot returns it, and only after `run_job` killed
+  the processes of that uid and deleted its directory and its files in
+  `/scratch`, `/tmp`, `/var/tmp` and `/dev/shm`. That deletion is what isolates
+  a job from the previous one, because the uid is reused.
+- `run_job` starts a thread (`_Scan`) that measures memory and disk. Only that
+  thread writes `peak` and `killed` (`killed` before `tripped`); `run_job` reads
+  them after `tripped` or after joining the thread.
+- The Cloudflare instances share nothing: each has its own queue. The Worker
+  picks one of two and, if it answers 503, repeats the request once on the
+  other, with its own budget reservation.
+- The Worker keeps its state in two Durable Objects in
+  `runner/worker/src/meters.ts` ([runner.md](runner.md#worker-protection)
+  explains the limits). Each object serves one call at a time, and its methods
+  only wait on their own storage, so reading and writing inside one method is
+  one operation.
 
-`RateLimiter` hay uno por clave (una IP o un usuario), etiqueta y día, nombrado
-con un HMAC de los tres. Su estado es el registro `count` (minuto del reloj,
-peticiones de ese minuto y del día).
+There is one `RateLimiter` per key (an IP or a user), label and day, named with
+an HMAC of the three. Its state is the `count` record (clock minute, requests of
+that minute and of the day).
 
-| Estado   | Significa                                | Quién lo deja y cuándo                                                                                                                                               |
-| -------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| vacío    | No hay `count`.                          | Al crearse el objeto, y la alarma `alarm` cuando termina el día más un minuto.                                                                                       |
-| contando | Hay `count` y una alarma al fin del día. | `take`, que el Worker llama en cada `POST /run` y en cada petición a `/auth` y `/api`. Suma una petición si caben en el minuto y en el día, y si no, no cambia nada. |
+| State    | Meaning                                     | Who leaves it and when                                                                                                                                                                |
+| -------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| empty    | There is no `count`.                        | When the object is created, and the `alarm` alarm when the day plus one minute ends.                                                                                                  |
+| counting | There is a `count` and an alarm at day end. | `take`, which the Worker calls on each `POST /run` and each request to `/auth` and `/api`. It adds a request if they fit in the minute and in the day, and otherwise changes nothing. |
 
-- Al cambiar el minuto del reloj, `take` empieza el contador del minuto de cero
-  sin esperar a ningún evento. El contador del día sigue hasta la alarma.
-- Solo `take` escribe `count`, y solo `alarm` lo borra.
+- When the clock minute changes, `take` restarts the minute counter from zero
+  without waiting for any event. The day counter continues until the alarm.
+- Only `take` writes `count`, and only `alarm` deletes it.
 
-`Budget` hay uno en total. Su estado son tres tipos de registro: `month` y `day`
-(periodo UTC y nanodólares gastados; `day` cuenta solo el gasto público) y, por
-instancia, `awake:<instancia>` (el instante en que se espera que se apague y la
-reserva que lo fijó).
+There is one `Budget` in total. Its state is three kinds of record: `month` and
+`day` (UTC period and nanodollars spent; `day` counts only public spend) and,
+per instance, `awake:<instance>` (the instant it is expected to shut down and
+the reservation that set it).
 
-| Estado        | Significa                                                                | Quién lo deja y cuándo                                                                                                                                                                           |
-| ------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| periodo nuevo | No hay `month` (o `day`), o su periodo no es el actual: el total es 0.   | El paso del reloj al día 1 UTC, o a un día nuevo. No hay temporizador: el primer `reserve` del periodo nuevo lo sobrescribe.                                                                     |
-| reservado     | El total incluye lo apartado por ejecuciones que aún no terminaron.      | `reserve`, que el Worker llama antes de arrancar el contenedor. Suma la reserva solo si caben el tope del mes (el del público o el total) y, para el público, el del día; si no, no cambia nada. |
-| ajustado      | El total cambia la reserva por el coste medido, con tope en lo apartado. | `settle`, al terminar la ejecución y, sin coste, cuando Turnstile rechaza una petición que ya había apartado. No hace nada si el periodo ya cambió.                                              |
+| State      | Meaning                                                                               | Who leaves it and when                                                                                                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| new period | There is no `month` (or `day`), or its period is not the current one: the total is 0. | The clock passing to day 1 UTC, or to a new day. There is no timer: the first `reserve` of the new period overwrites it.                                                                                          |
+| reserved   | The total includes what is set aside for runs that have not finished.                 | `reserve`, which the Worker calls before starting the container. It adds the reservation only if the month cap fits (the public one or the total) and, for the public, the day cap; otherwise it changes nothing. |
+| settled    | The total swaps the reservation for the measured cost, capped at what was set aside.  | `settle`, when the run ends and, at no cost, when Turnstile rejects a request that had already reserved. It does nothing if the period already changed.                                                           |
 
-- `reserve` suma la ventana encendida desde `max(ahora, awakeUntil)` y deja
-  `awakeUntil` en `ahora` más la reserva más `sleepAfter`. `settle` solo lo
-  acorta si la reserva que lo fijó sigue siendo la dueña; si otra lo alargó, esa
-  parte sigue cobrada.
-- Una petición tiene una reserva por intento, y cada una se aparta una vez y se
-  cambia una vez; o se interrumpe y la reserva se queda en el total.
-- Un `settle` que falla se registra y no cambia la respuesta de la petición.
+- `reserve` adds the awake window from `max(now, awakeUntil)` and leaves
+  `awakeUntil` at `now` plus the reservation plus `sleepAfter`. `settle` only
+  shortens it if the reservation that set it is still the owner; if another one
+  extended it, that part stays charged.
+- A request has one reservation per attempt, and each is set aside once and
+  swapped once; or it is interrupted and the reservation stays in the total.
+- A `settle` that fails is logged and does not change the response of the
+  request.
 
-`DB` es la base D1 de las cuentas ([runner.md](runner.md#cuentas) da los
-endpoints y [`schema.sql`](../runner/worker/src/schema.sql) las tablas). Todo
-cuelga de `users` con `ON DELETE CASCADE`, y D1 hace cumplir las claves
-foráneas: borrar un usuario borra todo lo suyo en una sola sentencia. Las
-sentencias de un lote de D1 se ejecutan seguidas, sin que otra escritura se
-intercale.
+`DB` is the D1 database of the accounts ([runner.md](runner.md#accounts) gives
+the endpoints and [`schema.sql`](../runner/worker/src/schema.sql) the tables).
+Everything hangs from `users` with `ON DELETE CASCADE`, and D1 enforces foreign
+keys: deleting a user deletes everything of theirs in one statement. The
+statements of a D1 batch run one after another, with no other write in between.
 
-Usuario (`users`):
+User (`users`):
 
-| Estado    | Significa                                                    | Quién lo deja y cuándo                                                                                                                           |
-| --------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| no existe | No hay fila con ese id.                                      | El principio; y `DELETE /api/me` o la limpieza diaria, que borran la fila.                                                                       |
-| activo    | Hay fila y `seen_day` es el día de la última visita.         | `userForIdentity`, en la vuelta de OAuth de una identidad nueva, en un lote con su fila de `identities`. Cada visita con sesión sube `seen_day`. |
-| inactivo  | `seen_day` es anterior a hoy menos `ACCOUNT_RETENTION_DAYS`. | El paso del tiempo. No hay temporizador: la limpieza diaria lo borra.                                                                            |
+| State    | Meaning                                                          | Who leaves it and when                                                                                                                       |
+| -------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| absent   | There is no row with that id.                                    | The start; and `DELETE /api/me` or the daily cleanup, which delete the row.                                                                  |
+| active   | There is a row and `seen_day` is the day of the last visit.      | `userForIdentity`, on the OAuth return of a new identity, in a batch with its `identities` row. Each visit with a session raises `seen_day`. |
+| inactive | `seen_day` is earlier than today minus `ACCOUNT_RETENTION_DAYS`. | Time passing. There is no timer: the daily cleanup deletes it.                                                                               |
 
-- Dos primeras entradas a la vez de la misma identidad crean un solo usuario: la
-  clave de `identities` es (proveedor, identificador), el lote de la segunda se
-  deshace entero y esa entrada usa el usuario de la primera.
-- Una visita es una petición con sesión a `/run` o a `/api`, o la vuelta de
-  OAuth. `seen_day` solo sube, a lo sumo una vez al día.
+- Two first sign-ins at once of the same identity create a single user: the key
+  of `identities` is (provider, identifier), the batch of the second is undone
+  entirely and that sign-in uses the user of the first.
+- A visit is a request with a session to `/run` or to `/api`, or the OAuth
+  return. `seen_day` only rises, at most once a day.
 
-Sesión (`sessions`):
+Session (`sessions`):
 
-| Estado   | Significa                                     | Quién lo deja y cuándo                                                              |
-| -------- | --------------------------------------------- | ----------------------------------------------------------------------------------- |
-| vigente  | Hay fila y `expires_at` es posterior a ahora. | `openSession`, en la vuelta de OAuth. Cada inicio crea una y deja las anteriores.   |
-| caducada | Hay fila y `expires_at` ya pasó.              | El paso del tiempo. `sessionUser` ya no la acepta; la fila sigue hasta la limpieza. |
-| cerrada  | No hay fila.                                  | `POST /auth/logout`, la limpieza de las caducadas y el borrado del usuario.         |
+| State   | Meaning                                       | Who leaves it and when                                                                |
+| ------- | --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| valid   | There is a row and `expires_at` is after now. | `openSession`, on the OAuth return. Each sign-in creates one and leaves the previous. |
+| expired | There is a row and `expires_at` has passed.   | Time passing. `sessionUser` no longer accepts it; the row stays until the cleanup.    |
+| closed  | There is no row.                              | `POST /auth/logout`, the cleanup of the expired ones and the deletion of the user.    |
 
-Una sesión nunca vuelve a vigente. Una cuenta tiene tantas a la vez como
-dispositivos con los que entró.
+A session never becomes valid again. An account has as many at once as devices
+it signed in on.
 
-Progreso (`lesson_done`, `exercise_state`, `kv` y `users.progress_version`):
+Progress (`lesson_done`, `exercise_state`, `kv` and `users.progress_version`):
 
-| Estado    | Significa                              | Quién lo deja y cuándo                                                  |
-| --------- | -------------------------------------- | ----------------------------------------------------------------------- |
-| vacío     | El usuario no tiene filas en las tres. | La creación del usuario, con `progress_version` 0.                      |
-| con datos | Tiene filas en alguna de las tres.     | `mergeProgress`, que sirve a `POST /api/merge` y a `PUT /api/progress`. |
+| State     | Meaning                            | Who leaves it and when                                                   |
+| --------- | ---------------------------------- | ------------------------------------------------------------------------ |
+| empty     | The user has no rows in the three. | The creation of the user, with `progress_version` 0.                     |
+| with data | It has rows in any of the three.   | `mergeProgress`, which serves `POST /api/merge` and `PUT /api/progress`. |
 
-- Una escritura no quita nada: no borra una lección, `passed` no vuelve a falso,
-  `hints`, `checks` y `at` solo suben, y el código solo lo cambia una edición
-  con `at` mayor. Cada clave de `kv` se junta por la regla de su familia
-  ([runner.md](runner.md#el-progreso)). Lo que no cambia el resultado no
-  escribe.
-- `mergeProgress` lee las tres tablas y `progress_version` en un lote, calcula
-  el resultado y lo escribe en otro lote cuyas sentencias solo actúan si
-  `progress_version` sigue siendo la leída; la última la sube en uno. Si otra
-  escritura del mismo usuario se coló, esa última no cambia ninguna fila y la
-  petición vuelve a leer. Tras 10 intentos responde 503 `busy`. Ninguna
-  escritura pisa a otra.
-- Si el usuario se borra mientras la petición corre, la lectura no lo encuentra
-  y responde 401 `signed_out`.
+- A write removes nothing: it does not delete a lesson, `passed` does not go
+  back to false, `hints`, `checks` and `at` only rise, and the code changes only
+  with an edit with a greater `at`. Each `kv` key is merged by the rule of its
+  family ([runner.md](runner.md#progress)). What does not change the result does
+  not write.
+- `mergeProgress` reads the three tables and `progress_version` in one batch,
+  computes the result and writes it in another batch whose statements act only
+  if `progress_version` is still the one read; the last one raises it by one. If
+  another write of the same user slipped in, that last one changes no row and
+  the request reads again. After 10 attempts it answers 503 `busy`. No write
+  overwrites another.
+- If the user is deleted while the request runs, the read does not find them and
+  answers 401 `signed_out`.
 
-Intento (`attempts`):
+Attempt (`attempts`):
 
-| Estado  | Significa                                                | Quién lo deja y cuándo                                                                                    |
-| ------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| anotado | Hay fila, con `user_id` o con `NULL`.                    | `recordAttempt`, tras cada respuesta 200 de `/run` cuyo JSON tiene la forma del contrato.                 |
-| vencido | `at` es anterior a ahora menos `ATTEMPT_RETENTION_DAYS`. | El paso del tiempo. La limpieza diaria lo borra.                                                          |
-| borrado | No hay fila.                                             | La limpieza diaria y, si tenía `user_id`, el borrado del usuario. Los anónimos solo salen en la limpieza. |
+| State    | Meaning                                                  | Who leaves it and when                                                                                            |
+| -------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| recorded | There is a row, with `user_id` or with `NULL`.           | `recordAttempt`, after each 200 response of `/run` whose JSON has the shape of the contract.                      |
+| expired  | `at` is earlier than now minus `ATTEMPT_RETENTION_DAYS`. | Time passing. The daily cleanup deletes it.                                                                       |
+| deleted  | There is no row.                                         | The daily cleanup and, if it had a `user_id`, the deletion of the user. Anonymous ones leave only in the cleanup. |
 
-Una fila no se modifica después de escribirse.
+A row is not modified after it is written.
 
-Borrado y limpieza:
+Deletion and cleanup:
 
-- `DELETE /api/me` borra la fila de `users`. Con ella salen las identidades, las
-  sesiones, el progreso y los intentos del usuario. Las peticiones siguientes
-  con su cookie ya no encuentran la sesión.
-- El cron diario ejecuta `purge` en un lote, en este orden: intentos vencidos,
-  sesiones caducadas, usuarios inactivos. Un usuario inactivo que entra justo
-  mientras corre puede perder la sesión que abría (500); al reintentar se crea
-  una cuenta nueva.
+- `DELETE /api/me` deletes the `users` row. With it go the identities, the
+  sessions, the progress and the attempts of the user. The following requests
+  with their cookie no longer find the session.
+- The daily cron runs `purge` in one batch, in this order: expired attempts,
+  expired sessions, inactive users. An inactive user who signs in just while it
+  runs can lose the session being opened (500); on retry a new account is
+  created.
 
-## Camino de los datos
+## Data path
 
 ```text
-plan.py + parte*.py -> build.py -> lesson.json (y course.json)
-lesson.json -> tts.py -> audio/<paso>.mp3 + timings.json
+plan.py + parte*.py -> build.py -> lesson.json (and course.json)
+lesson.json -> tts.py -> audio/<step>.mp3 + timings.json
 lesson.json + timings.json + audio -> engine.js
 ```
 
-1. `build.py` numera las secciones según el orden de `plan.PARTS`, añade a cada
-   lección el enlace a sus guías originales y escribe `lesson.json` con la lista
-   de pasos y `next`, la lección siguiente. `course.json` suma los minutos: la
-   duración de `timings.json` si existe, o una estimación por palabras si no,
-   más 45 segundos por pregunta.
-2. `tts.py` lee `lesson.json`. Por cada paso aplica `pronunciacion.py` al texto
-   de `say`, sintetiza `audio/<paso>.mp3` con Edge TTS y mide su duración con
-   `ffprobe`. `timings.json` guarda por paso `dur` (segundos), `marks` (el
-   segundo en que empieza la palabra que sigue a cada `[[marca]]`) y `cues` (los
-   subtítulos con su segundo de inicio, con el texto original).
-3. `engine.js` carga `lesson.json` y `timings.json`, reproduce el audio de cada
-   paso y lanza cada acción de `actions` en el segundo de su marca. Los
-   subtítulos salen de `cues`. `?beat=N` muestra el estado final del paso N sin
+1. `build.py` numbers the sections following the order of `plan.PARTS`, adds to
+   each lesson the link to its original guides and writes `lesson.json` with the
+   list of steps and `next`, the following lesson. `course.json` adds up the
+   minutes: the duration from `timings.json` if it exists, or an estimate by
+   words if not, plus 45 seconds per question.
+2. `tts.py` reads `lesson.json`. For each step it applies `pronunciacion.py` to
+   the `say` text, synthesizes `audio/<step>.mp3` with Edge TTS and measures its
+   duration with `ffprobe`. `timings.json` holds per step `dur` (seconds),
+   `marks` (the second at which the word after each `[[mark]]` starts) and
+   `cues` (the subtitles with their start second, with the original text).
+3. `engine.js` loads `lesson.json` and `timings.json`, plays the audio of each
+   step and fires each action of `actions` at the second of its mark. The
+   subtitles come from `cues`. `?beat=N` shows the final state of step N without
    audio.

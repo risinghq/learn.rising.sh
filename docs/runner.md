@@ -1,24 +1,27 @@
-# El corredor de código
+# The code runner
 
-El corredor ejecuta el código de un alumno con Qiskit y Qiskit Aer y devuelve lo
-que imprimió y el resultado de los casos de un ejercicio, con el formato de
-[`qgcheck.grade`](exercises.md#corregir-código). Es una imagen de contenedor con
-un servidor HTTP. No depende del anfitrión: el mismo contrato vale en Cloudflare
-Containers y en Docker. Es el `POST /run` que llama el editor de las lecciones,
-con aislamiento para exponerlo en red; `tools/serve.py` lo responde en tu equipo
-sin él.
+The runner runs a learner's code with Qiskit and Qiskit Aer and returns what it
+printed and the result of the cases of an exercise, in the format of
+[`qgcheck.grade`](exercises.md#grade-code). It is a container image with an HTTP
+server. It does not depend on the host: the same contract holds on Cloudflare
+Containers and on Docker. It is the `POST /run` that the lesson editor calls,
+with the isolation needed to expose it on a network; `tools/serve.py` answers it
+on your machine without that isolation.
 
-## Contrato
+The messages the runner and the Worker return to the learner are in Spanish,
+because the course is. This document quotes them as they are.
 
-`POST /run` con un JSON:
+## Contract
 
-| Campo      | Tipo  | Significado                                                                            |
-| ---------- | ----- | -------------------------------------------------------------------------------------- |
-| `code`     | texto | El código del alumno, hasta 20 000 bytes.                                              |
-| `mode`     | texto | `run` (por defecto) ejecuta el código. `check` además lo prueba con el ejercicio.      |
-| `exercise` | texto | `lección/ejercicio`, por ejemplo `p1-quickstart/ghz`. Obligatorio con `mode: "check"`. |
+`POST /run` with a JSON body:
 
-Responde 200 con:
+| Field      | Type | Meaning                                                                            |
+| ---------- | ---- | ---------------------------------------------------------------------------------- |
+| `code`     | text | The learner's code, up to 20 000 bytes.                                            |
+| `mode`     | text | `run` (default) runs the code. `check` also tests it with the exercise.            |
+| `exercise` | text | `lesson/exercise`, for example `p1-quickstart/ghz`. Required with `mode: "check"`. |
+
+It answers 200 with:
 
 ```json
 {
@@ -47,280 +50,278 @@ Responde 200 con:
 }
 ```
 
-- `passed` es verdadero si `error` es `null` y, con `check`, hay al menos un
-  caso y todos pasan.
-- `stdout` junta la salida estándar y la de errores, en el orden en que se
-  escribieron. Con `check` es la del código del alumno al cargarse, una vez, y
-  la que imprimen sus funciones.
-- `error` es el error del código del alumno, con su línea, o el motivo por el
-  que el corredor lo detuvo. Con un error, `tests` está vacío.
-- `tests` está vacío con `mode: "run"`. Un caso oculto se llama `caso oculto N`.
-  `hint` es el número de la pista que nombra el caso, o `null`
+- `passed` is true if `error` is `null` and, with `check`, there is at least one
+  case and all pass.
+- `stdout` joins standard output and standard error, in the order they were
+  written. With `check` it is that of the learner's code when it loads, once,
+  and what its functions print.
+- `error` is the error of the learner's code, with its line, or the reason the
+  runner stopped it. With an error, `tests` is empty.
+- `tests` is empty with `mode: "run"`. A hidden case is called `caso oculto N`.
+  `hint` is the number of the hint the case names, or `null`
   ([exercises.md](exercises.md)).
-- `killed` es `time`, `memory`, `disk` u `output` cuando el corredor mató el
-  trabajo por ese límite, y `null` si no. Es `scan` si falló la lectura de
-  memoria o disco que vigila los límites: sin poder medir, el corredor mata el
-  trabajo en vez de dejarlo correr sin tope, y escribe el error en su salida.
-- `ms` es el tiempo del trabajo dentro del corredor. `peak_mb` es la mayor suma
-  de la memoria proporcional (PSS) de los procesos del trabajo, medida cada 0,5
-  s y cuando la memoria residente pasa del tope: una página compartida entre
-  procesos se reparte entre ellos, así que cuenta una vez.
+- `killed` is `time`, `memory`, `disk` or `output` when the runner killed the
+  job for that limit, and `null` if not. It is `scan` if the read of memory or
+  disk that watches the limits failed: unable to measure, the runner kills the
+  job instead of letting it run without a cap, and writes the error in its
+  output.
+- `ms` is the time of the job inside the runner. `peak_mb` is the largest sum of
+  the proportional memory (PSS) of the job's processes, measured every 0.5 s and
+  when the resident memory passes the cap: a page shared among processes is
+  split among them, so it counts once.
 
-Otras respuestas llevan `{"error": "..."}`: 400 si la petición no es válida, 404
-si el ejercicio no existe, 413 si el código pasa de 20 000 bytes o el cuerpo de
-121 024 (seis veces el código, que es lo que ocupa un carácter de control en
-JSON, más la envoltura) y 503 si no queda una ranura libre. `GET /health`
-responde 200.
+Other responses carry `{"error": "..."}`: 400 if the request is not valid, 404
+if the exercise does not exist, 413 if the code exceeds 20 000 bytes or the body
+121 024 (six times the code, which is what a control character takes in JSON,
+plus the envelope) and 503 if no slot is free. `GET /health` answers 200.
 
-## Límites
+## Limits
 
-| Límite                | Valor              | Cómo se aplica                                                               |
-| --------------------- | ------------------ | ---------------------------------------------------------------------------- |
-| Tiempo                | 10 s               | `sandbox.py` mata el grupo de procesos y todo proceso del mismo uid.         |
-| Memoria               | 512 MB             | `sandbox.py` vigila cada 20 ms y mata si la memoria proporcional (PSS) pasa. |
-| Directorio de trabajo | 64 MB              | `sandbox.py` mide el disco cada 100 ms; un archivo no pasa de 16 MB.         |
-| Procesos e hilos      | 64                 | `RLIMIT_NPROC` sobre el uid de la ranura.                                    |
-| Salida                | 64 KiB             | `sandbox.py` mata el trabajo al pasarse.                                     |
-| Red                   | solo `AF_UNIX`     | Un filtro seccomp de `launcher.py` niega `socket` de cualquier otra familia. |
-| Escritura             | solo su directorio | Un uid sin privilegios; `/scratch`, `/tmp` y `/app` son de root.             |
+| Limit             | Value              | How it is applied                                                                  |
+| ----------------- | ------------------ | ---------------------------------------------------------------------------------- |
+| Time              | 10 s               | `sandbox.py` kills the process group and every process of the same uid.            |
+| Memory            | 512 MB             | `sandbox.py` checks every 20 ms and kills if the proportional memory (PSS) passes. |
+| Working directory | 64 MB              | `sandbox.py` measures the disk every 100 ms; a file does not exceed 16 MB.         |
+| Processes/threads | 64                 | `RLIMIT_NPROC` on the uid of the slot.                                             |
+| Output            | 64 KiB             | `sandbox.py` kills the job when it is exceeded.                                    |
+| Network           | `AF_UNIX` only     | A seccomp filter in `launcher.py` denies `socket` of any other family.             |
+| Writing           | its directory only | An unprivileged uid; `/scratch`, `/tmp` and `/app` belong to root.                 |
 
-Un trabajo corre con el uid de su ranura, sin capacidades y con `no_new_privs`.
-Al terminar se matan los procesos de ese uid y se borran su directorio y lo que
-dejó en `/scratch`, `/tmp`, `/var/tmp` y `/dev/shm`. El servidor ejecuta tantos
-trabajos a la vez como ranuras tiene (`QG_JOBS`, por defecto 1); el ciclo de las
-ranuras está en [architecture.md](architecture.md#runner). Los demás valores se
-cambian con `QG_WALL_S`, `QG_MEM_MB` y `QG_SCRATCH_MB`.
+A job runs with the uid of its slot, with no capabilities and with
+`no_new_privs`. When it ends, the processes of that uid are killed and its
+directory and whatever it left in `/scratch`, `/tmp`, `/var/tmp` and `/dev/shm`
+are deleted. The server runs as many jobs at once as it has slots (`QG_JOBS`,
+default 1); the slot cycle is in [architecture.md](architecture.md#runner). The
+other values change with `QG_WALL_S`, `QG_MEM_MB` and `QG_SCRATCH_MB`.
 
-El trabajo es `python -u -P -m qgcheck.job`, el mismo que lanza
-[`qgcheck.grade`](exercises.md#corregir-código) en tu equipo sin los límites de
-arriba. Con `mode: "run"` el código del alumno corre en ese proceso. Con
-`mode: "check"` hay dos procesos del mismo uid:
+The job is `python -u -P -m qgcheck.job`, the same one that
+[`qgcheck.grade`](exercises.md#grade-code) launches on your machine without the
+limits above. With `mode: "run"` the learner's code runs in that process. With
+`mode: "check"` there are two processes of the same uid:
 
-- El comprobador (`qgcheck/job.py`) corre los casos de `check.py`. Antes de
-  importar nada instala el filtro de importaciones diferidas de Python
-  (`sys.set_lazy_imports_filter`) para `qiskit_ibm_runtime` y
-  `qiskit_mitigation`: sus clientes y `scipy` se cargan al usarlos, no al
-  importar el paquete. Después se declara no volcable e importa las bibliotecas
-  de `PRELOAD_ROOTS` (`qgcheck/source.py`) que usan el código del alumno y
-  `check.py`.
-- El proceso del alumno (`qgcheck/host.py`) es un `fork` del comprobador, hecho
-  antes de leer `check.py`, así que hereda las bibliotecas ya cargadas y ninguna
-  respuesta. Cierra todos los descriptores salvo su extremo de un `socketpair`
-  con el comprobador, ejecuta el código del alumno una vez y atiende las
-  peticiones una a una en ese mismo proceso: el estado de nivel superior pasa de
-  una a otra, como en el intérprete del alumno, y su salida se muestra una vez.
-  No bifurca por petición porque el código del alumno ya puede haber creado
-  hilos (Qiskit los crea al transpilar) y el hijo de un proceso con hilos se
-  bloquea.
+- The checker (`qgcheck/job.py`) runs the cases of `check.py`. Before importing
+  anything it installs Python's lazy-import filter
+  (`sys.set_lazy_imports_filter`) for `qiskit_ibm_runtime` and
+  `qiskit_mitigation`: their clients and `scipy` load when used, not when the
+  package is imported. Then it declares itself non-dumpable and imports the
+  libraries of `PRELOAD_ROOTS` (`qgcheck/source.py`) that the learner's code and
+  `check.py` use.
+- The learner's process (`qgcheck/host.py`) is a `fork` of the checker, made
+  before reading `check.py`, so it inherits the already loaded libraries and no
+  answer. It closes all descriptors except its end of a `socketpair` with the
+  checker, runs the learner's code once and serves the requests one at a time in
+  that same process: the top-level state passes from one to the next, as in the
+  learner's interpreter, and its output shows once. It does not fork per request
+  because the learner's code may already have created threads (Qiskit creates
+  them when transpiling) and the child of a process with threads hangs.
 
-Cada acceso a `learner.<nombre>` de un caso es una petición por el socket: qué
-nombres hay, el valor de uno o su llamada. Los mensajes son JSON con la longitud
-delante (`qgcheck/wire.py`, hasta 4 MiB) y llevan un `id` que el comprobador
-sortea en cada petición. Solo viajan datos: números, textos, listas, tuplas,
-diccionarios con claves de texto, `bytes`, arreglos de NumPy, `Statevector`,
-`Operator`, `SparsePauliOp` y `QuantumCircuit` en QPY. Nunca se deserializa
-código. Un caso que necesita pasar o recibir otra cosa (una clase, un
-`PassManager`, un `Target`, unos ejes) la maneja en una función de `check.py`
-marcada con `@inside`, que corre en el proceso del alumno y devuelve datos
-([exercises.md](exercises.md#escribir-checkpy)).
+Each access to `learner.<name>` in a case is a request over the socket: which
+names exist, the value of one or its call. The messages are JSON with the length
+in front (`qgcheck/wire.py`, up to 4 MiB) and carry an `id` that the checker
+draws at random on each request. Only data travels: numbers, strings, lists,
+tuples, dictionaries with string keys, `bytes`, NumPy arrays, `Statevector`,
+`Operator`, `SparsePauliOp` and `QuantumCircuit` in QPY. Code is never
+deserialized. A case that needs to pass or receive anything else (a class, a
+`PassManager`, a `Target`, some axes) handles it in a function of `check.py`
+marked `@inside`, which runs in the learner's process and returns data
+([exercises.md](exercises.md#write-checkpy)).
 
-El comprobador se declara no volcable y el proceso del alumno nace de él antes
-de que exista ningún valor esperado, así que el alumno no lee ni escribe la
-memoria del comprobador ni abre sus descriptores, y su único canal es el socket.
-El alumno decide el valor que devuelve cada petición, lo calcule su función o
-no, y los casos juzgan ese valor fuera de su proceso. Como no conoce el `id`
-hasta recibir la petición, no puede dejar respuestas escritas para las
-siguientes: el comprobador descarta toda respuesta que no repita el `id` y la
-trata como un canal roto. El alumno sí puede leer `check.py`: el corredor
-protege el anfitrión y la corrección, no la clave de respuestas.
+The checker declares itself non-dumpable and the learner's process is born from
+it before any expected value exists, so the learner reads or writes neither the
+checker's memory nor opens its descriptors, and its only channel is the socket.
+The learner decides the value each request returns, whether its function
+computes it or not, and the cases judge that value outside its process. Since it
+does not know the `id` until it receives the request, it cannot leave answers
+written for the following ones: the checker discards any answer that does not
+repeat the `id` and treats it as a broken channel. The learner can read
+`check.py`: the runner protects the host and the grading, not the answer key.
 
-## Archivos
+## Files
 
-| Archivo                              | Función                                                                                        |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `runner/server.py`                   | El servidor HTTP y la validación de la petición.                                               |
-| `runner/sandbox.py`                  | Lanza el trabajo y vigila tiempo, memoria, disco y salida.                                     |
-| `runner/launcher.py`                 | Fija los rlimits, baja de uid e instala el filtro seccomp antes del `exec`.                    |
-| `qgcheck/job.py`                     | El trabajo: el comprobador de `check` y la ejecución de `run`.                                 |
-| `qgcheck/host.py`                    | El proceso del alumno de `check`.                                                              |
-| `qgcheck/wire.py`                    | El formato de mensajes entre esos dos procesos.                                                |
-| `qgcheck/`                           | El corrector de [exercises.md](exercises.md). La imagen lo copia sin cambios.                  |
-| `runner/Dockerfile`                  | La imagen. Python y uv salen de `mise.toml`; las bibliotecas, del grupo `runner` de `uv.lock`. |
-| `runner/local.py`                    | Construye la imagen y la ejecuta con Docker y las banderas de aislamiento.                     |
-| `runner/bench.py`                    | Mide la latencia fría y templada.                                                              |
-| `runner/worker/`                     | El Worker de Cloudflare: sirve `site/` y arranca la imagen como Container.                     |
-| `runner/worker/cloudflare.config.ts` | El Worker, el Container, los Durable Objects, las variables y las rutas.                       |
-| `runner/worker/wrangler.config.ts`   | El directorio de `site/` que el Worker publica como archivos estáticos.                        |
-| `runner/worker/src/routes.ts`        | Las rutas que entran al Worker antes que a los archivos.                                       |
-| `runner/worker/src/index.ts`         | Las comprobaciones de [Protección del Worker](#protección-del-worker).                         |
-| `runner/worker/src/meters.ts`        | Los Durable Objects `RateLimiter` y `Budget`.                                                  |
-| `runner/worker/src/session.ts`       | La cookie de sesión de Turnstile y la llamada a `siteverify`.                                  |
-| `runner/worker/src/throttle.ts`      | El contador por clave (IP o usuario) sobre `RateLimiter`.                                      |
-| `runner/worker/src/auth.ts`          | `/auth/*`: el inicio de sesión con Google y GitHub y el cierre.                                |
-| `runner/worker/src/account.ts`       | Usuarios, identidades y sesiones de cuenta en D1.                                              |
-| `runner/worker/src/api.ts`           | `/api/*`: la cuenta y su progreso.                                                             |
-| `runner/worker/src/progress.ts`      | La validación y la unión del progreso.                                                         |
-| `runner/worker/src/attempts.ts`      | Lo que se anota de cada ejecución.                                                             |
-| `runner/worker/src/purge.ts`         | La limpieza diaria.                                                                            |
-| `runner/worker/src/schema.sql`       | El esquema de la base D1.                                                                      |
-| `tools/dashboard.py`                 | El panel del operador: lee D1 y muestra dónde se atascan los alumnos.                          |
-| `runner/worker/src/http.ts`          | Las respuestas y la comprobación de origen que comparten `/auth` y `/api`.                     |
-| `runner/worker/src/contract.ts`      | La forma de un id de ejercicio.                                                                |
-| `runner/worker/src/log.ts`           | Las únicas líneas que el Worker escribe en su registro.                                        |
-| `runner/worker/test/`                | Las pruebas del Worker con un contenedor y un proveedor OAuth falsos.                          |
-| `runner/worker/test/serve.ts`        | El mismo Worker en local, para las pruebas de navegador de la cuenta.                          |
-| `site/qiskit/account.js`             | El cliente de la cuenta: el menú, la unión al cargar y el envío al escribir.                   |
-| `site/qiskit/privacidad.html`        | La página de privacidad.                                                                       |
-| [`deploy.md`](deploy.md)             | Los pasos para publicar una copia propia.                                                      |
-| `exercises/<lección>/<ejercicio>/`   | La imagen solo lleva `check.py` de cada uno.                                                   |
+| File                                 | Function                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `runner/server.py`                   | The HTTP server and the validation of the request.                                                   |
+| `runner/sandbox.py`                  | Launches the job and watches time, memory, disk and output.                                          |
+| `runner/launcher.py`                 | Sets the rlimits, drops the uid and installs the seccomp filter before the `exec`.                   |
+| `qgcheck/job.py`                     | The job: the checker of `check` and the execution of `run`.                                          |
+| `qgcheck/host.py`                    | The learner's process of `check`.                                                                    |
+| `qgcheck/wire.py`                    | The message format between those two processes.                                                      |
+| `qgcheck/`                           | The grader of [exercises.md](exercises.md). The image copies it unchanged.                           |
+| `runner/Dockerfile`                  | The image. Python and uv come from `mise.toml`; the libraries, from the `runner` group of `uv.lock`. |
+| `runner/local.py`                    | Builds the image and runs it with Docker and the isolation flags.                                    |
+| `runner/bench.py`                    | Measures cold and warm latency.                                                                      |
+| `runner/worker/`                     | The Cloudflare Worker: serves `site/` and starts the image as a Container.                           |
+| `runner/worker/cloudflare.config.ts` | The Worker, the Container, the Durable Objects, the variables and the routes.                        |
+| `runner/worker/wrangler.config.ts`   | The `site/` directory the Worker publishes as static files.                                          |
+| `runner/worker/src/routes.ts`        | The routes that enter the Worker before the files.                                                   |
+| `runner/worker/src/index.ts`         | The checks of [Worker protection](#worker-protection).                                               |
+| `runner/worker/src/meters.ts`        | The Durable Objects `RateLimiter` and `Budget`.                                                      |
+| `runner/worker/src/session.ts`       | The Turnstile session cookie and the call to `siteverify`.                                           |
+| `runner/worker/src/throttle.ts`      | The per-key counter (IP or user) over `RateLimiter`.                                                 |
+| `runner/worker/src/auth.ts`          | `/auth/*`: sign-in with Google and GitHub and sign-out.                                              |
+| `runner/worker/src/account.ts`       | Users, identities and account sessions in D1.                                                        |
+| `runner/worker/src/api.ts`           | `/api/*`: the account and its progress.                                                              |
+| `runner/worker/src/progress.ts`      | The validation and the merge of the progress.                                                        |
+| `runner/worker/src/attempts.ts`      | What is recorded of each run.                                                                        |
+| `runner/worker/src/purge.ts`         | The daily cleanup.                                                                                   |
+| `runner/worker/src/schema.sql`       | The schema of the D1 database.                                                                       |
+| `tools/dashboard.py`                 | The operator dashboard: reads D1 and shows where learners get stuck.                                 |
+| `runner/worker/src/http.ts`          | The responses and the origin check that `/auth` and `/api` share.                                    |
+| `runner/worker/src/contract.ts`      | The shape of an exercise id.                                                                         |
+| `runner/worker/src/log.ts`           | The only lines the Worker writes to its log.                                                         |
+| `runner/worker/test/`                | The Worker tests with a fake container and a fake OAuth provider.                                    |
+| `runner/worker/test/serve.ts`        | The same Worker locally, for the browser tests of the account.                                       |
+| `site/qiskit/account.js`             | The account client: the menu, the merge on load and the send on write.                               |
+| `site/qiskit/privacidad.html`        | The privacy page.                                                                                    |
+| [`deploy.md`](deploy.md)             | The steps to publish your own copy.                                                                  |
+| `exercises/<lesson>/<exercise>/`     | The image carries only the `check.py` of each.                                                       |
 
-## Ejecutarlo con Docker
+## Run it with Docker
 
 ```sh
 python runner/local.py serve
 ```
 
-Construye la imagen `qg-runner` si hace falta (`python runner/local.py build`),
-la arranca y escribe su URL. Usa gVisor (`runsc`) si Docker lo tiene registrado
-y `runc` si no; `--runtime` lo fuerza. El contenedor va en una red interna de
-Docker, sin salida a internet, con el sistema de archivos de solo lectura y sin
-más capacidades que `SETUID`, `SETGID`, `KILL`, `CHOWN`, `FOWNER`,
-`DAC_OVERRIDE` y `SYS_PTRACE` (el corredor la usa para leer la memoria de los
-procesos del alumno). Se alcanza por su IP, lo que funciona en Linux.
+It builds the `qg-runner` image if needed (`python runner/local.py build`),
+starts it and prints its URL. It uses gVisor (`runsc`) if Docker has it
+registered and `runc` if not; `--runtime` forces one. The container runs on an
+internal Docker network, with no internet access, with a read-only file system
+and no capabilities beyond `SETUID`, `SETGID`, `KILL`, `CHOWN`, `FOWNER`,
+`DAC_OVERRIDE` and `SYS_PTRACE` (the runner uses the last to read the memory of
+the learner's processes). It is reached by its IP, which works on Linux.
 
 ```sh
 curl -s $URL/run -d '{"code": "print(2 + 2)"}'
 ```
 
-## Pruebas y medidas
+## Tests and measurements
 
 ```sh
 mise run test:integration
 python runner/bench.py --runs 50
 ```
 
-`tests/runner_test.py` construye la imagen, la arranca y habla con `/run` por
-HTTP. Cubre el contrato, que el resultado de cada ejercicio sea el de
-`qgcheck.grade`, los intentos de falsear un resultado y cada límite. Se salta si
-Docker no responde.
+`tests/runner_test.py` builds the image, starts it and talks to `/run` over
+HTTP. It covers the contract, that the result of each exercise is that of
+`qgcheck.grade`, attempts to forge a result and each limit. It is skipped if
+Docker does not respond.
 
 ```sh
 mise run test:worker
 ```
 
-Las pruebas del Worker (`runner/worker/test/`) arrancan el Worker real en el
-runtime local de Cloudflare (Miniflare), con `site/` como archivos estáticos y
-las mismas rutas de entrada que el despliegue, y con un contenedor falso que
-anota cada llamada, una base D1 local y un proveedor OAuth falso que hace de
-Google y de GitHub. No necesitan Docker ni cuenta. Comprueban que `GET /` sirve
-el catálogo y `GET /qiskit/` el curso, y que las páginas del curso no responden
-en la raíz, que `POST /run` devuelve el JSON del corredor y cada límite de
-[Protección del Worker](#protección-del-worker) por su respuesta y, con el
-contenedor falso, que una petición rechazada no lo alcanza. También recorren el
-inicio de sesión, los [endpoints de la cuenta](#cuentas), lo que se guarda de
-cada ejecución y la limpieza diaria. Dos pruebas llaman al `siteverify` real con
-las claves de prueba y se saltan si no hay red.
+The Worker tests (`runner/worker/test/`) start the real Worker in Cloudflare's
+local runtime (Miniflare), with `site/` as static files and the same entry
+routes as the deploy, and with a fake container that records each call, a local
+D1 database and a fake OAuth provider that stands in for Google and GitHub. They
+need no Docker or account. They check that `GET /` serves the catalog and
+`GET /qiskit/` the course, and that the course pages do not answer at the root,
+that `POST /run` returns the runner's JSON and each limit of
+[Worker protection](#worker-protection) by its response and, with the fake
+container, that a rejected request does not reach it. They also walk through
+sign-in, the [account endpoints](#accounts), what is stored of each run and the
+daily cleanup. Two tests call the real `siteverify` with the test keys and are
+skipped if there is no network.
 
-`tests/account_ui_test.py` arranca `runner/worker/test/serve.ts`, que sirve ese
-mismo Worker en local con el proveedor falso, y lo recorre con un navegador:
-termina una lección y falla una comprobación sin cuenta, entra, abre otro
-navegador con la misma cuenta, borra la cuenta y mira qué queda en el servidor y
-en el navegador. Se ejecuta dentro de `mise run test:ui`.
+`tests/account_ui_test.py` starts `runner/worker/test/serve.ts`, which serves
+that same Worker locally with the fake provider, and walks through it with a
+browser: it finishes a lesson and fails a check without an account, signs in,
+opens another browser with the same account, deletes the account and looks at
+what remains on the server and in the browser. It runs inside
+`mise run test:ui`.
 
 ## Cloudflare Containers
 
-`runner/worker/` es un solo Worker, `duo`, que sirve el catálogo, los cursos, el
-corredor y las cuentas en el mismo origen, `edu.rising.sh`: el editor llama a
-`/run` y la cookie de sesión de Turnstile es `SameSite=Strict`.
+`runner/worker/` is a single Worker, `duo`, that serves the catalog, the
+courses, the runner and the accounts on the same origin, `edu.rising.sh`: the
+editor calls `/run` and the Turnstile session cookie is `SameSite=Strict`.
 
-- Los archivos de `site/` son sus archivos estáticos. El directorio lo fija
+- The files of `site/` are its static files. The directory is set by
   [`wrangler.config.ts`](../runner/worker/wrangler.config.ts).
-- `/run`, `/health`, `/auth/*` y `/api/*` entran al código del Worker antes que
-  a los archivos (`run_worker_first`). La lista está en
-  [`src/routes.ts`](../runner/worker/src/routes.ts), que usan también el
-  despliegue y las pruebas. Un archivo del sitio lo responde el servicio de
-  archivos sin ejecutar el Worker: `/` es el catálogo y `/qiskit/` el curso. Una
-  ruta que no es un archivo pasa al Worker, que se la devuelve al servicio de
-  archivos, y este responde 404. Una ruta de `/auth/*` o de `/api/*` que no
-  existe la responde el Worker con 404 y `reason` `not_found`.
-- Una clase `Runner` que extiende `Container` (`@cloudflare/containers`) reparte
-  las peticiones de `/run` entre dos instancias. Si la instancia elegida
-  responde 503, repite la petición una vez en la otra. La instancia no tiene
-  salida a internet (`enableInternet = false`) y se apaga a los 60 segundos sin
-  peticiones.
+- `/run`, `/health`, `/auth/*` and `/api/*` enter the Worker code before the
+  files (`run_worker_first`). The list is in
+  [`src/routes.ts`](../runner/worker/src/routes.ts), which the deploy and the
+  tests also use. A file of the site is answered by the file service without
+  running the Worker: `/` is the catalog and `/qiskit/` the course. A route that
+  is not a file goes to the Worker, which hands it back to the file service, and
+  this answers 404. A route under `/auth/*` or `/api/*` that does not exist is
+  answered by the Worker with 404 and `reason` `not_found`.
+- A `Runner` class that extends `Container` (`@cloudflare/containers`) spreads
+  the `/run` requests between two instances. If the chosen instance answers 503,
+  it repeats the request once on the other. The instance has no internet access
+  (`enableInternet = false`) and shuts down after 60 seconds without requests.
 
-Un solo `cf deploy` construye la imagen, empaqueta el Worker y sube `site/` como
-una versión. Para publicar un cambio de las lecciones hay que volver a
-desplegar.
+A single `cf deploy` builds the image, packages the Worker and uploads `site/`
+as one version. To publish a change to the lessons, deploy again.
 
-### Lo que fija el operador
+### What the operator sets
 
-El plan Workers Paid, Docker, la base D1, el widget de Turnstile y los clientes
-OAuth son de la cuenta de quien despliega. [deploy.md](deploy.md) da los pasos.
-Los valores y los secretos que el Worker lee están en
-[Variables y secretos](#variables-y-secretos). El Worker es `duo`, sirve en
-`edu.rising.sh` (`domains: ["edu.rising.sh"]`) y no usa `workers.dev`. Su
-Container es `duo-runner`.
+The Workers Paid plan, Docker, the D1 database, the Turnstile widget and the
+OAuth clients belong to the account of whoever deploys. [deploy.md](deploy.md)
+gives the steps. The values and the secrets the Worker reads are in
+[Variables and secrets](#variables-and-secrets). The Worker is `duo`, serves on
+`edu.rising.sh` (`domains: ["edu.rising.sh"]`) and does not use `workers.dev`.
+Its Container is `duo-runner`.
 
-## Cuentas
+## Accounts
 
-Una cuenta es opcional. Sin ella todo funciona y el progreso se queda en el
-navegador (`localStorage`). Con ella el progreso se guarda en una base D1 y se
-comparte entre dispositivos. Se entra con Google o con GitHub, sin contraseña.
+An account is optional. Without it everything works and the progress stays in
+the browser (`localStorage`). With it the progress is stored in a D1 database
+and shared between devices. Sign-in is with Google or GitHub, without a
+password.
 
-| Método y ruta                      | Qué hace                                                                     |
-| ---------------------------------- | ---------------------------------------------------------------------------- |
-| `GET /auth/google`, `/auth/github` | Redirige al proveedor. `?return=/ruta` dice adónde volver (por defecto `/`). |
-| `GET /auth/<proveedor>/callback`   | La vuelta del proveedor. Abre la sesión y redirige a `return`.               |
-| `POST /auth/logout`                | Cierra la sesión. Responde 204.                                              |
-| `GET /api/me`                      | Quién entró y su progreso.                                                   |
-| `POST /api/merge`                  | Junta el progreso del navegador con el de la cuenta.                         |
-| `PUT /api/progress`                | Guarda cambios de progreso. Responde 204.                                    |
-| `DELETE /api/me`                   | Borra la cuenta y todo lo suyo.                                              |
+| Method and route                   | What it does                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------------ |
+| `GET /auth/google`, `/auth/github` | Redirects to the provider. `?return=/path` says where to return (default `/`). |
+| `GET /auth/<provider>/callback`    | The return from the provider. Opens the session and redirects to `return`.     |
+| `POST /auth/logout`                | Closes the session. Answers 204.                                               |
+| `GET /api/me`                      | Who signed in and their progress.                                              |
+| `POST /api/merge`                  | Merges the browser's progress with the account's.                              |
+| `PUT /api/progress`                | Saves progress changes. Answers 204.                                           |
+| `DELETE /api/me`                   | Deletes the account and everything of theirs.                                  |
 
-Las respuestas de error llevan `{"error": "...", "reason": "..."}`. Los métodos
-que cambian datos (`POST`, `PUT`, `DELETE`) exigen la cabecera `Origin` del
-mismo origen y responden 403 `bad_origin` si no. Sin sesión, todo `/api` salvo
-`GET /api/me` responde 401 `signed_out`. Una ruta que no existe responde 404
-`not_found`, y un método equivocado, 405 `method` con `Allow`.
+Error responses carry `{"error": "...", "reason": "..."}`. The methods that
+change data (`POST`, `PUT`, `DELETE`) require the `Origin` header of the same
+origin and answer 403 `bad_origin` if not. Without a session, all of `/api`
+except `GET /api/me` answers 401 `signed_out`. A route that does not exist
+answers 404 `not_found`, and a wrong method, 405 `method` with `Allow`.
 
-### Entrar
+### Sign-in
 
-El inicio de sesión es el flujo de código de autorización de OAuth 2.0 con
-`state` y PKCE (S256), escrito sin biblioteca en
-[`src/auth.ts`](../runner/worker/src/auth.ts).
+Sign-in is the OAuth 2.0 authorization code flow with `state` and PKCE (S256),
+written without a library in [`src/auth.ts`](../runner/worker/src/auth.ts).
 
-1. `GET /auth/<proveedor>` guarda un `state` al azar, el verificador PKCE y el
-   `return` en la cookie `qg_oauth`
-   (`Path=/auth; HttpOnly; Secure; SameSite=Lax`, 10 minutos) y redirige al
-   proveedor. Google recibe el permiso `openid`; GitHub, ninguno. `return` solo
-   puede ser una ruta de este sitio (empieza por una `/` y no por `//` ni `/\`,
-   sin caracteres de control, hasta 200 caracteres); otra cosa responde 400
-   `bad_return`. La redirección escribe en porcentaje (UTF-8) los caracteres que
-   no son ASCII. Sin las credenciales del proveedor responde 503
+1. `GET /auth/<provider>` stores a random `state`, the PKCE verifier and the
+   `return` in the `qg_oauth` cookie
+   (`Path=/auth; HttpOnly; Secure; SameSite=Lax`, 10 minutes) and redirects to
+   the provider. Google receives the `openid` scope; GitHub, none. `return` can
+   only be a route of this site (it starts with a `/` and not with `//` or `/\`,
+   has no control characters, up to 200 characters); anything else answers 400
+   `bad_return`. The redirect percent-encodes (UTF-8) the characters that are
+   not ASCII. Without the provider's credentials it answers 503
    `provider_unavailable`.
-2. La vuelta cambia el código por un token en el extremo del proveedor y lee de
-   su extremo de datos solo el identificador: `sub` en Google, `id` en GitHub.
-   Las peticiones a GitHub llevan `User-Agent: qiskit-guides`.
-3. Si el identificador ya tiene usuario, entra en él; si no, se crea uno. Una
-   sesión nueva sale en la cookie `qg_auth`
-   (`Path=/; HttpOnly; Secure; SameSite=Lax`, `AUTH_SESSION_DAYS` días) y la
-   respuesta redirige a `return`. La cookie `qg_oauth` se gasta en toda vuelta.
+2. The return exchanges the code for a token at the provider's endpoint and
+   reads from its data endpoint only the identifier: `sub` on Google, `id` on
+   GitHub. Requests to GitHub carry `User-Agent: qiskit-guides`.
+3. If the identifier already has a user, it signs in as that user; if not, one
+   is created. A new session goes out in the `qg_auth` cookie
+   (`Path=/; HttpOnly; Secure; SameSite=Lax`, `AUTH_SESSION_DAYS` days) and the
+   response redirects to `return`. The `qg_oauth` cookie is spent on every
+   return.
 
-La vuelta se rechaza con 400 si falta la cookie `qg_oauth` o es de otro
-proveedor (`flow_missing`), si el `state` no es el guardado (`state_mismatch`),
-si no trae `code` (`code_missing`) o si el proveedor no acepta el código
-(`code_rejected`: un código solo vale una vez). Si el proveedor no responde, 502
-`provider_failed`. Si el alumno cancela en la pantalla del proveedor, la
-respuesta redirige a `return` sin sesión.
+The return is rejected with 400 if the `qg_oauth` cookie is missing or belongs
+to another provider (`flow_missing`), if the `state` is not the stored one
+(`state_mismatch`), if it carries no `code` (`code_missing`) or if the provider
+does not accept the code (`code_rejected`: a code is valid only once). If the
+provider does not respond, 502 `provider_failed`. If the learner cancels on the
+provider's screen, the response redirects to `return` without a session.
 
-Un proveedor y un identificador son una identidad. Ni dos proveedores ni dos
-cuentas de un mismo proveedor se juntan: cada identidad nueva es un usuario
-nuevo.
+A provider and an identifier are an identity. Neither two providers nor two
+accounts of the same provider merge: each new identity is a new user.
 
-### El progreso
+### Progress
 
-`GET /api/me` responde `{"signedIn": false}` sin sesión. Con ella:
+`GET /api/me` answers `{"signedIn": false}` without a session. With one:
 
 ```json
 {
@@ -342,424 +343,428 @@ nuevo.
 }
 ```
 
-`done` son las lecciones terminadas. `exercises` guarda por ejercicio el código
-(solo si la página lo manda), las pistas y las comprobaciones, si pasó y `at`,
-los milisegundos Unix de la última edición. `kv` guarda las claves de
-`localStorage` que siguen una de estas formas:
+`done` are the finished lessons. `exercises` holds per exercise the code (only
+if the page sends it), the hints and the checks, whether it passed and `at`, the
+Unix milliseconds of the last edit. `kv` holds the `localStorage` keys that
+follow one of these shapes:
 
-| Clave                                    | Valor              | Al juntar dos valores                                                 |
-| ---------------------------------------- | ------------------ | --------------------------------------------------------------------- |
-| `qiskit:heard:<lección>`, `qiskit:hitos` | lista de enteros   | la unión                                                              |
-| `qiskit:misiones`                        | lista de textos    | la unión                                                              |
-| `qiskit:pos:<lección>`                   | entero             | el mayor                                                              |
-| `qiskit:predict:<lección>:<id>`          | entero             | el que ya estaba: una apuesta no cambia                               |
-| `qiskit:repaso`                          | `{id: {box, due}}` | por pregunta, la caja mayor y, a igual caja, la fecha que vence antes |
+| Key                                     | Value              | When merging two values                                                  |
+| --------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
+| `qiskit:heard:<lesson>`, `qiskit:hitos` | list of integers   | the union                                                                |
+| `qiskit:misiones`                       | list of strings    | the union                                                                |
+| `qiskit:pos:<lesson>`                   | integer            | the larger                                                               |
+| `qiskit:predict:<lesson>:<id>`          | integer            | the one already there: a bet does not change                             |
+| `qiskit:repaso`                         | `{id: {box, due}}` | per question, the higher box and, with equal boxes, the earlier due date |
 
-`POST /api/merge` y `PUT /api/progress` reciben el mismo cuerpo (`done`,
-`exercises` y `kv`, todos opcionales) y lo juntan con lo guardado:
+`POST /api/merge` and `PUT /api/progress` receive the same body (`done`,
+`exercises` and `kv`, all optional) and merge it with what is stored:
 
-- `done` se une.
-- Por ejercicio, `hints` y `checks` son el mayor, `passed` es verdadero si lo
-  era alguno, y el código es el de la edición con `at` mayor. Un código ausente
-  o `null` no borra el guardado.
-- `kv` se junta según la tabla.
+- `done` is united.
+- Per exercise, `hints` and `checks` are the larger, `passed` is true if either
+  was, and the code is that of the edit with the greater `at`. A missing or
+  `null` code does not delete the stored one.
+- `kv` is merged according to the table.
 
-Ninguna regla depende del orden, así que dos dispositivos que se sincronizan
-acaban en el mismo estado. `POST /api/merge` responde `{"progress": {...}}` con
-el resultado; `PUT /api/progress` responde 204. Una clave de `kv` o un campo que
-el Worker no conoce responde 400 `bad_request`, para que un error de la página
-se vea. El cuerpo es `application/json` (415 `content_type` si no) y de hasta
-800 000 bytes (413 `too_large`). Una cuenta admite 500 lecciones, 100 ejercicios
-y 2000 claves; pasarse responde 413 `too_much`. El código de un ejercicio mide
-hasta 20 000 bytes. Dos escrituras a la vez del mismo usuario no se pisan: una
-que encuentra el progreso cambiado vuelve a leer y a juntar. Si pierde 10 veces
-seguidas responde 503 `busy` con `Retry-After`. El detalle está en
+No rule depends on order, so two devices that sync end in the same state.
+`POST /api/merge` answers `{"progress": {...}}` with the result;
+`PUT /api/progress` answers 204. A `kv` key or a field the Worker does not know
+answers 400 `bad_request`, so an error in the page shows. The body is
+`application/json` (415 `content_type` if not) and up to 800 000 bytes (413
+`too_large`). An account allows 500 lessons, 100 exercises and 2000 keys;
+exceeding that answers 413 `too_much`. The code of an exercise is up to 20 000
+bytes. Two simultaneous writes of the same user do not overwrite each other: one
+that finds the progress changed reads and merges again. If it loses 10 times in
+a row it answers 503 `busy` with `Retry-After`. The detail is in
 [architecture.md](architecture.md#runner).
 
-`DELETE /api/me` borra el usuario y, por las claves foráneas, sus identidades,
-sesiones, progreso e intentos. Responde `{"deleted": true}` y borra la cookie.
+`DELETE /api/me` deletes the user and, through the foreign keys, their
+identities, sessions, progress and attempts. It answers `{"deleted": true}` and
+clears the cookie.
 
-Cada endpoint de `/auth` cuenta contra un límite por IP, `AUTH_PER_MINUTE` por
-minuto y `RATE_PER_DAY` por día, y responde 429 `rate_auth` al pasarse. Cada
-endpoint de `/api` cuenta contra el límite por usuario de
-[Límite por IP](#límite-por-ip).
+Each `/auth` endpoint counts against a per-IP limit, `AUTH_PER_MINUTE` per
+minute and `RATE_PER_DAY` per day, and answers 429 `rate_auth` when exceeded.
+Each `/api` endpoint counts against the per-user limit of
+[Per-IP limit](#per-ip-limit).
 
-### En el sitio
+### On the site
 
-[`site/qiskit/account.js`](../site/qiskit/account.js) es el cliente. Pone el
-menú _Entrar_ en la cabecera de la portada del curso, de las lecciones y de
-[`privacidad.html`](../site/qiskit/privacidad.html), la página que dice qué se
-guarda, cuánto tiempo y cómo borrarlo.
+[`site/qiskit/account.js`](../site/qiskit/account.js) is the client. It puts the
+_Entrar_ menu in the header of the course home page, the lessons and
+[`privacidad.html`](../site/qiskit/privacidad.html), the page that says what is
+stored, for how long and how to delete it.
 
-- Sin cuenta, la página no hace ninguna petición salvo `/run`. Lo que mira para
-  saberlo es la marca `qiskit:cuenta` de `localStorage`.
-- _Entrar con Google_ y _Entrar con GitHub_ van a `/auth/<proveedor>` con
-  `return` igual a la página actual más `#cuenta`. Al volver, ese `#cuenta` hace
-  que la página deje la marca y junte el progreso.
-- Con la marca, cada carga manda todo el progreso del navegador a
-  `POST /api/merge` y guarda la respuesta antes de que la página lo lea. Espera
-  4 segundos como mucho; si el Worker no responde, la página sigue con lo local.
-  La primera vez que entras, esa misma llamada junta lo que ya había en el
-  navegador con lo de la cuenta.
-- Cada cambio se manda después, en `PUT /api/progress`, 1,5 segundos después del
-  último y siempre al cerrar o ocultar la página. Sin red, el cambio queda en
-  `localStorage` y la siguiente carga lo junta.
-- Cada `qiskit:exercise:<id>` lleva `at`, la hora de la última edición del
-  código. Solo cambia al cambiar el código, no con las pistas ni las
-  comprobaciones. Así gana la copia más reciente al juntar.
-- Se sincronizan las lecciones hechas, el código, las pistas y las
-  comprobaciones de cada ejercicio y las claves de `kv` de la tabla de arriba.
-  El texto de las reflexiones (`qiskit:reflect`) no sale del navegador. Un valor
-  que el Worker rechazaría (un código de más de 20 000 bytes, por ejemplo) se
-  omite del cuerpo, porque rechazaría todo el cuerpo.
-- _Cerrar sesión_ llama a `POST /auth/logout` y _Borrar mi cuenta_, tras una
-  confirmación, a `DELETE /api/me`. Ninguna de las dos toca lo que hay en el
-  navegador. Una respuesta 401 quita la marca.
+- Without an account, the page makes no request except `/run`. What it looks at
+  to know is the `qiskit:cuenta` mark in `localStorage`.
+- _Entrar con Google_ and _Entrar con GitHub_ go to `/auth/<provider>` with
+  `return` equal to the current page plus `#cuenta`. On return, that `#cuenta`
+  makes the page leave the mark and merge the progress.
+- With the mark, each load sends all the browser's progress to `POST /api/merge`
+  and stores the response before the page reads it. It waits 4 seconds at most;
+  if the Worker does not respond, the page continues with the local data. The
+  first time you sign in, that same call merges what was already in the browser
+  with the account's data.
+- Each change is sent afterwards, in `PUT /api/progress`, 1.5 seconds after the
+  last one and always when the page is closed or hidden. Without a network, the
+  change stays in `localStorage` and the next load merges it.
+- Each `qiskit:exercise:<id>` carries `at`, the time of the last edit of the
+  code. It changes only when the code changes, not with hints or checks. This
+  way the most recent copy wins when merging.
+- The synced data are the finished lessons, the code, hints and checks of each
+  exercise and the `kv` keys of the table above. The text of the reflections
+  (`qiskit:reflect`) does not leave the browser. A value that the Worker would
+  reject (a code of more than 20 000 bytes, for example) is left out of the
+  body, because it would reject the whole body.
+- _Cerrar sesión_ calls `POST /auth/logout` and _Borrar mi cuenta_, after a
+  confirmation, `DELETE /api/me`. Neither touches what is in the browser. A 401
+  response removes the mark.
 
-El progreso local pasa a la cuenta con la que se entra, sea cual sea. En un
-equipo compartido, quien entra después junta lo que dejó quien usó el navegador
-antes.
+The local progress passes to the account that signs in, whichever it is. On a
+shared machine, whoever signs in afterwards merges what the previous user of the
+browser left.
 
-### Datos que se guardan
+### Data stored
 
-El Worker no guarda correo, nombre, avatar ni contraseña: no los pide al
-proveedor y descarta lo que este devuelve. El esquema es
+The Worker stores no email, name, avatar or password: it does not request them
+from the provider and discards what the provider returns. The schema is
 [`src/schema.sql`](../runner/worker/src/schema.sql).
 
-| Tabla            | Qué guarda                                                             |
-| ---------------- | ---------------------------------------------------------------------- |
-| `users`          | Un id al azar, el día de alta y el día de la última visita.            |
-| `identities`     | Proveedor e identificador del proveedor de cada usuario.               |
-| `sessions`       | El hash SHA-256 del token de `qg_auth` y su caducidad. Nunca el token. |
-| `lesson_done`    | Las lecciones terminadas y cuándo.                                     |
-| `exercise_state` | El código, las pistas, las comprobaciones y si pasó, por ejercicio.    |
-| `kv`             | Las claves de `localStorage` de la tabla de arriba.                    |
-| `attempts`       | Una fila por ejecución, con o sin cuenta.                              |
+| Table            | What it stores                                                           |
+| ---------------- | ------------------------------------------------------------------------ |
+| `users`          | A random id, the sign-up day and the day of the last visit.              |
+| `identities`     | Provider and provider identifier of each user.                           |
+| `sessions`       | The SHA-256 hash of the `qg_auth` token and its expiry. Never the token. |
+| `lesson_done`    | The finished lessons and when.                                           |
+| `exercise_state` | The code, hints, checks and whether it passed, per exercise.             |
+| `kv`             | The `localStorage` keys of the table above.                              |
+| `attempts`       | One row per run, with or without an account.                             |
 
-Cada respuesta 200 de `/run` escribe una fila en `attempts`, a partir del JSON
-que devolvió el contenedor, que es quien califica el código. La fila lleva el
-momento, el `user_id` (`NULL` sin cuenta), el ejercicio, el modo, el resultado
-(`pass`, `fail`, `error` o `timeout`), los nombres de los casos que fallaron, el
-nombre de la excepción de Python (o `other`, o `killed_memory`, `killed_disk`,
-`killed_output` o `killed_scan`), las pistas que la página dice haber usado
-(cabecera `X-Hints`, un dígito del 0 al 9), `ms` y el tamaño del código en
-bytes. No lleva el código, `stdout`, el texto del error ni el `message` de un
-caso, que pueden repetir lo que escribió el alumno. Solo se anota una ejecución
-con `mode` `run` o `check` y un `exercise` con la forma de un valor del
-contrato. Un fallo al escribir la fila se registra y la respuesta no cambia.
+Each 200 response of `/run` writes a row to `attempts`, from the JSON the
+container returned, which is what grades the code. The row carries the moment,
+the `user_id` (`NULL` without an account), the exercise, the mode, the result
+(`pass`, `fail`, `error` or `timeout`), the names of the cases that failed, the
+name of the Python exception (or `other`, or `killed_memory`, `killed_disk`,
+`killed_output` or `killed_scan`), the hints the page says it used (`X-Hints`
+header, a digit from 0 to 9), `ms` and the size of the code in bytes. It does
+not carry the code, `stdout`, the error text or the `message` of a case, which
+could repeat what the learner wrote. A run is recorded only with `mode` `run` or
+`check` and an `exercise` shaped like a value of the contract. A failure to
+write the row is logged and the response does not change.
 
-### Retención
+### Retention
 
-| Variable                 | Valor | Qué se borra                                        |
-| ------------------------ | ----- | --------------------------------------------------- |
-| `ATTEMPT_RETENTION_DAYS` | 180   | Los intentos de más de esos días.                   |
-| `ACCOUNT_RETENTION_DAYS` | 730   | Las cuentas sin una visita en esos días (24 meses). |
+| Variable                 | Value | What is deleted                                             |
+| ------------------------ | ----- | ----------------------------------------------------------- |
+| `ATTEMPT_RETENTION_DAYS` | 180   | The attempts older than that many days.                     |
+| `ACCOUNT_RETENTION_DAYS` | 730   | The accounts without a visit in that many days (24 months). |
 
-Un cron diario (`17 3 * * *`, UTC) llama al manejador `scheduled` del Worker,
-que borra en un solo lote los intentos vencidos, las sesiones caducadas y las
-cuentas inactivas. Borrar una cuenta arrastra todo lo suyo. Una visita es una
-petición con sesión de cuenta, y se anota a lo sumo una vez al día.
+A daily cron (`17 3 * * *`, UTC) calls the Worker's `scheduled` handler, which
+deletes in a single batch the expired attempts, the expired sessions and the
+inactive accounts. Deleting an account takes everything of theirs with it. A
+visit is a request with an account session, and it is recorded at most once a
+day.
 
-### Dónde se atascan los alumnos
+### Where learners get stuck
 
-`tools/dashboard.py` lee la base con `wrangler d1 execute` y no escribe nada.
-`uv run python tools/dashboard.py --database-id <uuid>` lee la base remota, con
-la sesión de `bunx wrangler login` (en `runner/worker`) o
-`CLOUDFLARE_API_TOKEN`, y `--local` lee la copia local de `--persist-to`.
-Imprime, para el periodo de `--since` a `--until` (días UTC, por defecto los
-últimos 30), los usuarios nuevos, los que intentaron algo y los intentos con y
-sin cuenta; las lecciones terminadas por lección; los ejercicios con más
-comprobaciones fallidas y los casos que más fallan; y los ejercicios aprobados
-con más pistas abiertas. Una comprobación fallida es un intento `check` que no
-acabó en `pass`, y cuenta también sin cuenta. Las lecciones terminadas y las
-pistas salen de las tablas de una cuenta, así que no cuentan a nadie anónimo.
-`--json` imprime lo mismo como JSON y `--limit` fija las filas de cada ranking
-(10 por defecto).
+`tools/dashboard.py` reads the database with `wrangler d1 execute` and writes
+nothing. `uv run python tools/dashboard.py --database-id <uuid>` reads the
+remote database, with the session of `bunx wrangler login` (in `runner/worker`)
+or `CLOUDFLARE_API_TOKEN`, and `--local` reads the local copy of `--persist-to`.
+For the period from `--since` to `--until` (UTC days, by default the last 30) it
+prints the new users, those who tried something and the attempts with and
+without an account; the lessons finished per lesson; the exercises with the most
+failed checks and the cases that fail most; and the passed exercises with the
+most hints opened. A failed check is a `check` attempt that did not end in
+`pass`, and it counts without an account too. The finished lessons and the hints
+come from the tables of an account, so they do not count anyone anonymous.
+`--json` prints the same as JSON and `--limit` sets the rows of each ranking (10
+by default).
 
-### Variables y secretos
+### Variables and secrets
 
-Los secretos se crean con `bindings.secret()` en
-[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts) y no se escriben
-en el repositorio. [deploy.md](deploy.md) dice dónde se obtiene cada uno y cómo
-se guarda.
+The secrets are created with `bindings.secret()` in
+[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts) and are not
+written in the repository. [deploy.md](deploy.md) says where each is obtained
+and how it is stored.
 
-| Nombre                                     | Tipo    | Para qué                                                          |
-| ------------------------------------------ | ------- | ----------------------------------------------------------------- |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secreto | El cliente OAuth de Google.                                       |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | secreto | La aplicación OAuth de GitHub.                                    |
-| `TURNSTILE_SECRET`                         | secreto | El widget de Turnstile; también clave del HMAC de los contadores. |
-| `DB`                                       | D1      | La base de datos.                                                 |
-| `AUTH_PER_MINUTE`                          | 10      | Peticiones por IP y minuto a `/auth/*`.                           |
-| `AUTH_SESSION_DAYS`                        | 30      | Duración de la cookie `qg_auth`.                                  |
-| `SIGNED_IN_IP_FACTOR`                      | 4       | Cuánto sube el tope por IP de quien tiene cuenta.                 |
-| `ATTEMPT_RETENTION_DAYS`                   | 180     | Ver [Retención](#retención).                                      |
-| `ACCOUNT_RETENTION_DAYS`                   | 730     | Ver [Retención](#retención).                                      |
+| Name                                       | Type   | What for                                                  |
+| ------------------------------------------ | ------ | --------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secret | The Google OAuth client.                                  |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | secret | The GitHub OAuth application.                             |
+| `TURNSTILE_SECRET`                         | secret | The Turnstile widget; also the HMAC key of the counters.  |
+| `DB`                                       | D1     | The database.                                             |
+| `AUTH_PER_MINUTE`                          | 10     | Requests per IP and minute to `/auth/*`.                  |
+| `AUTH_SESSION_DAYS`                        | 30     | Lifetime of the `qg_auth` cookie.                         |
+| `SIGNED_IN_IP_FACTOR`                      | 4      | How much the per-IP cap of someone with an account rises. |
+| `ATTEMPT_RETENTION_DAYS`                   | 180    | See [Retention](#retention).                              |
+| `ACCOUNT_RETENTION_DAYS`                   | 730    | See [Retention](#retention).                              |
 
-El Worker arma el `redirect_uri` con el origen de la petición. Qué registrar en
-cada proveedor lo dice [deploy.md](deploy.md).
+The Worker builds the `redirect_uri` from the origin of the request. What to
+register with each provider is in [deploy.md](deploy.md).
 
-## Protección del Worker
+## Worker protection
 
-El Worker comprueba cada `POST /run` antes de arrancar el contenedor. Las
-comprobaciones van en este orden, y la primera que falla responde sin que el
-contenedor reciba nada:
+The Worker checks each `POST /run` before starting the container. The checks go
+in this order, and the first that fails answers without the container receiving
+anything:
 
-1. El límite por IP.
-2. El límite por usuario, si la petición trae una sesión de cuenta (`qg_auth`)
-   que no es de un mantenedor.
-3. El tamaño del cuerpo y del código.
-4. El presupuesto del mes y del día ([Presupuesto](#presupuesto)).
-5. Turnstile, si la petición no es de un mantenedor ni trae una sesión de
-   Turnstile válida.
+1. The per-IP limit.
+2. The per-user limit, if the request carries an account session (`qg_auth`)
+   that does not belong to a maintainer.
+3. The size of the body and of the code.
+4. The budget of the month and of the day ([Budget](#budget)).
+5. Turnstile, if the request is not from a maintainer and carries no valid
+   Turnstile session.
 
-Una negativa lleva `{"error": "...", "reason": "..."}`. El editor muestra el
-texto de `error` tal cual. Todos los valores salen de `env` en
-[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts); cambiarlos es
-editar ese archivo y desplegar. Un valor ausente o que no es un número positivo
-hace que el Worker responda 500 con `internal_error` y registre qué variable
-falló.
+A refusal carries `{"error": "...", "reason": "..."}`. The editor shows the
+`error` text as is. All the values come from `env` in
+[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts); changing them
+means editing that file and deploying. A missing value, or one that is not a
+positive number, makes the Worker answer 500 with `internal_error` and log which
+variable failed.
 
-`GET /health` lo responde el Worker con 200 sin tocar un contenedor, para que
-una petición sin límite no pueda mantener una instancia encendida.
+`GET /health` is answered by the Worker with 200 without touching a container,
+so an unlimited request cannot keep an instance awake.
 
-### Límite por IP
+### Per-IP limit
 
-| Variable          | Valor | Significa                                   |
-| ----------------- | ----- | ------------------------------------------- |
-| `RATE_PER_MINUTE` | 30    | Peticiones por IP en cada minuto del reloj. |
-| `RATE_PER_DAY`    | 1000  | Peticiones por IP en cada día UTC.          |
+| Variable          | Value | Meaning                               |
+| ----------------- | ----- | ------------------------------------- |
+| `RATE_PER_MINUTE` | 30    | Requests per IP in each clock minute. |
+| `RATE_PER_DAY`    | 1000  | Requests per IP in each UTC day.      |
 
-Cuenta toda petición a `/run` desde que llega, también las que luego se rechazan
-por tamaño o por Turnstile. Pasado el límite responde 429 con `Retry-After` en
-segundos y `reason` `rate_minute` o `rate_day`. El alumno ve:
+It counts every request to `/run` from the moment it arrives, including those
+rejected later for size or by Turnstile. Past the limit it answers 429 with
+`Retry-After` in seconds and `reason` `rate_minute` or `rate_day`. The learner
+sees:
 
-- «Estás ejecutando demasiado seguido. Espera 12 s y vuelve a intentarlo.»
-- «Llegaste al límite de ejecuciones de hoy. Puedes volver a ejecutar en 5 h.»
+- "Estás ejecutando demasiado seguido. Espera 12 s y vuelve a intentarlo."
+- "Llegaste al límite de ejecuciones de hoy. Puedes volver a ejecutar en 5 h."
 
-La IP es `CF-Connecting-IP`. Sin esa cabecera (en local) todas las peticiones
-comparten un solo contador. Una clase entera detrás de una misma IP comparte el
-límite.
+The IP is `CF-Connecting-IP`. Without that header (locally) all requests share a
+single counter. A whole class behind the same IP shares the limit.
 
-Con una sesión de cuenta, el tope por IP es `SIGNED_IN_IP_FACTOR` veces el
-anónimo (4: 120 por minuto y 4000 por día) y el que acota a cada alumno es el
-suyo, con los mismos valores de `RATE_PER_MINUTE` y `RATE_PER_DAY`. Así una
-clase entera con cuenta cabe detrás de una IP, y un solo alumno no gasta más que
-uno anónimo. La respuesta 429 es la misma, con `reason` `rate_minute` o
-`rate_day`.
+With an account session, the per-IP cap is `SIGNED_IN_IP_FACTOR` times the
+anonymous one (4: 120 per minute and 4000 per day) and what bounds each learner
+is their own, with the same values of `RATE_PER_MINUTE` and `RATE_PER_DAY`. This
+way a whole class with accounts fits behind one IP, and a single learner spends
+no more than an anonymous one. The 429 response is the same, with `reason`
+`rate_minute` or `rate_day`.
 
-Cada contador vive en un Durable Object `RateLimiter` que se nombra con un HMAC
-de la etiqueta (`limiter` para una IP, `user`, `auth` o `api`), del día y de la
-clave (la IP o el id del usuario). La clave del HMAC sale de `TURNSTILE_SECRET`,
-así que el nombre no se puede volver a una IP ni a un usuario sin ese secreto.
-El objeto guarda dos contadores y borra su estado cuando termina el día.
+Each counter lives in a `RateLimiter` Durable Object named with an HMAC of the
+label (`limiter` for an IP, `user`, `auth` or `api`), the day and the key (the
+IP or the user id). The HMAC key comes from `TURNSTILE_SECRET`, so the name
+cannot be traced back to an IP or a user without that secret. The object stores
+two counters and deletes its state when the day ends.
 
-### Tamaño del código
+### Code size
 
-| Variable         | Valor  | Significa                     |
-| ---------------- | ------ | ----------------------------- |
-| `MAX_CODE_BYTES` | 20 000 | Bytes UTF-8 del campo `code`. |
+| Variable         | Value  | Meaning                          |
+| ---------------- | ------ | -------------------------------- |
+| `MAX_CODE_BYTES` | 20 000 | UTF-8 bytes of the `code` field. |
 
-Un código mayor responde 413 con `reason` `too_large` y el alumno ve «El código
-ocupa 20001 bytes y el máximo son 20000.». Un cuerpo mayor que seis veces el
-máximo más 1024 bytes responde 413 sin leerse entero. Un cuerpo que no es JSON o
-no trae `code` como texto responde 400 (`bad_request`). El contenedor repite la
-comprobación con `MAX_CODE` de `qgcheck/runner.py`; para cambiar el tope hay que
-cambiar los dos.
+Code over the limit answers 413 with `reason` `too_large` and the learner sees
+"El código ocupa 20001 bytes y el máximo son 20000.". A body larger than six
+times the maximum plus 1024 bytes answers 413 without being read in full. A body
+that is not JSON or has no `code` as a string answers 400 (`bad_request`). The
+container repeats the check with `MAX_CODE` of `qgcheck/runner.py`; to change
+the cap, change both.
 
-### Presupuesto
+### Budget
 
-Cloudflare no tiene un tope de gasto: sus alertas de presupuesto solo mandan un
-correo ([deploy.md](deploy.md#10-pon-alertas-de-gasto)). Por eso el Worker
-cuenta lo que gasta y se niega a ejecutar cuando el gasto estimado del mes
-llegaría a `MONTHLY_BUDGET_USD`. La cuenta es una cota superior de lo que
-factura Cloudflare Containers. No incluye los 5 USD al mes del plan Workers
-Paid, que se pagan aparte.
+Cloudflare has no spend cap: its budget alerts only send an email
+([deploy.md](deploy.md#10-set-spend-alerts)). So the Worker counts what it
+spends and refuses to run when the estimated spend of the month would reach
+`MONTHLY_BUDGET_USD`. The count is an upper bound of what Cloudflare Containers
+bills. It does not include the 5 USD a month of the Workers Paid plan, which is
+paid apart.
 
-| Variable                | Valor      | Significa                                                           |
-| ----------------------- | ---------- | ------------------------------------------------------------------- |
-| `MONTHLY_BUDGET_USD`    | 2          | Gasto estimado del mes UTC que no se supera.                        |
-| `PUBLIC_BUDGET_SHARE`   | 0.75       | Parte del presupuesto que gasta quien no mantiene el sitio.         |
-| `PUBLIC_BUDGET_DAYS`    | 15         | Un día de gasto público no pasa de 1/15 de esa parte.               |
-| `INSTANCE_TYPE`         | standard-2 | Tipo de instancia. De él salen los precios.                         |
-| `INSTANCES`             | 2          | Instancias entre las que el Worker reparte las ejecuciones.         |
-| `RESERVED_BUSY_SECONDS` | 30         | Segundos que una ejecución aparta del presupuesto antes de empezar. |
-| `MAINTAINERS`           | ids        | Ver [Mantenedores](#mantenedores).                                  |
+| Variable                | Value      | Meaning                                                          |
+| ----------------------- | ---------- | ---------------------------------------------------------------- |
+| `MONTHLY_BUDGET_USD`    | 2          | Estimated spend of the UTC month that is not exceeded.           |
+| `PUBLIC_BUDGET_SHARE`   | 0.75       | Share of the budget spent by those who do not maintain the site. |
+| `PUBLIC_BUDGET_DAYS`    | 15         | A day of public spend does not exceed 1/15 of that share.        |
+| `INSTANCE_TYPE`         | standard-2 | Instance type. The prices come from it.                          |
+| `INSTANCES`             | 2          | Instances the Worker spreads the runs between.                   |
+| `RESERVED_BUSY_SECONDS` | 30         | Seconds a run sets aside from the budget before starting.        |
+| `MAINTAINERS`           | ids        | See [Maintainers](#maintainers).                                 |
 
-`INSTANCE_TYPE` e `INSTANCES` se declaran una vez en
-[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts), que los usa
-para la instancia que despliega y para el Worker. No hay un precio que editar:
-[`src/container.ts`](../runner/worker/src/container.ts) tiene la tarifa de
-Cloudflare y las medidas de cada tipo, y de ahí sale el precio del segundo de
-CPU y el del segundo de instancia encendida.
+`INSTANCE_TYPE` and `INSTANCES` are declared once in
+[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts), which uses them
+for the instance it deploys and for the Worker. There is no price to edit:
+[`src/container.ts`](../runner/worker/src/container.ts) holds Cloudflare's rate
+and the measures of each type, and from them come the price of the CPU second
+and that of the awake-instance second.
 
-#### Qué cuesta una ejecución
+#### What a run costs
 
-Cloudflare factura la CPU solo mientras la instancia trabaja, y la memoria y el
-disco durante todo el tiempo que está encendida, trabaje o no. La instancia se
-apaga `sleepAfter` (60 s) después de su última petición. Con `standard-2` (1
-vCPU, 6 GiB y 12 GB) un segundo cuesta:
+Cloudflare bills CPU only while the instance works, and memory and disk for the
+whole time it is awake, working or not. The instance shuts down `sleepAfter` (60
+s) after its last request. With `standard-2` (1 vCPU, 6 GiB and 12 GB) one
+second costs:
 
-| Concepto             | Cuenta                          | USD por segundo |
-| -------------------- | ------------------------------- | --------------- |
-| CPU, solo trabajando | 1 × 0,00002                     | 0,00002         |
-| Encendida, siempre   | 6 × 0,0000025 + 12 × 0,00000007 | 0,00001584      |
+| Item              | Calculation                     | USD per second |
+| ----------------- | ------------------------------- | -------------- |
+| CPU, only working | 1 × 0.00002                     | 0.00002        |
+| Awake, always     | 6 × 0.0000025 + 12 × 0.00000007 | 0.00001584     |
 
-El Worker aparta y cobra así, en el Durable Object `Budget`, que guarda por
-instancia el instante en que se espera que se apague (`awakeUntil`):
+The Worker sets aside and charges like this, in the `Budget` Durable Object,
+which stores per instance the instant at which it is expected to shut down
+(`awakeUntil`):
 
-1. Antes de arrancar el contenedor aparta la ejecución más cara que cabe en
-   `RESERVED_BUSY_SECONDS`: esos segundos de CPU y los segundos encendida desde
-   `max(ahora, awakeUntil)` hasta `ahora + RESERVED_BUSY_SECONDS + sleepAfter`.
-   Una instancia que ya estaba encendida solo cobra lo que la ejecución alarga
-   su ventana. Los segundos se cobran en pasos de 10 ms.
-2. Si la reserva no cabe, no ejecuta ([Qué se rechaza](#qué-se-rechaza)).
-   Comprobar y apartar es una sola operación del objeto, así que varias
-   peticiones simultáneas no pueden apartar a la vez lo que solo cabe una vez.
-3. Al terminar cambia la reserva por el coste medido: el tiempo que esperó al
-   contenedor (el arranque incluido) a la tarifa de CPU y la ventana encendida
-   hasta `sleepAfter` después de que respondió, y nunca más de lo apartado. Solo
-   la reserva que fijó `awakeUntil` lo acorta; si otra lo alargó después, esa
-   parte sigue cobrada, porque esa otra cobró desde donde esta acababa.
-4. Una petición que se rechaza después de apartar (por Turnstile) devuelve la
-   reserva entera. El total del mes y el del día anteriores se descartan.
+1. Before starting the container it sets aside the most expensive run that fits
+   in `RESERVED_BUSY_SECONDS`: those seconds of CPU and the awake seconds from
+   `max(now, awakeUntil)` to `now + RESERVED_BUSY_SECONDS + sleepAfter`. An
+   instance that was already awake charges only what the run extends its window.
+   Seconds are charged in steps of 10 ms.
+2. If the reservation does not fit, it does not run
+   ([What is rejected](#what-is-rejected)). Checking and setting aside is a
+   single operation of the object, so several simultaneous requests cannot set
+   aside at once what fits only once.
+3. When it ends it swaps the reservation for the measured cost: the time it
+   waited for the container (the startup included) at the CPU rate and the awake
+   window until `sleepAfter` after it answered, and never more than what was set
+   aside. Only the reservation that set `awakeUntil` shortens it; if another
+   extended it later, that part stays charged, because that other charged from
+   where this one ended.
+4. A request rejected after setting aside (by Turnstile) returns the whole
+   reservation. The previous month and day totals are discarded.
 
-`RESERVED_BUSY_SECONDS` es un tope y no una estimación. Cubre los 10 s de
-trabajo de [Límites](#límites), el arranque de una instancia y el reintento tras
-un 503. Si la ejecución, con su reintento, llega a ese tiempo, el Worker detiene
-la instancia que aún no había respondido, cobra lo apartado y responde 504 con
-`reason` `run_too_long`. Una instancia que respondió 503 atiende el trabajo de
-otro alumno y no se detiene. El reintento aparta su propia reserva en la
-instancia siguiente. El alumno ve «La ejecución tardó más de lo que el corredor
-permite y se detuvo. Revisa si el código tiene un bucle sin fin.» Como cada
-ejecución cuesta como mucho lo que apartó y solo se aparta si cabe, el gasto
-estimado no pasa del presupuesto. Si el Worker se interrumpe entre apartar y
-terminar, o falla el almacenamiento al terminar (se registra con
-`where: "settle"` y la respuesta no cambia), la reserva se queda y el mes cuenta
-de más, nunca de menos.
+`RESERVED_BUSY_SECONDS` is a cap and not an estimate. It covers the 10 s of work
+of [Limits](#limits), the startup of an instance and the retry after a 503. If
+the run, with its retry, reaches that time, the Worker stops the instance that
+had not yet answered, charges what was set aside and answers 504 with `reason`
+`run_too_long`. An instance that answered 503 serves another learner's job and
+is not stopped. The retry sets aside its own reservation on the next instance.
+The learner sees "La ejecución tardó más de lo que el corredor permite y se
+detuvo. Revisa si el código tiene un bucle sin fin." Since each run costs at
+most what it set aside and is only set aside if it fits, the estimated spend
+does not exceed the budget. If the Worker is interrupted between setting aside
+and finishing, or the storage fails on finishing (logged with `where: "settle"`
+and the response does not change), the reservation stays and the month counts
+too much, never too little.
 
-#### Un ejemplo con `standard-2`
+#### An example with `standard-2`
 
-Cifras que salen de las tarifas anteriores, con `RESERVED_BUSY_SECONDS` de 30:
+Figures that come from the rates above, with `RESERVED_BUSY_SECONDS` of 30:
 
-- **Una ejecución aislada de 2 s**, sin otra en los 60 s anteriores: 2 × 0,00002
-  de CPU más 62 s encendida (2 s de trabajo y 60 de espera) × 0,00001584. Son
-  0,00102 USD. Una de 1 s cuesta 0,00099 USD y una de 10 s, 0,00131 USD: casi
-  todo es la espera, no el trabajo. Antes de empezar aparta 0,0020256 USD.
-- **100 ejecuciones de 1 s en un minuto**, repartidas entre las dos instancias y
-  seguidas (50 s de trabajo cada una): 100 × 0,00002 de CPU más 2 instancias
-  encendidas 110 s (50 de trabajo y 60 de espera) × 0,00001584. Son 0,0055 USD,
-  menos de lo que cuestan 6 ejecuciones aisladas, porque las ejecuciones que
-  llegan con la instancia encendida solo alargan su ventana. Las mismas 100
-  ejecuciones, cada una con más de 60 s de diferencia de la anterior, cuestan
-  0,099 USD.
-- **Cuántas ejecuciones aisladas de 2 s caben en 2 USD**: 1955 en total. Quien
-  no mantiene el sitio dispone de 1,5 USD, que son 1466; los 0,5 USD restantes
-  son de los mantenedores. En un día el gasto público no pasa de 0,10 USD (1,5
-  USD entre 15), que son 96 ejecuciones aisladas.
+- **An isolated 2 s run**, with no other in the previous 60 s: 2 × 0.00002 of
+  CPU plus 62 s awake (2 s of work and 60 of waiting) × 0.00001584. That is
+  0.00102 USD. A 1 s run costs 0.00099 USD and a 10 s one, 0.00131 USD: almost
+  all of it is the wait, not the work. Before starting it sets aside 0.0020256
+  USD.
+- **100 runs of 1 s in a minute**, spread between the two instances and
+  back-to-back (50 s of work each): 100 × 0.00002 of CPU plus 2 instances awake
+  110 s (50 of work and 60 of waiting) × 0.00001584. That is 0.0055 USD, less
+  than 6 isolated runs cost, because the runs that arrive with the instance
+  awake only extend its window. The same 100 runs, each more than 60 s after the
+  previous one, cost 0.099 USD.
+- **How many isolated 2 s runs fit in 2 USD**: 1955 in total. Those who do not
+  maintain the site have 1.5 USD, which is 1466; the remaining 0.5 USD belongs
+  to the maintainers. In a day the public spend does not exceed 0.10 USD (1.5
+  USD divided by 15), which is 96 isolated runs.
 
-#### Qué se rechaza
+#### What is rejected
 
-| Quién      | Tope                                     | `reason`     |
-| ---------- | ---------------------------------------- | ------------ |
-| Público    | 75 % del presupuesto, gastado por todos  | `budget`     |
-| Público    | 1/15 de ese 75 %, gastado en el día UTC  | `budget_day` |
-| Mantenedor | El presupuesto entero, gastado por todos | `budget`     |
+| Who        | Cap                                     | `reason`     |
+| ---------- | --------------------------------------- | ------------ |
+| Public     | 75 % of the budget, spent by everyone   | `budget`     |
+| Public     | 1/15 of that 75 %, spent in the UTC day | `budget_day` |
+| Maintainer | The whole budget, spent by everyone     | `budget`     |
 
-Un mantenedor no tiene tope diario, y lo que gasta cuenta en el 75 % del
-público. Todas las negativas son 503 con `Retry-After` en segundos. `budget`
-espera al día 1 del mes siguiente y `budget_day` a la medianoche UTC. El alumno
-ve:
+A maintainer has no daily cap, and what they spend counts toward the public's 75
+%. All refusals are 503 with `Retry-After` in seconds. `budget` waits for day 1
+of the next month and `budget_day` for UTC midnight. The learner sees:
 
-- `budget`: «El corredor alcanzó su presupuesto de este mes y no ejecuta más
+- `budget`: "El corredor alcanzó su presupuesto de este mes y no ejecuta más
   código hasta que empiece el siguiente. Los cuadernos de marimo siguen
-  funcionando en tu equipo.»
-- `budget_day`: «El corredor alcanzó su presupuesto de hoy y no ejecuta más
+  funcionando en tu equipo."
+- `budget_day`: "El corredor alcanzó su presupuesto de hoy y no ejecuta más
   código hasta mañana. Puedes volver a ejecutar en 5 h. Los cuadernos de marimo
-  siguen funcionando en tu equipo.»
+  siguen funcionando en tu equipo."
 
-#### Mantenedores
+#### Maintainers
 
-`MAINTAINERS` es una lista de ids numéricos de GitHub separados por comas, sin
-logins: un login se puede renombrar y otra persona puede quedárselo, y el id no
-cambia. Quien entró con GitHub y tiene su id en la lista es mantenedor. No pasa
-por Turnstile, no tiene el límite por usuario de [Límite por IP](#límite-por-ip)
-y gasta del presupuesto entero. El límite por IP y el tamaño del código siguen
-valiendo para él. Una cuenta de Google nunca es mantenedora, aunque su
-identificador sea el mismo número. Un valor que no sea una lista de ids hace que
-el Worker responda 500 y registre `MAINTAINERS`.
-[deploy.md](deploy.md#9-elige-los-mantenedores) dice cómo ver el id de una
-cuenta.
+`MAINTAINERS` is a list of numeric GitHub ids separated by commas, with no
+logins: a login can be renamed and someone else can take it, and the id does not
+change. Whoever signed in with GitHub and has their id in the list is a
+maintainer. They do not go through Turnstile, do not have the per-user limit of
+[Per-IP limit](#per-ip-limit) and spend from the whole budget. The per-IP limit
+and the code size still apply to them. A Google account is never a maintainer,
+even if its identifier is the same number. A value that is not a list of ids
+makes the Worker answer 500 and log `MAINTAINERS`.
+[deploy.md](deploy.md#9-choose-the-maintainers) says how to see the id of an
+account.
 
-#### Lo que la estimación no cuenta
+#### What the estimate does not count
 
-La cuenta es una cota superior: ignora las cuotas mensuales incluidas en Workers
-Paid, y cobra la CPU de todo el tiempo que la petición esperó al contenedor, el
-arranque incluido, aunque Cloudflare solo la factura mientras trabaja. Lo que
-puede quedar fuera:
+The count is an upper bound: it ignores the monthly quotas included in Workers
+Paid, and it charges the CPU for all the time the request waited for the
+container, the startup included, although Cloudflare bills it only while it
+works. What may be left out:
 
-- Una instancia que el Worker no logra detener al llegar al tope (se registra
-  con `where: "stop"`). Cloudflare la factura hasta que se apague sola.
-- Una instancia que sigue arrancando cuando se llega al tope no ha respondido
-  aún, así que el Worker la detiene aunque otro alumno haya llegado a ella
-  durante el arranque.
+- An instance that the Worker fails to stop on reaching the cap (logged with
+  `where: "stop"`). Cloudflare bills it until it shuts down by itself.
+- An instance that is still starting when the cap is reached has not answered
+  yet, so the Worker stops it even if another learner reached it during startup.
 
-La suma de `cost_nano_usd` en el registro da el gasto estimado del mes.
+The sum of `cost_nano_usd` in the log gives the estimated spend of the month.
 
 ### Turnstile
 
-Cloudflare Turnstile se verifica en la primera ejecución de cada sesión, con
-cuenta o sin ella. Solo un [mantenedor](#mantenedores) no pasa por Turnstile: la
-petición ni llama a `siteverify` ni recibe `qg_session`. Una petición sin sesión
-de Turnstile y sin token recibe 403 `turnstile_missing` con la clave del sitio
-en el campo `sitekey`. Con ella, `site/qiskit/exercise.js` carga el widget, y
-repite la petición con el token del widget en la cabecera `X-Turnstile-Token`.
-El Worker lo comprueba con `siteverify`, al que envía solo el secreto y el
-token, y si vale responde con la cookie `qg_session` además del resultado:
+Cloudflare Turnstile is verified on the first run of each session, with or
+without an account. Only a [maintainer](#maintainers) does not go through
+Turnstile: the request neither calls `siteverify` nor receives `qg_session`. A
+request without a Turnstile session and without a token receives 403
+`turnstile_missing` with the site key in the `sitekey` field. With it,
+`site/qiskit/exercise.js` loads the widget, and repeats the request with the
+widget's token in the `X-Turnstile-Token` header. The Worker checks it with
+`siteverify`, to which it sends only the secret and the token, and if valid it
+answers with the `qg_session` cookie in addition to the result:
 
 ```text
-qg_session=<caducidad>.<mac>; Max-Age=28800; Path=/run; HttpOnly; Secure; SameSite=Strict
+qg_session=<expiry>.<mac>; Max-Age=28800; Path=/run; HttpOnly; Secure; SameSite=Strict
 ```
 
-La cookie lleva la hora de caducidad y un MAC que cubre esa hora y la IP. No
-lleva ningún identificador, y no sirve desde otra IP ni pasada su caducidad. Las
-siguientes ejecuciones la mandan solas y no vuelven a llamar a Turnstile.
+The cookie carries the expiry time and a MAC that covers that time and the IP.
+It carries no identifier, and is not valid from another IP or past its expiry.
+The following runs send it on their own and do not call Turnstile again.
 
-| Respuesta | `reason`                | El alumno ve                                                                                           |
-| --------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| 403       | `turnstile_missing`     | «Antes de ejecutar código hay que comprobar que eres una persona.»                                     |
-| 403       | `turnstile_failed`      | «No pasó la comprobación de que eres una persona. Recarga la página e inténtalo de nuevo.»             |
-| 503       | `turnstile_unavailable` | «No se pudo comprobar que eres una persona. Vuelve a intentarlo en unos segundos.» (`Retry-After: 10`) |
+| Response | `reason`                | The learner sees                                                                                       |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| 403      | `turnstile_missing`     | "Antes de ejecutar código hay que comprobar que eres una persona."                                     |
+| 403      | `turnstile_failed`      | "No pasó la comprobación de que eres una persona. Recarga la página e inténtalo de nuevo."             |
+| 503      | `turnstile_unavailable` | "No se pudo comprobar que eres una persona. Vuelve a intentarlo en unos segundos." (`Retry-After: 10`) |
 
-| Variable             | Valor         | Significa                                                          |
-| -------------------- | ------------- | ------------------------------------------------------------------ |
-| `SESSION_HOURS`      | 8             | Duración de la sesión verificada.                                  |
-| `TURNSTILE_SITE_KEY` | configuración | La clave pública del widget configurada en `cloudflare.config.ts`. |
+| Variable             | Value         | Meaning                                                       |
+| -------------------- | ------------- | ------------------------------------------------------------- |
+| `SESSION_HOURS`      | 8             | Lifetime of the verified session.                             |
+| `TURNSTILE_SITE_KEY` | configuration | The widget's public key configured in `cloudflare.config.ts`. |
 
-`TURNSTILE_SECRET` es un secreto del Worker (`bindings.secret()`), no un valor
-del repositorio. La clave del sitio no es secreta: el Worker se la da a la
-página en la respuesta `turnstile_missing`. Con `TURNSTILE_SITE_KEY` vacía, un
-`POST /run` anónimo responde 500 `internal_error` y registra la variable que
-falta. Cloudflare documenta claves de prueba que no necesitan cuenta:
+`TURNSTILE_SECRET` is a Worker secret (`bindings.secret()`), not a repository
+value. The site key is not secret: the Worker gives it to the page in the
+`turnstile_missing` response. With `TURNSTILE_SITE_KEY` empty, an anonymous
+`POST /run` answers 500 `internal_error` and logs the missing variable.
+Cloudflare documents test keys that need no account:
 
-| Clave                                 | Tipo    | Comportamiento                                                |
-| ------------------------------------- | ------- | ------------------------------------------------------------- |
-| `1x00000000000000000000AA`            | sitio   | Siempre pasa. El token que genera es `XXXX.DUMMY.TOKEN.XXXX`. |
-| `1x0000000000000000000000000000000AA` | secreto | Siempre pasa.                                                 |
-| `2x0000000000000000000000000000000AA` | secreto | Siempre falla.                                                |
-| `3x0000000000000000000000000000000AA` | secreto | Responde que el token ya se usó.                              |
+| Key                                   | Type   | Behavior                                                          |
+| ------------------------------------- | ------ | ----------------------------------------------------------------- |
+| `1x00000000000000000000AA`            | site   | Always passes. The token it generates is `XXXX.DUMMY.TOKEN.XXXX`. |
+| `1x0000000000000000000000000000000AA` | secret | Always passes.                                                    |
+| `2x0000000000000000000000000000000AA` | secret | Always fails.                                                     |
+| `3x0000000000000000000000000000000AA` | secret | Answers that the token was already used.                          |
 
-Las pruebas del Worker usan los tres secretos.
+The Worker tests use the three secrets.
 
-### Qué recibe el contenedor y qué se registra
+### What the container receives and what is logged
 
-El contenedor recibe el cuerpo de la petición y `Content-Type`. No recibe la
-cookie, el token ni la IP.
+The container receives the body of the request and `Content-Type`. It does not
+receive the cookie, the token or the IP.
 
-El Worker escribe estos registros y ningún otro. Todos tienen campos fijos, que
-`src/log.ts` define.
+The Worker writes these logs and no others. All have fixed fields, which
+`src/log.ts` defines.
 
-1. Una línea `run` por cada petición a `/run` que el Worker contesta, con
-   cualquier resultado menos un error interno:
+1. A `run` line for each request to `/run` that the Worker answers, with any
+   result except an internal error:
 
    ```json
    {
@@ -774,13 +779,13 @@ El Worker escribe estos registros y ningún otro. Todos tienen campos fijos, que
    }
    ```
 
-   `outcome` es `ok`, `rate_minute`, `rate_day`, `bad_request`, `too_large`,
+   `outcome` is `ok`, `rate_minute`, `rate_day`, `bad_request`, `too_large`,
    `budget`, `budget_day`, `turnstile_missing`, `turnstile_failed`,
-   `turnstile_unavailable` o `run_too_long`. `mode` y `exercise` se copian solo
-   si tienen la forma de un valor del contrato.
+   `turnstile_unavailable` or `run_too_long`. `mode` and `exercise` are copied
+   only if they are shaped like a value of the contract.
 
-2. Una línea de error, en lugar de la anterior, cuando la petición falla por un
-   error del Worker o de la configuración y responde 500 `internal_error`:
+2. An error line, instead of the previous one, when the request fails because of
+   a Worker or configuration error and answers 500 `internal_error`:
 
    ```json
    {
@@ -791,41 +796,42 @@ El Worker escribe estos registros y ningún otro. Todos tienen campos fijos, que
    }
    ```
 
-   `error` es el nombre de la clase del error. `detail` lleva el texto solo si
-   es un error de configuración, que nombra una variable y no datos.
+   `error` is the name of the error class. `detail` carries the text only if it
+   is a configuration error, which names a variable and not data.
 
-3. Una línea de error aparte, además de la línea de la propia petición, cuando
-   un paso posterior falla y la petición sigue su camino. Lleva `where` y no
-   lleva `status`:
-   - `"settle"`: falló el ajuste del presupuesto.
-   - `"stop"`: falló detener una instancia al llegar al tope de la reserva.
-   - `"attempt"`: falló anotar el intento en la base. La respuesta no cambia.
+3. A separate error line, in addition to the line of the request itself, when a
+   later step fails and the request carries on. It carries `where` and no
+   `status`:
+   - `"settle"`: the budget adjustment failed.
+   - `"stop"`: stopping an instance on reaching the reservation cap failed.
+   - `"attempt"`: recording the attempt in the database failed. The response
+     does not change.
 
-4. Una línea de error con `event` `auth`, `api` o `purge` cuando falla un
-   endpoint de [Cuentas](#cuentas) o la limpieza diaria. Lleva `outcome`
-   `internal_error`, `status` 500 y `error` con el nombre de la clase. Un
-   endpoint responde 500 `internal_error`; la limpieza deja que falle el cron.
+4. An error line with `event` `auth`, `api` or `purge` when an endpoint of
+   [Accounts](#accounts) or the daily cleanup fails. It carries `outcome`
+   `internal_error`, `status` 500 and `error` with the class name. An endpoint
+   answers 500 `internal_error`; the cleanup lets the cron fail.
 
-Ningún registro lleva el código, la IP, el token, la cookie ni el texto de un
-error. `cloudflare.config.ts` activa Workers Logs con el registro de
-invocaciones apagado, que es el que lleva la petición. Lo que Cloudflare guarda
-de su red no depende del Worker.
+No log carries the code, the IP, the token, the cookie or the text of an error.
+`cloudflare.config.ts` turns on Workers Logs with the invocation log off, which
+is the one that carries the request. What Cloudflare stores from its network
+does not depend on the Worker.
 
-### Por qué estos valores
+### Why these values
 
-Los valores salen de las tarifas de Containers con la instancia `standard-2` y
-de dos instancias que atienden un trabajo cada una (las cifras de
-[Presupuesto](#presupuesto)):
+The values come from the Containers rates with the `standard-2` instance and two
+instances that serve one job each (the figures of [Budget](#budget)):
 
-- Dos instancias encendidas todo el mes costarían unos 82 USD (2 × 0,00001584 ×
-  2 592 000 s). Con `sleepAfter` de 60 s y el tope de 2 USD, el Worker no puede
-  dejar que eso ocurra: cada segundo encendido se cuenta.
-- 30 por minuto es una ejecución cada 2 s. Con ejecuciones de 1 s una IP ocupa
-  30 s de los 120 s de instancia que hay cada minuto.
-- 1000 por día, todas de 1 s y aisladas, costarían a una IP 0,99 USD. El tope
-  diario público (0,10 USD) la para antes.
-- Un atacante con muchas IPs gasta como mucho 0,10 USD al día, que son 96
-  ejecuciones aisladas de 2 s, así que la parte pública del mes le dura al menos
-  15 días. Los mantenedores conservan el último 25 %.
+- Two instances awake all month would cost about 82 USD (2 × 0.00001584 × 2 592
+  000 s). With `sleepAfter` of 60 s and the 2 USD cap, the Worker cannot let
+  that happen: each awake second is counted.
+- 30 per minute is one run every 2 s. With 1 s runs an IP occupies 30 s of the
+  120 s of instance there are each minute.
+- 1000 per day, all of 1 s and isolated, would cost an IP 0.99 USD. The public
+  daily cap (0.10 USD) stops it first.
+- An attacker with many IPs spends at most 0.10 USD a day, which is 96 isolated
+  2 s runs, so the public part of the month lasts at least 15 days. The
+  maintainers keep the last 25 %.
 
-Son cálculos con esas tarifas, no medidas del Worker desplegado.
+These are calculations with those rates, not measurements of the deployed
+Worker.

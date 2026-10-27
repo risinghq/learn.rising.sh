@@ -1,80 +1,80 @@
-# Plan: de lecciones para ver a lecciones para hacer
+# Plan: from lessons to watch to lessons to do
 
-Decidido el 2026-10-07. Problema: las lecciones son sobre todo para consumir
-(ver, escuchar, 1–2 preguntas de memoria). Objetivo: que cada lección lleve a
-**actuar** y a **reflexionar**.
+Decided on 2026-10-07. Problem: the lessons are mostly for consuming (watch,
+listen, answer one or two memory questions). Goal: each lesson leads the learner
+to **act** and to **reflect**.
 
-## 1. El nuevo ciclo de cada lección
+## 1. The new cycle of each lesson
 
-| Momento         | Qué pasa                                                                                  | Cómo se implementa                                                 |
-| --------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| **Predecir**    | Antes de ver un resultado, apuestas una respuesta (conteos, profundidad, valor esperado). | `ask` antes de la revelación, no después. Mínimo 1 por lección.    |
-| **Ver**         | La animación narrada actual, algo más corta.                                              | Igual que hoy.                                                     |
-| **Hacer**       | Una misión en el cuaderno marimo de la lección.                                           | Paso «Tu turno» con la misión y el comando para abrir el cuaderno. |
-| **Reflexionar** | 1–2 preguntas abiertas: «explícalo con tus palabras», «¿qué pasaría si…?».                | Cuadro de texto guardado en el navegador; se ve al volver.         |
-| **Resumir**     | El resumen actual.                                                                        | Igual que hoy.                                                     |
+| Moment      | What happens                                                                         | How it is implemented                                           |
+| ----------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| **Predict** | Before seeing a result, you bet on an answer (counts, depth, expectation value).     | `ask` before the reveal, not after. At least one per lesson.    |
+| **Watch**   | The current narrated animation, a little shorter.                                    | Same as today.                                                  |
+| **Do**      | A mission in the lesson's marimo notebook.                                           | A "Your turn" step with the mission and the command to open it. |
+| **Reflect** | One or two open questions: "explain it in your own words", "what would happen if…?". | A text box saved in the browser; it shows when you come back.   |
+| **Recap**   | The current summary.                                                                 | Same as today.                                                  |
 
-## 2. Cuadernos de práctica con marimo
+## 2. Practice notebooks with marimo
 
-- Un cuaderno por lección: `practica/<id>.py`, que se abre con
+- One notebook per lesson: `practica/<id>.py`, opened with
   `uv run marimo edit practica/<id>.py`.
-- **¿Por qué marimo y no Jupyter?** Es reactivo: cambias algo y todo se
-  recalcula, así que las comprobaciones dicen ✅ o ❌ al instante. Trae
-  controles deslizantes, buenos para explorar parámetros. Sus archivos son `.py`
-  normales: ligeros, fáciles de versionar y verificables con `tools/verify.py`.
-- **La contra:** las guías de IBM y la comunidad usan Jupyter. Una misión de la
-  Parte I enseña a convertir entre los dos formatos (`marimo convert`) para que
-  también sepas usar Jupyter.
-- Ejercicios en tres niveles: 🟢 reproducir · 🟡 modificar · 🔴 crear. Cada uno
-  con su comprobación.
-- Qiskit no corre en el navegador, así que los cuadernos se ejecutan en tu
-  equipo, con el entorno uv del proyecto.
+- **Why marimo and not Jupyter?** It is reactive: you change something and
+  everything recomputes, so the checks show ✅ or ❌ at once. It has sliders,
+  which suit exploring parameters. Its files are plain `.py`: light, easy to
+  version and checkable with `tools/verify.py`.
+- **The downside:** the IBM guides and the community use Jupyter. A mission in
+  Part I teaches how to convert between the two formats (`marimo convert`) so
+  you can use Jupyter too.
+- Exercises come in three levels: 🟢 reproduce · 🟡 modify · 🔴 create. Each has
+  its own check.
+- Qiskit does not run in the browser, so the notebooks run on your machine, in
+  the project's uv environment.
 
-## 3. Proyecto que atraviesa el curso: la cadena de espines (Ising)
+## 3. A project through the course: the spin chain (Ising)
 
-Un solo experimento que crece parte por parte (`practica/proyecto/`), con un
-objetivo físico claro: ver cómo evoluciona la magnetización de una cadena de
-espines tras un cambio brusco del campo.
+One experiment that grows part by part (`practica/proyecto/`), with a clear
+physical goal: see how the magnetization of a spin chain evolves after a sudden
+change of the field.
 
-| Parte | Hito del proyecto                                                                     |
-| ----- | ------------------------------------------------------------------------------------- |
-| I     | Crear la cuenta de IBM Quantum (plan Open). Un paso de Trotter con 2 espines.         |
-| II    | Hamiltoniano como `SparsePauliOp`; circuito de N pasos; observables de magnetización. |
-| III   | Transpilar para `FakeFez`; comparar niveles; profundidad frente a número de pasos.    |
-| IV    | Magnetización en el tiempo: exacta frente a simulación con ruido (Aer).               |
-| V     | **Primera ejecución en un QPU real** (presupuesto ≤ 1 min).                           |
-| VI    | Mitigar: sin mitigación frente a TREX y ZNE; ¿cuánto se acerca al valor exacto?       |
-| VII   | Puertas fraccionales (RZZ) y modo batch; segunda ejecución real.                      |
-| VIII  | Reducir la profundidad con un addon (OBP o AQC-Tensor).                               |
-| IX    | Migrar el código a las primitivas del lado del cliente y empaquetarlo.                |
-| X     | Informe final reproducible: gráficas, cita de Qiskit y del QPU.                       |
+| Part | Project milestone                                                            |
+| ---- | ---------------------------------------------------------------------------- |
+| I    | Create the IBM Quantum account (Open plan). One Trotter step with 2 spins.   |
+| II   | Hamiltonian as a `SparsePauliOp`; N-step circuit; magnetization observables. |
+| III  | Transpile for `FakeFez`; compare levels; depth against number of steps.      |
+| IV   | Magnetization over time: exact against noisy simulation (Aer).               |
+| V    | **First run on a real QPU** (budget ≤ 1 min).                                |
+| VI   | Mitigate: no mitigation against TREX and ZNE; how close to the exact value?  |
+| VII  | Fractional gates (RZZ) and batch mode; second real run.                      |
+| VIII | Reduce the depth with an addon (OBP or AQC-Tensor).                          |
+| IX   | Migrate the code to the client-side primitives and package it.               |
+| X    | Final reproducible report: plots, citation of Qiskit and of the QPU.         |
 
-Presupuesto del plan Open: 10 min cada 28 días. Hay 3 ejecuciones reales
-planificadas, de unos 1–2 min cada una; antes de cada una se estima el uso con
-la fórmula de la lección 7.5.
+The Open plan budget is 10 minutes every 28 days. Three real runs are planned,
+about 1–2 minutes each. Before each one, the usage is estimated with the formula
+from lesson 7.5.
 
-## 4. Repaso espaciado
+## 4. Spaced review
 
-La portada propone cada día 3–4 preguntas de lecciones ya completadas (las `ask`
-existentes), espaciadas en el tiempo: 1, 3, 7 y 21 días. Las que fallas vuelven
-antes.
+The home page offers 3–4 questions a day from lessons already completed (the
+existing `ask` questions), spaced in time: 1, 3, 7 and 21 days. The ones you
+miss come back sooner.
 
-## 5. Nueva portada (un panel, no un índice)
+## 5. New home page (a dashboard, not an index)
 
-La estructura de la propuesta C, pero **con identidad propia**: sin el azul ni
-la letra de IBM, y sin el estilo crema con serifa. Secciones:
+The structure of proposal C, but **with its own identity**: without IBM's blue
+or typeface, and without the cream and serif style. Sections:
 
-1. **Siguiente acción**: la lección pendiente o la misión del proyecto.
-2. **Proyecto Ising**: hitos con su estado.
-3. **Repaso de hoy**.
-4. **Partes**: tarjetas con anillo de progreso.
+1. **Next action**: the pending lesson or the project mission.
+2. **Ising project**: milestones with their state.
+3. **Today's review**.
+4. **Parts**: cards with a progress ring.
 
-Pendiente: elegir nombre y paleta entre 2–3 variantes.
+Pending: choose a name and palette from 2–3 variants.
 
-## 6. Orden de trabajo
+## 6. Order of work
 
-1. **Piloto**: aplicar el ciclo completo a 2 lecciones (1.4 «Tu primer circuito»
-   y 2.1 «Construir circuitos»), con sus 2 cuadernos y el hito I del proyecto.
-   Pruebas y das tu opinión.
-2. Ajustar según tu opinión. Diseñar la portada (variantes de identidad).
-3. Extender a las 63 lecciones, parte por parte, verificando cuadernos y audio.
+1. **Pilot**: apply the full cycle to 2 lessons (1.4 "Your first circuit" and
+   2.1 "Building circuits"), with their 2 notebooks and milestone I of the
+   project. You try them and give your opinion.
+2. Adjust according to your opinion. Design the home page (identity variants).
+3. Extend to all 63 lessons, part by part, checking notebooks and audio.
