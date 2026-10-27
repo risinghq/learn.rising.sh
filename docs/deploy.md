@@ -33,9 +33,9 @@ bunx cf auth login
 
 Ambos están en [`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts).
 El nombre es `worker.name` (`duo`) y el dominio es `HOME_HOST`
-(`edu.rising.sh`), que el config pone en `worker.domains` y en la variable
-`HOME_HOST`. Cámbialos por los tuyos. `workersDev` es `false`: el Worker
-responde solo en su dominio, no en `<worker>.<subdominio>.workers.dev`.
+(`edu.rising.sh`), que el config pone en `worker.domains`. Cámbialos por los
+tuyos. `workersDev` es `false`: el Worker responde solo en su dominio, no en
+`<worker>.<subdominio>.workers.dev`.
 
 El dominio debe ser de una zona activa en tu cuenta de Cloudflare. Al desplegar,
 Cloudflare crea el registro DNS y el certificado. Si otro Worker ya sirve ese
@@ -226,26 +226,3 @@ y solo existen en cuentas de pago por uso. Si recibes la de 1 USD, mira
 
 Los 5 USD al mes del plan Workers Paid no están en los 2 USD: son una cuota fija
 que se paga aparte de lo que el Worker gasta en Containers.
-
-## 11. Redirige la dirección antigua
-
-Solo hace falta si el sitio estuvo publicado antes con otro Worker y otra
-dirección, y quieres que sus enlaces sigan funcionando. En el despliegue de
-Rising, el Worker anterior es `qiskit-guides`, en
-`qiskit-guides.empirical.workers.dev`.
-
-`cloudflare.config.ts` define esa pareja en `LEGACY_WORKER` y `LEGACY_HOST`. Con
-`--mode legacy`, `cf deploy` sube el mismo código con el nombre `LEGACY_WORKER`
-y sin dominio, así que queda en `workers.dev`. El Worker responde allí con 301 a
-la misma ruta en `<host>`, y manda `/`, `/index.html`, `/lesson.html`,
-`/privacidad.html` y `/lessons/...` a `/qiskit/...`.
-
-```sh
-mise run deploy --mode legacy
-curl -sI 'https://<LEGACY_HOST>/lesson.html?l=p1-quickstart' | grep -iE '^(HTTP|location)'
-```
-
-Este Worker usa la misma base D1 que el del paso 6. Si ya existía con ese
-nombre, conserva sus secretos. Si es nuevo, el primer despliegue exige los
-secretos: añade `--secrets-file` como en el paso 6. La respuesta de `curl` es
-`301` y `location: https://<host>/qiskit/lesson.html?l=p1-quickstart`.
