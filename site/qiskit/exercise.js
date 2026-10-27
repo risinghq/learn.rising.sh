@@ -3,6 +3,7 @@
 // spec: exercise (id) · prompt · level · hints · starter · cases (nombres de los casos visibles)
 // Ejecutar y Comprobar envían el código a /run en el mismo origen que la página.
 // La primera petición de una sesión puede requerir Turnstile y repetir la petición con el token.
+
 // El navegador guarda el código, las pistas vistas y el estado de resolución en
 // qiskit:exercise:<id>. `at` registra la última edición del código.
 // Con cuenta, account.js también envía esos datos al servidor.

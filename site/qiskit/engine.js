@@ -1,10 +1,10 @@
 // Motor de lecciones animadas y narradas (Qiskit · guías de IBM Quantum).
-//
 // Una lección es lessons/<id>/lesson.json: una lista de "beats". Cada beat tiene
 //   say      narración (con marcas [[nombre]] antes de la palabra que dispara algo)
 //   scene    bloques que se apilan en el escenario (texto, fórmulas, listas, recuadros, figuras)
 //   actions  qué pasa y cuándo: { at: "marca", t: segundos extra, do: "show", id: ... }
 //   ask      pregunta opcional al terminar la narración (choice, numeric, reveal)
+
 // timings.json (de tools/tts.py) da la duración de cada clip, el segundo de cada marca y los subtítulos.
 //
 // Modo revisión: lesson.html?l=<id>&beat=N muestra el estado final del beat N sin audio.

@@ -38,6 +38,7 @@ select.tool { padding: 0 4px; }
 #timeline .seg { flex: 1; height: 6px; border-radius: 3px; background: var(--seg); position: relative; cursor: pointer; overflow: hidden; }
 #timeline .seg:hover { background: var(--seg-hover); }
 #timeline .seg.now { height: 9px; }
+
 #timeline .seg i { position: absolute; inset: 0; width: 0; background: var(--blue); border-radius: 3px; }
 #timeline .seg.done i { width: 100%; background: var(--seg-done); }
 #timeline .seg.q { background: var(--seg-q); }

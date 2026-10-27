@@ -4,12 +4,28 @@
 (() => {
   const MODE = "qiskit:theme",
     PAL = "qiskit:paleta";
-  const PALETAS = {
-    fosforo: "Fósforo",
-    cobre: "Cobre",
-    medianoche: "Medianoche",
-  };
   const root = document.documentElement;
+  // Los textos del control siguen el atributo lang de la página.
+  const TEXT = {
+    es: {
+      paletas: { fosforo: "Fósforo", cobre: "Cobre", medianoche: "Medianoche" },
+      palette: "Paleta",
+      paletteTitle: "Paleta de colores",
+      toggle: "Tema claro u oscuro",
+      toDark: "Cambiar a tema oscuro",
+      toLight: "Cambiar a tema claro",
+    },
+    en: {
+      paletas: { fosforo: "Phosphor", cobre: "Copper", medianoche: "Midnight" },
+      palette: "Palette",
+      paletteTitle: "Color palette",
+      toggle: "Light or dark theme",
+      toDark: "Switch to dark theme",
+      toLight: "Switch to light theme",
+    },
+  };
+  const text = () => TEXT[root.lang.slice(0, 2)] ?? TEXT.es;
+  const PALETAS = TEXT.es.paletas;
   const read = (k) => {
     try {
       return localStorage.getItem(k);
@@ -33,7 +49,7 @@
 
   const modeLabel = () => (root.dataset.theme === "light" ? "☾" : "☀");
   const modeTitle = () =>
-    "Cambiar a tema " + (root.dataset.theme === "light" ? "oscuro" : "claro");
+    root.dataset.theme === "light" ? text().toDark : text().toLight;
   const paint = () =>
     document.querySelectorAll("[data-theme-ctl]").forEach((c) => {
       c.querySelector("select").value = root.dataset.paleta;
@@ -58,12 +74,12 @@
   addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll("[data-theme-ctl]").forEach((c) => {
       const sel = document.createElement("select");
-      sel.setAttribute("aria-label", "Paleta");
-      sel.title = "Paleta de colores";
-      for (const k in PALETAS) sel.add(new Option(PALETAS[k], k));
+      sel.setAttribute("aria-label", text().palette);
+      sel.title = text().paletteTitle;
+      for (const k in PALETAS) sel.add(new Option(text().paletas[k], k));
       sel.addEventListener("change", () => setPaleta(sel.value));
       const btn = document.createElement("button");
-      btn.setAttribute("aria-label", "Tema claro u oscuro");
+      btn.setAttribute("aria-label", text().toggle);
       btn.addEventListener("click", window.toggleTheme);
       c.classList.add("theme-ctl");
       c.append(sel, btn);

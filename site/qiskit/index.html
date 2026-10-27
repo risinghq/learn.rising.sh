@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qubit a qubit</title>
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="../vendor/katex/katex.min.css">
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="index.css">
+<script defer src="../vendor/katex/katex.min.js"></script>
+<script src="../theme.js"></script>
+<script src="account.js"></script>
+<script src="notebooks.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <a class="brand" href="index.html"><span class="dot"></span>Qubit a qubit</a>
+    <span class="pill">Qiskit · en español</span>
+    <span class="sp"></span>
+    <span class="pill" id="prog"></span>
+    <a class="pill" href="../">Duo</a>
+    <div data-account></div>
+    <div data-theme-ctl></div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Aprende Qiskit<br><span>haciendo</span>, qubit a qubit.</h1>
+      <p class="lead">Lecciones animadas y narradas que recorren todas las guías de IBM Quantum. En cada una predices, practicas en tu cuaderno y reflexionas; a lo largo del curso construyes un experimento real.</p>
+      <div class="next" id="next"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <svg class="bloch" viewBox="-170 -170 340 340" id="bloch" aria-hidden="true"></svg>
+  </section>
+
+  <div class="two">
+    <section class="blk">
+      <div class="sh"><h2>Repaso de hoy</h2><span class="note" id="rnote"></span></div>
+      <div class="panel" id="repaso"></div>
+    </section>
+    <section class="blk">
+      <div class="sh"><h2>Proyecto Ising</h2><span class="note">una cadena de espines, de la pizarra al QPU</span></div>
+      <div class="panel">
+        <div class="track" id="track"></div>
+        <div class="hcur" id="hito"></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="blk">
+    <div class="sh"><h2>El curso</h2><span class="note">10 partes · basado en las guías oficiales de IBM Quantum</span></div>
+    <div class="parts" id="parts"></div>
+  </section>
+
+  <footer>
+    Contenido basado en las <a href="https://quantum.cloud.ibm.com/docs/en/guides">guías de IBM Quantum</a> (CC BY-SA 4.0). Todo el código se ejecutó con Qiskit 2.5.
+  </footer>
+</div>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} QGAccount.changed(k); },
+};
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// texto con `código`, **negrita** y $matemáticas$
+function rich(s) {
+  const math = [];
+  s = s.replace(/\$([^$]+)\$/g, (_, m) => { math.push(m); return `\u0000${math.length - 1}\u0000`; });
+  s = esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  return s.replace(/\u0000(\d+)\u0000/g, (_, k) => { try { return katex.renderToString(math[+k], { throwOnError: false }); } catch (e) { return esc(math[+k]); } });
+}
+
+// ---------- esfera de Bloch: el estado precesa alrededor de Z ----------
+(() => {
+  const s = $('#bloch'), ns = 'http://www.w3.org/2000/svg', R = 120, tilt = 0.24;
+  const E = (t, a) => { const e = document.createElementNS(ns, t); for (const k in a) e.setAttribute(k, a[k]); s.appendChild(e); return e; };
+  s.innerHTML = '<defs><radialGradient id="gl" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="var(--acc)" stop-opacity=".16"/><stop offset="100%" stop-color="var(--acc)" stop-opacity="0"/></radialGradient></defs>';
+  E('circle', { class: 'sph', r: R });
+  E('ellipse', { class: 'eq', rx: R, ry: R * tilt });
+  E('line', { class: 'ax', x1: 0, y1: -R - 20, x2: 0, y2: R + 20 });
+  E('line', { class: 'ax', x1: -R - 20, y1: 0, x2: R + 20, y2: 0 });
+  E('text', { x: -10, y: -R - 28 }).textContent = '|0⟩';
+  E('text', { x: -10, y: R + 42 }).textContent = '|1⟩';
+  const trail = E('path', { class: 'trail' });
+  const vec = E('line', { class: 'vec', x1: 0, y1: 0 });
+  const tip = E('circle', { class: 'tip', r: 7 });
+  const proj = (th, ph) => [R * Math.sin(th) * Math.cos(ph), -R * Math.cos(th) + R * tilt * Math.sin(th) * Math.sin(ph)];
+  const th = 0.85;
+  const pts = []; for (let k = 0; k <= 64; k++) pts.push(proj(th, k / 64 * 2 * Math.PI));
+  trail.setAttribute('d', 'M' + pts.map(p => p.map(v => v.toFixed(1)).join(' ')).join('L'));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const frame = t => {
+    const [x, y] = proj(th, t / 1600);
+    vec.setAttribute('x2', x); vec.setAttribute('y2', y); tip.setAttribute('cx', x); tip.setAttribute('cy', y);
+    if (!reduce) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+})();
+
+// ---------- proyecto Ising ----------
+const HITOS = [
+  { n: 1, part: 1, t: 'Dos espines y un paso de tiempo', d: 'Crea tu cuenta de IBM Quantum, escribe el Hamiltoniano y construye un paso de Trotter.', nb: 'practica/proyecto/hito1.py' },
+  { n: 2, part: 2, t: 'Muchos pasos y la magnetización', d: 'Encadena pasos de Trotter con parámetros y define los observables de magnetización.' },
+  { n: 3, part: 3, t: 'Transpilar para un procesador', d: 'Lleva el circuito a FakeFez y mide cómo crece la profundidad con el tiempo.' },
+  { n: 4, part: 4, t: 'Exacto frente a ruidoso', d: 'Magnetización en el tiempo: simulación exacta y con el modelo de ruido de Aer.' },
+  { n: 5, part: 5, t: 'Primera ejecución real', d: 'Tu cadena en un QPU de IBM, con un presupuesto de un minuto.' },
+  { n: 6, part: 6, t: 'Mitigar el ruido', d: 'Sin mitigación, TREX y ZNE: ¿cuánto te acercas al valor exacto?' },
+  { n: 7, part: 7, t: 'Puertas fraccionales', d: 'RZZ nativas y modo batch; segunda ejecución real.' },
+  { n: 8, part: 8, t: 'Menos profundidad', d: 'Recorta el circuito con un addon (OBP o AQC-Tensor).' },
+  { n: 9, part: 9, t: 'Código moderno', d: 'Migra a las primitivas del lado del cliente y empaqueta el experimento.' },
+  { n: 10, part: 10, t: 'Informe final', d: 'Gráficas, conclusiones y citas, listo para compartir.' },
+];
+function renderProyecto(course) {
+  const done = LS.get('qiskit:hitos', []);
+  const linkedNotebooks = new Set(course.parts.flatMap(p => p.lessons).flatMap(l => l.missions || []).map(m => m.notebook));
+  const notebookForHito = h => { const notebook = `practica/proyecto/hito${h.n}.py`; return linkedNotebooks.has(notebook) ? notebook : null; };
+  const cur = HITOS.find(h => !done.includes(h.n)) || HITOS[HITOS.length - 1];
+  const track = $('#track'); track.textContent = '';
+  HITOS.forEach(h => {
+    const d = document.createElement('div');
+    d.className = 'hito' + (done.includes(h.n) ? ' done' : notebookForHito(h) ? ' open' : '');
+    d.textContent = h.n; d.title = `Hito ${h.n} · ${h.t}`;
+    track.appendChild(d);
+  });
+  const partTitle = course.parts[cur.part - 1].title.split(' · ')[1];
+  const box = $('#hito');
+  box.innerHTML = `<div class="k">Hito ${cur.n} de 10 · Parte ${cur.part}</div><h3></h3><p></p>`;
+  box.querySelector('h3').textContent = cur.t; box.querySelector('p').textContent = cur.d;
+  const currentNotebook = notebookForHito(cur);
+  if (currentNotebook) {
+    const cmd = `uv run marimo edit ${currentNotebook}`;
+    const row = document.createElement('div'); row.className = 'cmd';
+    row.innerHTML = `<code></code><button>Copiar</button><button class="chk">Marcar como hecho</button>`;
+    row.querySelector('code').textContent = cmd;
+    row.children[1].onclick = e => navigator.clipboard?.writeText(cmd).then(() => { e.target.textContent = 'Copiado ✓'; });
+    row.children[2].onclick = () => { LS.set('qiskit:hitos', [...new Set([...done, cur.n])]); renderProyecto(course); };
+    window.notebookHelp(row);
+    box.appendChild(row);
+  } else {
+    const p = document.createElement('p'); p.textContent = `Se abre cuando llegues a la Parte ${cur.part} (${partTitle}).`; box.appendChild(p);
+  }
+}
+
+// ---------- repaso espaciado (1, 3, 7 y 21 días; lo que fallas vuelve mañana) ----------
+const DAY = 864e5, GAPS = [1, 3, 7, 21];
+async function renderRepaso(course, doneSet) {
+  const box = $('#repaso');
+  const lessons = course.parts.flatMap(p => p.lessons).filter(l => doneSet.has(l.id));
+  if (!lessons.length) { box.innerHTML = '<p class="empty">Cuando completes tu primera lección, aquí aparecerán preguntas para repasar en el momento justo, antes de que se olviden.</p>'; $('#rnote').textContent = ''; return; }
+  const state = LS.get('qiskit:repaso', {}), now = Date.now(), items = [];
+  const loaded = await Promise.all(lessons.map(l =>
+    fetch(`lessons/${l.id}/lesson.json`).then(r => r.json()).then(L => ({ l, L }), () => null)));
+  for (const { l, L } of loaded.filter(Boolean)) {
+    for (const b of L.beats) {
+      if (!b.ask || !['choice', 'numeric'].includes(b.ask.kind)) continue;
+      const id = `${l.id}:${b.id}`, st = state[id];
+      if (!st || st.due <= now) items.push({ id, l, a: b.ask, st, due: st ? st.due : 0 });
+    }
+  }
+  items.sort((x, y) => x.due - y.due || Math.random() - .5);
+  const todo = items.slice(0, 3);
+  $('#rnote').textContent = todo.length ? `${todo.length} de ${items.length} pendientes` : '';
+  box.textContent = '';
+  if (!todo.length) { box.innerHTML = '<p class="empty">Nada que repasar hoy. ✓ Vuelve mañana.</p>'; return; }
+  const answer = (it, ok, el) => {
+    const s = LS.get('qiskit:repaso', {}), prev = s[it.id] || { box: -1 };
+    const nb = ok ? Math.min(prev.box + 1, GAPS.length - 1) : 0;
+    s[it.id] = { box: nb, due: Date.now() + (ok ? GAPS[nb] : 1) * DAY };
+    LS.set('qiskit:repaso', s);
+    const fb = el.querySelector('.fb');
+    fb.innerHTML = (ok ? '✓ ' : '✗ ') + rich(ok ? (it.a.why || 'Correcto.') : (it.a.hint || 'No es correcto: volverá mañana.')) + `<br><span class="mono">próximo repaso en ${ok ? GAPS[nb] : 1} día(s)</span>`;
+  };
+  for (const it of todo) {
+    const el = document.createElement('div'); el.className = 'rq';
+    el.innerHTML = `<div class="from">${esc(it.l.section)} · ${esc(it.l.title)}</div><div class="p">${rich(it.a.prompt)}</div>`;
+    if (it.a.kind === 'choice') {
+      const o = document.createElement('div'); o.className = 'opts';
+      it.a.options.forEach((t, k) => {
+        const b = document.createElement('button'); b.innerHTML = rich(t);
+        b.onclick = () => { if (el.dataset.done) return; el.dataset.done = 1; const ok = k === it.a.right; b.classList.add(ok ? 'ok' : 'no');
+          if (!ok) o.children[it.a.right].classList.add('ok'); answer(it, ok, el); };
+        o.appendChild(b);
+      });
+      el.appendChild(o);
+    } else {
+      const r = document.createElement('div'); r.className = 'num';
+      r.innerHTML = '<input inputmode="decimal" placeholder="Tu respuesta"><button>Comprobar</button>';
+      const inp = r.querySelector('input');
+      const go = () => { if (el.dataset.done) return; const v = Number(inp.value.replace(',', '.')); if (!isFinite(v) || inp.value.trim() === '') return;
+        el.dataset.done = 1; const tol = it.a.tol ?? 0.01; answer(it, Math.abs(v - it.a.answer) <= tol * Math.max(1, Math.abs(it.a.answer)), el); };
+      r.querySelector('button').onclick = go; inp.onkeydown = e => { if (e.key === 'Enter') go(); };
+      el.appendChild(r);
+    }
+    el.appendChild(Object.assign(document.createElement('div'), { className: 'fb' }));
+    box.appendChild(el);
+  }
+}
+
+// ---------- curso ----------
+(async () => {
+  await QGAccount.ready;
+  const doneSet = new Set(LS.get('qiskit:done', []));
+  const course = await (await fetch('course.json')).json();
+  const all = course.parts.flatMap(p => p.lessons);
+  const mins = all.reduce((a, l) => a + (l.minutes || 0), 0);
+  $('#prog').textContent = `${doneSet.size}/${all.length} lecciones`;
+  $('#stats').innerHTML = `<div><b>${all.length}</b>lecciones</div><div><b>${(mins / 60).toFixed(1)} h</b>narradas</div><div><b>10</b>hitos de proyecto</div><div><b>${doneSet.size}</b>completadas</div>`;
+
+  // siguiente paso: misión pendiente de una lección hecha, o la siguiente lección
+  const misDone = LS.get('qiskit:misiones', []);
+  const pendMis = all.filter(l => doneSet.has(l.id)).flatMap(l => (l.missions || []).filter(m => !m.notebook.includes('proyecto/') && !misDone.includes(m.notebook)).map(m => ({ l, m })))[0];
+  const nextL = all.find(l => !doneSet.has(l.id)) || all[0];
+  const nx = $('#next');
+  if (pendMis) {
+    const cmd = `uv run marimo edit ${pendMis.m.notebook}`;
+    nx.innerHTML = `<div class="k">Tu turno · misión pendiente</div><div class="t"></div><div class="s">${pendMis.m.tasks === 1 ? '1 misión' : pendMis.m.tasks + ' misiones'} en el cuaderno de práctica. Busca ${pendMis.m.tasks === 1 ? 'la ✅' : 'las ✅'}.</div>
+      <div class="cmd"><code></code><button>Copiar</button><button class="chk">Ya la hice</button></div>`;
+    nx.querySelector('.t').textContent = `${pendMis.l.section} · ${pendMis.l.title}`;
+    nx.querySelector('code').textContent = cmd;
+    const [cp, ok] = nx.querySelectorAll('.cmd button');
+    cp.onclick = () => navigator.clipboard?.writeText(cmd).then(() => { cp.textContent = 'Copiado ✓'; });
+    ok.onclick = () => { LS.set('qiskit:misiones', [...misDone, pendMis.m.notebook]); location.reload(); };
+    window.notebookHelp(nx.querySelector('.cmd'));
+  } else {
+    nx.innerHTML = `<div class="k">${doneSet.size ? 'Continúa' : 'Empieza aquí'} · ${esc(nextL.section)}</div><div class="t"></div><div class="s"></div><a class="go" href="lesson.html?l=${encodeURIComponent(nextL.id)}">${doneSet.size ? 'Continuar' : 'Empezar'} · ${nextL.minutes} min →</a>`;
+    nx.querySelector('.t').textContent = nextL.title; nx.querySelector('.s').textContent = nextL.summary;
+  }
+
+  renderProyecto(course);
+  renderRepaso(course, doneSet);
+
+  const COLORS = ['--acc', '--acc2', '--acc3'];
+  const root = $('#parts');
+  course.parts.forEach((part, i) => {
+    const [num, name] = part.title.split(' · ');
+    const pd = part.lessons.filter(l => doneSet.has(l.id)).length, n = part.lessons.length;
+    const C = 2 * Math.PI * 22, col = `var(${COLORS[i % 3]})`;
+    const card = document.createElement('article'); card.className = 'part';
+    card.innerHTML = `<div class="h"><svg class="ring" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" stroke="var(--line)"/>
+      <circle cx="27" cy="27" r="22" stroke="${col}" stroke-linecap="${pd ? 'round' : 'butt'}" stroke-dasharray="${C * pd / n} ${C}" transform="rotate(-90 27 27)"/><text x="27" y="27">${pd}/${n}</text></svg>
+      <div><div class="no"></div><h3></h3><p class="d"></p></div></div>
+      <details><summary>${n} lecciones · ${part.lessons.reduce((a, l) => a + (l.minutes || 0), 0)} min</summary></details>`;
+    card.querySelector('.no').textContent = num; card.querySelector('h3').textContent = name || num; card.querySelector('.d').textContent = part.desc;
+    const det = card.querySelector('details');
+    if (part.lessons.some(l => !doneSet.has(l.id)) && part.lessons.some(l => doneSet.has(l.id))) det.open = true;
+    for (const l of part.lessons) {
+      const a = document.createElement('a'); a.href = 'lesson.html?l=' + encodeURIComponent(l.id); a.title = l.summary;
+      if (doneSet.has(l.id)) a.className = 'done';
+      a.innerHTML = `<span class="s">${esc(l.section)}</span><span class="t"></span><span class="m">${l.minutes} min</span>`;
+      a.querySelector('.t').textContent = l.title;
+      if (l.missions) a.querySelector('.t').insertAdjacentHTML('beforeend', '<span class="tag">práctica</span>');
+      det.appendChild(a);
+    }
+    root.appendChild(card);
+  });
+})();
+</script>
+</body>
+</html>

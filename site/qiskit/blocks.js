@@ -4,14 +4,14 @@
 //   draw()            vuelve a pintar (cambio de orientación o de tema)
 //   act(a, instant)   ejecuta una acción propia; devuelve true si la reconoció
 //   items             (opcional) elementos que revela la acción genérica 'item'
-//
-//   code    código con resaltado: revelar líneas ('lines'), resaltar ('hl', 'unhl')
+
+//   code   código con resaltado: revelar líneas ('lines'), resaltar ('hl', 'unhl')
 //   circuit diagrama de circuito: puertas que aparecen ('gate'), resaltado ('hlop'), cursor de columna ('cursor')
 //   hist    histograma de conteos o probabilidades con etiquetas de texto: 'grow', 'data'
 //   table   tabla con filas que aparecen con 'item'; 'hlrow' resalta una fila
 //   flow    pasos encadenados con flechas; 'item' revela, 'step' destaca uno
 //   graph   grafo de acoplamiento (qubits físicos): 'hlnode', 'hledge', 'nodelabel', 'clearhl'
-//
+
 // El bloque 'exercise' vive en exercise.js, que se carga después de este archivo.
 /* oxlint-disable unicorn/consistent-function-scoping --
    Script clásico en una función: sus ayudas no pueden salir al ámbito global. */
