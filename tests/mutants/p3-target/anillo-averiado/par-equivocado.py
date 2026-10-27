@@ -1,4 +1,4 @@
-# Equivocada: quita el par (3, 0) en vez del averiado.
+# Wrong: removes the pair (3, 0) instead of the faulty one.
 from qiskit import QuantumCircuit
 from qiskit.circuit import Measure, Parameter
 from qiskit.circuit.library import CZGate, RZGate, SXGate, XGate

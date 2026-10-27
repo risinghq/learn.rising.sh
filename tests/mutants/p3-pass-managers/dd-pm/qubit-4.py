@@ -1,4 +1,4 @@
-# Equivocada: rellena solo el qubit 4.
+# Wrong: fills only qubit 4.
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import XGate
 from qiskit.providers.fake_provider import GenericBackendV2

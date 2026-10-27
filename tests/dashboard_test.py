@@ -1,8 +1,8 @@
-"""Prueba tools/dashboard.py contra una base D1 local con el esquema del Worker y filas conocidas.
+"""Tests tools/dashboard.py against a local D1 database with the Worker's schema and known rows.
 
     uv run pytest tests/dashboard_test.py
 
-Necesita `mise run install`, que trae wrangler a runner/worker; sin él, se omite.
+It needs `mise run install`, which brings wrangler to runner/worker; without it, it is skipped.
 """
 
 import datetime
@@ -22,12 +22,12 @@ TOOL = ROOT / "tools" / "dashboard.py"
 
 pytestmark = pytest.mark.skipif(
     not shutil.which("bunx") or not (WORKER / "node_modules" / ".bin" / "wrangler").exists(),
-    reason="falta bun o wrangler: ejecuta `mise run install`",
+    reason="bun or wrangler is missing: run `mise run install`",
 )
 
 
 def at(day: int, hour: int = 12) -> int:
-    """Segundos Unix de un día de octubre de 2026 a una hora UTC."""
+    """Unix seconds of a day in October 2026 at a UTC hour."""
     moment = datetime.datetime(2026, 10, day, hour, tzinfo=datetime.UTC)
     return int(moment.timestamp())
 
@@ -60,13 +60,13 @@ def state(user: str, exercise: str, hints: int, passed: int, day: int) -> str:
     )
 
 
-# Periodo de la prueba: del 5 al 11 de octubre, ambos incluidos.
+# Test period: 5 to 11 October, both included.
 SEED = [
     "INSERT INTO users (id, created_day, seen_day) VALUES "
     f"('u1', {epoch_day(5)}, {epoch_day(9)}), ('u2', {epoch_day(11)}, {epoch_day(11)}), "
     f"('u3', {epoch_day(4)}, {epoch_day(9)}), ('u4', {epoch_day(12)}, {epoch_day(12)})",
-    # Dentro del periodo: p1/ghz falla 4 veces (u1 dos, u2 una, una anónima), con los casos
-    # «chain» (3), «measure» (2) y «size» (1); p1/bell falla una vez por error y una por timeout.
+    # Inside the period: p1/ghz fails 4 times (u1 twice, u2 once, one anonymous), with the cases
+    # «chain» (3), «measure» (2) and «size» (1); p1/bell fails once by error and once by timeout.
     attempt(6, "u1", "p1/ghz", "check", "fail", ["chain", "measure"]),
     attempt(7, "u1", "p1/ghz", "check", "fail", ["chain"]),
     attempt(8, "u2", "p1/ghz", "check", "fail", ["size", "measure"]),
@@ -74,16 +74,16 @@ SEED = [
     attempt(9, "u1", "p1/ghz", "check", "pass"),
     attempt(10, None, "p1/bell", "check", "error"),
     attempt(10, "u2", "p1/bell", "check", "timeout"),
-    # No son comprobaciones fallidas: una ejecución sin comprobar y una que pasa.
+    # Not failed checks: a run that was not checked and one that passes.
     attempt(10, "u1", "p1/ghz", "run", "fail", ["chain"]),
     attempt(10, None, "p1/bell", "check", "pass"),
-    # Fuera del periodo.
+    # Outside the period.
     attempt(4, "u3", "p1/ghz", "check", "fail", ["chain"]),
     attempt(12, "u4", "p1/ghz", "check", "fail", ["chain"]),
     "INSERT INTO lesson_done (user_id, lesson, done_at) VALUES "
     f"('u1', 'p1', {at(7)}), ('u2', 'p1', {at(9)}), ('u1', 'p2', {at(8)}), "
     f"('u3', 'p1', {at(4)}), ('u4', 'p3', {at(12)})",
-    # Alumnos que aprobaron: u1 y u2 abrieron pistas en p1/ghz, u1 ninguna en p1/bell.
+    # Learners who passed: u1 and u2 opened hints in p1/ghz, u1 none in p1/bell.
     state("u1", "p1/ghz", 3, 1, 9),
     state("u2", "p1/ghz", 2, 1, 10),
     state("u1", "p1/bell", 0, 1, 9),
@@ -115,32 +115,32 @@ EXPECTED: dict[str, Any] = {
 }
 
 TEXT = """\
-Periodo: 2026-10-05 a 2026-10-11 (UTC)
+Period: 2026-10-05 to 2026-10-11 (UTC)
 
-Usuarios nuevos        2
-Usuarios con intentos  2
-Intentos               9
-Intentos sin cuenta    3
+New users                 2
+Users with attempts       2
+Attempts                  9
+Attempts without account  3
 
-Lecciones terminadas
-lección  terminadas
-p1                2
-p2                1
+Lessons finished
+lesson  finished
+p1             2
+p2             1
 
-Ejercicios con más comprobaciones fallidas
-ejercicio  fallidas  con cuenta  anónimas
-p1/ghz            4           2         1
-p1/bell           2           1         1
+Exercises with the most failed checks
+exercise  failed  with account  anonymous
+p1/ghz         4             2          1
+p1/bell        2             1          1
 
-Casos que más fallan
-ejercicio  caso     fallos
-p1/ghz     chain         3
-p1/ghz     measure       2
-p1/ghz     size          1
+Cases that fail most
+exercise  case     failures
+p1/ghz    chain           3
+p1/ghz    measure         2
+p1/ghz    size            1
 
-Ejercicios aprobados con más pistas abiertas
-ejercicio  aprobaron  pistas  por alumno
-p1/ghz             2       5         2.5"""
+Passed exercises with the most hints opened
+exercise  passed  hints  per learner
+p1/ghz         2      5          2.5"""
 
 
 def wrangler(persist: Path, *args: str) -> None:

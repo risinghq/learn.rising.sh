@@ -1,4 +1,4 @@
-# Equivocada: deja vacía la lista de la unitaria.
+# Wrong: leaves the unitary list empty.
 from qiskit.transpiler.passes.synthesis.plugin import (
     high_level_synthesis_plugin_names,
     unitary_synthesis_plugin_names,

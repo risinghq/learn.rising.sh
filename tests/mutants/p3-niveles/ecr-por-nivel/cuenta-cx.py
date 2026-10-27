@@ -1,4 +1,4 @@
-# Equivocada: cuenta `cx` en vez de `ecr`.
+# Wrong: counts `cx` instead of `ecr`.
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
 from qiskit.quantum_info import random_unitary

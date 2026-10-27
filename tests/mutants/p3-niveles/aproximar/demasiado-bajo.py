@@ -1,4 +1,4 @@
-# Equivocada: baja el grado a 0.5: el circuito ya no se parece a la unitaria.
+# Wrong: lowers the degree to 0.5: the circuit does not resemble the unitary.
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
 from qiskit.quantum_info import random_unitary

@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 
-// Sustituye a Google y GitHub como servicio de salida del Worker.
-// Conserva los requisitos relevantes: códigos de un solo uso, PKCE,
-// credenciales del cliente y `User-Agent` en GitHub.
+// Stands in for Google and GitHub as the Worker's outbound service.
+// It keeps the relevant requirements: single-use codes, PKCE,
+// client credentials and `User-Agent` on GitHub.
 
 export type ProviderName = "google" | "github";
 
@@ -33,9 +33,9 @@ export interface ProviderCall {
   form: Record<string, string>;
 }
 
-// Lo que un proveedor real también devuelve y el Worker no debe guardar.
-// Cada valor es largo y propio de la prueba: un texto corto como «ada» aparece por
-// azar en los tokens y hashes base64url y haría la búsqueda intermitente.
+// What a real provider also returns and the Worker must not store.
+// Each value is long and unique to the test: a short text such as «ada» appears
+// by chance in base64url tokens and hashes and would make the search flaky.
 export const PII = {
   email: "pii-4417@ejemplo.test",
   name: "Nombre Propio PII-4417",
@@ -55,8 +55,8 @@ export class FakeProvider {
     return url.hostname in HOSTS;
   }
 
-  // El alumno aprueba en la pantalla del proveedor. Devuelve el código que el
-  // navegador llevaría de vuelta a la dirección de retorno.
+  // The learner approves on the provider's screen. Returns the code the
+  // browser would carry back to the return address.
   consent(authorizeUrl: string, subject: string): string {
     const url = new URL(authorizeUrl);
     const provider = HOSTS[url.hostname];
@@ -69,7 +69,7 @@ export class FakeProvider {
       !q.get("code_challenge") ||
       !q.get("state")
     ) {
-      throw new Error(`petición de autorización inválida: ${authorizeUrl}`);
+      throw new Error(`invalid authorization request:${authorizeUrl}`);
     }
     const code = randomUUID();
     this.grants.set(code, {
@@ -97,7 +97,7 @@ export class FakeProvider {
         ? Object.fromEntries(new URLSearchParams(await request.text()))
         : {};
     this.calls.push({ url: request.url, headers, form });
-    if (this.down.has(provider)) return new Response("caído", { status: 503 });
+    if (this.down.has(provider)) return new Response("down", { status: 503 });
 
     if (request.method === "POST") return this.token(provider, headers, form);
 
@@ -124,7 +124,7 @@ export class FakeProvider {
     headers: Record<string, string>,
     form: Record<string, string>,
   ) {
-    // GitHub contesta 200 con `error`; Google, 400.
+    // GitHub answers 200 with `error`; Google, 400.
     const reject = (error: string) =>
       provider === "github"
         ? Response.json({ error })

@@ -1,4 +1,4 @@
-# Equivocada: devuelve una cx de más.
+# Wrong: returns one cx too many.
 from qiskit import QuantumCircuit
 from qiskit.providers.fake_provider import GenericBackendV2
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager

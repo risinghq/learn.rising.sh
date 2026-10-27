@@ -1,4 +1,4 @@
-# Equivocada: añade una H que la cadena no debe tener.
+# Wrong: adds an H that the chain must not have.
 from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import Measure, Parameter
 from qiskit.circuit.library import CZGate, HGate, RZGate, SXGate, XGate

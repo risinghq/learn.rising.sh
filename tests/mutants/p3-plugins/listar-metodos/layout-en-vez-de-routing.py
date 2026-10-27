@@ -1,4 +1,4 @@
-# Equivocada: lista los métodos de layout en vez de los de routing.
+# Wrong: lists the layout methods instead of the routing ones.
 from qiskit.transpiler.passes.synthesis.plugin import (
     high_level_synthesis_plugin_names,
     unitary_synthesis_plugin_names,

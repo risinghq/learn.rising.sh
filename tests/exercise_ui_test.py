@@ -1,10 +1,11 @@
-"""Comprueba en el navegador el editor de los ejercicios con Playwright y tools/serve.py.
+"""Test the exercise editor in the browser with Playwright and tools/serve.py.
 
-    uv run --group tools python tests/exercise_ui_test.py [--shots CARPETA]
+    uv run --group tools python tests/exercise_ui_test.py [--shots FOLDER]
 
-Abre el paso de misión de cada lección con ejercicios, prueba el editor en escritorio y móvil,
-y comprueba que el progreso se conserva. También prueba el teclado, el tema, los estados de carga
-y error, y la comprobación de Turnstile. `--shots` guarda capturas.
+Open the mission step of each lesson with exercises, test the editor on desktop
+and mobile, and check that progress is kept. Also test the keyboard, the theme,
+the loading and error states, and the Turnstile check. `--shots` saves
+screenshots.
 """
 
 import importlib.util
@@ -70,7 +71,7 @@ anti.measure_all()
 resultado = StatevectorSampler(seed=7).run([anti], shots=1024).result()
 print(resultado[0].data.meas.get_counts())
 """
-# (lección, posición del ejercicio en el paso, ejercicio, código equivocado o None para el inicial, caso que falla)
+# (lesson, position of the exercise in the step, exercise, wrong code or None for the starter, failing case)
 EXERCISES: list[tuple[str, int, str, str | None, str]] = [
     ("p1-quickstart", 1, "ghz", GHZ_WITHOUT_CHAIN, "n = 2, 3 y 4"),
     ("p1-quickstart", 0, "bell-distinto", BELL_WITH_Z, "Salen ['00', '11']"),
@@ -123,7 +124,7 @@ def write(page: Page, panel: Locator, code: str) -> None:
 
 
 def editor_text(panel: Locator) -> str:
-    """El texto del editor sin líneas en blanco: inner_text las cuenta distinto según el diseño."""
+    """The editor text without blank lines: inner_text counts them differently by layout."""
     return "\n".join(
         line.rstrip()
         for line in panel.locator(".cm-content").inner_text().split("\n")
@@ -144,7 +145,7 @@ def wait_result(panel: Locator, timeout: int = 40_000) -> None:
 
 
 def shot(page: Page, shots: str | None, name: str, panel: Locator, results: bool = False) -> None:
-    """En pantallas estrechas el resultado queda bajo el editor: se encuadra el resultado."""
+    """On narrow screens the result sits under the editor, so frame the result."""
     if shots:
         viewport = page.viewport_size
         assert viewport is not None
@@ -166,7 +167,7 @@ def flow(
     failing_case: str,
     shots: str | None,
 ) -> None:
-    """Equivocado, falla un caso; corregido, pasa; tras recargar, el progreso sigue."""
+    """Wrong, a case fails; fixed, it passes; after a reload, the progress is still there."""
     solution = read(lesson, name, "solution.py")
     page = new_context(browser, **ctx).new_page()
     errors: list[str] = []
@@ -176,37 +177,39 @@ def flow(
     tag = f"{label} {lesson}/{name}"
     if wrong:
         write(page, panel, wrong)
-    shot(page, shots, f"{label}-{name}-escrito", panel)
+    shot(page, shots, f"{label}-{name}-written", panel)
     press(panel, "Comprobar")
     wait_result(panel)
     check(
         panel.locator(".xstatus.bad").count() == 1 and panel.locator(".xtests li.bad").count() >= 1,
-        f"{tag}: el código equivocado falla un caso",
+        f"{tag}: the wrong code fails a case",
     )
     check(
         failing_case in panel.locator(".xtests li.bad").first.inner_text(),
-        f"{tag}: el caso que falla trae su nombre o su mensaje ({failing_case})",
+        f"{tag}: the failing case shows its name or its message ({failing_case})",
     )
-    check(panel.locator(".xsolved").is_hidden(), f"{tag}: aún no figura como resuelto")
-    shot(page, shots, f"{label}-{name}-falla", panel, results=True)
+    check(panel.locator(".xsolved").is_hidden(), f"{tag}: not yet listed as solved")
+    shot(page, shots, f"{label}-{name}-fails", panel, results=True)
     write(page, panel, solution)
     press(panel, "Comprobar")
     wait_result(panel)
     check(
         "¡Pasa todos los casos!" in panel.locator(".xstatus").inner_text(),
-        f"{tag}: la solución pasa todos los casos",
+        f"{tag}: the solution passes every case",
     )
     check(
         panel.locator(".xtests li.bad").count() == 0 and panel.locator(".xsolved").is_visible(),
-        f"{tag}: figura como resuelto",
+        f"{tag}: listed as solved",
     )
-    shot(page, shots, f"{label}-{name}-pasa", panel, results=True)
+    shot(page, shots, f"{label}-{name}-passes", panel, results=True)
     page.reload()
     panel = page.locator(".xpanel").nth(k)
     panel.locator(".cm-editor").wait_for()
-    check(editor_text(panel) == unblank(solution), f"{tag}: tras recargar, el código sigue")
-    check(panel.locator(".xsolved").is_visible(), f"{tag}: tras recargar, sigue resuelto")
-    check(not errors, f"{tag}: sin errores en consola {errors}")
+    check(
+        editor_text(panel) == unblank(solution), f"{tag}: after a reload, the code is still there"
+    )
+    check(panel.locator(".xsolved").is_visible(), f"{tag}: after a reload, still solved")
+    check(not errors, f"{tag}: no console errors {errors}")
     page.context.close()
 
 
@@ -225,21 +228,21 @@ def feedback(browser: Browser, base: str, shots: str | None) -> None:
     error = panel.locator(".xerr").inner_text()
     check(
         "SyntaxError" in error and "línea 4" in error,
-        f"error de sintaxis: el panel muestra el error con su línea ({error})",
+        f"syntax error: the panel shows the error with its line ({error})",
     )
     check(
         "No se pudo probar tu código" in panel.locator(".xout").inner_text(),
-        "error de sintaxis: el panel dice que no se pudo probar el código",
+        "syntax error: the panel says the code could not be tested",
     )
     check(
         panel.locator(".xtests").count() == 0 and panel.locator(".xtests li").count() == 0,
-        "error de sintaxis: no se muestra ningún caso",
+        "syntax error: no case is shown",
     )
     check(
         "Pasan" not in panel.locator(".xstatus").inner_text(),
-        "error de sintaxis: no se cuentan casos",
+        "syntax error: no cases are counted",
     )
-    shot(page, shots, "escritorio-ghz-sintaxis", panel, results=True)
+    shot(page, shots, "desktop-ghz-syntax", panel, results=True)
 
     visible = sum(shown is not None for _, shown in cases)
     hidden = len(cases) - visible
@@ -249,19 +252,19 @@ def feedback(browser: Browser, base: str, shots: str | None) -> None:
     status = panel.locator(".xstatus").inner_text()
     check(
         f"{visible} de {visible} visibles · 0 de {hidden} ocultos" in status,
-        f"casos ocultos: se cuentan aparte de los visibles ({status})",
+        f"hidden cases: counted apart from the visible ones ({status})",
     )
     failing = panel.locator(".xtests li.bad")
     check(
         failing.count() == hidden and all("caso oculto" in t for t in failing.all_inner_texts()),
-        "casos ocultos: solo fallan los ocultos",
+        "hidden cases: only the hidden ones fail",
     )
-    shot(page, shots, "escritorio-ghz-oculto", panel, results=True)
+    shot(page, shots, "desktop-ghz-hidden", panel, results=True)
     page.context.close()
 
-    # El servidor lee el check.py de prueba desde QG_EXERCISES.
+    # The server reads the test check.py from QG_EXERCISES.
     with tempfile.TemporaryDirectory(prefix="qg-ui-") as scratch, mock.patch.dict(os.environ):
-        # Las fuentes pueden ser de solo lectura; la copia se edita y se borra, así que se deja escribible.
+        # The sources may be read-only; the copy is edited and deleted, so make it writable.
         copy = Path(scratch) / "exercises"
         shutil.copytree(ROOT / "exercises", copy, copy_function=shutil.copyfile)
         for path in [copy, *copy.rglob("*")]:
@@ -295,15 +298,15 @@ def feedback(browser: Browser, base: str, shots: str | None) -> None:
         check(
             named.locator(".xcasehint").count() == 1
             and tip.replace("`", "") in named.locator(".xcasehint").inner_text(),
-            "pista del caso: el caso que falla muestra la pista que nombra",
+            "case hint: the failing case shows the hint it names",
         )
         check(
             panel.locator(".xtests li.bad").locator(".xcasehint").count() == 1,
-            "pista del caso: los casos que no nombran pista no la muestran",
+            "case hint: cases that name no hint do not show one",
         )
         check(
             panel.locator(".xhint:not(.xcasehint)").count() == 0,
-            "pista del caso: no cuenta como pista pedida con el botón",
+            "case hint: it does not count as a hint requested with the button",
         )
         page.context.close()
 
@@ -322,24 +325,24 @@ def mobile_layout(browser: Browser, base: str, shots: str | None) -> None:
     assert box is not None
     check(
         page.evaluate("document.documentElement.scrollWidth") <= 390,
-        "móvil: la página no se desplaza en horizontal",
+        "mobile: the page does not scroll horizontally",
     )
     check(
         box["x"] >= 0 and box["x"] + box["width"] <= 390,
-        "móvil: el panel cabe en el ancho de la pantalla",
+        "mobile: the panel fits the screen width",
     )
     check(
         page.evaluate("getComputedStyle(document.querySelector('#stage')).transform") == "none",
-        "móvil: el paso con ejercicio no se escala",
+        "mobile: the step with an exercise is not scaled",
     )
     sizes = [height(panel.get_by_role("button", name=n)) for n in ("Ejecutar", "Comprobar")]
-    check(min(sizes) >= 40, f"móvil: los botones se pulsan con el dedo ({sizes})")
+    check(min(sizes) >= 40, f"mobile: the buttons can be pressed with a finger ({sizes})")
     check(
         panel.locator(".cm-content").evaluate("e => parseFloat(getComputedStyle(e).fontSize)")
         >= 16,
-        "móvil: el código se lee a 16 px o más",
+        "mobile: the code reads at 16 px or more",
     )
-    shot(page, shots, "movil-ghz-inicio", panel)
+    shot(page, shots, "mobile-ghz-start", panel)
     page.context.close()
 
 
@@ -351,19 +354,19 @@ def keyboard(browser: Browser, base: str) -> None:
     page.keyboard.type(" c")
     check(
         editor_text(panel) == "x c" and page.locator('#cc[aria-pressed="true"]').count() == 1,
-        "teclado: escribir espacio y «c» en el editor no activa los atajos de la lección",
+        "keyboard: typing a space and «c» in the editor does not trigger the lesson shortcuts",
     )
     page.keyboard.press("ArrowLeft")
-    check(panel.is_visible(), "teclado: las flechas del editor no cambian de paso")
+    check(panel.is_visible(), "keyboard: the arrows in the editor do not change the step")
     write(page, panel, "x")
     page.keyboard.press("Home")
     page.keyboard.press("Tab")
-    check(editor_text(panel) == "    x", "teclado: Tab sangra cuatro espacios")
+    check(editor_text(panel) == "    x", "keyboard: Tab indents four spaces")
     page.keyboard.press("Escape")
     page.keyboard.press("Tab")
     check(
         page.evaluate("!document.activeElement.closest('.cm-editor')"),
-        "teclado: Esc y Tab sacan el foco del editor",
+        "keyboard: Esc and Tab move the focus out of the editor",
     )
     write(page, panel, 'print("hola")')
     editor.press("ControlOrMeta+Enter")
@@ -371,24 +374,24 @@ def keyboard(browser: Browser, base: str) -> None:
     check(
         "hola" in panel.locator(".xstdout").inner_text()
         and "ejecutó sin errores" in panel.locator(".xstatus").inner_text(),
-        "teclado: Ctrl+Intro ejecuta y muestra la salida",
+        "keyboard: Ctrl+Enter runs and shows the output",
     )
-    check(panel.locator(".xtests").count() == 0, "teclado: Ejecutar no corre los casos")
+    check(panel.locator(".xtests").count() == 0, "keyboard: Ejecutar does not run the cases")
     write(page, panel, "print(1)\nprint(y)")
     editor.press("ControlOrMeta+Shift+Enter")
     wait_result(panel)
     check(
         "línea 2" in panel.locator(".xerr").inner_text()
         and "tiene un error" in panel.locator(".xstatus").inner_text(),
-        "teclado: Ctrl+Mayús+Intro comprueba y muestra el error con su línea",
+        "keyboard: Ctrl+Shift+Enter checks and shows the error with its line",
     )
     check(
         panel.locator(".cm-errline").count() == 1
         and "print(y)" in panel.locator(".cm-errline").inner_text(),
-        "el editor marca la línea del error",
+        "the editor marks the error line",
     )
     write(page, panel, "print(1)\nprint(y)\n")
-    check(panel.locator(".cm-errline").count() == 0, "la marca del error se quita al editar")
+    check(panel.locator(".cm-errline").count() == 0, "the error mark clears on edit")
     page.context.close()
 
 
@@ -406,19 +409,19 @@ def hints(browser: Browser, base: str) -> None:
         for blk in b["scene"]
         if blk.get("exercise") == "p1-quickstart/ghz"
     )
-    check(panel.locator(".xhint").count() == 0, "pistas: al abrir no hay ninguna")
+    check(panel.locator(".xhint").count() == 0, "hints: none on open")
     press(panel, "Pista")
     press(panel, "Pista")
-    check(panel.locator(".xhint").count() == 2, "pistas: una más por pulsación")
+    check(panel.locator(".xhint").count() == 2, "hints: one more per press")
     page.reload()
     panel = page.locator(".xpanel").nth(1)
     panel.locator(".cm-editor").wait_for()
-    check(panel.locator(".xhint").count() == 2, "pistas: las vistas se conservan al recargar")
+    check(panel.locator(".xhint").count() == 2, "hints: the viewed ones are kept on reload")
     press(panel, f"Pista (2/{total})")
     check(
         panel.locator(".xhint").count() == total
         and panel.get_by_role("button", name="Sin más pistas").is_disabled(),
-        "pistas: la última deja el botón sin uso",
+        "hints: the last one disables the button",
     )
     page.context.close()
 
@@ -435,14 +438,14 @@ def theme(browser: Browser, base: str) -> None:
         seen[mode] = panel.locator(".cm-editor").evaluate(paint)
         check(
             seen[mode] == page.evaluate(probe),
-            f"tema {mode}: el editor usa --code-bg ({seen[mode]})",
+            f"theme {mode}: the editor uses --code-bg ({seen[mode]})",
         )
-    check(seen["light"] != seen["dark"], "tema: el editor cambia con el modo claro y oscuro")
+    check(seen["light"] != seen["dark"], "theme: the editor changes with light and dark mode")
     page.context.close()
 
 
 def states(browser: Browser, base: str) -> None:
-    """Cargando, tiempo agotado del código, y errores del corredor."""
+    """Loading, code timeout, and runner errors."""
     page = new_context(browser, **DESKTOP).new_page()
     panel = open_panel(page, base, "p1-quickstart", 1)
     write(page, panel, "while True:\n    pass")
@@ -451,13 +454,13 @@ def states(browser: Browser, base: str) -> None:
         panel.locator(".xstatus.busy").is_visible()
         and panel.get_by_role("button", name="Ejecutar").is_disabled()
         and panel.get_by_role("button", name="Comprobar").is_disabled(),
-        "carga: mientras corre se ve «Ejecutando…» y los botones se bloquean",
+        "loading: while it runs the page shows «Ejecutando…» and the buttons are disabled",
     )
     wait_result(panel)
     check(
         "más de 10 s" in panel.locator(".xerr").inner_text()
         and panel.get_by_role("button", name="Ejecutar").is_enabled(),
-        "tiempo agotado: el código infinito se corta con su mensaje y los botones vuelven",
+        "timeout: the endless code is cut with its message and the buttons come back",
     )
 
     page.route(
@@ -470,7 +473,7 @@ def states(browser: Browser, base: str) -> None:
     panel.locator(".xstatus.bad").wait_for()
     check(
         "ocupado" in panel.locator(".xstatus").inner_text(),
-        "error: un 503 dice que el corredor está ocupado",
+        "error: a 503 says the runner is busy",
     )
     page.unroute("**/run")
     page.route("**/run", lambda r: r.abort())
@@ -478,7 +481,7 @@ def states(browser: Browser, base: str) -> None:
     panel.locator(".xstatus", has_text="No se pudo conectar").wait_for()
     check(
         panel.get_by_role("button", name="Ejecutar").is_enabled(),
-        "error: sin conexión se dice y se puede reintentar",
+        "error: with no connection the page says so and allows a retry",
     )
     page.context.close()
 
@@ -486,27 +489,25 @@ def states(browser: Browser, base: str) -> None:
     page.clock.install()
     panel = open_panel(page, base, "p1-quickstart", 1)
     held: list[Route] = []
-    page.route(
-        "**/run", lambda r: held.append(r)
-    )  # Mantiene la petición abierta para probar el tiempo límite.
+    page.route("**/run", lambda r: held.append(r))  # Keeps the request open to test the time limit.
     press(panel, "Comprobar")
     page.clock.run_for(5_000)
     check(
         "Esperando al corredor" in panel.locator(".xstatus").inner_text(),
-        "carga: tras unos segundos explica que el corredor puede tardar",
+        "loading: after a few seconds it explains that the runner may be slow",
     )
     page.clock.run_for(30_000)
     panel.locator(".xstatus", has_text="no respondió").wait_for()
     check(
         panel.get_by_role("button", name="Comprobar").is_enabled(),
-        "tiempo agotado: si el corredor no responde se corta y se puede reintentar",
+        "timeout: if the runner does not answer the request is cut and a retry is possible",
     )
     for route in held:
         route.abort()
     page.context.close()
 
 
-# Sustituye el widget de Turnstile y entrega un token de prueba.
+# Replaces the Turnstile widget and hands over a test token.
 FAKE_TURNSTILE = """window.turnstile = {
   render(slot, o) { slot.dataset.sitekey = o.sitekey; setTimeout(() => o.callback('XXXX.DUMMY.TOKEN.XXXX'), 20); return 'w1'; },
   remove() { window.turnstileRemoved = (window.turnstileRemoved || 0) + 1; },
@@ -514,7 +515,7 @@ FAKE_TURNSTILE = """window.turnstile = {
 
 
 def turnstile(browser: Browser, base: str) -> None:
-    """Comprueba la petición inicial de Turnstile y la sesión que deja abierta."""
+    """Check the initial Turnstile request and the session it leaves open."""
     page = new_context(browser, **DESKTOP).new_page()
     sent: list[str | None] = []
     scripts: list[str] = []
@@ -548,19 +549,19 @@ def turnstile(browser: Browser, base: str) -> None:
     check(
         sent == [None, "XXXX.DUMMY.TOKEN.XXXX"]
         and "Se ejecutó sin errores" in panel.locator(".xstatus").inner_text(),
-        f"turnstile: la primera ejecución repite la petición con el token ({sent})",
+        f"turnstile: the first run repeats the request with the token ({sent})",
     )
     check(
         len(scripts) == 1
         and page.evaluate("window.turnstileRemoved") == 1
         and page.locator(".xturnstile").count() == 0,
-        "turnstile: el widget se carga una vez y se retira al terminar",
+        "turnstile: the widget loads once and is removed when done",
     )
     press(panel, "Ejecutar")
     wait_result(panel)
     check(
         sent == [None, "XXXX.DUMMY.TOKEN.XXXX", None] and len(scripts) == 1,
-        f"turnstile: con la sesión abierta no se vuelve a pedir ({sent})",
+        f"turnstile: with the session open it is not asked again ({sent})",
     )
 
     page.context.close()
@@ -576,7 +577,7 @@ def turnstile(browser: Browser, base: str) -> None:
     panel.locator(".xstatus", has_text="comprobación de que eres una persona").wait_for()
     check(
         panel.get_by_role("button", name="Ejecutar").is_enabled(),
-        "turnstile: si el widget no carga se dice y se puede reintentar",
+        "turnstile: if the widget fails to load the page says so and allows a retry",
     )
     page.context.close()
 
@@ -593,10 +594,8 @@ def main() -> None:
     base = serve(quiet(tool.Handler))
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for label, ctx in (("escritorio", DESKTOP), ("movil", MOBILE)):
-            for lesson, k, name, wrong, case in (
-                EXERCISES if label == "escritorio" else EXERCISES[:1]
-            ):
+        for label, ctx in (("desktop", DESKTOP), ("mobile", MOBILE)):
+            for lesson, k, name, wrong, case in EXERCISES if label == "desktop" else EXERCISES[:1]:
                 flow(browser, base, label, ctx, lesson, k, name, wrong, case, shots)
         feedback(browser, base, shots)
         mobile_layout(browser, base, shots)
@@ -607,7 +606,7 @@ def main() -> None:
         turnstile(browser, base)
         browser.close()
     verify()
-    print(f"\n{len(failures)} fallos" if failures else "\ntodo bien")
+    print(f"\n{len(failures)} failures" if failures else "\nall good")
     sys.exit(1 if failures else 0)
 
 

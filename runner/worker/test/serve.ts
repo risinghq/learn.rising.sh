@@ -2,10 +2,10 @@ import http from "node:http";
 
 import { start } from "./harness.ts";
 
-// Un Worker local con el proveedor falso para las pruebas de navegador.
-// Imprime los orígenes del sitio y del control, y sirve hasta SIGTERM.
-// El control solo escucha en 127.0.0.1 y expone el consentimiento falso y
-// los recuentos de filas de la base.
+// A local Worker with the fake provider for the browser tests.
+// It prints the origins of the site and of the control, and serves until SIGTERM.
+// The control listens only on 127.0.0.1 and exposes the fake consent and
+// the row counts of the database.
 const TABLES = [
   "users",
   "identities",

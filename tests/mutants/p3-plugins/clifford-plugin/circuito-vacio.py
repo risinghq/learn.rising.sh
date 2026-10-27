@@ -1,4 +1,4 @@
-# Equivocada: con 6 qubits o más devuelve un circuito vacío en vez de None.
+# Wrong: with 6 qubits or more it returns an empty circuit instead of None.
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Clifford, random_clifford
 from qiskit.synthesis import synth_clifford_bm

@@ -1,10 +1,10 @@
-"""Comprueba la cuenta opcional en un navegador con un Worker local y un proveedor falso.
+"""Check the optional account in a browser with a local Worker and a fake provider.
 
     uv run --group tools python tests/account_ui_test.py
 
-Comprueba la sincronización entre dos navegadores y que borrar la cuenta conserva
-la copia local. Sin cuenta, la página solo hace la petición propia de `/run`.
-Se omite con el motivo si faltan Node o las dependencias del Worker.
+Check the sync between two browsers and that deleting the account keeps the
+local copy. Without an account, the page makes only its own `/run` request.
+The test skips with the reason when Node or the Worker dependencies are missing.
 """
 
 import json
@@ -37,7 +37,7 @@ from offline import new_context, verify
 WORKER = ROOT / "runner" / "worker"
 LESSON = "p1-quickstart"
 EXERCISE = "p1-quickstart/ghz"
-# El corredor falso da por fallida una comprobación cuyo código contiene FALLA.
+# The fake runner fails a check whose code contains FALLA.
 FAILING = "# FALLA\nprint('primer intento')\n"
 REWRITTEN = "# FALLA\nprint('desde el otro navegador')\n"
 SUBJECT = "424242"
@@ -76,7 +76,7 @@ def start_worker() -> tuple[subprocess.Popen[str], dict[str, str]]:
     line = process.stdout.readline()
     if not line:
         process.kill()
-        raise RuntimeError(f"el Worker local no arrancó: {process.stderr.read()}")
+        raise RuntimeError(f"the local Worker did not start: {process.stderr.read()}")
     return process, json.loads(line)
 
 
@@ -88,7 +88,7 @@ def last_beat(lesson: str) -> int:
 
 
 def new_page(browser: Browser, site: str, control: str) -> Tab:
-    """Un navegador nuevo: el widget de Turnstile y la pantalla del proveedor son falsos."""
+    """A new browser: the Turnstile widget and the provider screen are fake."""
     context = new_context(browser, **DESKTOP)
     context.route(
         "https://challenges.cloudflare.com/turnstile/v0/api.js*",
@@ -96,8 +96,9 @@ def new_page(browser: Browser, site: str, control: str) -> Tab:
     )
 
     def provider(route: Route) -> None:
-        """El Worker redirige al proveedor. El navegador no sigue esa redirección a través de route, así que se
-        responde aquí por el proveedor: el alumno aprueba y vuelve a la dirección de retorno con el código."""
+        """The Worker redirects to the provider. The browser does not follow that redirect through
+        route, so this handler answers for the provider: the learner approves and returns to the
+        redirect address with the code."""
         response = route.fetch(max_redirects=0)
         authorize = response.headers["location"]
         code = call(f"{control}/consent", {"authorizeUrl": authorize, "subject": SUBJECT})["code"]
@@ -148,12 +149,13 @@ def anonymous(browser: Browser, site: str, control: str) -> Tab:
     write(page, panel, FAILING)
     press(panel, "Comprobar")
     wait_result(panel)
-    check(panel.locator(".xstatus.bad").count() == 1, "anónimo: la comprobación falla")
+    check(panel.locator(".xstatus.bad").count() == 1, "anonymous: the check fails")
     page.goto(f"{site}/qiskit/lesson.html?l={LESSON}&beat={last_beat(LESSON)}")
     page.locator("#next").click()
     page.locator("#end:not(.hide)").wait_for()
     check(
-        stored(page, "qiskit:done") == [LESSON], "anónimo: la lección queda hecha en el navegador"
+        stored(page, "qiskit:done") == [LESSON],
+        "anonymous: the lesson is marked done in the browser",
     )
     record = stored(page, f"qiskit:exercise:{EXERCISE}")
     check(
@@ -161,7 +163,7 @@ def anonymous(browser: Browser, site: str, control: str) -> Tab:
         and record["checks"] == 1
         and not record.get("passed")
         and record["at"] > 0,
-        f"anónimo: el ejercicio guarda código, una comprobación fallida y la hora ({record})",
+        f"anonymous: the exercise stores the code, one failed check and the time ({record})",
     )
     page.wait_for_timeout(2500)
     ours = {
@@ -171,19 +173,21 @@ def anonymous(browser: Browser, site: str, control: str) -> Tab:
     }
     check(
         ours == {("POST", "/run")},
-        f"anónimo: la única petición propia que no es un archivo es /run ({sorted(ours)})",
+        f"anonymous: the only own request that is not a file is /run ({sorted(ours)})",
     )
-    check(stored(page, "qiskit:hitos") == [1], "anónimo: el hito marcado queda en el navegador")
+    check(
+        stored(page, "qiskit:hitos") == [1], "anonymous: the ticked milestone stays in the browser"
+    )
     check(
         page.locator(".acct > button").first.inner_text() == "Entrar",
-        "anónimo: el menú ofrece entrar",
+        "anonymous: the menu offers sign-in",
     )
     return page, errors, requests
 
 
 def main() -> None:
     if not shutil.which("node") or not (WORKER / "node_modules" / "miniflare").is_dir():
-        print("se omite: hace falta node y `mise run install`")
+        print("skipped: needs node and `mise run install`")
         return
     worker, urls = start_worker()
     site, control = urls["site"], urls["control"]
@@ -193,7 +197,7 @@ def main() -> None:
             one, one_errors, one_requests = anonymous(browser, site, control)
             check(
                 call(f"{control}/rows")["users"] == 0,
-                "anónimo: el servidor no tiene ninguna cuenta",
+                "anonymous: the server has no account",
             )
 
             one.goto(f"{site}/qiskit/lesson.html?l={LESSON}&beat={last_beat(LESSON)}")
@@ -204,12 +208,12 @@ def main() -> None:
                 and rows["lesson_done"] == 1
                 and rows["exercise_state"] == 1
                 and rows["kv"] == 1,
-                f"al entrar: la cuenta guarda la lección, el ejercicio y el hito ({rows})",
+                f"on sign-in: the account stores the lesson, the exercise and the milestone ({rows})",
             )
             check(
                 stored(one, "qiskit:done") == [LESSON]
                 and stored(one, f"qiskit:exercise:{EXERCISE}")["code"] == FAILING,
-                "al entrar: la copia local se conserva",
+                "on sign-in: the local copy is kept",
             )
 
             two, two_errors, _ = new_page(browser, site, control)
@@ -218,20 +222,20 @@ def main() -> None:
             two.locator("#parts .part").first.wait_for()
             check(
                 two.locator("#prog").inner_text().startswith("1/"),
-                f"otro navegador: la portada cuenta la lección como hecha ({two.locator('#prog').inner_text()})",
+                f"other browser: the front page counts the lesson as done ({two.locator('#prog').inner_text()})",
             )
             check(
                 two.locator("#track .hito.done").count() == 1,
-                "otro navegador: la portada marca el hito",
+                "other browser: the front page ticks the milestone",
             )
             panel = open_panel(two, site, LESSON, 1)
             check(
                 editor_text(panel) == unblank(FAILING),
-                "otro navegador: el editor trae el código del primero",
+                "other browser: the editor loads the code from the first one",
             )
             check(
                 stored(two, f"qiskit:exercise:{EXERCISE}")["checks"] == 1,
-                "otro navegador: trae la comprobación fallida",
+                "other browser: it loads the failed check",
             )
 
             with two.expect_response(lambda r: r.url.endswith("/api/progress") and r.status == 204):
@@ -239,7 +243,7 @@ def main() -> None:
             panel = open_panel(one, site, LESSON, 1)
             check(
                 editor_text(panel) == unblank(REWRITTEN),
-                "al cargar: gana el código más reciente de la cuenta",
+                "on load: the most recent code of the account wins",
             )
 
             menu(one, "Cuenta ✓")
@@ -247,28 +251,28 @@ def main() -> None:
             menu(one, "Sí, borrar")
             one.get_by_role("button", name="Entrar", exact=True).wait_for()
             rows = call(f"{control}/rows")
-            check(all(n == 0 for n in rows.values()), f"borrar: el servidor queda vacío ({rows})")
+            check(all(n == 0 for n in rows.values()), f"delete: the server is left empty ({rows})")
             check(
                 stored(one, "qiskit:done") == [LESSON]
                 and stored(one, f"qiskit:exercise:{EXERCISE}")["code"] == REWRITTEN,
-                "borrar: la copia local se queda",
+                "delete: the local copy stays",
             )
             me = one.context.request.get(f"{site}/api/me").json()
-            check(me == {"signedIn": False}, f"borrar: la sesión se cerró ({me})")
+            check(me == {"signedIn": False}, f"delete: the session was closed ({me})")
             before = len(one_requests)
             one.reload()
             one.locator(".xpanel").nth(1).locator(".cm-editor").wait_for()
             after = [r for r in one_requests[before:] if r[1].startswith(("/api", "/auth"))]
-            check(not after, f"borrar: la página ya no habla con la cuenta ({after})")
+            check(not after, f"delete: the page no longer talks to the account ({after})")
 
             for errors in (one_errors, two_errors):
-                check(not errors, f"sin errores de la página {errors}")
+                check(not errors, f"no page errors {errors}")
             browser.close()
     finally:
         worker.terminate()
         worker.wait(timeout=30)
     verify()
-    print(f"\n{len(failures)} fallos" if failures else "\ntodo bien")
+    print(f"\n{len(failures)} failures" if failures else "\nall good")
     sys.exit(1 if failures else 0)
 
 

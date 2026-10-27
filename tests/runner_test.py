@@ -1,9 +1,9 @@
-"""Prueba el corredor por HTTP contra la imagen real en Docker.
+"""Test the runner over HTTP against the real image in Docker.
 
     uv run pytest tests/runner_test.py
 
-Construye `qg-runner` con `runner/local.py`. Se salta si Docker no responde.
-`QG_DOCKER` y `QG_RUNTIME` eligen el comando y el runtime.
+Build `qg-runner` with `runner/local.py`. The tests skip when Docker does not
+answer. `QG_DOCKER` and `QG_RUNTIME` choose the command and the runtime.
 """
 
 import json
@@ -36,7 +36,7 @@ def runner() -> Iterator[local.Container]:
     try:
         local.docker("info")
     except (OSError, subprocess.CalledProcessError) as e:
-        pytest.skip(f"Docker no responde: {e}")
+        pytest.skip(f"Docker does not answer: {e}")
     local.build()
     container = local.start()
     yield container
@@ -78,7 +78,7 @@ def processes(container: local.Container) -> list[str]:
 
 
 def test_report_keeps_only_a_valid_hint_number() -> None:
-    """El informe proviene del código del alumno, así que valida la pista."""
+    """The report comes from the learner's code, so the hint is validated."""
     cases = [{"name": "a", "hint": hint} for hint in (2, 0, True, "1", None)] + [{"name": "b"}]
     report = parse_report(json.dumps({"error": None, "tests": cases}).encode())
     assert report is not None
@@ -89,7 +89,7 @@ def test_report_keeps_only_a_valid_hint_number() -> None:
 def test_slot_is_free_before_the_client_hears_the_result(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Quien recibe el resultado y envía otra petición no ve la ranura ocupada."""
+    """A client that gets the result and sends another request never sees the slot busy."""
     import server
 
     jobs = server.FREE_SLOTS.qsize()
@@ -445,7 +445,7 @@ def test_job_is_killed_when_the_scan_cannot_read_memory() -> None:
     try:
         local.docker("info")
     except (OSError, subprocess.CalledProcessError) as e:
-        pytest.skip(f"Docker no responde: {e}")
+        pytest.skip(f"Docker does not answer: {e}")
     blind = local.start(caps=tuple(c for c in local.CAPS if c != "SYS_PTRACE"))
     try:
         out = run(blind, "import time\ntime.sleep(8)\nprint('siguió')")
@@ -527,7 +527,7 @@ def test_no_network_even_when_the_container_has_internet() -> None:
     try:
         local.docker("info")
     except (OSError, subprocess.CalledProcessError) as e:
-        pytest.skip(f"Docker no responde: {e}")
+        pytest.skip(f"Docker does not answer: {e}")
     container = local.start(egress=True)
     try:
         try:
@@ -537,7 +537,7 @@ def test_no_network_even_when_the_container_has_internet() -> None:
                 "import socket; socket.create_connection(('1.1.1.1', 53), timeout=3)",
             )
         except subprocess.CalledProcessError:
-            pytest.skip("el anfitrión no tiene salida a internet; no hay con qué comparar")
+            pytest.skip("the host has no internet access; there is nothing to compare with")
         out = run(container, NETWORK_CODE)
         assert out["stdout"] == "denegado\ndenegado\n"
     finally:

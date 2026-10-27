@@ -1,10 +1,11 @@
-"""Comprueba el panel «Proyecto Ising» con Playwright y un servidor para site/.
+"""Check the "Proyecto Ising" panel with Playwright and a server for site/.
 
     uv run --group tools python tests/proyecto_test.py
 
-Para cada hito n, guarda los hitos anteriores como hechos en `qiskit:hitos` y carga la
-portada. El comando mostrado coincide con el cuaderno enlazado por `missions[].notebook` en
-course.json. La pista usa la misma condición y la consola no debe registrar errores.
+For each milestone n, store the earlier milestones as done in `qiskit:hitos` and
+load the front page. The command shown matches the notebook that
+`missions[].notebook` links in course.json. The track uses the same condition,
+and the console must log no errors.
 """
 
 import json
@@ -33,7 +34,7 @@ def serve() -> tuple[ThreadingHTTPServer, str]:
 
 
 def vigilar(pg: Page, errores: list[str]) -> None:
-    """Anota en `errores` los errores de página y de consola."""
+    """Append page errors and console errors to `errores`."""
     pg.on("pageerror", lambda e: errores.append(f"pageerror: {e}"))
     pg.on("console", lambda m: errores.append(f"console: {m.text}") if m.type == "error" else None)
 
@@ -70,24 +71,24 @@ def main() -> None:
             comandos = pg.locator("#hito .cmd code").all_text_contents()
             esperados = [f"uv run marimo edit {nb}"] if esperado else []
             if comandos != esperados:
-                fallos.append(f"hito {n}: comando {comandos}, esperado {esperados}")
+                fallos.append(f"hito {n}: command {comandos}, expected {esperados}")
             pista = pg.locator("#track .hito").nth(n - 1)
             abierto = "open" in (pista.get_attribute("class") or "").split()
             if abierto != esperado:
-                fallos.append(f"hito {n}: pista abierta={abierto}, esperado {esperado}")
+                fallos.append(f"hito {n}: track open={abierto}, expected {esperado}")
             titulo = pg.locator("#hito .k").text_content() or ""
             if not titulo.startswith(f"Hito {n} de"):
-                fallos.append(f"hito {n}: el panel muestra {titulo!r}")
+                fallos.append(f"hito {n}: the panel shows {titulo!r}")
             if errores:
                 fallos.append(f"hito {n}: {errores}")
             ctx.close()
         browser.close()
     srv.shutdown()
     verify()
-    print(f"hitos abiertos según course.json: {abiertos}")
-    print(f"{HITOS} hitos comprobados, {len(fallos)} fallos")
+    print(f"milestones open according to course.json: {abiertos}")
+    print(f"{HITOS} milestones checked, {len(fallos)} failures")
     for f in fallos:
-        print("FALLO", f)
+        print("FAIL", f)
     sys.exit(1 if fallos else 0)
 
 

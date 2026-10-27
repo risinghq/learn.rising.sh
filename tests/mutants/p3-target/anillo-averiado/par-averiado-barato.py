@@ -1,4 +1,4 @@
-# Equivocada: deja el par averiado con el error más bajo.
+# Wrong: leaves the faulty pair with the lowest error.
 from qiskit import QuantumCircuit
 from qiskit.circuit import Measure, Parameter
 from qiskit.circuit.library import CZGate, RZGate, SXGate, XGate

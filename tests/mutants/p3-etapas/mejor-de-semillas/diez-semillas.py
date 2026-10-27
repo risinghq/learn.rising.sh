@@ -1,4 +1,4 @@
-# Equivocada: ignora las semillas dadas y prueba las diez primeras.
+# Wrong: ignores the given seeds and tries the first ten.
 from qiskit.circuit.random import random_circuit
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager
 

@@ -1,4 +1,4 @@
-# Equivocada: añade un par entre el primer y el último qubit.
+# Wrong: adds a pair between the first and the last qubit.
 from qiskit.circuit import Measure, Parameter
 from qiskit.circuit.library import CZGate, RZGate, SXGate, XGate
 from qiskit.transpiler import InstructionProperties, Target

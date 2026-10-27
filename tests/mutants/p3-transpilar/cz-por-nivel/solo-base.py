@@ -1,4 +1,4 @@
-# Equivocada: traduce a las puertas del chip sin pasar el backend, así que ignora los pares conectados.
+# Wrong: translates to the chip gates without passing the backend, so it ignores the connected pairs.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

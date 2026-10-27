@@ -1,4 +1,4 @@
-# Equivocada: mira el nombre de la puerta y no los qubits.
+# Wrong: looks at the gate name and not at the qubits.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

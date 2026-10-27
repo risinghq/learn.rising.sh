@@ -1,4 +1,4 @@
-# Equivocada: no revisa las puertas de dos qubits.
+# Wrong: does not check the two-qubit gates.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

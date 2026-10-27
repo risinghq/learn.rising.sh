@@ -1,4 +1,4 @@
-# Equivocada: añade una X al final: el circuito deja de ser el original.
+# Wrong: adds an X at the end: the circuit differs from the original.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

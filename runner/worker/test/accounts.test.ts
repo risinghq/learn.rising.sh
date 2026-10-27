@@ -47,7 +47,7 @@ async function dump(h: Harness): Promise<string> {
   return JSON.stringify(rows.map((r) => r.results));
 }
 
-describe("inicio de sesión con OAuth", () => {
+describe("OAuth sign-in", () => {
   it.each(["google", "github"] as const)(
     "%s manda al alumno con state y PKCE S256",
     async (provider) => {
@@ -61,15 +61,15 @@ describe("inicio de sesión con OAuth", () => {
       expect(url.searchParams.get("redirect_uri")).toBe(
         `http://runner.test/auth/${provider}/callback`,
       );
-      // El URI de vuelta sale del host de la petición, así que el dominio del
-      // sitio lo lleva sin más configuración.
+      // The return URI comes from the request host, so the site's domain
+      // carries it with no further configuration.
       const home = await h.request("GET", `/auth/${provider}`, {
         host: HOME_HOST,
       });
       expect(
         new URL(home.headers.get("location")!).searchParams.get("redirect_uri"),
       ).toBe(`http://${HOME_HOST}/auth/${provider}/callback`);
-      // Solo el identificador: ni correo ni nombre.
+      // Only the identifier: no email, no name.
       expect(url.searchParams.get("scope")).toBe(
         provider === "google" ? "openid" : null,
       );
@@ -84,7 +84,7 @@ describe("inicio de sesión con OAuth", () => {
     },
   );
 
-  it("rechaza un state que no es el de la salida y no llama al proveedor", async () => {
+  it("rejects a state that is not the one from the redirect out and does not call the provider", async () => {
     const h = await worker();
     const { location, flow } = await begin(h, "google");
     const code = h.provider.consent(location!, "sub-1");
@@ -102,7 +102,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(await count(h, "users")).toBe(0);
   });
 
-  it("rechaza una vuelta sin la cookie de la salida", async () => {
+  it("rejects a return without the cookie from the redirect out", async () => {
     const h = await worker();
     const { location } = await begin(h, "github");
     const code = h.provider.consent(location!, "7");
@@ -116,7 +116,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(h.provider.tokenCalls()).toHaveLength(0);
   });
 
-  it("rechaza el state de un proveedor en la vuelta de otro", async () => {
+  it("rejects the state of one provider on the return of another", async () => {
     const h = await worker();
     const { location, flow } = await begin(h, "google");
     const state = new URL(location!).searchParams.get("state")!;
@@ -130,13 +130,13 @@ describe("inicio de sesión con OAuth", () => {
     expect(back.body.reason).toBe("flow_missing");
   });
 
-  it("rechaza un código repetido y no abre otra sesión", async () => {
+  it("rejects a repeated code and does not open another session", async () => {
     const h = await worker();
     const first = await signIn(h, "google", "sub-1");
     expect(first.back.status).toBe(302);
     expect(await count(h, "sessions")).toBe(1);
 
-    // Alguien reenvía la misma vuelta con la misma cookie de salida.
+    // Someone replays the same return with the same outbound cookie.
     const replay = await h.request(
       "GET",
       `/auth/google/callback?code=${first.code}&state=${first.state}`,
@@ -149,7 +149,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(await count(h, "users")).toBe(1);
   });
 
-  it("rechaza un código repetido también en GitHub, que contesta 200 con error", async () => {
+  it("rejects a repeated code on GitHub too, which answers 200 with an error", async () => {
     const h = await worker();
     const first = await signIn(h, "github", "99");
     const replay = await h.request(
@@ -170,7 +170,7 @@ describe("inicio de sesión con OAuth", () => {
     "evil.example",
     "/\r\nSet-Cookie:x=1",
     `/${"a".repeat(300)}`,
-  ])("rechaza el destino %j como redirección abierta", async (target) => {
+  ])("rejects the target %j as an open redirect", async (target) => {
     const h = await worker();
     const { start } = await begin(
       h,
@@ -183,7 +183,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(setCookies(start.headers)).toHaveLength(0);
   });
 
-  it("vuelve solo a la ruta de este sitio que se pidió", async () => {
+  it("returns only to the path of this site that was requested", async () => {
     const h = await worker();
     const { back } = await signIn(
       h,
@@ -197,7 +197,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(none.back.headers.get("location")).toBe("/");
   });
 
-  it("vuelve a una ruta con caracteres no ASCII, en porcentaje y sin error", async () => {
+  it("returns to a path with non-ASCII characters, percent-encoded and without error", async () => {
     const h = await worker();
     const target = "/lección/€.html?q=ñ";
     const { back } = await signIn(
@@ -213,7 +213,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(decodeURI(back.headers.get("location")!)).toBe(target);
   });
 
-  it("no sigue un destino ajeno que venga en una cookie de salida fabricada", async () => {
+  it("does not follow a foreign target that comes in a forged outbound cookie", async () => {
     const h = await worker();
     const { location } = await begin(h, "google");
     const code = h.provider.consent(location!, "sub-1");
@@ -239,7 +239,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(h.provider.tokenCalls()).toHaveLength(0);
   });
 
-  it("un inicio válido pone qg_auth y crea un solo usuario", async () => {
+  it("a valid sign-in sets qg_auth and creates a single user", async () => {
     const h = await worker();
     const { back, cookie } = await signIn(h, "google", "sub-1");
     expect(back.status).toBe(302);
@@ -265,7 +265,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(me.body).toMatchObject({ signedIn: true, providers: ["google"] });
   });
 
-  it("el mismo sujeto del proveedor entra en el mismo usuario", async () => {
+  it("the same provider subject signs in as the same user", async () => {
     const h = await worker();
     const first = await signIn(h, "github", "1234");
     const second = await signIn(h, "github", "1234");
@@ -279,7 +279,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(ids.results).toHaveLength(1);
   });
 
-  it("otro sujeto es otro usuario, y el mismo número en otro proveedor también", async () => {
+  it("another subject is another user, and so is the same number on another provider", async () => {
     const h = await worker();
     await signIn(h, "google", "42");
     await signIn(h, "github", "42");
@@ -288,7 +288,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(await count(h, "identities")).toBe(3);
   });
 
-  it("de la sesión solo se guarda el hash del token", async () => {
+  it("only the hash of the token is stored for the session", async () => {
     const h = await worker();
     const { cookie } = await signIn(h, "google", "sub-1");
     const token = cookie!.slice("qg_auth=".length);
@@ -303,7 +303,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(row!.token_hash).toBe(Buffer.from(digest).toString("base64url"));
   });
 
-  it("manda el verificador PKCE y el User-Agent que GitHub exige", async () => {
+  it("sends the PKCE verifier and the User-Agent that GitHub requires", async () => {
     const h = await worker();
     await signIn(h, "github", "7");
     const [token] = h.provider.tokenCalls();
@@ -312,7 +312,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(token.headers.accept).toBe("application/json");
   });
 
-  it("no guarda correo ni nombre aunque el proveedor los devuelva", async () => {
+  it("stores no email or name even if the provider returns them", async () => {
     const h = await worker();
     await signIn(h, "google", "sub-1");
     await signIn(h, "github", "5");
@@ -322,7 +322,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(all).not.toContain(PII.login);
   });
 
-  it("si el alumno cancela vuelve a la página sin sesión", async () => {
+  it("if the learner cancels, they return to the page without a session", async () => {
     const h = await worker();
     const { location, flow } = await begin(h, "google", "?return=/lesson.html");
     const state = new URL(location!).searchParams.get("state")!;
@@ -339,7 +339,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(await count(h, "sessions")).toBe(0);
   });
 
-  it("responde 502 si el proveedor no contesta y no crea nada", async () => {
+  it("answers 502 if the provider does not reply and creates nothing", async () => {
     const h = await worker();
     const { location, flow } = await begin(h, "google");
     const code = h.provider.consent(location!, "sub-1");
@@ -357,7 +357,7 @@ describe("inicio de sesión con OAuth", () => {
     expect(await count(h, "users")).toBe(0);
   });
 
-  it("responde 503 si el proveedor no tiene credenciales", async () => {
+  it("answers 503 if the provider has no credentials", async () => {
     const h = await worker({
       vars: { GITHUB_CLIENT_ID: "", GITHUB_CLIENT_SECRET: "" },
     });
@@ -367,7 +367,7 @@ describe("inicio de sesión con OAuth", () => {
     expect((await h.request("GET", "/auth/google")).status).toBe(302);
   });
 
-  it("limita los intentos de inicio de sesión por IP", async () => {
+  it("limits sign-in attempts per IP", async () => {
     await clearOfMinuteEnd();
     const h = await worker({ vars: { AUTH_PER_MINUTE: "3" } });
     const statuses: number[] = [];
@@ -379,7 +379,7 @@ describe("inicio de sesión con OAuth", () => {
     ).toBe(302);
   });
 
-  it("responde 404 y 405 a lo que no es una ruta de /auth", async () => {
+  it("answers 404 and 405 to what is not an /auth route", async () => {
     const h = await worker();
     expect((await h.request("GET", "/auth/gitlab")).status).toBe(404);
     expect((await h.request("GET", "/auth")).status).toBe(404);
@@ -390,10 +390,10 @@ describe("inicio de sesión con OAuth", () => {
   });
 });
 
-describe("cerrar sesión y caducidad", () => {
+describe("sign-out and expiry", () => {
   const origin = { origin: "http://runner.test" };
 
-  it("logout borra la sesión y la cookie", async () => {
+  it("logout deletes the session and the cookie", async () => {
     const h = await worker();
     const { cookie } = await signIn(h, "google", "sub-1");
     const out = await h.request("POST", "/auth/logout", {
@@ -410,7 +410,7 @@ describe("cerrar sesión y caducidad", () => {
     expect(me.body).toEqual({ signedIn: false });
   });
 
-  it("logout exige que la petición venga de este sitio", async () => {
+  it("logout requires the request to come from this site", async () => {
     const h = await worker();
     const { cookie } = await signIn(h, "google", "sub-1");
     const none = await h.request("POST", "/auth/logout", {
@@ -424,7 +424,7 @@ describe("cerrar sesión y caducidad", () => {
     expect(await count(h, "sessions")).toBe(1);
   });
 
-  it("una sesión vencida es como no tener sesión", async () => {
+  it("an expired session is the same as no session", async () => {
     const h = await worker();
     const { cookie } = await signIn(h, "google", "sub-1");
     await h.db.prepare("UPDATE sessions SET expires_at = 1").run();
@@ -440,17 +440,17 @@ describe("cerrar sesión y caducidad", () => {
   });
 });
 
-// Quien entró y no mantiene el sitio ejecuta con su cookie y el token de Turnstile.
+// A signed-in user who does not maintain the site runs with their cookie and the Turnstile token.
 const signedIn = (cookie: string, extra: Record<string, string> = {}) => ({
   cookie,
   "x-turnstile-token": TOKEN,
   ...extra,
 });
 
-describe("/run con cuenta", () => {
+describe("/run with an account", () => {
   const check = { code: "print(1)", mode: "check", exercise: "intro/uno" };
 
-  it("con sesión pero sin ser mantenedor, Turnstile sigue siendo necesario", async () => {
+  it("with a session but not a maintainer, Turnstile is still required", async () => {
     const h = await worker({ vars: { MAINTAINERS: "20960328" } });
     const { cookie } = await signIn(h, "github", "4242");
     const without = await h.post(check, { headers: { cookie: cookie! } });
@@ -463,7 +463,7 @@ describe("/run con cuenta", () => {
     expect(h.siteverify.calls).toHaveLength(1);
   });
 
-  it("un mantenedor de GitHub ejecuta sin Turnstile ni límite por usuario", async () => {
+  it("a GitHub maintainer runs without Turnstile or a per-user limit", async () => {
     await clearOfMinuteEnd();
     const h = await worker({
       vars: {
@@ -483,7 +483,7 @@ describe("/run con cuenta", () => {
     expect(await count(h, "attempts", "user_id IS NOT NULL")).toBe(4);
   });
 
-  it("el mismo número en Google no hace mantenedor, y el límite por usuario sí le llega", async () => {
+  it("the same number on Google does not make a maintainer, and the per-user limit does apply", async () => {
     await clearOfMinuteEnd();
     const h = await worker({
       vars: {
@@ -492,7 +492,7 @@ describe("/run con cuenta", () => {
         SIGNED_IN_IP_FACTOR: "100",
       },
     });
-    // El primer intento, sin token, ya cuenta en el límite del usuario.
+    // The first attempt, without a token, already counts toward the user's limit.
     const { cookie } = await signIn(h, "google", "20960328");
     const reply = await h.post(check, { headers: { cookie: cookie! } });
     expect(reply.status).toBe(403);
@@ -505,21 +505,21 @@ describe("/run con cuenta", () => {
     expect(statuses).toEqual([200, 429]);
   });
 
-  it("MAINTAINERS con un nombre de usuario en vez de un id es un error de configuración", async () => {
+  it("MAINTAINERS with a username instead of an id is a configuration error", async () => {
     const h = await worker({ vars: { MAINTAINERS: "totallynotdavid" } });
     const reply = await h.post(check, { headers: signedIn("qg_auth=x") });
     expect(reply.status).toBe(500);
     expect(h.workerLogs().join("\n")).toContain("MAINTAINERS");
   });
 
-  it("sin sesión y sin token sigue respondiendo 403", async () => {
+  it("without a session and without a token it still answers 403", async () => {
     const h = await worker();
     const reply = await h.post(check);
     expect(reply.status).toBe(403);
     expect(h.runnerCalls()).toHaveLength(0);
   });
 
-  it("una cookie qg_auth inventada no salta Turnstile", async () => {
+  it("a made-up qg_auth cookie does not skip Turnstile", async () => {
     const h = await worker();
     const reply = await h.post(check, {
       headers: { cookie: "qg_auth=inventada" },
@@ -527,7 +527,7 @@ describe("/run con cuenta", () => {
     expect(reply.status).toBe(403);
   });
 
-  it("cada usuario tiene su propio límite por minuto", async () => {
+  it("each user has their own per-minute limit", async () => {
     await clearOfMinuteEnd();
     const h = await worker({
       vars: { RATE_PER_MINUTE: "2", SIGNED_IN_IP_FACTOR: "100" },
@@ -544,9 +544,9 @@ describe("/run con cuenta", () => {
     expect(await statuses(bea.cookie!)).toEqual([200, 200, 429]);
   });
 
-  it("con cuenta la IP admite cuatro veces el tope anónimo", async () => {
+  it("with an account the IP allows four times the anonymous cap", async () => {
     await clearOfMinuteEnd();
-    // Cada usuario tiene su cuenta (3) y la IP compartida solo 2 × 4.
+    // Each user has their own allowance (3) and the shared IP only 2 × 4.
     const h = await worker({
       vars: { RATE_PER_MINUTE: "2", SIGNED_IN_IP_FACTOR: "4" },
     });
@@ -560,12 +560,12 @@ describe("/run con cuenta", () => {
           (await h.post(check, { headers: signedIn(user.cookie!) })).status,
         );
     }
-    // Ocho ejecuciones caben; la novena de la misma IP ya no.
+    // Eight runs fit; the ninth from the same IP does not.
     expect(statuses.slice(0, 8)).toEqual(Array(8).fill(200));
     expect(statuses.slice(8)).toEqual([429, 429]);
   });
 
-  it("la IP anónima conserva su tope sin multiplicar", async () => {
+  it("the anonymous IP keeps its cap without multiplying", async () => {
     await clearOfMinuteEnd();
     const h = await worker({ vars: { RATE_PER_MINUTE: "2" } });
     const headers = { "x-turnstile-token": TOKEN };
@@ -576,7 +576,7 @@ describe("/run con cuenta", () => {
   });
 });
 
-describe("intentos", () => {
+describe("attempts", () => {
   const MARKER = "MARCA-SECRETA-7731";
 
   async function attempts(h: Harness) {
@@ -586,7 +586,7 @@ describe("intentos", () => {
     return rows.results;
   }
 
-  it("tras un check que falla guarda los casos fallidos y nada del código ni del texto", async () => {
+  it("after a failing check it stores the failed cases and nothing of the code or the text", async () => {
     const h = await worker();
     const { cookie } = await signIn(h, "google", "sub-1");
     const code = `# FALLA ${MARKER}\nprint('${MARKER}')`;
@@ -595,7 +595,7 @@ describe("intentos", () => {
       { headers: signedIn(cookie!, { "x-hints": "2" }) },
     );
     expect(reply.status).toBe(200);
-    // El corredor sí repite el marcador en lo que le devuelve a la página.
+    // The runner does repeat the marker in what it returns to the page.
     expect(JSON.stringify(reply.body)).toContain(MARKER);
 
     const [row, ...rest] = await attempts(h);
@@ -611,12 +611,12 @@ describe("intentos", () => {
     });
     expect(row.user_id).toMatch(/^[A-Za-z0-9_-]{22}$/);
     expect(JSON.parse(row.failed)).toEqual(["n = 2, 3 y 4", "caso oculto 1"]);
-    // Ninguna columna de ninguna tabla lleva el marcador.
+    // No column of any table carries the marker.
     expect(await dump(h)).not.toContain(MARKER);
     expect(await dump(h)).not.toContain("salió");
   });
 
-  it("un error de Python guarda solo el nombre de la excepción", async () => {
+  it("a Python error stores only the exception name", async () => {
     const h = await worker();
     const { cookie } = await signIn(h, "google", "sub-1");
     await h.post(
@@ -633,7 +633,7 @@ describe("intentos", () => {
     expect(await dump(h)).not.toContain("is not defined");
   });
 
-  it("un texto de error que no es una excepción se guarda como «other»", async () => {
+  it('an error text that is not an exception is stored as "other"', async () => {
     const h = await worker();
     await h.post(
       { code: `ERROR-RARO ${MARKER}`, mode: "run", exercise: "intro/uno" },
@@ -644,7 +644,7 @@ describe("intentos", () => {
     expect(await dump(h)).not.toContain(MARKER);
   });
 
-  it("un corte por tiempo es «timeout» y un acierto es «pass»", async () => {
+  it('a cut-off by time is "timeout" and a success is "pass"', async () => {
     const h = await worker();
     const headers = { "x-turnstile-token": TOKEN };
     await h.post(
@@ -661,7 +661,7 @@ describe("intentos", () => {
     expect(await dump(h)).not.toContain(MARKER);
   });
 
-  it("una ejecución anónima escribe una fila con user_id NULL", async () => {
+  it("an anonymous run writes a row with user_id NULL", async () => {
     const h = await worker();
     const reply = await h.post(
       { code: "print(1)", mode: "run", exercise: "intro/uno" },
@@ -675,7 +675,7 @@ describe("intentos", () => {
     expect(await count(h, "users")).toBe(0);
   });
 
-  it("no anota sin ejercicio válido, con un modo desconocido ni con una cabecera de pistas rara", async () => {
+  it("records nothing without a valid exercise, with an unknown mode or with an odd hints header", async () => {
     const h = await worker();
     const headers = { "x-turnstile-token": TOKEN };
     await h.post({ code: "print(1)", mode: "run" }, { headers });
@@ -695,7 +695,7 @@ describe("intentos", () => {
     expect((await attempts(h))[0].hints).toBe(0);
   });
 
-  it("una petición rechazada no deja fila", async () => {
+  it("a rejected request leaves no row", async () => {
     const h = await worker();
     const run = { code: "print(1)", mode: "run", exercise: "intro/uno" };
     expect((await h.post(run)).status).toBe(403);
@@ -710,7 +710,7 @@ describe("intentos", () => {
     expect(await attempts(h)).toHaveLength(0);
   });
 
-  it("si la base falla, la página recibe igualmente el resultado", async () => {
+  it("if the database fails, the page still receives the result", async () => {
     const h = await worker();
     await h.db.prepare("DROP TABLE attempts").run();
     const reply = await h.post(
@@ -741,7 +741,7 @@ describe("/api", () => {
       body,
     });
 
-  it("sin sesión /api/me dice que nadie entró y lo demás responde 401", async () => {
+  it("without a session /api/me says nobody signed in and the rest answers 401", async () => {
     const h = await worker();
     expect((await h.request("GET", "/api/me")).body).toEqual({
       signedIn: false,
@@ -759,7 +759,7 @@ describe("/api", () => {
     ).toBe(401);
   });
 
-  it("rechaza el origen ajeno, el contenido que no es JSON y los métodos erróneos", async () => {
+  it("rejects a foreign origin, non-JSON content and wrong methods", async () => {
     const h = await worker();
     const { cookie } = await user(h);
     const foreign = await h.request("PUT", "/api/progress", {
@@ -787,22 +787,22 @@ describe("/api", () => {
   });
 
   it.each([
-    ["una lista que no es", { done: "intro" }],
-    ["un id de lección con ruta", { done: ["../x"] }],
-    ["un campo desconocido", { otro: 1 }],
-    ["un ejercicio mal formado", { exercises: { "intro/uno": { hints: -1 } } }],
+    ["a non-list where a list belongs", { done: "intro" }],
+    ["a lesson id with a path", { done: ["../x"] }],
+    ["an unknown field", { otro: 1 }],
+    ["a malformed exercise", { exercises: { "intro/uno": { hints: -1 } } }],
     [
-      "un id de ejercicio inválido",
+      "an invalid exercise id",
       {
         exercises: {
           "Intro/UNO": { hints: 0, checks: 0, passed: false, at: 1 },
         },
       },
     ],
-    ["una clave de kv desconocida", { kv: { "qiskit:otra": [1] } }],
-    ["un valor de kv de otra forma", { kv: { "qiskit:hitos": "uno" } }],
+    ["an unknown kv key", { kv: { "qiskit:otra": [1] } }],
+    ["a kv value of another shape", { kv: { "qiskit:hitos": "uno" } }],
     [
-      "un código enorme",
+      "a huge code",
       {
         exercises: {
           "intro/uno": {
@@ -815,8 +815,8 @@ describe("/api", () => {
         },
       },
     ],
-    ["un arreglo en la raíz", [1, 2]],
-  ])("responde 400 a %s", async (_label, body) => {
+    ["an array at the root", [1, 2]],
+  ])("answers 400 to %s", async (_label, body) => {
     const h = await worker();
     const { cookie } = await user(h);
     const reply = await put(h, cookie, body);
@@ -826,7 +826,7 @@ describe("/api", () => {
     expect(await count(h, "kv")).toBe(0);
   });
 
-  it("responde 400 a un JSON roto", async () => {
+  it("answers 400 to broken JSON", async () => {
     const h = await worker();
     const { cookie } = await user(h);
     const broken = await h.request("PUT", "/api/progress", {
@@ -835,10 +835,10 @@ describe("/api", () => {
     expect(broken.status).toBe(400);
   });
 
-  it("rechaza un cuerpo enorme sin guardar nada", async () => {
+  it("rejects a huge body without storing anything", async () => {
     const h = await worker();
     const { cookie } = await user(h);
-    // Solo el encabezado: el 413 llega sin que el cuerpo se haya enviado.
+    // Only the header: the 413 arrives without the body having been sent.
     const status = await h.declare("PUT", "/api/progress", 900_001, {
       ...origin,
       cookie,
@@ -848,7 +848,7 @@ describe("/api", () => {
     expect(await count(h, "kv")).toBe(0);
   });
 
-  it("varias escrituras a la vez del mismo usuario no se pisan", async () => {
+  it("several simultaneous writes of the same user do not overwrite each other", async () => {
     const h = await worker();
     const { cookie } = await user(h);
     const lessons = ["a", "b", "c", "d", "e"];
@@ -879,7 +879,7 @@ describe("/api", () => {
     expect(me.kv["qiskit:hitos"]).toEqual([0, 1, 2, 3, 4]);
   });
 
-  it("merge une el progreso local con el de la cuenta y devuelve el resultado", async () => {
+  it("merge joins the local progress with the account's and returns the result", async () => {
     const h = await worker();
     const { cookie } = await user(h);
     await put(h, cookie, {
@@ -932,7 +932,7 @@ describe("/api", () => {
     expect(merged.body.progress).toEqual({
       done: ["intro", "puertas", "qubit"],
       exercises: {
-        // Gana el código más reciente; pistas y comprobaciones, el máximo; pasar no se pierde.
+        // The most recent code wins; hints and checks take the maximum; a pass is never lost.
         "intro/uno": {
           code: "nuevo",
           hints: 1,
@@ -945,7 +945,7 @@ describe("/api", () => {
       kv: {
         "qiskit:hitos": [1, 2, 3],
         "qiskit:pos:intro": 4,
-        // La primera apuesta es la que vale.
+        // The first bet is the one that counts.
         "qiskit:predict:intro:p1": 2,
         "qiskit:repaso": {
           a: { box: 3, due: 90 },
@@ -958,7 +958,7 @@ describe("/api", () => {
     expect(me.body.progress).toEqual(merged.body.progress);
   });
 
-  it("un código viejo no pisa al nuevo y un null no borra el guardado", async () => {
+  it("an old code does not overwrite the new one and a null does not erase the stored one", async () => {
     const h = await worker();
     const { cookie } = await user(h);
     await put(h, cookie, {
@@ -998,7 +998,7 @@ describe("/api", () => {
     expect(me.body.progress.exercises["intro/uno"].code).toBe("reciente");
   });
 
-  it("dos sesiones de la misma cuenta acaban con el mismo estado sea cual sea el orden", async () => {
+  it("two sessions of the same account end in the same state in any order", async () => {
     const h = await worker();
     const first = await user(h);
     const second = await signIn(h, "google", "sub-1");
@@ -1028,7 +1028,7 @@ describe("/api", () => {
     expect(one.body.progress.kv["qiskit:hitos"]).toEqual([1, 2]);
   });
 
-  it("el progreso de un usuario no se ve desde otro", async () => {
+  it("one user's progress is not visible from another", async () => {
     const h = await worker();
     const ada = await user(h, "ada");
     const bea = await user(h, "bea");
@@ -1039,11 +1039,11 @@ describe("/api", () => {
     expect(me.body.progress.done).toEqual([]);
   });
 
-  it("DELETE /api/me no deja ninguna fila del usuario en ninguna tabla", async () => {
+  it("DELETE /api/me leaves no row of the user in any table", async () => {
     const h = await worker();
     const ada = await user(h, "ada");
     const bea = await user(h, "bea");
-    await signIn(h, "github", "77"); // otra sesión y otra identidad ajenas
+    await signIn(h, "github", "77"); // another session and another identity, unrelated
     for (const who of [ada, bea]) {
       await put(h, who.cookie, {
         done: ["intro"],
@@ -1061,7 +1061,7 @@ describe("/api", () => {
       { code: "print(1)", mode: "run", exercise: "intro/uno" },
       { headers: { "x-turnstile-token": TOKEN } },
     );
-    // Una segunda sesión de Ada, para probar que también cae.
+    // A second session of Ada, to prove it falls too.
     await signIn(h, "google", "ada");
 
     const adaId = (await h.db
@@ -1071,7 +1071,7 @@ describe("/api", () => {
       .first<{ user_id: string }>())!.user_id;
     for (const table of TABLES) {
       if (table === "users") continue;
-      // Todas las tablas tienen filas de Ada antes de borrar.
+      // Every table has rows of Ada before deleting.
       expect(
         await count(h, table, `user_id = '${adaId}'`),
         table,
@@ -1092,12 +1092,12 @@ describe("/api", () => {
       if (table === "users") continue;
       expect(await count(h, table, `user_id = '${adaId}'`), table).toBe(0);
     }
-    // Lo de los demás sigue: Bea, el usuario de GitHub y el intento anónimo.
+    // What belongs to others stays: Bea, the GitHub user and the anonymous attempt.
     expect(await count(h, "users")).toBe(2);
     expect(await count(h, "lesson_done")).toBe(1);
     expect(await count(h, "attempts", "user_id IS NULL")).toBe(1);
     expect(await count(h, "attempts")).toBe(2);
-    // La cookie vieja ya no vale.
+    // The old cookie is rejected.
     const me = await h.request("GET", "/api/me", {
       headers: { cookie: ada.cookie },
     });
@@ -1105,7 +1105,7 @@ describe("/api", () => {
   });
 });
 
-describe("limpieza diaria", () => {
+describe("daily purge", () => {
   const DAY = 86_400;
 
   async function insertAttempt(
@@ -1122,7 +1122,7 @@ describe("limpieza diaria", () => {
       .run();
   }
 
-  it("borra un intento de más de 180 días y deja el reciente", async () => {
+  it("deletes an attempt older than 180 days and keeps the recent one", async () => {
     const h = await worker();
     const now = Math.floor(Date.now() / 1000);
     await insertAttempt(h, now - 181 * DAY);
@@ -1135,7 +1135,7 @@ describe("limpieza diaria", () => {
     expect(left.results.map((r) => r.at)).toEqual([now - 179 * DAY]);
   });
 
-  it("borra las cuentas sin visitas en 24 meses con todo lo suyo, y las sesiones vencidas", async () => {
+  it("deletes accounts with no visits in 24 months with everything of theirs, and expired sessions", async () => {
     const h = await worker();
     const old = await signIn(h, "google", "vieja");
     const live = await signIn(h, "google", "activa");
@@ -1172,7 +1172,7 @@ describe("limpieza diaria", () => {
     expect(me.body.signedIn).toBe(true);
   });
 
-  it("usa los plazos que fija el entorno", async () => {
+  it("uses the periods the environment sets", async () => {
     const h = await worker({ vars: { ATTEMPT_RETENTION_DAYS: "10" } });
     const now = Math.floor(Date.now() / 1000);
     await insertAttempt(h, now - 11 * DAY);

@@ -1,4 +1,4 @@
-# Equivocada: pone la Toffoli en los últimos tres qubits.
+# Wrong: puts the Toffoli on the last three qubits.
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import CCXGate, HGate
 from qiskit.converters import circuit_to_dag, dag_to_circuit

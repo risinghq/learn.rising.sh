@@ -1,4 +1,4 @@
-# Equivocada: cuenta también las de tres qubits o más.
+# Wrong: also counts the gates on three qubits or more.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.basepasses import AnalysisPass

@@ -1,13 +1,14 @@
-"""Prueba del tema compartido con Playwright sobre site/ servido por http.server.
+"""Test the shared theme with Playwright on site/ served by http.server.
 
-    uv run --group tools python tests/theme_test.py [--shots CARPETA] [--table]
+    uv run --group tools python tests/theme_test.py [--shots FOLDER] [--table]
 
-Carga la portada y tres lecciones (primer y último paso) en cada modo, en 1366x768 y 390x844.
-Exige: ninguna salida de error en la consola, ningún `#scene > .blk` fuera de `#stage`, la marca
-y las fuentes iguales en las dos páginas, el modo guardado una sola vez, el contraste WCAG AA de
-cada token de texto y de cada borde de control, y la portada pidiendo los lesson.json en
-paralelo. --shots guarda una captura por página, modo y tamaño. --table imprime los contrastes
-mínimos en Markdown.
+Load the front page and three lessons (first and last step) in each mode, at
+1366x768 and 390x844. Require: no error output in the console, no
+`#scene > .blk` outside `#stage`, the same brand and fonts on both pages, the
+mode stored exactly once, WCAG AA contrast for each text token and each control
+border, and the front page requesting the lesson.json files in parallel.
+--shots saves a screenshot per page, mode and size. --table prints the minimum
+contrasts as Markdown.
 """
 
 import argparse
@@ -158,7 +159,7 @@ def visitar(
                 rep.check(attr == modo, f"{etiqueta} {nombre}: data-theme {attr}")
                 if nombre not in ("index", "catalogo"):
                     fuera = fuera_del_stage(pg)
-                    rep.check(not fuera, f"{etiqueta} {nombre}: bloques fuera de #stage {fuera}")
+                    rep.check(not fuera, f"{etiqueta} {nombre}: blocks outside #stage {fuera}")
                 marca = pg.evaluate(
                     "[document.querySelector('.brand').textContent.trim(), getComputedStyle(document.querySelector('.brand')).fontFamily,"
                     " getComputedStyle(document.body).fontFamily]"
@@ -174,17 +175,17 @@ def visitar(
                 ctx.close()
     for (modo, tam), valor in catalogos.items():
         curso = marcas[(modo, tam, True)]
-        rep.check(valor[0] == "Duo", f"marca del catálogo {valor[0]!r}")
+        rep.check(valor[0] == "Duo", f"catalog brand {valor[0]!r}")
         rep.check(
             valor[1:] == curso[1:],
-            f"las fuentes del catálogo difieren de las del curso: {valor[1:]} / {curso[1:]}",
+            f"the catalog fonts differ from the course fonts: {valor[1:]} / {curso[1:]}",
         )
     for (modo, tam, es_index), valor in marcas.items():
         otro = marcas[(modo, tam, not es_index)]
-        rep.check(valor[0] == "Qubit a qubit", f"marca {valor[0]!r}")
+        rep.check(valor[0] == "Qubit a qubit", f"brand {valor[0]!r}")
         rep.check(
             valor[1] == otro[1],
-            f"la fuente de la marca difiere entre páginas: {valor[1]} / {otro[1]}",
+            f"the brand font differs between pages: {valor[1]} / {otro[1]}",
         )
 
 
@@ -200,14 +201,14 @@ def contrastes(rep: Report, browser: Browser, base: str) -> dict[tuple[str, str]
         for t in TEXTO:
             peor = min(contraste(col[t], col[s]) for s in SUPERFICIES)
             tabla[(t, modo)] = peor
-            rep.check(peor >= 4.5, f"contraste {t} en {modo}: {peor:.2f} < 4,5")
+            rep.check(peor >= 4.5, f"contrast {t} in {modo}: {peor:.2f} < 4.5")
         for g in GRAFICOS:
             peor = min(contraste(col[g], col[s]) for s in SUPERFICIES)
             tabla[(g, modo)] = peor
-            rep.check(peor >= 3, f"contraste {g} en {modo}: {peor:.2f} < 3")
+            rep.check(peor >= 3, f"contrast {g} in {modo}: {peor:.2f} < 3")
         r = contraste(col["acc-ink"], col["acc"])
         tabla[("acc-ink/acc", modo)] = r
-        rep.check(r >= 4.5, f"contraste acc-ink sobre acc en {modo}: {r:.2f} < 4,5")
+        rep.check(r >= 4.5, f"contrast acc-ink on acc in {modo}: {r:.2f} < 4.5")
     return tabla
 
 
@@ -226,34 +227,34 @@ def modo_guardado_una_vez(rep: Report, browser: Browser, base: str) -> None:
     pg.wait_for_selector("[data-theme-ctl] button")
     rep.check(
         pg.evaluate("document.documentElement.dataset.theme") is None,
-        "sin modo guardado la página fija data-theme en vez de seguir al sistema",
+        "with no stored mode the page sets data-theme instead of following the system",
     )
     fondo = pg.evaluate("getComputedStyle(document.body).backgroundColor")
     pg.click("[data-theme-ctl] button")
     rep.check(
         pg.evaluate("localStorage.getItem('qiskit:theme')") == "dark",
-        "el botón de modo no guardó el modo oscuro",
+        "the mode button did not store the dark mode",
     )
     rep.check(
         pg.evaluate("getComputedStyle(document.body).backgroundColor") != fondo,
-        "el fondo no cambió con el modo",
+        "the background did not change with the mode",
     )
     pg.goto(f"{base}/qiskit/lesson.html?l=p1-quickstart&beat=0")
     pg.wait_for_selector("[data-theme-ctl] button")
     rep.check(
         pg.evaluate("document.documentElement.dataset.theme") == "dark",
-        "el reproductor no leyó el modo guardado",
+        "the player did not read the stored mode",
     )
     rep.check(
         pg.inner_text("[data-theme-ctl] button") == "Tema claro",
-        "el botón del reproductor no ofrece el otro modo",
+        "the player button does not offer the other mode",
     )
     pg.click("[data-theme-ctl] button")
     pg.goto(f"{base}/qiskit/index.html")
     pg.wait_for_selector("[data-theme-ctl] button")
     rep.check(
         pg.evaluate("document.documentElement.dataset.theme") == "light",
-        "la portada no leyó el modo elegido en el reproductor",
+        "the front page did not read the mode chosen in the player",
     )
     ctx.close()
 
@@ -270,9 +271,9 @@ def repaso_en_paralelo(rep: Report, browser: Browser, base: str) -> float:
     n = len(json.loads(hechas))
     rep.check(
         dt < DEMORA_LESSON_JSON * (n - 1),
-        f"el repaso tardó {dt:.2f} s con {n} lecciones de {DEMORA_LESSON_JSON} s: pide en serie",
+        f"the review took {dt:.2f} s with {n} lessons of {DEMORA_LESSON_JSON} s: it requests in series",
     )
-    rep.check(not errores, f"repaso: {errores}")
+    rep.check(not errores, f"review: {errores}")
     ctx.close()
     return dt
 
@@ -302,10 +303,10 @@ def main() -> None:
     verify()
     if args.table:
         imprimir_tabla(tabla)
-    print(f"repaso con 6 lecciones de {DEMORA_LESSON_JSON} s cada una: {dt:.2f} s")
-    print(f"{rep.pruebas} comprobaciones, {len(rep.fallos)} fallos")
+    print(f"review with 6 lessons of {DEMORA_LESSON_JSON} s each: {dt:.2f} s")
+    print(f"{rep.pruebas} checks, {len(rep.fallos)} failures")
     for f in rep.fallos:
-        print("FALLO", f)
+        print("FAIL", f)
     sys.exit(1 if rep.fallos else 0)
 
 

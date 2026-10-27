@@ -1,4 +1,4 @@
-# Equivocada: no escribe la clave cuando no hay puertas de dos qubits.
+# Wrong: does not write the key when there are no two-qubit gates.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.basepasses import AnalysisPass

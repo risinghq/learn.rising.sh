@@ -8,7 +8,7 @@ import { Miniflare, convertV4MiniflareOptions } from "miniflare";
 import { WORKER_FIRST } from "../src/routes.ts";
 import { CLIENTS, FakeProvider } from "./provider.ts";
 
-// Secretos de prueba documentados por Cloudflare para Turnstile.
+// Test secrets that Cloudflare documents for Turnstile.
 export const PASS_SECRET = "1x0000000000000000000000000000000AA";
 export const FAIL_SECRET = "2x0000000000000000000000000000000AA";
 export const SPENT_SECRET = "3x0000000000000000000000000000000AA";
@@ -66,7 +66,7 @@ export interface Reply {
 }
 
 export interface Siteverify {
-  // Pares clave-valor enviados al servicio de verificación.
+  // Key-value pairs sent to the verification service.
   calls: Record<string, string>[];
 }
 
@@ -83,12 +83,12 @@ export interface Harness {
       ip?: string;
       headers?: Record<string, string>;
       body?: unknown;
-      // El host de la URL. Por defecto, runner.test.
+      // The host of the URL. Defaults to runner.test.
       host?: string;
     },
   ): Promise<Reply>;
-  // Manda solo los encabezados de una petición que declara `length` bytes de cuerpo
-  // y devuelve el estado de la respuesta, sin enviar el cuerpo.
+  // Sends only the headers of a request that declares `length` bytes of body
+  // and returns the response status, without sending the body.
   declare(
     method: string,
     pathname: string,
@@ -97,15 +97,15 @@ export interface Harness {
   ): Promise<number>;
   provider: FakeProvider;
   db: D1Database;
-  // Origen HTTP del Worker, para un navegador.
+  // HTTP origin of the Worker, for a browser.
   origin(): Promise<string>;
   purge(at?: Date): Promise<void>;
-  // Líneas escritas por el Worker en Workers Logs.
+  // Lines the Worker wrote to Workers Logs.
   workerLogs(): string[];
   runnerCalls(): { path: string; headers: string[] }[];
-  // Cuántas veces el Worker detuvo una instancia.
+  // How many times the Worker stopped an instance.
   runnerStops(): number;
-  // Adelanta `ms` el reloj detenido de la opción `FAKE_CLOCK`.
+  // Advances by `ms` the stopped clock set by the `FAKE_CLOCK` option.
   advance(ms: number): Promise<void>;
   siteverify: Siteverify;
   dispose(): Promise<void>;
@@ -117,7 +117,7 @@ function fakeSiteverify(siteverify: Siteverify, down: boolean) {
   return async (request: Request): Promise<Response> => {
     const form = new URLSearchParams(await request.text());
     siteverify.calls.push(Object.fromEntries(form));
-    if (down) return new Response("caído", { status: 502 });
+    if (down) return new Response("down", { status: 502 });
     const secret = form.get("secret") ?? "";
     if (secret.startsWith("1x"))
       return Response.json({ success: true, "error-codes": [] });
@@ -129,14 +129,14 @@ function fakeSiteverify(siteverify: Siteverify, down: boolean) {
 }
 
 export interface Options {
-  // FAKE_SETTLE_FAILS hace fallar el ajuste del presupuesto, FAKE_PICKS elige las
-  // instancias del contenedor y FAKE_CLOCK detiene el reloj (test/entry.ts).
+  // FAKE_SETTLE_FAILS makes the budget adjustment fail, FAKE_PICKS picks the
+  // container instances and FAKE_CLOCK stops the clock (test/entry.ts).
   vars?: Partial<typeof VARS> & {
     FAKE_SETTLE_FAILS?: string;
     FAKE_PICKS?: string;
     FAKE_CLOCK?: string;
   };
-  // Sin esto el Worker llama al servicio real de Turnstile.
+  // Without this the Worker calls the real Turnstile service.
   siteverify?: "fake" | "down" | "real";
 }
 
@@ -165,7 +165,7 @@ export async function start(options: Options = {}): Promise<Harness> {
       scriptPath: path.join(process.cwd(), "worker.mjs"),
       compatibilityDate: "2026-10-01",
       bindings: { ...VARS, ...options.vars },
-      // Sirve site/ sin invocar el Worker, salvo en las rutas de WORKER_FIRST.
+      // Serves site/ without invoking the Worker, except on the WORKER_FIRST routes.
       assets: {
         binding: "ASSETS",
         directory: path.join(import.meta.dirname, "../../../site"),
@@ -288,8 +288,8 @@ export async function start(options: Options = {}): Promise<Harness> {
   };
 }
 
-// Un límite por minuto cuenta ventanas de reloj. Si faltan menos de `ms` para que
-// termine la ventana, espera a la siguiente para que la prueba no la cruce.
+// A per-minute limit counts clock windows. If less than `ms` remains before the
+// window ends, wait for the next one so the test does not cross it.
 export async function clearOfMinuteEnd(ms = 8000): Promise<void> {
   const left = 60_000 - (Date.now() % 60_000);
   if (left < ms) await new Promise((resolve) => setTimeout(resolve, left + 50));

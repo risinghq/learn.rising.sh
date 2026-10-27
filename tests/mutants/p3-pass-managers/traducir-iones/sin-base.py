@@ -1,4 +1,4 @@
-# Equivocada: consolida los bloques sin las puertas de iones.
+# Wrong: consolidates the blocks without the ion gates.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import PassManager
 from qiskit.transpiler.passes import Collect2qBlocks, ConsolidateBlocks, UnitarySynthesis

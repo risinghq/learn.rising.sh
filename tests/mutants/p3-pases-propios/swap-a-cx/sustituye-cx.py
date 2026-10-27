@@ -1,4 +1,4 @@
-# Equivocada: toca las puertas que no son swap.
+# Wrong: touches the gates that are not swap.
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import CXGate, SwapGate

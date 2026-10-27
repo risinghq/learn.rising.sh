@@ -2,29 +2,29 @@ import { DurableObject } from "cloudflare:workers";
 
 import real, { Budget as RealBudget } from "../src/index.ts";
 
-// Sustituye la imagen por un contenedor falso que registra las cabeceras, nunca
-// el cuerpo, y responde con el contrato de /run.
+// Replaces the image with a fake container that logs the headers, never the
+// body, and answers with the /run contract.
 export { RateLimiter } from "../src/index.ts";
 
-// Un Budget real cuyo almacenamiento falla al ajustar el coste cuando la prueba
-// lo pide con la variable FAKE_SETTLE_FAILS.
+// A real Budget whose storage fails when adjusting the cost if the test asks
+// for it with the FAKE_SETTLE_FAILS variable.
 export class Budget extends RealBudget {
   override async settle(
     ...args: Parameters<RealBudget["settle"]>
   ): Promise<number> {
     if ((this.env as { FAKE_SETTLE_FAILS?: string }).FAKE_SETTLE_FAILS) {
-      throw new Error("StorageDown: el almacenamiento no responde");
+      throw new Error("StorageDown: the storage does not answer");
     }
     return super.settle(...args);
   }
 }
 
 interface TestEnv {
-  // Instancias que elige el Worker, en orden, separadas por comas ("0,1").
+  // Instances the Worker picks, in order, separated by commas ("0,1").
   FAKE_PICKS?: string;
   INSTANCES: string;
-  // Fecha ISO en que se detiene el reloj. Solo avanza con /clock?advance=<ms> y con
-  // el trabajo del corredor falso ("TRABAJO-<ms>").
+  // ISO date at which the clock stops. It advances only with /clock?advance=<ms>
+  // and with the fake runner's job ("TRABAJO-<ms>").
   FAKE_CLOCK?: string;
 }
 
@@ -37,9 +37,10 @@ function freeze(env: TestEnv): void {
   Date.now = () => frozen!;
 }
 
-// El corredor repite en `stdout`, en el `message` de los casos y en `error` lo que
-// recibió: así las pruebas ven si el Worker deja pasar algo de eso a la base.
-// La palabra que contiene el código decide el resultado.
+// The runner repeats what it received in `stdout`, in the `message` of the cases
+// and in `error`, so the tests see whether the Worker lets any of it reach the
+// database. The word the code contains decides the result. The reply texts
+// imitate the real runner's, which are in Spanish.
 function answer(code: string) {
   const base = {
     stdout: code,
@@ -105,7 +106,7 @@ export default {
       frozen = (frozen ?? Date.now()) + Number(url.searchParams.get("advance"));
       return Response.json({ now: frozen });
     }
-    // Otro alumno que ya tiene un trabajo en la instancia 0, sin pasar por el Worker.
+    // Another learner who already has a job on instance 0, without going through the Worker.
     if (url.pathname === "/other-learner") {
       return runners.get(runners.idFromName("instance-0")).fetch(
         new Request("http://runner/run", {
@@ -117,7 +118,7 @@ export default {
     if (env.FAKE_PICKS && !picked) {
       picked = true;
       const picks = env.FAKE_PICKS.split(",").map(Number);
-      // getRandom elige con Math.random: así la prueba decide qué instancia toca.
+      // getRandom picks with Math.random: this way the test decides which instance comes up.
       Math.random = () => ((picks.shift() ?? 0) + 0.5) / Number(env.INSTANCES);
     }
     return real.fetch(request, env as never, ctx);
@@ -127,7 +128,7 @@ export default {
 };
 
 export class Runner extends DurableObject {
-  // Verdadero mientras la instancia atiende el trabajo de otro alumno.
+  // True while the instance serves another learner's job.
   private busy = false;
   private killed = false;
 
@@ -138,28 +139,28 @@ export class Runner extends DurableObject {
     );
     const { code } = (await request.json()) as { code: string };
     if (code === "romper-contenedor")
-      throw new Error("ContainerDown: la instancia se cayó");
+      throw new Error("ContainerDown: the instance went down");
     if (code === "ajeno") {
       this.busy = true;
       this.killed = false;
       await scheduler.wait(900);
       this.busy = false;
       if (this.killed)
-        throw new Error("ContainerKilled: la instancia se detuvo");
+        throw new Error("ContainerKilled: the instance was stopped");
     } else if (this.busy) {
-      // Como runner/server.py: sin ranura libre responde 503 y no espera.
+      // Like runner/server.py: with no free slot it answers 503 and does not wait.
       return Response.json({ error: "ocupado" }, { status: 503 });
     } else {
-      // Un trabajo que no termina a tiempo: solo el Worker puede cortarlo.
+      // A job that does not finish in time: only the Worker can cut it off.
       await scheduler.wait(code === "colgar" ? 1500 : 15);
-      // Un trabajo que dura tanto como dice el código, en el reloj detenido.
+      // A job that lasts as long as the code says, on the stopped clock.
       const work = /TRABAJO-(\d+)/.exec(code);
       if (work && frozen !== undefined) frozen += Number(work[1]);
     }
     return Response.json(answer(code));
   }
 
-  // Container.destroy() mata la instancia.
+  // Container.destroy() kills the instance.
   async destroy(): Promise<void> {
     if (this.busy) this.killed = true;
     console.log("FAKE_RUNNER_STOP");

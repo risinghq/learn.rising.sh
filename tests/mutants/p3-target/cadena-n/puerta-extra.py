@@ -1,4 +1,4 @@
-# Equivocada: añade una H al Target.
+# Wrong: adds an H to the Target.
 from qiskit.circuit import Measure, Parameter
 from qiskit.circuit.library import CZGate, HGate, RZGate, SXGate, XGate
 from qiskit.transpiler import InstructionProperties, Target

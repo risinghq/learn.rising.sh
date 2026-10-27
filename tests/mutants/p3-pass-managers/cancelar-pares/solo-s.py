@@ -1,4 +1,4 @@
-# Equivocada: cancela solo S y S†.
+# Wrong: cancels only S and S†.
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import HGate, SdgGate, SGate
 from qiskit.transpiler import PassManager, generate_preset_pass_manager

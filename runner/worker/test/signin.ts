@@ -8,7 +8,7 @@ export const cookieOf = (setCookie: string[], name: string) =>
 
 export const setCookies = (headers: Headers) => headers.getSetCookie();
 
-// El alumno pulsa «entrar», aprueba en el proveedor y el navegador vuelve.
+// The learner clicks «entrar», approves at the provider and the browser returns.
 export async function begin(h: Harness, provider: ProviderName, query = "") {
   const start = await h.request("GET", `/auth/${provider}${query}`);
   const location = start.headers.get("location");

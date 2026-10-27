@@ -1,8 +1,8 @@
-# Equivocada: usa el layout identidad, que necesita SWAP.
+# Wrong: uses the identity layout, which needs SWAP.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager
 
-# El qubit físico 1 tiene tres vecinos (0, 2 y 3); el 0 solo tiene uno.
+# Physical qubit 1 has three neighbors (0, 2 and 3); qubit 0 has only one.
 chip = CouplingMap([[0, 1], [1, 2], [1, 3], [3, 4]])
 chip.make_symmetric()
 
@@ -11,7 +11,7 @@ estrella.cx(0, 1)
 estrella.cx(0, 2)
 estrella.cx(0, 3)
 
-# el elemento i es el qubit físico donde va el virtual i
+# element i is the physical qubit where virtual qubit i goes
 layout_inicial = [0, 1, 2, 3]
 
 pm = generate_preset_pass_manager(0, coupling_map=chip, initial_layout=layout_inicial, seed_transpiler=1)

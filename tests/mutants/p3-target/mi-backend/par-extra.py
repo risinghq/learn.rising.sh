@@ -1,4 +1,4 @@
-# Equivocada: añade el par (0, 2) a la conectividad.
+# Wrong: adds the pair (0, 2) to the connectivity.
 from qiskit import QuantumCircuit, transpile
 from qiskit.circuit import Measure, Parameter
 from qiskit.circuit.library import CZGate, RZGate, SXGate, XGate

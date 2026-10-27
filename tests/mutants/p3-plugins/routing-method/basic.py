@@ -1,4 +1,4 @@
-# Equivocada: deja el método basic.
+# Wrong: keeps the basic method.
 from qiskit.circuit.random import random_circuit
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager
 

@@ -21,7 +21,7 @@ def refuse(route: Route) -> None:
         route.fallback()
         return
     external.append(url)
-    print(f"✗ petición fuera del equipo: {url}", file=sys.stderr)
+    print(f"✗ request to an external host: {url}", file=sys.stderr)
     route.abort()
 
 
@@ -34,4 +34,4 @@ def new_context(browser: Browser, **options: Any) -> BrowserContext:
 def verify() -> None:
     if external:
         urls = "\n".join(f"  {url}" for url in sorted(set(external)))
-        sys.exit(f"Las pruebas pidieron direcciones fuera del equipo:\n{urls}")
+        sys.exit(f"The tests requested external addresses:\n{urls}")

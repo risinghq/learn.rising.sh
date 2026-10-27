@@ -1,4 +1,4 @@
-# Equivocada: el pass manager es ISA pero añade una X al final.
+# Wrong: the pass manager is ISA but adds an X at the end.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

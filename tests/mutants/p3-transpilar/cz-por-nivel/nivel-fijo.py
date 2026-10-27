@@ -1,4 +1,4 @@
-# Equivocada: transpila siempre con el nivel 1.
+# Wrong: always transpiles at level 1.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

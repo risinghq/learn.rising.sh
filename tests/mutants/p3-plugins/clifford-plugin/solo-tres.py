@@ -1,4 +1,4 @@
-# Equivocada: sintetiza solo con 3 qubits exactos.
+# Wrong: synthesizes only with exactly 3 qubits.
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Clifford, random_clifford
 from qiskit.synthesis import synth_clifford_bm

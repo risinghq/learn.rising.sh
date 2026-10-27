@@ -1,4 +1,4 @@
-# Equivocada: deja el grado en 1.0.
+# Wrong: leaves the degree at 1.0.
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
 from qiskit.quantum_info import random_unitary

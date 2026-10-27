@@ -1,9 +1,9 @@
-"""Pruebas del formato de ejercicios, del corrector y de lo que build.py publica.
+"""Tests for the exercise format, the grader and what build.py publishes.
 
     uv run pytest tests/exercises_test.py
 
-Cada ejercicio de exercises/ se corrige con su solución (pasa) y con una solución equivocada (falla
-con un mensaje útil). No necesitan red.
+Each exercise in exercises/ is graded with its solution (it passes) and with a
+wrong solution (it fails with a useful message). The tests need no network.
 """
 
 import ast
@@ -70,17 +70,17 @@ def ghz(n):
 
 
 def broken(exercise_id: str, old: str, new: str) -> str:
-    """Devuelve la solución de referencia con un cambio incorrecto."""
+    """Return the reference solution with an incorrect change."""
     code = (spec.folder(exercise_id) / "solution.py").read_text(encoding="utf-8")
     assert old in code, (exercise_id, old)
     return code.replace(old, new)
 
 
 def mutant(exercise_id: str, name: str) -> str:
-    """Devuelve el código equivocado `tests/mutants/<ejercicio>/<nombre>.py`.
+    """Return the wrong code in `tests/mutants/<exercise>/<name>.py`.
 
-    Cada archivo es un programa completo, no un cambio sobre solution.py: así reescribir la
-    solución de referencia no rompe las pruebas.
+    Each file is a whole program, not a change to solution.py, so rewriting the
+    reference solution does not break the tests.
     """
     return (ROOT / "tests" / "mutants" / exercise_id / f"{name}.py").read_text(encoding="utf-8")
 
@@ -90,7 +90,7 @@ def mutants_of(exercise_id: str) -> list[tuple[str, str]]:
     return [(exercise_id, path.read_text(encoding="utf-8")) for path in sorted(folder.glob("*.py"))]
 
 
-# (ejercicio, código equivocado, texto esperado en algún mensaje de fallo)
+# (exercise, wrong code, text expected in some failure message)
 WRONG = [
     (
         "p1-quickstart/bell-distinto",
@@ -290,7 +290,7 @@ QPY_ON_DISK = (
     "    return open(nombre, 'rb').read()"
 )
 
-# Parte 3: (ejercicio, nombre del archivo en tests/mutants/<ejercicio>/, texto esperado en algún mensaje).
+# Part 3: (exercise, file name in tests/mutants/<exercise>/, text expected in some message).
 WRONG += [
     (eid, mutant(eid, name), expected)
     for eid, name, expected in [
@@ -330,8 +330,8 @@ WRONG += [
     ]
 ]
 
-# Códigos equivocados que hacen fallar los casos ocultos: (ejercicio, código). Cada mensaje de un
-# caso oculto que falla se compara con la solución de referencia en test_hidden_messages_*.
+# Wrong code that fails the hidden cases: (exercise, code). The message of each failing hidden
+# case is compared with the reference solution in test_hidden_messages_*.
 MUTANTS = [
     ("p1-quickstart/ghz", GHZ_WITHOUT_CHAIN),
     (
@@ -426,8 +426,8 @@ MUTANTS = [
 ]
 
 
-# El corredor da a un trabajo 10 s con 1/4 de vCPU, unas 4 veces el tiempo de un núcleo, así que un
-# trabajo que pase de 2,5 s de CPU ya no cabe. La solución más lenta (fidelidad) usa 1,9 s.
+# The runner gives a job 10 s with 1/4 of a vCPU, about 4 times the time of one core, so a job
+# that goes over 2.5 s of CPU does not fit. The slowest solution (fidelidad) uses 1.9 s.
 CPU_BUDGET_S = 2.5
 
 
@@ -439,7 +439,9 @@ def test_solution_passes_within_the_cpu_budget(exercise_id: str) -> None:
     assert result["passed"], result
     assert result["tests"] and all(t["passed"] and t["message"] is None for t in result["tests"])
     cpu = after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime
-    assert cpu <= CPU_BUDGET_S, f"La solución usó {cpu:.1f} s de CPU; el tope es {CPU_BUDGET_S} s."
+    assert cpu <= CPU_BUDGET_S, (
+        f"The solution used {cpu:.1f} s of CPU; the limit is {CPU_BUDGET_S} s."
+    )
 
 
 @pytest.mark.parametrize("exercise_id", REAL)
@@ -464,7 +466,7 @@ def test_wrong_solutions_cover_every_exercise() -> None:
 
 
 def learner_names(exercise_id: str) -> set[str]:
-    """Nombres que el código inicial define: las variables y funciones del alumno."""
+    """Names that the starter code defines: the learner's variables and functions."""
     names: set[str] = set()
     for node in ast.walk(ast.parse(read(exercise_id, "starter.py"))):
         if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
@@ -475,14 +477,14 @@ def learner_names(exercise_id: str) -> set[str]:
 
 
 def names_its_input(exercise_id: str, message: str) -> bool:
-    """Un mensaje nombra su entrada con `n = 7` o con el nombre del alumno entre comillas invertidas."""
+    """A message names its input with `n = 7` or with the learner's name in backticks."""
     return bool(re.search(r"\b\w+ = \S", message)) or any(
         f"`{name}" in message for name in learner_names(exercise_id)
     )
 
 
 def graded_attempts(exercise_id: str) -> list[str]:
-    """El código inicial y cada código equivocado de WRONG para este ejercicio."""
+    """The starter code and each wrong code in WRONG for this exercise."""
     return [
         read(exercise_id, "starter.py"),
         *(code for eid, code, *_ in WRONG if eid == exercise_id),
@@ -491,17 +493,17 @@ def graded_attempts(exercise_id: str) -> list[str]:
 
 @pytest.mark.parametrize("exercise_id", REAL)
 def test_graded_hidden_messages_name_their_input(exercise_id: str) -> None:
-    """Lo que `grade` devuelve para un caso oculto que falla dice con qué entrada falló."""
+    """What `grade` returns for a failing hidden case says which input it failed on."""
     for code in graded_attempts(exercise_id):
         for test in failed(grade(exercise_id, code)):
             if not test["visible"]:
                 assert names_its_input(exercise_id, test["message"]), (
-                    f"{test['name']} no nombra su entrada: {test['message']}"
+                    f"{test['name']} does not name its input: {test['message']}"
                 )
 
 
-# Un `assert` de un caso mira el código del alumno a través de estas expresiones, y lleva escritos
-# los valores esperados como literales.
+# An `assert` in a case looks at the learner's code through these expressions, and it carries the
+# expected values written as literals.
 OBSERVED = (
     ast.Name,
     ast.Attribute,
@@ -521,26 +523,26 @@ OBSERVED = (
 
 
 def plain(value: Any) -> str:
-    """repr de un valor, con los de numpy convertidos a los de Python, como los imprime un mensaje."""
+    """repr of a value, with numpy values converted to Python ones, as a message prints them."""
     if isinstance(value, (np.ndarray, np.generic)):
         value = value.tolist()
     return repr(value)
 
 
 def forms(value: Any) -> list[str]:
-    """Cómo puede aparecer un valor en un mensaje: su repr y, si es un texto, el texto mismo."""
+    """How a value can appear in a message: its repr and, for a string, the string itself."""
     return [plain(value)] + ([value] if isinstance(value, str) and len(value) > 1 else [])
 
 
 def informative(value: Any) -> bool:
-    """Un valor que un mensaje puede mostrar: ni módulos ni funciones ni objetos con repr de dirección."""
+    """A value a message can show: no modules, functions or objects whose repr is an address."""
     if isinstance(value, (bool, np.bool_, types.ModuleType, type)) or callable(value):
         return False
     return " at 0x" not in repr(value)
 
 
 def expressions(tree: ast.AST) -> list[ast.expr]:
-    """Las expresiones observables de `tree`. De un literal cuenta la colección entera, no cada número."""
+    """The observable expressions of `tree`. For a literal, the whole collection counts, not each number."""
     found: list[ast.expr] = []
     inside: set[int] = set()
     for node in ast.walk(tree):
@@ -563,10 +565,11 @@ def names_in(node: ast.AST) -> set[str]:
 
 
 class Site:
-    """El assert que falló: sus expresiones y de qué depende cada una.
+    """The assert that failed: its expressions and what each one depends on.
 
-    kind[texto] es "learner" si la expresión depende del código del alumno, "input" si es una variable
-    de entrada del caso (la n de un bucle) y "fixed" si no depende de ninguno: un valor esperado.
+    kind[text] is "learner" if the expression depends on the learner's code, "input" if it is an
+    input variable of the case (the n of a loop) and "fixed" if it depends on neither: an expected
+    value.
     """
 
     def __init__(self, tree: ast.Module, lineno: int) -> None:
@@ -602,7 +605,7 @@ class Site:
             if isinstance(n, ast.FormattedValue)
         }
         self.nodes = [*self.test.values(), *self.message.values()]
-        # Lo que el check le pasa al código del alumno es su entrada, aunque sea un literal o una variable.
+        # What the check passes to the learner's code is its input, even if it is a literal or a variable.
         given = [
             a
             for n in ast.walk(scope)
@@ -625,7 +628,7 @@ class Site:
                 self.kind[ast.unparse(n)] = "learner" if names_in(n) & tainted else "fixed"
 
     def parts(self, node: ast.AST, seen: tuple[str, ...] = ()) -> set[str]:
-        """Textos de lo que la expresión toma del código del alumno, también a través de las variables que usa."""
+        """Texts of what the expression takes from the learner's code, also through the variables it uses."""
         found: set[str] = set()
         for n in ast.walk(node):
             if (isinstance(n, ast.Name) and n.id in self.derived) or (
@@ -639,10 +642,10 @@ class Site:
 
     @staticmethod
     def dependencies(tree: ast.Module, scope: ast.FunctionDef) -> tuple[set[str], set[str]]:
-        """(nombres que dependen del alumno, nombres de entrada).
+        """(names that depend on the learner, input names).
 
-        Dependen del alumno `learner`, las funciones del check que lo usan, los parámetros y lo que se
-        asigna desde ellos. Son entrada las variables de un bucle sobre datos fijos.
+        These depend on the learner: `learner`, the check functions that use it, the parameters and
+        what is assigned from them. The variables of a loop over fixed data are input.
         """
         functions = [f for f in tree.body if isinstance(f, ast.FunctionDef)]
         tainted = {"learner", *(a.arg for a in scope.args.args)}
@@ -683,11 +686,11 @@ def run_hidden_case(
     case: str,
     probe: tuple[int, int, list[ast.expr]] | None = None,
 ) -> tuple[str | None, int | None, collections.Counter[int], dict[str, list[str]]]:
-    """Corre un caso oculto con `code` como código del alumno, en este proceso.
+    """Run a hidden case with `code` as the learner's code, in this process.
 
-    Devuelve (mensaje o None, línea del assert que falló, pasadas por cada línea, valores). Con
-    probe=(línea, veces, nodos) evalúa los nodos en la pasada número `veces` por esa línea, justo
-    antes de su assert, y devuelve {texto de la expresión: cómo la muestra un mensaje}.
+    Return (message or None, line of the assert that failed, passes through each line, values).
+    With probe=(line, times, nodes) it evaluates the nodes on pass number `times` through that
+    line, just before its assert, and returns {text of the expression: how a message shows it}.
     """
     check = spec.folder(exercise_id) / "check.py"
     fn = next(fn for fn, shown in spec.load_cases(check) if fn.__name__ == case)
@@ -700,8 +703,8 @@ def run_hidden_case(
             return None
 
         def on_line(frame: types.FrameType, event: str, arg: Any) -> Any:
-            # Un assert de varias líneas o con `and` puede volver a su primera línea dentro de la
-            # misma pasada: solo cuenta la instrucción con que empieza.
+            # An assert that spans several lines or uses `and` can return to its first line within
+            # the same pass: only the instruction it starts with counts.
             if (
                 event == "line"
                 and starts.setdefault(frame.f_lineno, frame.f_lasti) == frame.f_lasti
@@ -760,10 +763,10 @@ def hidden_case_names(exercise_id: str) -> list[str]:
 def hidden_failures(
     exercise_id: str, code: str
 ) -> list[tuple[str, str, Site, dict[str, list[str]], dict[str, list[str]]]]:
-    """[(caso, mensaje, assert que falló, valores con el código equivocado, valores con la referencia)].
+    """[(case, message, assert that failed, values with the wrong code, values with the reference)].
 
-    Los valores son los de las expresiones del assert que falló. La referencia las evalúa con la
-    misma entrada: la misma pasada por esa línea del mismo caso.
+    The values are those of the expressions in the assert that failed. The reference evaluates
+    them with the same input: the same pass through that line of the same case.
     """
     found = []
     tree = ast.parse(read(exercise_id, "check.py"))
@@ -771,19 +774,19 @@ def hidden_failures(
         message, lineno, arrivals, _ = run_hidden_case(exercise_id, code, case)
         if message is None:
             continue
-        assert lineno, f"{case} no falló con un assert: {message}"
+        assert lineno, f"{case} did not fail with an assert: {message}"
         site = Site(tree, lineno)
         probe = (site.first, arrivals[site.first], site.nodes)
         wrong = run_hidden_case(exercise_id, code, case, probe)
         right = run_hidden_case(exercise_id, read(exercise_id, "solution.py"), case, probe)
-        assert right[0] is None, f"la solución de referencia falla {case}: {right[0]}"
-        assert wrong[0] is not None, f"{case} dejó de fallar al repetirlo"
+        assert right[0] is None, f"the reference solution fails {case}: {right[0]}"
+        assert wrong[0] is not None, f"{case} stopped failing when repeated"
         found.append((case, wrong[0], site, wrong[3], right[3]))
     return found
 
 
 def pattern(text: str) -> str:
-    """El texto entero, no dentro de otro número o palabra (0.5 no está en 0.50)."""
+    """The whole text, not inside another number or word (0.5 is not in 0.50)."""
     return rf"(?<!\w){re.escape(text)}(?!\w|\.\d)"
 
 
@@ -792,8 +795,8 @@ def shown(message: str, candidates: Iterable[str]) -> bool:
 
 
 def kinds(site: Site, got: Mapping[str, Any], want: Mapping[str, Any]) -> dict[str, str]:
-    """site.kind, y del alumno todo lo que no coincide con la referencia aunque no lo calcule con `learner`
-    (un circuito que el alumno modificó, un archivo que dejó en el disco)."""
+    """site.kind, plus as the learner's everything that differs from the reference even if it is not
+    computed with `learner` (a circuit the learner modified, a file left on disk)."""
     return {
         k: "learner" if kind == "fixed" and k in got and want.get(k) != got[k] else kind
         for k, kind in site.kind.items()
@@ -803,7 +806,7 @@ def kinds(site: Site, got: Mapping[str, Any], want: Mapping[str, Any]) -> dict[s
 def returned_roots(
     site: Site, kind: Mapping[str, str], got: Mapping[str, Any], want: Mapping[str, Any]
 ) -> list[str]:
-    """Lo que el assert observa del código del alumno y no coincide con la referencia, sin sus partes."""
+    """What the assert observes of the learner's code that differs from the reference, without its parts."""
     differing = {
         k: n
         for k, n in site.test.items()
@@ -820,14 +823,14 @@ def test_hidden_messages_show_the_input_and_the_return_but_not_the_expected_valu
     exercise_id: str, code: str
 ) -> None:
     failures = hidden_failures(exercise_id, code)
-    assert failures, "el código equivocado no falla ningún caso oculto"
+    assert failures, "the wrong code fails no hidden case"
     for case, message, site, got, want in failures:
-        assert names_its_input(exercise_id, message), f"{case} no nombra su entrada: {message}"
+        assert names_its_input(exercise_id, message), f"{case} does not name its input: {message}"
 
         kind = kinds(site, got, want)
 
-        # Cada cosa que el assert observa del código del alumno llega al mensaje: una expresión que el
-        # mensaje interpola se calcula con ella, vale distinto que con la referencia y se ve en el texto.
+        # Everything the assert observes of the learner's code reaches the message: an expression the
+        # message interpolates is computed from it, differs from the reference and shows in the text.
         roots = returned_roots(site, kind, got, want)
         for root in roots:
             holders = [
@@ -837,19 +840,19 @@ def test_hidden_messages_show_the_input_and_the_return_but_not_the_expected_valu
                 and want.get(k) != got[k]
                 and (k == root or site.parts(site.message[k]) & site.parts(site.test[root]))
             ]
-            # Un entero suelto en el texto puede ser otro número; solo cuenta si viene de una expresión.
+            # A bare integer in the text may be another number; it counts only if it comes from an expression.
             written = [t for t in got[root] if not re.fullmatch(r"-?\d+", t)]
             assert shown(message, written) or any(shown(message, got[k]) for k in holders), (
-                f"{case} no muestra lo que devolvió el código ({root} = {got[root][0]}): {message}"
+                f"{case} does not show what the code returned ({root} = {got[root][0]}): {message}"
             )
         if not roots:
             changed = [k for k in got if kind[k] == "learner" and want.get(k) != got[k]]
             assert any(shown(message, got[k]) for k in changed), (
-                f"{case} no muestra lo que devolvió el código: {message}"
+                f"{case} does not show what the code returned: {message}"
             )
 
-        # Ningún valor esperado: ni el de la referencia en lo que cambia, ni un literal o un valor que
-        # el check calcula aparte, salvo que el alumno lo haya devuelto o sea la entrada.
+        # No expected value: neither the reference's value where it differs, nor a literal or a value
+        # the check computes apart, unless the learner returned it or it is the input.
         rest = message
         for text in sorted(
             {t for k in got if kind[k] != "fixed" for t in got[k]}, key=len, reverse=True
@@ -861,7 +864,7 @@ def test_hidden_messages_show_the_input_and_the_return_but_not_the_expected_valu
             if kind[k] == "fixed" or (kind[k] == "learner" and v != got.get(k))
         }
         leaked = {k: t for k, v in expected.items() for t in v if shown(rest, [t])}
-        assert not leaked, f"{case} muestra el valor esperado {leaked}: {message}"
+        assert not leaked, f"{case} shows the expected value {leaked}: {message}"
 
 
 @pytest.mark.parametrize("exercise_id", REAL)
@@ -873,9 +876,7 @@ def test_every_hidden_case_is_checked_against_a_wrong_answer(exercise_id: str) -
         for case, *_ in hidden_failures(eid, code)
     }
     missing = [case for case in hidden_case_names(exercise_id) if case not in reached]
-    assert hidden_case_names(exercise_id) and not missing, (
-        f"ningún código equivocado falla {missing}"
-    )
+    assert hidden_case_names(exercise_id) and not missing, f"no wrong code fails {missing}"
 
 
 def test_run_mode_returns_output_without_tests() -> None:
@@ -1039,11 +1040,11 @@ def test_build_rejects_a_broken_exercise_reference(fixture_dir: Path) -> None:
     for eid in ("leccion/uno", "leccion/uno", "otra/dos", "leccion/falta", "Leccion/Mal"):
         build.publish_exercises(lesson_with(exercise_block(eid)), seen)
     text = "\n".join(build.ERRORS)
-    assert "leccion/uno no tiene ningún caso @visible" in text
-    assert "otra/dos debe estar en exercises/leccion/" in text
-    assert "leccion/falta no tiene starter.py, solution.py, check.py" in text
-    assert "id de ejercicio inválido" in text
-    assert "leccion/uno está repetido" in text
+    assert "leccion/uno has no @visible case" in text
+    assert "otra/dos must be in exercises/leccion/" in text
+    assert "leccion/falta has no starter.py, solution.py, check.py" in text
+    assert "invalid exercise id" in text
+    assert "leccion/uno is repeated" in text
 
 
 def test_exercise_rejects_unknown_level_and_needs() -> None:
@@ -1063,20 +1064,22 @@ def test_tool_accepts_a_sound_exercise(fixture_dir: Path) -> None:
 def test_tool_flags_a_failing_solution(fixture_dir: Path) -> None:
     write_exercise(fixture_dir, "leccion/uno", solution="x = 2\n")
     assert any(
-        "solution.py no pasa: x vale uno: x debería valer 1" in p
+        "solution.py does not pass: x vale uno: x debería valer 1" in p
         for p in exercises_tool.problems("leccion/uno", "qiskit")
     )
 
 
 def test_tool_flags_a_starter_that_is_already_solved(fixture_dir: Path) -> None:
     write_exercise(fixture_dir, "leccion/uno", starter="x = 1\n")
-    assert "starter.py ya pasa todos los casos" in exercises_tool.problems("leccion/uno", "qiskit")
+    assert "starter.py already passes every case" in exercises_tool.problems(
+        "leccion/uno", "qiskit"
+    )
 
 
 def test_tool_flags_a_starter_that_crashes(fixture_dir: Path) -> None:
     write_exercise(fixture_dir, "leccion/uno", starter="x = 1 / 0\n")
     assert any(
-        "starter.py falla al ejecutarse: ZeroDivisionError" in p
+        "starter.py fails to run: ZeroDivisionError" in p
         for p in exercises_tool.problems("leccion/uno", "qiskit")
     )
 
@@ -1085,11 +1088,11 @@ def test_tool_flags_needs_that_does_not_match_the_solution(fixture_dir: Path) ->
     write_exercise(fixture_dir, "leccion/uno", solution="import qiskit_aer\nx = 1\n")
     write_exercise(fixture_dir, "leccion/dos")
     assert any(
-        'needs="qiskit" pero solution.py necesita qiskit_aer' in p
+        'needs="qiskit" but solution.py needs qiskit_aer' in p
         for p in exercises_tool.problems("leccion/uno", "qiskit")
     )
     assert exercises_tool.problems("leccion/uno", "aer") == []
-    assert 'needs="aer" pero solution.py pasa sin qiskit_aer' in exercises_tool.problems(
+    assert 'needs="aer" but solution.py passes without qiskit_aer' in exercises_tool.problems(
         "leccion/dos", "aer"
     )
 
@@ -1118,7 +1121,7 @@ def test_tool_flags_a_hint_the_exercise_does_not_have(fixture_dir: Path) -> None
     write_exercise(fixture_dir, "leccion/uno", check=HINTED_CHECK)
     assert exercises_tool.problems("leccion/uno", "qiskit", hints=2) == []
     assert exercises_tool.problems("leccion/uno", "qiskit", hints=1) == [
-        "test_shown nombra la pista 2 y el ejercicio tiene 1"
+        "test_shown names hint 2 and the exercise has 1"
     ]
 
 
@@ -1130,7 +1133,7 @@ def test_tool_reports_a_malformed_declared_id(
     with pytest.raises(SystemExit) as stop:
         exercises_tool.main()
     assert stop.value.code == 1
-    assert "id de ejercicio inválido" in capsys.readouterr().out
+    assert "invalid exercise id" in capsys.readouterr().out
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-# Equivocada: no sustituye los swap sobre qubits mayores que 2.
+# Wrong: does not replace the swaps on qubits greater than 2.
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import CXGate, SwapGate

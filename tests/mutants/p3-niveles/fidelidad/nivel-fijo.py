@@ -1,4 +1,4 @@
-# Equivocada: transpila siempre con el nivel 3.
+# Wrong: always transpiles at level 3.
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import DiagonalGate, grover_operator
 from qiskit.quantum_info import Statevector, hellinger_fidelity

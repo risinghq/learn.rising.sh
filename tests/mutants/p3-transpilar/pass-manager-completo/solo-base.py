@@ -1,4 +1,4 @@
-# Equivocada: da las puertas del chip pero no el backend, así que no hay layout ni routing.
+# Wrong: gives the chip gates but not the backend, so there is no layout or routing.
 from qiskit import QuantumCircuit
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeFez

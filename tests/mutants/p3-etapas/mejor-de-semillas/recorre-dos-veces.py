@@ -1,4 +1,4 @@
-# Equivocada: recorre `semillas` dos veces, así que un generador llega vacío.
+# Wrong: iterates over `semillas` twice, so a generator arrives empty.
 from qiskit.circuit.random import random_circuit
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager
 

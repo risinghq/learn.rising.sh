@@ -1,4 +1,4 @@
-# Equivocada: transpila siempre el mismo circuito, no el que recibe.
+# Wrong: always transpiles the same circuit, not the one it receives.
 from qiskit.circuit.random import random_circuit
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager
 
