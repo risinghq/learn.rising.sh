@@ -2,11 +2,12 @@
 
 Esta guía lleva a quien bifurca el repositorio desde cero hasta un sitio
 publicado en su cuenta de Cloudflare, con ejecución de código y cuentas. Qué
-hace cada pieza está en [runner.md](runner.md). Aquí solo hay pasos.
+hace cada pieza está en [runner.md](runner.md), [accounts.md](accounts.md) y
+[protection.md](protection.md). Aquí solo hay pasos.
 
 Los valores entre `< >` son tuyos. `<worker>` es el nombre del Worker y `<host>`
-es su dominio. En el despliegue de Rising son `duo` y `edu.rising.sh`. Ningún
-secreto va en el repositorio ni en un archivo que subas a git.
+es su dominio. El repositorio trae `duo` y `edu.rising.sh`. Ningún secreto va en
+el repositorio ni en un archivo que subas a git.
 
 ## Qué necesitas
 
@@ -33,9 +34,9 @@ bunx cf auth login
 
 Ambos están en [`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts).
 El nombre es `worker.name` (`duo`) y el dominio es `HOME_HOST`
-(`edu.rising.sh`), que el config pone en `worker.domains`. Cámbialos por los
-tuyos. `workersDev` es `false`: el Worker responde solo en su dominio, no en
-`<worker>.<subdominio>.workers.dev`.
+(`edu.rising.sh`), que el config pone en `worker.domains`. El contenedor es
+`duo-runner`. Cámbialos por los tuyos. `workersDev` es `false`: el Worker
+responde solo en su dominio, no en `<worker>.<subdominio>.workers.dev`.
 
 El dominio debe ser de una zona activa en tu cuenta de Cloudflare. Al desplegar,
 Cloudflare crea el registro DNS y el certificado. Si otro Worker ya sirve ese
@@ -51,8 +52,10 @@ La base guarda cuentas, progreso e intentos. Su esquema es
 bunx cf d1 create --name qiskit-guides
 ```
 
-Copia el identificador (`uuid`) de la respuesta. El nombre debe ser el de
-`bindings.d1` en `cloudflare.config.ts`. Aplica el esquema:
+Copia el identificador (`uuid`) de la respuesta. La base se llama
+`qiskit-guides`, el nombre que tenía el proyecto antes de ser Duo; es lo único
+que lo conserva. Debe coincidir con `bindings.d1` en `cloudflare.config.ts`, y
+si eliges otro nombre cambia los dos. Aplica el esquema:
 
 ```sh
 bunx cf d1 query <uuid> "--sql=$(cat src/schema.sql)"
@@ -97,7 +100,7 @@ De la respuesta copia dos valores:
 7. Pulsa **Create**. Copia el **Client ID** y el **Client secret**: son
    `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
 
-Qué pide el Worker a cada proveedor está en [Entrar](runner.md#entrar).
+Qué pide el Worker a cada proveedor está en [Entrar](accounts.md#entrar).
 
 ## 5. Crea la aplicación de GitHub
 
@@ -184,15 +187,15 @@ Abre cualquier página de lección con un ejercicio en `<host>` y pulsa
 con ese token y debe recibir 200 con la salida del programa. Después entra con
 cada proveedor y ejecuta un ejercicio.
 
-El cron diario de [Retención](runner.md#retención) se declara en
+El cron diario de [Retención](accounts.md#retención) se declara en
 `cloudflare.config.ts` y se despliega con el Worker.
 
 ## 9. Elige los mantenedores
 
 Un mantenedor ejecuta código sin Turnstile ni límite por usuario, y gasta del
-presupuesto entero ([runner.md](runner.md#mantenedores)). `MAINTAINERS` en
-`worker.env` de `cloudflare.config.ts` es una lista de ids numéricos de GitHub
-separados por comas. Un login no sirve: se puede renombrar.
+presupuesto entero ([protection.md](protection.md#mantenedores)). `MAINTAINERS`
+en `worker.env` de `cloudflare.config.ts` es una lista de ids numéricos de
+GitHub separados por comas. Un login no sirve: se puede renombrar.
 
 Para ver el id de una cuenta de GitHub:
 
@@ -208,9 +211,9 @@ devuelve al entrar.
 ## 10. Pon alertas de gasto
 
 El Worker se niega a ejecutar cuando el gasto estimado del mes llega a
-`MONTHLY_BUDGET_USD` (2 USD), pero Cloudflare no tiene un tope de gasto que pare
-nada. Una alerta de presupuesto es un segundo aviso, fuera del Worker, y solo
-manda un correo: no pausa ni limita el uso.
+`MONTHLY_BUDGET_USD`, pero Cloudflare no tiene un tope de gasto que pare nada.
+Una alerta de presupuesto es un segundo aviso, fuera del Worker, y solo manda un
+correo: no pausa ni limita el uso.
 
 1. Abre el [panel de Cloudflare](https://dash.cloudflare.com/), elige la cuenta
    y ve a **Manage Account** > **Billing** > **Billable Usage**.
@@ -222,7 +225,18 @@ manda un correo: no pausa ni limita el uso.
 Las alertas miden el gasto por uso de toda la cuenta, no solo el de este Worker,
 y solo existen en cuentas de pago por uso. Si recibes la de 1 USD, mira
 **Billable Usage** y la suma de `cost_nano_usd` en los registros del Worker
-([runner.md](runner.md#presupuesto)).
+([protection.md](protection.md#presupuesto)).
 
-Los 5 USD al mes del plan Workers Paid no están en los 2 USD: son una cuota fija
-que se paga aparte de lo que el Worker gasta en Containers.
+Los 5 USD al mes del plan Workers Paid no están en ese presupuesto: son una
+cuota fija que se paga aparte de lo que el Worker gasta en Containers.
+
+## Variables
+
+Las variables no secretas están en `worker.env` de `cloudflare.config.ts`.
+Cambiar una es editar el archivo y volver a ejecutar `mise run deploy`. Cada
+documento da las de su parte:
+
+- Límites, presupuesto, mantenedores y Turnstile:
+  [protection.md](protection.md).
+- Duración de la sesión, límite de `/auth` y retención:
+  [accounts.md](accounts.md).

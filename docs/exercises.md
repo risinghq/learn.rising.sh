@@ -182,6 +182,7 @@ código del alumno; `mode="check"` además corre los casos. Devuelve:
   "stdout": "listo\n",
   "error": null,
   "ms": 1180,
+  "killed": null,
   "tests": [
     {
       "name": "n = 2, 3 y 4",
@@ -202,6 +203,9 @@ código del alumno; `mode="check"` además corre los casos. Devuelve:
 ```
 
 `hint` es el número de la pista que nombra el caso con `@hint`, o `null`.
+`killed` es lo que detuvo el trabajo (`time`, `memory`, `disk`, `output` o
+`scan`) o `null`. Los campos son los del contrato del corredor
+([runner.md](runner.md#contrato)), sin `peak_mb`.
 
 - `error` trae el error del código del alumno, con su línea cuando el error nace
   en una línea, por ejemplo
@@ -214,8 +218,8 @@ código del alumno; `mode="check"` además corre los casos. Devuelve:
   importar en el proceso del alumno.
 - `grade` no aísla al alumno del equipo: no limita memoria, procesos ni red. El
   código del alumno corre en un proceso distinto del que corre los casos, pero
-  con el mismo usuario. Un servicio expuesto a internet debe correrlo en un
-  contenedor sin red y con límites: [runner.md](runner.md) lo hace.
+  con el mismo usuario. Un servicio expuesto a internet debe correrlo con los
+  límites del [corredor](runner.md#límites).
 
 ## Editor en la lección
 
@@ -255,16 +259,15 @@ inválida) tiene su mensaje.
 
 El editor envía `POST /run` con `{"exercise", "code", "mode"}` y recibe el
 resultado de `grade()`. La ruta es siempre `/run`, la del mismo origen que la
-página. El corredor de [runner.md](runner.md) no responde las peticiones
-`OPTIONS` ni envía cabeceras CORS, y su cookie de sesión es `SameSite=Strict`:
-la página y el corredor deben tener el mismo origen. En producción los sirve un
-solo Worker; ver [runner.md](runner.md#cloudflare-containers).
+página: el corredor no responde las peticiones `OPTIONS` ni envía cabeceras
+CORS, y su cookie de sesión es `SameSite=Strict`. En producción los sirve un
+solo Worker ([runner.md](runner.md#en-cloudflare)).
 
 Si el corredor responde 403 con `reason` `turnstile_missing`, la página carga el
 widget de Cloudflare Turnstile con la clave del sitio que trae esa respuesta, y
-repite la petición con el token en la cabecera `X-Turnstile-Token`. El widget
-solo se ve si Cloudflare necesita que el lector haga algo. Con la sesión abierta
-no se vuelve a pedir. Si el widget no carga, el panel lo dice y se puede
+repite la petición con el token en la cabecera `X-Turnstile-Token`
+([protection.md](protection.md#turnstile)). El widget solo se ve si Cloudflare
+necesita que el lector haga algo. Si no carga, el panel lo dice y se puede
 reintentar.
 
 En tu equipo, [`tools/serve.py`](../tools/serve.py) responde `POST /run` sin
@@ -322,19 +325,16 @@ uv run --group tools python tests/exercise_ui_test.py
 4. Cada `@hint(n)` nombra una pista que el ejercicio tiene en `hints`.
 
 [`tests/exercises_test.py`](../tests/exercises_test.py) corre cada ejercicio con
-su solución y con una solución equivocada que debe fallar con un mensaje útil, y
+su solución, con una solución equivocada que debe fallar con un mensaje útil y
 con los programas equivocados de `tests/mutants/<ejercicio>/` (los que hacen
-fallar cada caso oculto; son programas completos, sin depender del texto de
-`solution.py`), y comprueba que todo caso oculto que falla con el código inicial
-o con una solución equivocada nombra su entrada. También prueba el corrector, lo
-que publica `build.py`, las comprobaciones y `serve.py`.
+fallar cada caso oculto; son programas completos). Comprueba que todo caso
+oculto que falla nombra su entrada, y prueba el corrector, lo que publica
+`build.py` y `serve.py`.
 [`tests/exercise_ui_test.py`](../tests/exercise_ui_test.py) abre las lecciones
-en el navegador contra `serve.py`: escribe código equivocado y ve fallar un
-caso, lo corrige y lo ve pasar, recarga y comprueba que el progreso sigue.
-También escribe un error de sintaxis y un `ghz` que solo falla casos ocultos, y
-comprueba lo que muestra el panel. Lo repite en un móvil, y prueba el teclado,
-las pistas, el timeout, los errores y la comprobación de Turnstile, con un
-widget de prueba. `mise run test:ui` ejecuta las pruebas del navegador. Todas
-usan [`tests/offline.py`](../tests/offline.py): el navegador aborta cualquier
-petición que no vaya a `127.0.0.1` o `localhost` y la prueba termina con error
-que nombra la dirección.
+en el navegador contra `serve.py`, en escritorio y en móvil: escribe código
+equivocado, lo corrige, recarga y comprueba el panel, el teclado, las pistas, el
+timeout, los errores y la comprobación de Turnstile con un widget de prueba.
+`mise run test:ui` ejecuta las pruebas del navegador. Todas usan
+[`tests/offline.py`](../tests/offline.py): el navegador aborta cualquier
+petición que no vaya a `127.0.0.1` o `localhost`, y la prueba termina con un
+error que nombra la dirección.
