@@ -4,7 +4,7 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-if (!process.argv[2]) throw new Error("usage: node vendor.js OUTPUT_DIR");
+if (!process.argv[2]) throw new Error("usage: node vendor.ts OUTPUT_DIR");
 const out = resolve(process.argv[2]);
 const modules = join(dirname(fileURLToPath(import.meta.url)), "node_modules");
 
@@ -35,7 +35,8 @@ const faces = (
           block.trim(),
         );
         if (!subset || !SUBSETS.has(subset[1])) continue;
-        const file = /url\(\.\/files\/([^)]+)\)/.exec(block)[1];
+        const file = /url\(\.\/files\/([^)]+)\)/.exec(block)?.[1];
+        if (!file) throw new Error(`no font file in ${family}: ${block}`);
         copies.push(cp(join(dir, "files", file), join(out, "fonts", file)));
         wanted.push(
           block

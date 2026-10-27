@@ -18,10 +18,5 @@
       }
     }
   ],
-  "ignorePatterns": [
-    "site/qiskit/editor.js",
-    "site/vendor/**",
-    ".cache/**",
-    "**/node_modules/**"
-  ]
+  "ignorePatterns": ["site/vendor/**", ".cache/**", "**/node_modules/**"]
 }

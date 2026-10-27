@@ -1,5 +1,10 @@
 .cache/
 site/vendor/
+site/theme.js
+site/qiskit/account.js
+site/qiskit/editor.js
+site/qiskit/engine.js
+site/qiskit/notebooks.js
 shots/
 __pycache__/
 .venv/

@@ -15,6 +15,7 @@ run = [
   "uv sync --locked --all-groups",
   "bun install --cwd editor --frozen-lockfile",
   "mise run generate:vendor",
+  "mise run generate:scripts",
   "bun install --cwd runner/worker --frozen-lockfile",
   "uv run --group tools playwright install ${CI:+--with-deps} chromium",
   "uv run python tools/fetch_docs.py",
@@ -58,9 +59,8 @@ description = "Check Python types with mypy in strict mode"
 run = "uv run mypy"
 
 [tasks."typecheck:ts"]
-description = "Check the Worker's TypeScript with tsc"
-dir = "runner/worker"
-run = "tsc -p ."
+description = "Check the TypeScript of the Worker, the editor and the site with tsc"
+run = ["tsc -p runner/worker", "tsc -p editor", "tsc -p site"]
 
 [tasks.typecheck]
 description = "Run every type check"
@@ -82,6 +82,7 @@ run = [
 
 [tasks."test:ui"]
 description = "Drive the exercise editor, the project panel, the theme and the optional account in a browser"
+depends = ["generate:scripts"]
 wait_for = ["test:py"]
 run = [
   "uv run python tests/exercise_ui_test.py",
@@ -113,15 +114,17 @@ depends = ["test:py", "test:notebooks", "test:ui", "test:worker", "test:lessons"
 description = "Rewrite site/qiskit/lessons/*/lesson.json and site/qiskit/course.json from lessons_src"
 run = "uv run python lessons_src/build.py"
 
-[tasks."generate:editor"]
-description = "Rewrite site/qiskit/editor.js from editor/src"
-dir = "editor"
-run = "esbuild src/index.js --bundle --minify --format=iife --target=es2020 --outfile=../site/qiskit/editor.js"
+[tasks."generate:scripts"]
+description = "Bundle the TypeScript in site/ and editor/src into the JavaScript the pages load, which git ignores"
+run = [
+  "bun build site/theme.ts site/qiskit/account.ts site/qiskit/notebooks.ts site/qiskit/engine.ts --root site --outdir site --format=iife --target=browser",
+  "bun build editor/src/index.ts --outfile site/qiskit/editor.js --format=iife --target=browser --minify",
+]
 
 [tasks."generate:vendor"]
 description = "Copy KaTeX and the fonts from editor/node_modules into site/vendor, which git ignores"
 dir = "editor"
-run = "node vendor.js ../site/vendor"
+run = "node vendor.ts ../site/vendor"
 
 [tasks.generate]
 description = "Rewrite every generated file under site/"
@@ -131,23 +134,18 @@ depends = ["generate:*"]
 description = "Fail without writing if the committed lesson JSON differs from the build output"
 run = "uv run python lessons_src/build.py --check"
 
-[tasks."build:editor"]
-description = "Fail without writing if site/qiskit/editor.js differs from the bundle built from editor/src"
-dir = "editor"
-run = """
-out="$(mktemp)"
-trap 'rm -f "$out"' EXIT
-esbuild src/index.js --bundle --minify --format=iife --target=es2020 --outfile="$out" --log-level=warning
-cmp "$out" ../site/qiskit/editor.js
-"""
-
 [tasks.build]
 description = "Check that the shipped site files match their sources"
 depends = ["build:*"]
 
+[tasks.serve]
+description = "Bundle the scripts, then serve site/ and grade the exercises on http://127.0.0.1:8810"
+depends = ["generate:scripts"]
+run = "uv run python tools/serve.py"
+
 [tasks.deploy]
-description = "Copy KaTeX and the fonts into site/vendor, then run cf deploy in runner/worker with the given arguments"
-depends = ["generate:vendor"]
+description = "Copy KaTeX and the fonts into site/vendor and bundle the scripts, then run cf deploy in runner/worker with the given arguments"
+depends = ["generate:vendor", "generate:scripts"]
 dir = "runner/worker"
 run = "bunx cf deploy"
 

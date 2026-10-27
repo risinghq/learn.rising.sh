@@ -1,5 +1,5 @@
 // The published site links to the repository because the reader has no local files.
-window.notebookHelp = (parent) => {
+window.notebookHelp = (parent: Element) => {
   const p = document.createElement("p");
   p.className = "mhow";
   p.append("Cómo ejecutar los cuadernos: clona el ");

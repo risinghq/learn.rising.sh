@@ -1,5 +1,5 @@
 // The editor uses CodeMirror 6 with Python and the tokens of theme.css.
-// `mise run generate:editor` bundles it into site/qiskit/editor.js. blocks.js loads it when the first exercise opens.
+// `mise run generate:scripts` bundles it into site/qiskit/editor.js. exercise.ts loads it when the first exercise opens.
 import {
   defaultKeymap,
   history,
@@ -18,7 +18,9 @@ import {
 import { EditorState, Prec, StateEffect, StateField } from "@codemirror/state";
 import {
   Decoration,
+  type DecorationSet,
   EditorView,
+  type KeyBinding,
   drawSelection,
   highlightActiveLine,
   highlightActiveLineGutter,
@@ -99,8 +101,8 @@ const theme = EditorView.theme({
   },
 });
 
-const markError = StateEffect.define();
-const errorLine = StateField.define({
+const markError = StateEffect.define<number>();
+const errorLine = StateField.define<DecorationSet>({
   create: () => Decoration.none,
   update(deco, tr) {
     for (const e of tr.effects) {
@@ -120,11 +122,28 @@ const errorLine = StateField.define({
   provide: (f) => EditorView.decorations.from(f),
 });
 
-// create(parent, { doc, label, onChange, onRun, onCheck }) -> { get, set, focus, markError }
-function create(parent, { doc, label, onChange, onRun, onCheck }) {
+export interface EditorOptions {
+  doc: string;
+  label: string;
+  onChange: (doc: string) => void;
+  onRun: () => void;
+  onCheck: () => void;
+}
+
+export interface Editor {
+  get: () => string;
+  set: (text: string) => void;
+  focus: () => void;
+  markError: (line: number) => void;
+}
+
+function create(
+  parent: HTMLElement,
+  { doc, label, onChange, onRun, onCheck }: EditorOptions,
+): Editor {
   // Tab indents. Esc lets the next Tab leave the editor.
   let tabOut = false;
-  const tabKeys = [
+  const tabKeys: KeyBinding[] = [
     { key: "Escape", run: () => ((tabOut = true), false) },
     {
       key: "Tab",
@@ -189,6 +208,12 @@ function create(parent, { doc, label, onChange, onRun, onCheck }) {
     focus: () => view.focus(),
     markError: (line) => view.dispatch({ effects: markError.of(line) }),
   };
+}
+
+declare global {
+  interface Window {
+    QGEditor: { create: typeof create };
+  }
 }
 
 window.QGEditor = { create };

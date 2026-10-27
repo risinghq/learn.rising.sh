@@ -1,15 +1,26 @@
-// Discreet sounds synthesized with WebAudio (no files): success, error and end of lesson.
-// oxlint-disable-next-line eslint/no-unused-vars -- Global used by engine.js.
-const SFX = (() => {
-  let ctx = null,
+export const SFX = (() => {
+  let ctx: AudioContext | null = null,
     muted = false;
   try {
     muted = localStorage.getItem("qiskit:mute") === "1";
   } catch {}
   const ac = () =>
-    ctx || (ctx = new (window.AudioContext || window.webkitAudioContext)());
+    ctx ||
+    (ctx = new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext
+    )());
 
-  function tone(freq, dur, { type = "sine", vol = 0.08, at = 0 } = {}) {
+  function tone(
+    freq: number,
+    dur: number,
+    {
+      type = "sine",
+      vol = 0.08,
+      at = 0,
+    }: { type?: OscillatorType; vol?: number; at?: number } = {},
+  ) {
     const c = ac(),
       t0 = c.currentTime + at,
       o = c.createOscillator(),
@@ -23,7 +34,7 @@ const SFX = (() => {
     o.start(t0);
     o.stop(t0 + dur + 0.02);
   }
-  const sounds = {
+  const sounds: Record<string, (() => void) | undefined> = {
     tick: () => tone(880, 0.06, { vol: 0.03 }),
     ok: () => {
       tone(660, 0.18);
@@ -41,10 +52,11 @@ const SFX = (() => {
         ac().resume();
       } catch {}
     },
-    play(n) {
-      if (!muted && sounds[n])
+    play(n: string) {
+      const sound = sounds[n];
+      if (!muted && sound)
         try {
-          sounds[n]();
+          sound();
         } catch {}
     },
     get muted() {

@@ -5,7 +5,6 @@
   "ignorePatterns": [
     "site/qiskit/lessons/**",
     "site/qiskit/course.json",
-    "site/qiskit/editor.js",
     "site/vendor/**",
     "content/**",
     "practica/soluciones/**",

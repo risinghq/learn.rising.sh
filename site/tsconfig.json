@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "types": [],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "allowUmdGlobalAccess": true
+  },
+  "include": [
+    "**/*.ts",
+    "../editor/src",
+    "../editor/node_modules/katex/types/katex.d.ts"
+  ]
+}
