@@ -16,7 +16,6 @@ import {
   type Who,
 } from "./meters.ts";
 import { purge } from "./purge.ts";
-import { legacyRedirect } from "./routes.ts";
 import { hasSession, issueSession, verifyTurnstile } from "./session.ts";
 import { take } from "./throttle.ts";
 
@@ -473,8 +472,6 @@ export default {
     ctx: ExecutionContext,
   ): Promise<Response> {
     const { pathname } = new URL(request.url);
-    const moved = legacyRedirect(request, env.LEGACY_HOST, env.HOME_HOST);
-    if (moved) return moved;
     // Responder aquí evita arrancar un contenedor por una petición sin límite.
     if (pathname === "/health") return Response.json({ ok: true });
     const account = pathname.startsWith("/auth/")
@@ -494,7 +491,7 @@ export default {
         return fail(500, "internal_error", "Error interno.");
       }
     }
-    // Las rutas antiguas del curso que no se redirigen son páginas del sitio.
+    // Las rutas que no son de la plataforma se sirven desde site/.
     if (pathname !== "/run") return env.ASSETS.fetch(request);
     if (request.method !== "POST") {
       return Response.json(
