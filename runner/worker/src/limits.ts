@@ -2,6 +2,12 @@ import { type Rates, isInstanceType, ratesOf } from "./container.ts";
 import type { Caps } from "./meters.ts";
 
 export interface Env {
+  // El Worker sirve los archivos estáticos para las rutas del curso que no redirige.
+  ASSETS: Fetcher;
+  // HOME_HOST sirve el sitio y LEGACY_HOST recibe las rutas antiguas del curso.
+  // LEGACY_HOST puede estar vacío.
+  HOME_HOST: string;
+  LEGACY_HOST: string;
   TURNSTILE_SECRET: string;
   // La página recibe la clave pública en la respuesta `turnstile_missing`.
   TURNSTILE_SITE_KEY: string;

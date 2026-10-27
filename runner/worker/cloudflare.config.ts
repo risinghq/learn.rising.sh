@@ -34,9 +34,19 @@ const runner = defineContainer({
   maxInstances: INSTANCES,
 });
 
-export default defineConfig({
+// El host del sitio. Las cuentas, el progreso y las ejecuciones de todos los
+// cursos entran por él.
+const HOME_HOST = "edu.rising.sh";
+// `--mode legacy` despliega un Worker sin dominio propio para redirigir las
+// rutas del curso que aún llegan al host antiguo.
+const LEGACY_WORKER = "qiskit-guides";
+const LEGACY_HOST = "qiskit-guides.empirical.workers.dev";
+
+export default defineConfig(({ mode }) => ({
   worker: {
-    name: "qiskit-guides",
+    name: mode === "legacy" ? LEGACY_WORKER : "duo",
+    // El Worker principal solo se sirve en el dominio del sitio.
+    ...(mode === "legacy" ? {} : { domains: [HOME_HOST], workersDev: false }),
     compatibilityDate: "2026-10-01",
     entrypoint,
     // Workers Logs guarda solo lo que escribe src/log.ts. El registro de
@@ -50,6 +60,9 @@ export default defineConfig({
     assets: { runWorkerFirst: WORKER_FIRST },
     triggers: [triggers.scheduled({ schedule: "17 3 * * *" })],
     env: {
+      ASSETS: bindings.assets(),
+      HOME_HOST: bindings.text(HOME_HOST),
+      LEGACY_HOST: bindings.text(LEGACY_HOST),
       // Las cuentas, el progreso y los intentos (src/schema.sql).
       DB: bindings.d1({ name: "qiskit-guides" }),
       // Los clientes OAuth se crean en las cuentas de Google y GitHub, y sus
@@ -93,4 +106,4 @@ export default defineConfig({
     },
   },
   containers: [runner],
-});
+}));
