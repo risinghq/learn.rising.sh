@@ -185,6 +185,7 @@ code; `mode="check"` also runs the cases. It returns:
   "stdout": "listo\n",
   "error": null,
   "ms": 1180,
+  "killed": null,
   "tests": [
     {
       "name": "n = 2, 3 y 4",
@@ -205,6 +206,9 @@ code; `mode="check"` also runs the cases. It returns:
 ```
 
 `hint` is the number of the hint that the case names with `@hint`, or `null`.
+`killed` is what stopped the job (`time`, `memory`, `disk`, `output` or `scan`)
+or `null`. The fields are those of the runner contract
+([runner.md](runner.md#contract)), without `peak_mb`.
 
 - `error` carries the error of the learner's code, with its line when the error
   comes from a line, for example
@@ -218,8 +222,7 @@ code; `mode="check"` also runs the cases. It returns:
 - `grade` does not isolate the learner from the machine: it limits no memory,
   processes or network. The learner's code runs in a process distinct from the
   one that runs the cases, but with the same user. A service exposed to the
-  internet must run it in a container with no network and with limits:
-  [runner.md](runner.md) does this.
+  internet must run it with the [runner's limits](runner.md#limits).
 
 ## Editor in the lesson
 
@@ -259,16 +262,15 @@ response) has its own message.
 
 The editor sends `POST /run` with `{"exercise", "code", "mode"}` and receives
 the result of `grade()`. The route is always `/run`, on the same origin as the
-page. The runner of [runner.md](runner.md) does not answer `OPTIONS` requests or
-send CORS headers, and its session cookie is `SameSite=Strict`: the page and the
-runner must have the same origin. In production a single Worker serves them; see
-[runner.md](runner.md#cloudflare-containers).
+page: the runner does not answer `OPTIONS` requests or send CORS headers, and
+its session cookie is `SameSite=Strict`. In production a single Worker serves
+both ([runner.md](runner.md#on-cloudflare)).
 
 If the runner answers 403 with `reason` `turnstile_missing`, the page loads the
 Cloudflare Turnstile widget with the site key that response carries, and repeats
-the request with the token in the `X-Turnstile-Token` header. The widget shows
-only if Cloudflare needs the reader to do something. With the session open it is
-not requested again. If the widget does not load, the panel says so and the
+the request with the token in the `X-Turnstile-Token` header
+([protection.md](protection.md#turnstile)). The widget shows only if Cloudflare
+needs the reader to do something. If it does not load, the panel says so and the
 reader can retry.
 
 On your machine, [`tools/serve.py`](../tools/serve.py) answers `POST /run`
@@ -328,19 +330,15 @@ their `hints`, so it goes after `build.py`. For each exercise it checks that:
 4. Each `@hint(n)` names a hint that the exercise has in `hints`.
 
 [`tests/exercises_test.py`](../tests/exercises_test.py) runs each exercise with
-its solution and with a wrong solution that must fail with a useful message, and
+its solution, with a wrong solution that must fail with a useful message and
 with the wrong programs of `tests/mutants/<exercise>/` (the ones that make each
-hidden case fail; they are complete programs, independent of the text of
-`solution.py`), and checks that every hidden case that fails with the starter
-code or with a wrong solution names its input. It also tests the grader, what
-`build.py` publishes, the checks and `serve.py`.
-[`tests/exercise_ui_test.py`](../tests/exercise_ui_test.py) opens the lessons in
-the browser against `serve.py`: it writes wrong code and sees a case fail,
-corrects it and sees it pass, reloads and checks that the progress remains. It
-also writes a syntax error and a `ghz` that fails only hidden cases, and checks
-what the panel shows. It repeats this on a phone, and tests the keyboard, the
-hints, the timeout, the errors and the Turnstile check, with a test widget.
+hidden case fail; they are complete programs). It checks that every hidden case
+that fails names its input, and tests the grader, what `build.py` publishes and
+`serve.py`. [`tests/exercise_ui_test.py`](../tests/exercise_ui_test.py) opens
+the lessons in the browser against `serve.py`, on desktop and on a phone: it
+writes wrong code, corrects it, reloads and checks the panel, the keyboard, the
+hints, the timeout, the errors and the Turnstile check with a test widget.
 `mise run test:ui` runs the browser tests. All of them use
 [`tests/offline.py`](../tests/offline.py): the browser aborts any request that
-does not go to `127.0.0.1` or `localhost` and the test ends with an error that
+does not go to `127.0.0.1` or `localhost`, and the test ends with an error that
 names the address.

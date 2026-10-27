@@ -2,11 +2,12 @@
 
 This guide takes a forker of the repository from nothing to a site published on
 their Cloudflare account, with code execution and accounts. What each piece does
-is in [runner.md](runner.md). Here are only steps.
+is in [runner.md](runner.md), [accounts.md](accounts.md) and
+[protection.md](protection.md). Here are only steps.
 
 Values between `< >` are yours. `<worker>` is the Worker name and `<host>` is
-its domain. In the Rising deployment they are `duo` and `edu.rising.sh`. No
-secret goes in the repository or in a file you push to git.
+its domain. The repository ships `duo` and `edu.rising.sh`. No secret goes in
+the repository or in a file you push to git.
 
 ## What you need
 
@@ -32,9 +33,9 @@ bunx cf auth login
 
 Both are in [`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts). The
 name is `worker.name` (`duo`) and the domain is `HOME_HOST` (`edu.rising.sh`),
-which the config puts in `worker.domains`. Change them to yours. `workersDev` is
-`false`: the Worker answers only on its domain, not on
-`<worker>.<subdomain>.workers.dev`.
+which the config puts in `worker.domains`. The container is `duo-runner`. Change
+them to yours. `workersDev` is `false`: the Worker answers only on its domain,
+not on `<worker>.<subdomain>.workers.dev`.
 
 The domain must belong to an active zone in your Cloudflare account. On deploy,
 Cloudflare creates the DNS record and the certificate. If another Worker already
@@ -50,8 +51,10 @@ The database stores accounts, progress and attempts. Its schema is
 bunx cf d1 create --name qiskit-guides
 ```
 
-Copy the identifier (`uuid`) from the response. The name must be the one in
-`bindings.d1` in `cloudflare.config.ts`. Apply the schema:
+Copy the identifier (`uuid`) from the response. The database is called
+`qiskit-guides`, the name the project had before it was Duo; it is the only
+place that keeps it. It must match `bindings.d1` in `cloudflare.config.ts`, and
+if you choose another name, change both. Apply the schema:
 
 ```sh
 bunx cf d1 query <uuid> "--sql=$(cat src/schema.sql)"
@@ -98,7 +101,7 @@ Copy two values from the response:
 7. Click **Create**. Copy the **Client ID** and the **Client secret**: they are
    `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
 
-What the Worker asks of each provider is in [Sign-in](runner.md#sign-in).
+What the Worker asks of each provider is in [Sign-in](accounts.md#sign-in).
 
 ## 5. Create the GitHub application
 
@@ -186,13 +189,13 @@ browser gets the Turnstile token, repeats the `POST /run` with that token and
 must receive 200 with the program output. Then sign in with each provider and
 run an exercise.
 
-The daily cron of [Retention](runner.md#retention) is declared in
+The daily cron of [Retention](accounts.md#retention) is declared in
 `cloudflare.config.ts` and deploys with the Worker.
 
 ## 9. Choose the maintainers
 
 A maintainer runs code without Turnstile or a per-user limit, and spends from
-the whole budget ([runner.md](runner.md#maintainers)). `MAINTAINERS` in
+the whole budget ([protection.md](protection.md#maintainers)). `MAINTAINERS` in
 `worker.env` of `cloudflare.config.ts` is a list of numeric GitHub ids separated
 by commas. A login does not work: it can be renamed.
 
@@ -210,9 +213,9 @@ returns on sign-in.
 ## 10. Set spend alerts
 
 The Worker refuses to run when the estimated spend of the month reaches
-`MONTHLY_BUDGET_USD` (2 USD), but Cloudflare has no spend cap that stops
-anything. A budget alert is a second warning, outside the Worker, and only sends
-an email: it does not pause or limit usage.
+`MONTHLY_BUDGET_USD`, but Cloudflare has no spend cap that stops anything. A
+budget alert is a second warning, outside the Worker, and only sends an email:
+it does not pause or limit usage.
 
 1. Open the [Cloudflare dashboard](https://dash.cloudflare.com/), choose the
    account and go to **Manage Account** > **Billing** > **Billable Usage**.
@@ -224,7 +227,16 @@ an email: it does not pause or limit usage.
 The alerts measure the usage spend of the whole account, not only that of this
 Worker, and exist only on pay-as-you-go accounts. If you receive the 1 USD one,
 look at **Billable Usage** and at the sum of `cost_nano_usd` in the Worker logs
-([runner.md](runner.md#budget)).
+([protection.md](protection.md#budget)).
 
-The 5 USD a month of the Workers Paid plan is not part of the 2 USD: it is a
+The 5 USD a month of the Workers Paid plan is not part of that budget: it is a
 fixed fee paid apart from what the Worker spends on Containers.
+
+## Variables
+
+The non-secret variables are in `worker.env` in `cloudflare.config.ts`. To
+change one, edit the file and run `mise run deploy` again. Each document gives
+the variables of its part:
+
+- Limits, budget, maintainers and Turnstile: [protection.md](protection.md).
+- Session lifetime, the `/auth` limit and retention: [accounts.md](accounts.md).
