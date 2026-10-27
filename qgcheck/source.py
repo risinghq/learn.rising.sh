@@ -1,8 +1,7 @@
-"""Lo que el corrector sabe del código de un alumno antes de ejecutarlo.
+"""What the grader knows about a learner's code before running it.
 
-`preload` importa las bibliotecas científicas que ese código y los casos usan, para que los
-procesos que se bifurcan después las hereden ya cargadas. `describe` da el error de una ejecución
-con la línea del alumno.
+`preload` imports the scientific libraries that code and the cases use, so the processes forked
+afterwards inherit them already loaded. `describe` gives the error of a run with the learner's line.
 """
 
 import ast
@@ -11,7 +10,7 @@ import importlib
 import traceback
 
 CODE_NAME = "tu_codigo.py"
-# Solo se precargan estas bibliotecas: el alumno no puede alargar el arranque con un import propio.
+# Only these libraries are preloaded: the learner cannot lengthen startup with an import of their own.
 PRELOAD_ROOTS = {
     "qiskit",
     "qiskit_aer",
@@ -22,20 +21,20 @@ PRELOAD_ROOTS = {
     "rustworkx",
     "sympy",
 }
-# Módulos que los ayudantes de qgcheck importan al llamarlos, por el nombre con que check.py los pide.
+# Modules the qgcheck helpers import when called, by the name check.py requests them with.
 HELPER_MODULES = {
     "counts": "qiskit.primitives",
     "aer_counts": "qiskit_aer.primitives",
     "state": "qiskit.quantum_info",
     "operator": "qiskit.quantum_info",
 }
-# Funciones de qiskit que importan scipy.stats al primer uso. Precargarlo evita que el comprobador y el
-# proceso del alumno lo importen cada uno (0,5 s de CPU en el corredor).
+# Qiskit functions that import scipy.stats on first use. Preloading it keeps the checker and the
+# learner's process from importing it each (0.5 s of CPU in the runner).
 USES_SCIPY_STATS = {"random_unitary", "random_hermitian", "random_quantum_channel", "QuantumVolume"}
 
 
 def imported_modules(source: str) -> set[str]:
-    """Módulos que el código importa en cualquier punto, y los que necesitan los ayudantes de qgcheck que pide."""
+    """Modules the code imports anywhere, and those the qgcheck helpers it requests need."""
     try:
         tree = ast.parse(source)
     except SyntaxError:
@@ -60,7 +59,7 @@ def imported_modules(source: str) -> set[str]:
 
 
 def uses_inside(check_source: str) -> bool:
-    """Si `check.py` define alguna función marcada con `@inside`, que corre en el proceso del alumno."""
+    """Whether `check.py` defines any function marked `@inside`, which runs in the learner's process."""
     try:
         tree = ast.parse(check_source)
     except SyntaxError:
@@ -75,7 +74,7 @@ def uses_inside(check_source: str) -> bool:
 
 
 def preload(*sources: str) -> None:
-    """Importa los módulos de PRELOAD_ROOTS que usan los códigos dados. Un fallo lo muestra el código al importar."""
+    """Import the PRELOAD_ROOTS modules the given sources use. A failure shows when the code imports."""
     wanted = set().union(*map(imported_modules, sources))
     for name in sorted(wanted):
         if name.split(".")[0] in PRELOAD_ROOTS:
@@ -84,7 +83,7 @@ def preload(*sources: str) -> None:
 
 
 def describe(exc: BaseException, source: str) -> str:
-    """Describe el error y, si procede, la última línea del código del alumno."""
+    """Describe the error and, when applicable, the last line of the learner's code."""
     if isinstance(exc, SyntaxError) and exc.filename == CODE_NAME:
         lineno, text = exc.lineno, (exc.text or "").strip()
         return f"{type(exc).__name__}: {exc.msg} (línea {lineno}: {text})"

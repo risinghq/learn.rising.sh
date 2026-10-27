@@ -1,4 +1,4 @@
-"""API que usan los archivos check.py de exercises/.
+"""API used by the check.py files of exercises/.
 
     from qgcheck import learner, counts, visible
 
@@ -6,20 +6,19 @@
     def test_small():
         assert set(counts(learner.ghz(2))) == {"00", "11"}, "con n = 2 no salen solo 00 y 11"
 
-Cada función `test_*` es un caso. Con `@visible` el alumno ve su nombre y su mensaje; sin él, el
-caso es oculto: el alumno solo ve «caso oculto» y el mensaje del `assert`, así que ese mensaje no
-debe revelar los datos del caso. `@hint(2)` enlaza el caso con la pista 2 del ejercicio (la primera
-es la 1). Si el caso falla, el alumno ve esa pista junto a él. Lo que el alumno escribió se lee con
-`learner.<nombre>` dentro del caso, no al importar el archivo. Este módulo no importa qiskit hasta
-que se llama a un ayudante, para que build.py pueda leer los casos sin él.
+Each `test_*` function is a case. With `@visible` the learner sees its name and its message; without
+it the case is hidden: the learner sees only "caso oculto" and the `assert` message, so that message
+must not reveal the case data. `@hint(2)` links the case to hint 2 of the exercise (the first is 1).
+If the case fails, the learner sees that hint next to it. What the learner wrote is read with
+`learner.<name>` inside the case, not when the file is imported. This module does not import qiskit
+until a helper is called, so build.py can read the cases without it.
 
-El código del alumno corre en otro proceso y solo viajan datos: números, textos, listas, tuplas,
-diccionarios, bytes, arreglos de NumPy, `Statevector`, `Operator`, `SparsePauliOp` y
-`QuantumCircuit`. Un caso
-que necesita pasar al código del alumno un objeto que no es un dato, o usar uno que devuelve (una
-clase, un `PassManager`, un `Target`, unos ejes de matplotlib), lo hace en una función de check.py
-marcada con `@inside`. Esa función corre en el proceso del alumno, lee `learner` de ahí y recibe y
-devuelve datos. El caso, fuera, compara con los valores esperados:
+The learner's code runs in another process and only data travels: numbers, strings, lists, tuples,
+dictionaries, bytes, NumPy arrays, `Statevector`, `Operator`, `SparsePauliOp` and `QuantumCircuit`.
+A case that needs to pass the learner's code an object that is not data, or to use one it returns (a
+class, a `PassManager`, a `Target`, matplotlib axes), does it in a check.py function marked
+`@inside`. That function runs in the learner's process, reads `learner` from there and receives and
+returns data. The case, outside, compares with the expected values:
 
     @inside
     def pairs(circuit):
@@ -37,7 +36,7 @@ from qgcheck.runner import grade as grade
 
 
 class Names(Protocol):
-    """Los nombres que definió el código del alumno."""
+    """The names the learner's code defined."""
 
     def __contains__(self, name: str, /) -> bool: ...
 
@@ -45,7 +44,7 @@ class Names(Protocol):
 
 
 def visible(name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    """Expone este caso con el nombre indicado."""
+    """Expose this case under the given name."""
 
     def mark(fn: Any) -> Any:
         fn.qg_visible = name
@@ -55,9 +54,9 @@ def visible(name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
 
 
 def hint(number: int) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    """Enlaza este caso con la pista `number` (desde 1) de `hints` del ejercicio."""
+    """Link this case to hint `number` (from 1) of the exercise's `hints`."""
     if isinstance(number, bool) or not isinstance(number, int) or number < 1:
-        raise ValueError(f"la pista se numera desde 1, no {number!r}")
+        raise ValueError(f"hints are numbered from 1, not {number!r}")
 
     def mark(fn: Any) -> Any:
         fn.qg_hint = number
@@ -70,14 +69,14 @@ _remote: Callable[[str, tuple[Any, ...], dict[str, Any]], Any] | None = None
 
 
 class LearnerError(Exception):
-    """Una excepción que lanzó el código del alumno en otro proceso."""
+    """An exception the learner's code raised in another process."""
 
 
 def inside(fn: Callable[..., Any]) -> Callable[..., Any]:
-    """Marca una función de check.py que corre en el proceso del alumno.
+    """Mark a check.py function that runs in the learner's process.
 
-    Fuera de ese proceso la llamada viaja hasta él y devuelve el valor.
-    Los argumentos y el valor deben ser datos serializables.
+    Outside that process the call travels to it and returns the value.
+    The arguments and the value must be serializable data.
     """
 
     @functools.wraps(fn)
@@ -91,14 +90,14 @@ def inside(fn: Callable[..., Any]) -> Callable[..., Any]:
 
 
 class HelperFailure(AssertionError):
-    """Un fallo que un ayudante de qgcheck detecta sin conocer la entrada del caso."""
+    """A failure a qgcheck helper detects without knowing the case input."""
 
 
 _last_use: dict[str, str | None] = {"name": None, "call": None}
 
 
 def last_use() -> str | None:
-    """Cómo se usó por última vez el código del alumno: `ghz(7)` o, si no era una función, `MiBackend`."""
+    """How the learner's code was last used: `ghz(7)` or, if it was not a function, `MiBackend`."""
     return _last_use["call"] or (f"`{_last_use['name']}`" if _last_use["name"] else None)
 
 
@@ -124,7 +123,7 @@ def _recorded(name: str, fn: Callable[..., Any]) -> Callable[..., Any]:
 
 
 class _Learner:
-    """Accede a los nombres definidos por el código del alumno."""
+    """Access to the names the learner's code defined."""
 
     def __init__(self) -> None:
         object.__setattr__(self, "_ns", None)
@@ -142,9 +141,7 @@ class _Learner:
     def __getattr__(self, name: str) -> Any:
         ns = object.__getattribute__(self, "_ns")
         if ns is None:
-            raise RuntimeError(
-                "learner solo existe mientras qgcheck corrige el código de un alumno"
-            )
+            raise RuntimeError("learner exists only while qgcheck grades a learner's code")
         if name not in ns:
             raise AssertionError(f"Falta definir `{name}` en tu código.")
         _last_use.update(name=name, call=None)
@@ -164,7 +161,7 @@ def _first_register(result: Any, what: str) -> Any:
 
 
 def counts(circuit: Any, shots: int = 1024, seed: int = 7) -> Any:
-    """Devuelve los conteos del primer registro clásico con StatevectorSampler."""
+    """Return the counts of the first classical register using StatevectorSampler."""
     from qiskit.primitives import StatevectorSampler
 
     result = StatevectorSampler(seed=seed).run([circuit], shots=shots).result()
@@ -172,7 +169,7 @@ def counts(circuit: Any, shots: int = 1024, seed: int = 7) -> Any:
 
 
 def aer_counts(circuit: Any, shots: int = 512, seed: int = 11) -> Any:
-    """Devuelve los conteos del primer registro clásico con SamplerV2."""
+    """Return the counts of the first classical register using SamplerV2."""
     from qiskit_aer.primitives import SamplerV2
 
     result = SamplerV2(seed=seed).run([circuit], shots=shots).result()
@@ -180,7 +177,7 @@ def aer_counts(circuit: Any, shots: int = 512, seed: int = 11) -> Any:
 
 
 def gates(circuit: Any) -> Counter[str]:
-    """Cuenta operaciones por nombre, incluso dentro de bloques de control."""
+    """Count operations by name, including inside control-flow blocks."""
     found: Counter[str] = Counter()
     for inst in circuit.data:
         found[inst.operation.name] += 1
@@ -190,14 +187,14 @@ def gates(circuit: Any) -> Counter[str]:
 
 
 def state(circuit: Any) -> Any:
-    """Devuelve el statevector del circuito sin mediciones finales."""
+    """Return the circuit's statevector without final measurements."""
     from qiskit.quantum_info import Statevector
 
     return Statevector(circuit.remove_final_measurements(inplace=False))
 
 
 def unsupported(circuit: Any, target: Any) -> list[str]:
-    """Lista las instrucciones del circuito que el target no admite donde están: ['h en 0', 'cz en 0-2']."""
+    """List the circuit instructions the target does not allow where they are: ['h en 0', 'cz en 0-2']."""
     found: list[str] = []
     for inst in circuit.data:
         at = tuple(circuit.find_bit(q).index for q in inst.qubits)
@@ -207,11 +204,11 @@ def unsupported(circuit: Any, target: Any) -> list[str]:
 
 
 def operator(circuit: Any) -> Any:
-    """Devuelve el operador de un circuito sobre los qubits virtuales del circuito original.
+    """Return a circuit's operator over the virtual qubits of the original circuit.
 
-    Si el circuito está transpilado, aplica el layout inicial y el final para que se pueda comparar
-    con el operador del original. Solo construye la matriz de los qubits que el circuito toca, así
-    que sirve con un circuito transpilado a un chip de 156 qubits.
+    If the circuit is transpiled, it applies the initial and final layout so the result can be
+    compared with the original's operator. It builds the matrix of only the qubits the circuit
+    touches, so it works with a circuit transpiled to a 156-qubit chip.
     """
     import numpy as np
     from qiskit import QuantumCircuit

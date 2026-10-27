@@ -1,6 +1,6 @@
-"""Formato de mensajes de datos entre el comprobador y el proceso del alumno.
+"""Data message format between the checker and the learner's process.
 
-Los mensajes llevan longitud, son JSON y nunca deserializan código.
+Messages are length-prefixed JSON and never deserialize code.
 """
 
 import base64
@@ -24,7 +24,7 @@ def _qpy_bytes(circuit: Any, qpy: Any) -> bytes:
 
 
 class WireError(Exception):
-    """El otro extremo cerró el canal o envió algo que no es un mensaje válido."""
+    """The other end closed the channel or sent something that is not a valid message."""
 
 
 def encode(value: Any) -> Any:
@@ -61,8 +61,8 @@ def encode(value: Any) -> Any:
             try:
                 qpy.load(io.BytesIO(data))
             except Exception:
-                # qpy.dump acepta circuitos que qpy.load no lee. Se reintenta
-                # con el circuito descompuesto en puertas básicas.
+                # qpy.dump accepts circuits that qpy.load cannot read. Retry
+                # with the circuit decomposed into basic gates.
                 data = _qpy_bytes(value.decompose(), qpy)
             return {"$": "circuit", "v": base64.b64encode(data).decode("ascii")}
         if isinstance(value, SparsePauliOp):
@@ -97,7 +97,7 @@ def decode(obj: Any) -> Any:
 
         dtype = obj["dtype"]
         if not DTYPE.fullmatch(dtype):
-            raise WireError(f"dtype no admitido: {dtype!r}")
+            raise WireError(f"unsupported dtype: {dtype!r}")
         return np.array(decode(v), dtype=dtype)
     if kind == "bytes":
         return base64.b64decode(v, validate=True)
@@ -117,19 +117,19 @@ def decode(obj: Any) -> Any:
         from qiskit.quantum_info import SparsePauliOp  # type: ignore[attr-defined]
 
         return SparsePauliOp.from_list(decode(v))
-    raise WireError("un valor con un tipo desconocido")
+    raise WireError("a value with an unknown type")
 
 
 def send(fd: int, message: dict[str, Any]) -> None:
     data = json.dumps(message).encode("utf-8")
     if len(data) > MESSAGE_CAP:
-        raise WireError("mensaje demasiado grande")
+        raise WireError("message too large")
     view = memoryview(struct.pack(">I", len(data)) + data)
     try:
         while view:
             view = view[os.write(fd, view) :]
     except OSError as e:
-        raise WireError(f"no se pudo escribir: {e}") from e
+        raise WireError(f"could not write: {e}") from e
 
 
 def _read(fd: int, size: int) -> bytes:
@@ -138,9 +138,9 @@ def _read(fd: int, size: int) -> bytes:
         try:
             chunk = os.read(fd, min(size, 65536))
         except OSError as e:
-            raise WireError(f"no se pudo leer: {e}") from e
+            raise WireError(f"could not read: {e}") from e
         if not chunk:
-            raise WireError("el canal se cerró")
+            raise WireError("the channel closed")
         chunks.append(chunk)
         size -= len(chunk)
     return b"".join(chunks)
@@ -149,11 +149,11 @@ def _read(fd: int, size: int) -> bytes:
 def receive(fd: int) -> dict[str, Any]:
     (size,) = struct.unpack(">I", _read(fd, 4))
     if size > MESSAGE_CAP:
-        raise WireError("mensaje demasiado grande")
+        raise WireError("message too large")
     try:
         message = json.loads(_read(fd, size))
     except (ValueError, RecursionError) as e:
-        raise WireError("el mensaje no es JSON") from e
+        raise WireError("the message is not JSON") from e
     if not isinstance(message, dict):
-        raise WireError("el mensaje no es un objeto")
+        raise WireError("the message is not an object")
     return message

@@ -1,7 +1,7 @@
-"""Ejecuta el código del alumno y atiende peticiones por un socket.
+"""Run the learner's code and serve requests over a socket.
 
-El proceso conserva el estado del alumno entre peticiones. No puede bifurcar por
-petición porque el alumno puede haber creado hilos.
+The process keeps the learner's state between requests. It cannot fork per
+request because the learner may have created threads.
 """
 
 import contextlib
@@ -70,7 +70,7 @@ def encoded(value: Any, name: Any) -> dict[str, Any]:
 
 def serve(sock: socket.socket, code_path: str, check_path: str) -> None:
     sock_fd = sock.fileno()
-    # Cerrar solo los descriptores heredados evita el coste de recorrer un rango enorme.
+    # Closing only the inherited descriptors avoids the cost of walking a huge range.
     for fd in sorted(int(name) for name in os.listdir("/proc/self/fd")):
         if fd > 2 and fd != sock_fd:
             with contextlib.suppress(OSError):
@@ -85,7 +85,7 @@ def serve(sock: socket.socket, code_path: str, check_path: str) -> None:
         error = describe(e, source)
     else:
         learner._bind(namespace)
-        # Importar check.py repite sus constantes en este proceso: solo se hace si lo necesita.
+        # Importing check.py repeats its constants in this process: only done when it needs it.
         if check_path and uses_inside(Path(check_path).read_text(encoding="utf-8")):
             check = spec.load_module(Path(check_path))
     while True:
@@ -97,6 +97,6 @@ def serve(sock: socket.socket, code_path: str, check_path: str) -> None:
         try:
             send(sock_fd, reply | {"id": request.get("id")})
         except WireError:
-            # Una respuesta demasiado grande no debe dejar al comprobador esperando.
+            # A reply that is too large must not leave the checker waiting.
             with contextlib.suppress(WireError):
                 send(sock_fd, failure(BROKEN) | {"id": request.get("id")})

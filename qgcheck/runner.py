@@ -1,23 +1,23 @@
-"""Corre el código de un alumno contra un ejercicio, en un proceso aparte.
+"""Run a learner's code against an exercise, in a separate process.
 
     from qgcheck import grade
-    grade("p1-quickstart/ghz", codigo, mode="check")
+    grade("p1-quickstart/ghz", code, mode="check")
 
-El resultado:
+The result:
 
     {"passed": bool, "stdout": str, "error": str | None, "ms": int, "killed": str | None,
      "tests": [{"name": str, "visible": bool, "passed": bool, "message": str | None,
                 "hint": int | None}]}
 
-`mode="run"` solo ejecuta el código y devuelve su salida; `tests` queda vacío.
-`mode="check"` además corre los casos de check.py. Con `block` los módulos nombrados no se pueden
-importar en el proceso del alumno.
+`mode="run"` only runs the code and returns its output; `tests` stays empty.
+`mode="check"` also runs the cases of check.py. With `block` the named modules cannot be
+imported in the learner's process.
 
-`grade` lanza `python -m qgcheck.job`, el mismo trabajo que el corredor (runner/server.py) lanza con
-límites de uid, memoria y red. `timeout` cuenta desde el arranque del proceso, con las bibliotecas
-incluidas. Aquí el trabajo corre con tu usuario, sin esos límites: mantiene el intérprete del alumno
-lejos del que llama, no es un aislamiento de seguridad. Quien exponga esto en red debe usar el
-corredor, en un contenedor sin red.
+`grade` launches `python -m qgcheck.job`, the same job the runner (runner/server.py) launches with
+uid, memory and network limits. `timeout` counts from the start of the process, libraries
+included. Here the job runs as your user, without those limits: it keeps the learner's interpreter
+apart from the caller's, and is not a security isolation. Whoever exposes this on a network must
+use the runner, in a container with no network.
 """
 
 import contextlib
@@ -90,9 +90,9 @@ def drain(fd: int, cap: int, box: bytearray, over: threading.Event) -> None:
 
 
 def parse_report(raw: bytes) -> tuple[str | None, list[dict[str, Any]]] | None:
-    """Valida lo que escribió el trabajo; en `run` lo controla el alumno.
+    """Validate what the job wrote; in `run` the learner controls it.
 
-    Devuelve (error, casos), o None si no hay un informe válido.
+    Return (error, cases), or None if there is no valid report.
     """
     try:
         report = json.loads(raw)
@@ -162,10 +162,10 @@ def grade(
 ) -> dict[str, Any]:
     start = time.monotonic()
     if mode not in ("run", "check"):
-        raise ValueError(f"modo inválido: {mode!r}")
+        raise ValueError(f"invalid mode: {mode!r}")
     d = spec.folder(exercise_id)
     if not d.is_dir():
-        raise ValueError(f"ejercicio desconocido: {exercise_id!r}")
+        raise ValueError(f"unknown exercise: {exercise_id!r}")
     if len(code.encode("utf-8")) > MAX_CODE:
         return dict(
             passed=False,

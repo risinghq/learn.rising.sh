@@ -1,8 +1,8 @@
-"""Localiza un ejercicio en exercises/ y lee de check.py los casos y lo que build.py publica.
+"""Locate an exercise in exercises/ and read from check.py the cases and what build.py publishes.
 
-exercises/<lección>/<ejercicio>/ guarda starter.py (lo que ve el alumno), solution.py (la
-referencia) y check.py (los casos). Solo starter.py y los nombres de los casos visibles llegan
-a site/.
+exercises/<lesson>/<exercise>/ holds starter.py (what the learner sees), solution.py (the
+reference) and check.py (the cases). Only starter.py and the names of the visible cases reach
+site/.
 """
 
 import importlib.util
@@ -23,14 +23,14 @@ def exercises_dir() -> Path:
 
 
 def folder(exercise_id: str) -> Path:
-    """Devuelve la carpeta y rechaza ids que no sigan el formato publicado."""
+    """Return the folder and reject ids that do not follow the published format."""
     if not ID.fullmatch(exercise_id):
-        raise ValueError(f"id de ejercicio inválido: {exercise_id!r}")
+        raise ValueError(f"invalid exercise id: {exercise_id!r}")
     return exercises_dir() / exercise_id
 
 
 def all_ids() -> list[str]:
-    """Devuelve ordenados los ids de las carpetas de ejercicio."""
+    """Return the ids of the exercise folders, sorted."""
     base = exercises_dir()
     return sorted(d.relative_to(base).as_posix() for d in base.glob("*/*") if d.is_dir())
 
@@ -41,7 +41,7 @@ def missing_files(exercise_id: str) -> list[str]:
 
 
 def load_module(check_path: Path) -> ModuleType:
-    """Importa check.py, que no debe leer `learner` ni correr código del alumno al importarse."""
+    """Import check.py, which must not read `learner` or run learner code when imported."""
     spec = importlib.util.spec_from_file_location("check", check_path)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
@@ -50,7 +50,7 @@ def load_module(check_path: Path) -> ModuleType:
 
 
 def load_cases(check_path: Path) -> list[tuple[Callable[..., Any], str | None]]:
-    """[(función, nombre visible o None)] de cada test_* de check.py, en el orden en que se definen."""
+    """[(function, visible name or None)] of each test_* in check.py, in definition order."""
     module = load_module(check_path)
     return [
         (fn, getattr(fn, "qg_visible", None))
@@ -60,7 +60,7 @@ def load_cases(check_path: Path) -> list[tuple[Callable[..., Any], str | None]]:
 
 
 def public(exercise_id: str) -> dict[str, Any]:
-    """Devuelve el código inicial y los nombres de los casos visibles."""
+    """Return the starter code and the names of the visible cases."""
     d = folder(exercise_id)
     return dict(
         starter=(d / "starter.py").read_text(encoding="utf-8").rstrip("\n"),

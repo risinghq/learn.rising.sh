@@ -1,23 +1,23 @@
-"""Proceso de un trabajo: ejecuta el código del alumno o lo comprueba con un ejercicio.
+"""A job process: run the learner's code or check it against an exercise.
 
-    python -u -P -m qgcheck.job run CÓDIGO
-    python -u -P -m qgcheck.job check CÓDIGO CHECK.PY
+    python -u -P -m qgcheck.job run CODE
+    python -u -P -m qgcheck.job check CODE CHECK.PY
 
-Escribe en el descriptor QG_REPORT_FD un JSON `{"error": texto o null, "tests": [...]}` con la forma
-que `qgcheck.grade` da a esos campos. `QG_BLOCK` lista, separados por comas, módulos que no se pueden
-importar.
+Write to the QG_REPORT_FD descriptor a JSON `{"error": text or null, "tests": [...]}` with the
+shape `qgcheck.grade` gives those fields. `QG_BLOCK` lists, comma-separated, modules that cannot be
+imported.
 
-`run` ejecuta el código en este proceso. `check` importa las bibliotecas que el código y los casos
-usan, bifurca el proceso del alumno (`qgcheck.host`) con ellas ya cargadas y corre aquí los casos de
-`check.py`. `qgcheck.learner` se enlaza a un espacio de nombres cuyas funciones son llamadas a ese
-proceso, así que el código del alumno nunca comparte proceso, canal ni estado con los casos. Entre
-procesos solo viajan datos (`qgcheck.wire`).
+`run` runs the code in this process. `check` imports the libraries the code and the cases use,
+forks the learner's process (`qgcheck.host`) with them already loaded and runs the cases of
+`check.py` here. `qgcheck.learner` binds to a namespace whose functions are calls to that process,
+so the learner's code never shares a process, channel or state with the cases. Only data travels
+between processes (`qgcheck.wire`).
 """
 
 import sys
 
-# Qiskit Runtime y Mitigation cargan scipy y sus clientes al importarse y casi nadie los usa en un
-# caso. Con `all` sin filtro, Qiskit falla (`n_local` no tiene `__all__`).
+# Qiskit Runtime and Mitigation load scipy and their clients on import, and almost no case uses
+# them. With `all` and no filter, Qiskit fails (`n_local` has no `__all__`).
 LAZY_IMPORTERS = ("qiskit_ibm_runtime", "qiskit_mitigation")
 
 
@@ -44,8 +44,8 @@ from qgcheck.host import serve  # noqa: E402
 from qgcheck.source import CODE_NAME, describe, preload  # noqa: E402
 from qgcheck.wire import BROKEN, WireError, decode, encode, receive, send  # noqa: E402
 
-# Los hilos de BLAS y de matplotlib hacen que Python avise de cada fork, y el aviso llegaría a la
-# salida del alumno.
+# BLAS and matplotlib threads make Python warn on every fork, and the warning would reach the
+# learner's output.
 warnings.filterwarnings("ignore", message=".*multi-threaded.*fork", category=DeprecationWarning)
 
 PR_SET_DUMPABLE = 4
@@ -53,7 +53,7 @@ REPLY_KEYS = {"id", "value", "raised", "error", "used"}
 
 
 class Host:
-    """Cliente del proceso del alumno."""
+    """Client of the learner's process."""
 
     def __init__(self, code_path: str, check_path: str) -> None:
         self._sock, theirs = socket.socketpair()
@@ -81,7 +81,7 @@ class Host:
         args: Sequence[Any] = (),
         kwargs: dict[str, Any] | None = None,
     ) -> Any:
-        """Devuelve el valor de la petición; un fallo del alumno se lanza como en el caso."""
+        """Return the request's value; a learner failure is raised as it would be in the case."""
         if self._broken:
             raise AssertionError(BROKEN)
         try:
@@ -110,8 +110,8 @@ class Host:
             raise AssertionError(BROKEN) from None
 
     def _decode(self, value: Any) -> Any:
-        """Un dato del alumno que no se reconstruye (p. ej. un `Statevector` cuyas dimensiones no
-        cuadran, que lanza `QiskitError`) es un canal roto, no una excepción de su código."""
+        """A learner datum that cannot be rebuilt (e.g. a `Statevector` whose dimensions do not
+        match, which raises `QiskitError`) is a broken channel, not an exception of their code."""
         try:
             return decode(value)
         except Exception:
@@ -119,10 +119,10 @@ class Host:
             raise AssertionError(BROKEN) from None
 
     def _exchange(self, message: dict[str, Any]) -> dict[str, Any]:
-        """Envía la petición con un `id` que el alumno no puede adivinar y lee su respuesta.
+        """Send the request with an `id` the learner cannot guess and read its reply.
 
-        El proceso del alumno no conoce el `id` antes de recibir la petición, así que no puede dejar
-        escritas respuestas que este lado tome por las de peticiones futuras.
+        The learner's process does not know the `id` before receiving the request, so it cannot
+        leave written replies that this side would take for those of future requests.
         """
         ident = secrets.token_hex(16)
         send(self._sock.fileno(), message | {"id": ident})
@@ -133,15 +133,15 @@ class Host:
             and reply.keys() <= REPLY_KEYS
         )
         if not valid:
-            raise WireError("respuesta inválida")
+            raise WireError("invalid reply")
         return reply
 
 
 class Names:
-    """El espacio de nombres que lee `qgcheck.learner`.
+    """The namespace `qgcheck.learner` reads.
 
-    `kinds` dice qué nombres definió el alumno y cuáles son funciones o clases. Una función es una
-    llamada al proceso del alumno; el valor de otro nombre se pide una vez.
+    `kinds` says which names the learner defined and which are functions or classes. A function is
+    a call to the learner's process; the value of any other name is requested once.
     """
 
     def __init__(self, host: Host, kinds: Any) -> None:
@@ -210,8 +210,8 @@ def run(code_path: str) -> dict[str, Any]:
 
 
 def check(code_path: str, check_path: str) -> dict[str, Any]:
-    # Mismo uid que el alumno: sin esto podría leer o escribir la memoria de este proceso. Los
-    # procesos del alumno heredan la marca.
+    # Same uid as the learner: without this they could read or write this process's memory. The
+    # learner's processes inherit the flag.
     ctypes.CDLL(None).prctl(PR_SET_DUMPABLE, 0, 0, 0, 0)
     preload(
         Path(code_path).read_text(encoding="utf-8"), Path(check_path).read_text(encoding="utf-8")
@@ -237,7 +237,7 @@ def main(mode: str, code_path: str, check_path: str = "") -> None:
     with os.fdopen(int(os.environ["QG_REPORT_FD"]), "w") as f:
         json.dump(report, f)
     if mode == "check":
-        # El comprobador no tiene nada que cerrar; cerrar el intérprete con Qiskit cargado cuesta 0,1 s.
+        # The checker has nothing to close; shutting down the interpreter with Qiskit loaded costs 0.1 s.
         sys.stdout.flush()
         os._exit(0)
 
