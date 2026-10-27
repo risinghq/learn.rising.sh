@@ -1,10 +1,10 @@
-// Se carga en <head> para fijar data-theme antes de pintar. Sin valor guardado, el sistema elige el modo.
+// Loaded in <head> to set data-theme before the first paint. Without a stored value, the system picks the mode.
 /* oxlint-disable unicorn/consistent-function-scoping --
-   Script clásico en una función: sus ayudas no pueden salir al ámbito global. */
+   Classic script in a function: its helpers cannot move to the global scope. */
 (() => {
   const MODE = "qiskit:theme";
   const root = document.documentElement;
-  // Los textos del control siguen el atributo lang de la página.
+  // The control texts follow the lang attribute of the page.
   const TEXT = {
     es: { toDark: "Tema oscuro", toLight: "Tema claro" },
     en: { toDark: "Dark theme", toLight: "Light theme" },

@@ -1,20 +1,21 @@
-"""Muestra dónde se atascan los alumnos, a partir de la base D1 de las cuentas.
+"""Shows where learners get stuck, from the accounts' D1 database.
 
-    uv run python tools/dashboard.py --database-id <uuid> [--since AAAA-MM-DD] [--until AAAA-MM-DD]
+    uv run python tools/dashboard.py --database-id <uuid> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
     uv run python tools/dashboard.py --local [--persist-to DIR]
     uv run python tools/dashboard.py --json ...
 
-Lee con `wrangler d1 execute` (la que instala runner/worker), sin escribir nada. Por defecto lee la
-base remota, que necesita sesión de Cloudflare y el uuid de la base (`--database-id` o la variable
-QG_D1_ID). Con `--local` lee la copia local de `wrangler dev`, o la de `--persist-to`.
+It reads with `wrangler d1 execute` (the one runner/worker installs) and writes nothing. By default
+it reads the remote database, which needs a Cloudflare session and the database uuid
+(`--database-id` or the QG_D1_ID variable). With `--local` it reads the local copy of
+`wrangler dev`, or the one in `--persist-to`.
 
-El periodo va de `--since` a `--until`, ambos días UTC incluidos. Por defecto, los últimos 30 días.
-Cuenta, en ese periodo:
-  - los usuarios nuevos, los usuarios con algún intento y los intentos (con y sin cuenta);
-  - las lecciones terminadas, por lección: solo cuentas;
-  - los ejercicios con más comprobaciones fallidas y los casos que más fallan. Una comprobación
-    fallida es un intento `check` que no acabó en `pass`; cuenta también sin cuenta;
-  - los ejercicios aprobados con más pistas abiertas: solo cuentas, una vez por alumno.
+The period runs from `--since` to `--until`, both UTC days included. By default, the last 30 days.
+It counts, in that period:
+  - the new users, the users with any attempt and the attempts (with and without an account);
+  - the lessons finished, per lesson: accounts only;
+  - the exercises with the most failed checks and the cases that fail most. A failed check is a
+    `check` attempt that did not end in `pass`; it counts without an account too;
+  - the passed exercises with the most hints opened: accounts only, once per learner.
 """
 
 import argparse
@@ -33,8 +34,8 @@ WORKER = ROOT / "runner" / "worker"
 DAY = 86400
 DEFAULT_DAYS = 30
 
-# {S} y {E} son segundos Unix. {E} queda excluido. {SD} y {ED} son días desde
-# la época. {ED} queda excluido. {N} es el tope de filas.
+# {S} and {E} are Unix seconds. {E} is excluded. {SD} and {ED} are days since
+# the epoch. {ED} is excluded. {N} is the row cap.
 QUERIES = {
     "summary": """
         SELECT
@@ -67,56 +68,56 @@ QUERIES = {
         ORDER BY hints DESC, exercise LIMIT {N}""",
 }
 
-# Título y columnas de cada sección en el texto.
+# Title and columns of each section in the text.
 SECTIONS = {
-    "completions": ("Lecciones terminadas", [("lesson", "lección"), ("completions", "terminadas")]),
+    "completions": ("Lessons finished", [("lesson", "lesson"), ("completions", "finished")]),
     "failed_checks": (
-        "Ejercicios con más comprobaciones fallidas",
+        "Exercises with the most failed checks",
         [
-            ("exercise", "ejercicio"),
-            ("failed_checks", "fallidas"),
-            ("users", "con cuenta"),
-            ("anonymous", "anónimas"),
+            ("exercise", "exercise"),
+            ("failed_checks", "failed"),
+            ("users", "with account"),
+            ("anonymous", "anonymous"),
         ],
     ),
     "failed_cases": (
-        "Casos que más fallan",
-        [("exercise", "ejercicio"), ("case", "caso"), ("failures", "fallos")],
+        "Cases that fail most",
+        [("exercise", "exercise"), ("case", "case"), ("failures", "failures")],
     ),
     "hints_before_pass": (
-        "Ejercicios aprobados con más pistas abiertas",
+        "Passed exercises with the most hints opened",
         [
-            ("exercise", "ejercicio"),
-            ("passed_by", "aprobaron"),
-            ("hints", "pistas"),
-            ("hints_per_learner", "por alumno"),
+            ("exercise", "exercise"),
+            ("passed_by", "passed"),
+            ("hints", "hints"),
+            ("hints_per_learner", "per learner"),
         ],
     ),
 }
 
 
 def day_start(text: str) -> int:
-    """Devuelve el inicio UTC de un día con formato AAAA-MM-DD."""
+    """Return the UTC start of a day written as YYYY-MM-DD."""
     try:
         day = datetime.datetime.strptime(text, "%Y-%m-%d")
     except ValueError:
-        raise SystemExit(f"error: «{text}» no es una fecha AAAA-MM-DD") from None
+        raise SystemExit(f"error: «{text}» is not a YYYY-MM-DD date") from None
     return int(day.replace(tzinfo=datetime.UTC).timestamp())
 
 
 def period(since: str | None, until: str | None, today: str) -> tuple[int, int]:
-    """Devuelve el intervalo Unix que incluye todo `until`."""
+    """Return the Unix interval that includes all of `until`."""
     end = (day_start(until) if until else day_start(today)) + DAY
     start = day_start(since) if since else end - DEFAULT_DAYS * DAY
     if start >= end:
-        raise SystemExit("error: --since debe ser anterior o igual a --until")
+        raise SystemExit("error: --since must be on or before --until")
     return start, end
 
 
 def wrangler_json(args: argparse.Namespace) -> list[dict[str, Any]]:
-    """Ejecuta Wrangler con una configuración temporal y devuelve su JSON."""
-    # Wrangler no lee cloudflare.config.ts. La configuración temporal declara la base.
-    # El id solo importa en remoto.
+    """Run Wrangler with a temporary configuration and return its JSON."""
+    # Wrangler does not read cloudflare.config.ts. The temporary configuration declares the database.
+    # The id only matters remotely.
     config = {
         "name": "qg-dashboard",
         "compatibility_date": "2026-10-01",
@@ -142,20 +143,20 @@ def wrangler_json(args: argparse.Namespace) -> list[dict[str, Any]]:
         run = subprocess.run(cmd, cwd=WORKER, capture_output=True, text=True)
     if run.returncode != 0:
         sys.stderr.write(run.stdout + run.stderr)
-        raise SystemExit(f"error: wrangler terminó con código {run.returncode}")
+        raise SystemExit(f"error: wrangler exited with code {run.returncode}")
     answers: list[dict[str, Any]] = json.loads(run.stdout)
     return answers
 
 
 def collect(args: argparse.Namespace) -> dict[str, Any]:
-    """Convierte las respuestas de Wrangler en el informe."""
+    """Turn Wrangler's answers into the report."""
     answers = wrangler_json(args)
     if len(answers) != len(QUERIES):
-        raise SystemExit(f"error: wrangler devolvió {len(answers)} respuestas de {len(QUERIES)}")
+        raise SystemExit(f"error: wrangler returned {len(answers)} answers out of {len(QUERIES)}")
     rows: dict[str, Any] = {}
     for name, answer in zip(QUERIES, answers, strict=True):
         if not answer.get("success", False):
-            raise SystemExit(f"error: la consulta {name} falló: {answer}")
+            raise SystemExit(f"error: query {name} failed: {answer}")
         rows[name] = answer["results"]
 
     def day(seconds: int) -> datetime.date:
@@ -170,7 +171,7 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def table(rows: Sequence[dict[str, Any]], columns: Sequence[tuple[str, str]]) -> list[str]:
-    """Devuelve líneas alineadas con texto a la izquierda y números a la derecha."""
+    """Return aligned lines with text on the left and numbers on the right."""
     cells = [[str(row[key]) for key, _ in columns] for row in rows]
     heads = [head for _, head in columns]
     widths = [max(len(c[i]) for c in [heads, *cells]) for i in range(len(columns))]
@@ -186,39 +187,39 @@ def table(rows: Sequence[dict[str, Any]], columns: Sequence[tuple[str, str]]) ->
 
 
 def render(report: dict[str, Any]) -> str:
-    """Renderiza el informe como texto alineado."""
+    """Render the report as aligned text."""
     period, summary = report["period"], report["summary"]
-    out = [f"Periodo: {period['since']} a {period['until']} (UTC)", ""]
+    out = [f"Period: {period['since']} to {period['until']} (UTC)", ""]
     labels = [
-        ("new_users", "Usuarios nuevos"),
-        ("active_users", "Usuarios con intentos"),
-        ("attempts", "Intentos"),
-        ("anonymous_attempts", "Intentos sin cuenta"),
+        ("new_users", "New users"),
+        ("active_users", "Users with attempts"),
+        ("attempts", "Attempts"),
+        ("anonymous_attempts", "Attempts without account"),
     ]
     width = max(len(label) for _, label in labels)
     out += [f"{label.ljust(width)}  {summary[key]}" for key, label in labels]
     for key, (title, columns) in SECTIONS.items():
         out += ["", title]
         rows = report[key]
-        out += table(rows, columns) if rows else ["(ninguno)"]
+        out += table(rows, columns) if rows else ["(none)"]
     return "\n".join(out)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--since", help="primer día, AAAA-MM-DD (por defecto, 30 días hasta --until)")
-    ap.add_argument("--until", help="último día incluido, AAAA-MM-DD (por defecto, hoy)")
-    ap.add_argument("--limit", type=int, default=10, help="filas por sección (por defecto, 10)")
-    ap.add_argument("--json", action="store_true", help="imprime JSON en lugar de texto")
-    ap.add_argument("--local", action="store_true", help="lee la base local, no la remota")
-    ap.add_argument("--persist-to", help="con --local, el directorio del estado local de wrangler")
-    ap.add_argument("--database", default="qiskit-guides", help="el nombre de la base D1")
-    ap.add_argument("--database-id", default=os.environ.get("QG_D1_ID"), help="el uuid (remoto)")
+    ap.add_argument("--since", help="first day, YYYY-MM-DD (default: 30 days up to --until)")
+    ap.add_argument("--until", help="last day included, YYYY-MM-DD (default: today)")
+    ap.add_argument("--limit", type=int, default=10, help="rows per section (default: 10)")
+    ap.add_argument("--json", action="store_true", help="print JSON instead of text")
+    ap.add_argument("--local", action="store_true", help="read the local database, not the remote")
+    ap.add_argument("--persist-to", help="with --local, the directory of wrangler's local state")
+    ap.add_argument("--database", default="qiskit-guides", help="the name of the D1 database")
+    ap.add_argument("--database-id", default=os.environ.get("QG_D1_ID"), help="the uuid (remote)")
     args = ap.parse_args()
     if not args.local and not args.database_id:
-        ap.error("la base remota necesita --database-id o QG_D1_ID")
+        ap.error("the remote database needs --database-id or QG_D1_ID")
     if args.limit < 1:
-        ap.error("--limit debe ser positivo")
+        ap.error("--limit must be positive")
 
     today = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d")
     start, end = period(args.since, args.until, today)

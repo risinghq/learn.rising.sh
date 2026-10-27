@@ -1,14 +1,14 @@
-// Bloque «exercise»: un editor de Python con Ejecutar, Comprobar, pistas y progreso (docs/exercises.md).
+// The «exercise» block: a Python editor with Ejecutar, Comprobar, hints and progress (docs/exercises.md).
 //
-// spec: exercise (id) · prompt · level · hints · starter · cases (nombres de los casos visibles)
-// Ejecutar y Comprobar envían el código a /run en el mismo origen que la página.
-// La primera petición de una sesión puede requerir Turnstile y repetir la petición con el token.
+// spec: exercise (id) · prompt · level · hints · starter · cases (names of the visible cases)
+// Ejecutar and Comprobar send the code to /run on the same origin as the page.
+// The first request of a session may need Turnstile and repeat the request with the token.
 
-// El navegador guarda el código, las pistas vistas y el estado de resolución en
-// qiskit:exercise:<id>. `at` registra la última edición del código.
-// Con cuenta, account.js también envía esos datos al servidor.
+// The browser stores the code, the hints seen and the solved state in
+// qiskit:exercise:<id>. `at` records the last edit of the code.
+// With an account, account.js also sends that data to the server.
 /* oxlint-disable unicorn/consistent-function-scoping --
-   Script clásico en una función: sus ayudas no pueden salir al ámbito global. */
+   Classic script in a function: its helpers cannot move to the global scope. */
 (() => {
   "use strict";
   const CALL_TIMEOUT_MS = 30000;
@@ -24,7 +24,7 @@
     503: "El corredor está ocupado. Inténtalo de nuevo en unos segundos.",
   };
 
-  // Carga editor.js solo en las lecciones con ejercicio para no descargarlo en las demás.
+  // Load editor.js only in lessons with an exercise, so other lessons do not download it.
   let editorLib = null,
     turnstileLib = null;
   const loadEditor = () =>
@@ -50,7 +50,7 @@
       });
       document.head.appendChild(sc);
     }));
-  // El token se usa una sola vez. El widget solo aparece si Cloudflare lo exige.
+  // The token is used once. The widget appears only if Cloudflare asks for it.
   const turnstileToken = async (sitekey, slot, signal) => {
     let id, lib;
     try {

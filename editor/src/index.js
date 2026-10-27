@@ -1,5 +1,5 @@
-// El editor usa CodeMirror 6 con Python y los tokens de theme.css.
-// `mise run generate:editor` lo empaqueta en site/qiskit/editor.js. blocks.js lo carga al abrir el primer ejercicio.
+// The editor uses CodeMirror 6 with Python and the tokens of theme.css.
+// `mise run generate:editor` bundles it into site/qiskit/editor.js. blocks.js loads it when the first exercise opens.
 import {
   defaultKeymap,
   history,
@@ -122,7 +122,7 @@ const errorLine = StateField.define({
 
 // create(parent, { doc, label, onChange, onRun, onCheck }) -> { get, set, focus, markError }
 function create(parent, { doc, label, onChange, onRun, onCheck }) {
-  // Tab sangra. Esc permite que el siguiente Tab salga del editor.
+  // Tab indents. Esc lets the next Tab leave the editor.
   let tabOut = false;
   const tabKeys = [
     { key: "Escape", run: () => ((tabOut = true), false) },

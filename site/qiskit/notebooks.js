@@ -1,4 +1,4 @@
-// El sitio publicado enlaza al repositorio porque el lector no tiene sus archivos locales.
+// The published site links to the repository because the reader has no local files.
 window.notebookHelp = (parent) => {
   const p = document.createElement("p");
   p.className = "mhow";

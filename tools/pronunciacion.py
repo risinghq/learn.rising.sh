@@ -1,17 +1,18 @@
-"""Diccionario de pronunciación para la narración (voz es-PE-AlexNeural de Edge TTS).
+"""Pronunciation dictionary for the narration (Edge TTS voice es-PE-AlexNeural).
 
-La voz lee con reglas del español: siglas como «IBM» o nombres como «Qiskit» suenan mal.
-Antes de sintetizar, tools/tts.py reescribe cada término con una ortografía española que
-suena bien. Los subtítulos siguen mostrando el texto original.
+The voice reads with Spanish rules, so acronyms such as «IBM» or names such as «Qiskit» sound
+wrong. Before synthesis, tools/tts.py rewrites each term with a Spanish spelling that
+sounds right. The subtitles still show the original text.
 
-Para añadir un término: agrégalo a SIGLAS (se respeta mayúsculas/minúsculas) o a PALABRAS
-(no distingue mayúsculas). Solo se reemplazan palabras completas. Después vuelve a correr
-tools/tts.py: solo se regeneran los clips cuyo texto pronunciado cambió.
+To add a term: add it to SIGLAS (acronyms, case-sensitive) or to PALABRAS (words and names,
+case-insensitive). Only whole words are replaced. Then run tools/tts.py again: only the
+clips whose spoken text changed are regenerated.
+The values are respellings in Spanish phonetics, so they stay in Spanish.
 """
 
 import re
 
-# Siglas: coincidencia exacta de mayúsculas (así «ISA» no afecta a «Isa», ni «PEA» a «pea»).
+# Acronyms: exact capitalisation match (so «ISA» does not affect «Isa», nor «PEA» «pea»).
 SIGLAS = {
     "IBM": "i be eme",
     "SDK": "ese de ka",
@@ -139,7 +140,7 @@ SIGLAS = {
     "HLSConfig": "hache ele ese config",
     "DAGCircuit": "dag církuit",
     "IBMid": "i be eme ai di",
-    # Partes VII–X
+    # Parts VII–X
     "TTL": "te te ele",
     "SX": "ese equis",
     "MPF": "eme pe efe",
@@ -191,7 +192,7 @@ SIGLAS = {
     "TransformationPass": "transforméishon pas",
 }
 
-# Palabras y nombres: sin distinguir mayúsculas.
+# Words and names: case-insensitive.
 PALABRAS = {
     "ibm": "i be eme",
     "sdk": "ese de ka",
@@ -437,7 +438,7 @@ PALABRAS = {
     "spectators": "spektéitors",
     "check": "chek",
     "checks": "cheks",
-    # Partes VII–X
+    # Parts VII–X
     "viewer": "viúer",
     "writer": "ráiter",
     "reader": "ríder",
@@ -575,18 +576,18 @@ _PALABRAS = re.compile(
 
 
 def limpiar(texto: str) -> str:
-    """Lo que se muestra en subtítulos: sin comillas invertidas de código."""
+    """What the subtitles show: without code backticks."""
     return texto.replace("`", "")
 
 
 def pronunciable(texto: str) -> str:
-    """Lo que se envía a la voz: identificadores legibles y términos con ortografía española."""
+    """What is sent to the voice: readable identifiers and terms with Spanish spelling."""
     t = limpiar(texto)
     t = t.replace("†", " daga").replace("−", "menos ")
     t = re.sub(r"(?<=\w)_(?=\w)", " ", t)
     t = _SIGLAS.sub(lambda m: SIGLAS[m.group(1)], t)
     t = _PALABRAS.sub(lambda m: PALABRAS[m.group(1).lower()], t)
-    t = re.sub(r"(?<=[a-z])(?=[A-Z][a-z])", " ", t)  # CamelCase restante → Camel Case
+    t = re.sub(r"(?<=[a-z])(?=[A-Z][a-z])", " ", t)  # remaining CamelCase → Camel Case
     t = _SIGLAS.sub(lambda m: SIGLAS[m.group(1)], t)
     t = _PALABRAS.sub(lambda m: PALABRAS[m.group(1).lower()], t)
     return t

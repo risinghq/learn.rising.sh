@@ -1,33 +1,33 @@
-// Bloques propios del curso de Qiskit, enchufados al motor (engine.js) mediante window.BLOCKS.
+// Blocks specific to the Qiskit course, plugged into the engine (engine.js) through window.BLOCKS.
 //
-// Cada constructor recibe (contenedor, spec, API) y devuelve un objeto con:
-//   draw()            vuelve a pintar (cambio de orientación o de tema)
-//   act(a, instant)   ejecuta una acción propia; devuelve true si la reconoció
-//   items             (opcional) elementos que revela la acción genérica 'item'
+// Each constructor receives (container, spec, API) and returns an object with:
+//   draw()            paints again (orientation or theme change)
+//   act(a, instant)   runs an action of its own; returns true if it recognised it
+//   items             (optional) elements the generic 'item' action reveals
 
-//   code   código con resaltado: revelar líneas ('lines'), resaltar ('hl', 'unhl')
-//   circuit diagrama de circuito: puertas que aparecen ('gate'), resaltado ('hlop'), cursor de columna ('cursor')
-//   hist    histograma de conteos o probabilidades con etiquetas de texto: 'grow', 'data'
-//   table   tabla con filas que aparecen con 'item'; 'hlrow' resalta una fila
-//   flow    pasos encadenados con flechas; 'item' revela, 'step' destaca uno
-//   graph   grafo de acoplamiento (qubits físicos): 'hlnode', 'hledge', 'nodelabel', 'clearhl'
+//   code    highlighted code: reveal lines ('lines'), highlight ('hl', 'unhl')
+//   circuit circuit diagram: gates that appear ('gate'), highlight ('hlop'), column cursor ('cursor')
+//   hist    histogram of counts or probabilities with text labels: 'grow', 'data'
+//   table   table whose rows appear with 'item'; 'hlrow' highlights a row
+//   flow    steps chained with arrows; 'item' reveals, 'step' highlights one
+//   graph   coupling graph (physical qubits): 'hlnode', 'hledge', 'nodelabel', 'clearhl'
 
-// El bloque 'exercise' vive en exercise.js, que se carga después de este archivo.
+// The 'exercise' block lives in exercise.js, which loads after this file.
 /* oxlint-disable unicorn/consistent-function-scoping --
-   Script clásico en una función: sus ayudas no pueden salir al ámbito global. */
+   Classic script in a function: its helpers cannot move to the global scope. */
 (() => {
   "use strict";
   const B = (window.BLOCKS = {});
   const availW = (A, s, pad = 0, box = null) => {
     let w = A.isPortrait() ? 624 : s.maxw || 1160;
-    // Dentro de una fila horizontal, cada bloque dispone de una parte del ancho.
+    // Inside a horizontal row, each block gets a share of the width.
     const row = box && !A.isPortrait() && box.closest(".row");
     if (row && !s.maxw)
       w = Math.min(w, 1160 / Math.max(2, row.children.length) - 40);
     return w - pad;
   };
 
-  // ---------------------------------------------------------------- código
+  // ---------------------------------------------------------------- code
   const PY_KW = new Set(
     "False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield".split(
       " ",
@@ -130,14 +130,14 @@
         A.isPortrait() ? 18 : 12,
         Math.min(base, availW(A, s, 60, box) / (0.61 * L), maxH / (1.5 * win)),
       );
-      // Código largo: ventana de `win` líneas que se desplaza hasta lo resaltado.
+      // Long code: a window of `win` lines that scrolls to the highlighted part.
       pre.classList.toggle("win", win < lines.length);
       pre.style.height = win < lines.length ? win * 1.5 * fs + "px" : "";
       o.fs = fs;
       pre.classList.toggle("wrap", fs * 0.61 * L > availW(A, s, 60, box) + 1);
       pre.style.fontSize = fs + "px";
     };
-    // Desplaza la ventana para que la línea k (base 1) quede cerca del borde superior.
+    // Scrolls the window so line k (1-based) sits near the top edge.
     o.scrollTo = (k, instant) => {
       if (!pre.classList.contains("win")) return;
       const r = rows[Math.max(0, k - 1)];
@@ -188,15 +188,15 @@
       return false;
     };
     o.draw();
-    A.after(o.draw); // de nuevo, ya dentro de su fila (cambia el ancho disponible)
+    A.after(o.draw); // again, now inside its row (the available width changes)
     return o;
   };
 
-  // ---------------------------------------------------------------- circuitos
-  // ops: {g:'h', q:[0]} · {g:'cx', q:[c, t]} · {g:'cz'|'swap'|'cp'|'crz'…} · {g:'ccx', q:[c1, c2, t]}
-  //      {g:'c', ctrl:[…], q:[t], label:'H'} control genérico · {g:'box', q:[…], label:'QFT'}
+  // ---------------------------------------------------------------- circuits
+  // ops:{g:'h', q:[0]} · {g:'cx', q:[c, t]} · {g:'cz'|'swap'|'cp'|'crz'…} · {g:'ccx', q:[c1, c2, t]}
+  //      {g:'c', ctrl:[…], q:[t], label:'H'} generic control · {g:'box', q:[…], label:'QFT'}
   //      {g:'measure', q:[i], c:j} · {g:'barrier', q?:[…]} · {g:'reset', q:[i]} · {g:'if', q:[…], label:'if c==1'}
-  //      p: parámetro mostrado bajo el nombre · hidden: aparece con la acción 'gate'
+  //      p: parameter shown under the name · hidden: appears with the 'gate' action
   const GCOL = {
     h: "red",
     x: "blue",
@@ -251,7 +251,7 @@
       nc = s.clbits || 0;
     const ops = s.ops.map((op) => ({ ...op, show: !op.hidden }));
     const o = { spec: s, hl: new Set(), cursor: null };
-    // capas: cada operación ocupa la primera columna libre en el rango vertical que cruza
+    // layers: each operation takes the first free column in the vertical range it crosses
     const level = Array.from({ length: n }, () => 0);
     ops.forEach((op) => {
       const qs = op.ctrl
@@ -814,7 +814,7 @@
     return o;
   };
 
-  // ---------------------------------------------------------------- histograma de conteos
+  // ---------------------------------------------------------------- histogram of counts
   B.hist = (box, s, A) => {
     const o = {
       spec: s,
@@ -931,7 +931,7 @@
     return o;
   };
 
-  // ---------------------------------------------------------------- tabla
+  // ---------------------------------------------------------------- table
   B.table = (box, s, A) => {
     const o = { spec: s };
     box.classList.remove("fig");
@@ -959,8 +959,8 @@
     return o;
   };
 
-  // ---------------------------------------------------------------- misión «Tu turno»
-  // notebook: ruta del cuaderno marimo · tasks: [{level: 1|2|3, text}]
+  // ---------------------------------------------------------------- "Tu turno" mission
+  // notebook: path of the marimo notebook · tasks: [{level: 1|2|3, text}]
   const LV = { 1: "Reproduce", 2: "Modifica", 3: "Crea" };
 
   B.mission = (box, s, A) => {
@@ -990,7 +990,7 @@
   };
   B.mission.levels = LV;
 
-  // ---------------------------------------------------------------- flujo de pasos
+  // ---------------------------------------------------------------- flow of steps
   B.flow = (box, s, A) => {
     const o = { spec: s, items: [] };
     box.classList.remove("fig");
@@ -1007,7 +1007,7 @@
       if (st.color) d.style.setProperty("--fc", A.col(st.color));
       o.items.push(d);
     });
-    // 'item' revela el paso k y la flecha que lo precede
+    // 'item' reveals step k and the arrow before it
     o.items = o.items.map((d) => ({
       classList: {
         remove: (c) => {
@@ -1029,8 +1029,8 @@
     return o;
   };
 
-  // ---------------------------------------------------------------- grafo de acoplamiento
-  // nodes: [[x, y], …] (coordenadas en una rejilla), edges: [[a, b], …]
+  // ---------------------------------------------------------------- coupling graph
+  // nodes: [[x, y], …] (coordinates on a grid), edges: [[a, b], …]
   B.graph = (box, s, A) => {
     const o = { spec: s, hn: {}, he: {}, lab: { ...s.nodeLabels } };
     o.draw = () => {

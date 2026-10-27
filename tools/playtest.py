@@ -1,11 +1,11 @@
-"""Prueba de reproducción real (con audio y tiempos): avanza, responde las dos primeras preguntas
-de la lección (las de opción primero mal y luego bien) y pasa al siguiente paso.
+"""Real playback test (with audio and timings): advances, answers the lesson's first two
+questions (multiple-choice ones first wrong and then right) and moves to the next step.
 
-    python -m http.server 8810 -d site          # en otra terminal
-    uv run --group tools python tools/playtest.py [lección]
+    python -m http.server 8810 -d site          # in another terminal
+    uv run --group tools python tools/playtest.py [lesson]
 
-Usa el Chromium de Playwright, que instala `mise run install`.
-Deja capturas en shots/. PLAYTEST_URL cambia la dirección del servidor.
+It uses Playwright's Chromium, which `mise run install` installs.
+It leaves screenshots in shots/. PLAYTEST_URL changes the server address.
 """
 
 import io
@@ -22,7 +22,7 @@ SHOTS = ROOT / "shots"
 
 
 def answerable(lesson: dict[str, Any]) -> list[tuple[int, dict[str, Any]]]:
-    """(índice de beat, pregunta) de las preguntas con respuesta correcta que se pueden contestar."""
+    """(beat index, question) of the questions with a correct answer that can be answered."""
     return [
         (n, b["ask"])
         for n, b in enumerate(lesson["beats"])
@@ -36,12 +36,12 @@ def answer(pg: Page, n: int, ask: dict[str, Any]) -> None:
     if ask["kind"] == "choice":
         wrong = next(k for k in range(len(ask["options"])) if k != ask["right"])
         pg.click(f"#ask .opt >> nth={wrong}")
-        print("feedback error:", pg.inner_text("#ask .fb")[:60])
+        print("wrong-answer feedback:", pg.inner_text("#ask .fb")[:60])
         pg.click(f"#ask .opt >> nth={ask['right']}")
     else:
         pg.fill("#ask input", str(ask["answer"]))
         pg.click("#ask .numrow .primary")
-    print("feedback acierto:", pg.inner_text("#ask .fb")[:60])
+    print("right-answer feedback:", pg.inner_text("#ask .fb")[:60])
     pg.click("#ask .next-row .primary")
     pg.wait_for_timeout(1000)
 
@@ -65,25 +65,25 @@ def main() -> None:
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
         pg.goto(f"{base_url}/qiskit/lesson.html?l={lesson_id}")
         pg.wait_for_timeout(1500)
-        print("inicio:", pg.inner_text("#start-meta"))
+        print("start:", pg.inner_text("#start-meta"))
         pg.click("#go")
         pg.wait_for_timeout(4000)
-        print("subtítulo t=4s:", pg.inner_text("#caption")[:70])
+        print("caption at t=4s:", pg.inner_text("#caption")[:70])
         pg.screenshot(path=str(SHOTS / "play-1.png"))
         for n, ask in answerable(lesson)[:2]:
             answer(pg, n, ask)
-            print("tras continuar:", pg.inner_text("#tag"))
+            print("after continuing:", pg.inner_text("#tag"))
         pg.screenshot(path=str(SHOTS / "play-2.png"))
         pg.click("#next")
         pg.wait_for_timeout(1500)
         print(
-            "fin visible:",
+            "end visible:",
             pg.is_visible("#end"),
             "|",
             pg.inner_text("#end-score") if pg.is_visible("#end") else "",
         )
         pg.screenshot(path=str(SHOTS / "play-3.png"))
-        print("errores:", errs or "ninguno")
+        print("errors:", errs or "none")
         b.close()
 
 

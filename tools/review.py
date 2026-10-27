@@ -1,8 +1,8 @@
-"""Revisión visual: captura el estado final de cada beat (modo ?beat=N) y arma hojas de contacto.
+"""Visual review: captures the final state of each beat (?beat=N mode) and builds contact sheets.
 
-    python -m http.server 8810 -d site          # en otra terminal
-    uv run --group tools python tools/review.py [lección ...] [--port 8810]
-Salida: shots/<lección>/NN-land.png, NN-port.png y shots/<lección>-hoja-{land,port}.png
+    python -m http.server 8810 -d site          # in another terminal
+    uv run --group tools python tools/review.py [lesson ...] [--port 8810]
+Output: shots/<lesson>/NN-<beat>-land.png, NN-<beat>-port.png and shots/<lesson>-hoja-{land,port}.png
 """
 
 import json
@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 COURSE, OUT = ROOT / "site" / "qiskit", ROOT / "shots"
 SIZES = {"land": (1366, 768), "port": (390, 844)}
 
-# Detecta bloques fuera del escenario o bajo la etiqueta superior.
+# Detects blocks outside the stage or under the top tag.
 OVERFLOW = """() => { const st = document.querySelector('#stage').getBoundingClientRect();
   const tag = document.querySelector('#tag').getBoundingClientRect();
   return [...document.querySelectorAll('#scene > .blk')].some(b => { const r = b.getBoundingClientRect();
@@ -24,7 +24,7 @@ OVERFLOW = """() => { const st = document.querySelector('#stage').getBoundingCli
 
 
 def watch(pg: Page, errors: dict[str, list[str]], lid: str) -> None:
-    """Anota en `errors[lid]` los errores de página y de consola."""
+    """Record the page and console errors in `errors[lid]`."""
 
     def note(message: str) -> None:
         errors.setdefault(lid, []).append(message)
@@ -61,7 +61,7 @@ def main() -> None:
         for lid in ids:
             les = json.loads((COURSE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
             if not (COURSE / "lessons" / lid / "timings.json").exists():
-                print(lid, "sin timings, se omite")
+                print(lid, "has no timings, skipped")
                 continue
             (OUT / lid).mkdir(parents=True, exist_ok=True)
             for tag, (w, h) in SIZES.items():
@@ -75,12 +75,12 @@ def main() -> None:
                     pg.screenshot(path=str(f))
                     files.append(f)
                     if pg.evaluate(OVERFLOW):
-                        errors.setdefault(lid, []).append(f"desborde en {n:02d}-{beat['id']}-{tag}")
+                        errors.setdefault(lid, []).append(f"overflow in {n:02d}-{beat['id']}-{tag}")
                 pg.close()
                 sheet(files, OUT / f"{lid}-hoja-{tag}.png", 3 if tag == "land" else 6)
             print(lid, "ok")
         b.close()
-    print("errores:", json.dumps(errors, ensure_ascii=False, indent=1) if errors else "ninguno")
+    print("errors:", json.dumps(errors, ensure_ascii=False, indent=1) if errors else "none")
 
 
 if __name__ == "__main__":

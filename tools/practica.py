@@ -1,12 +1,12 @@
-"""Comprueba los cuadernos marimo de practica/.
+"""Checks the marimo notebooks in practica/.
 
-    uv run python tools/practica.py [cuaderno ...]
+    uv run python tools/practica.py [notebook ...]
 
-Cada cuaderno se ejecuta tal cual y con las soluciones de
-practica/soluciones/<nombre>.json aplicadas. Las comprobaciones deben dar ✅ con las soluciones.
-Si tiene controles mo.ui.slider o mo.ui.number, también se ejecuta con todos los controles en su
-mínimo y en su máximo. Las comprobaciones que dan ❌ en un extremo se listan, pero no hacen fallar
-la ejecución porque pueden depender de los parámetros.
+Each notebook runs as is and with the solutions in
+practica/soluciones/<name>.json applied. The checks must give ✅ with the solutions.
+If it has mo.ui.slider or mo.ui.number controls, it also runs with every control at its
+minimum and at its maximum. Checks that give ❌ at an extreme are listed, but do not make the
+run fail because they can depend on the parameters.
 """
 
 import ast
@@ -25,7 +25,7 @@ PR = ROOT / "practica"
 
 
 def veredictos(path: Path, carpeta: Path) -> list[tuple[str, str]]:
-    """Ejecuta el cuaderno con sus módulos vecinos disponibles para importar."""
+    """Run the notebook with its neighbouring modules available to import."""
     sys.path.insert(0, str(carpeta))
     try:
         spec = importlib.util.spec_from_file_location("nb_" + path.stem, path)
@@ -41,7 +41,7 @@ def veredictos(path: Path, carpeta: Path) -> list[tuple[str, str]]:
 
 
 def ejecutar(src: str, nombre: str, carpeta: Path) -> list[tuple[str, str]]:
-    """Ejecuta src como cuaderno `nombre` con los módulos de `carpeta` disponibles."""
+    """Run src as notebook `nombre` with the modules of `carpeta` available."""
     with tempfile.TemporaryDirectory() as d:
         tmp = Path(d) / nombre
         tmp.write_text(src, encoding="utf-8")
@@ -49,9 +49,9 @@ def ejecutar(src: str, nombre: str, carpeta: Path) -> list[tuple[str, str]]:
 
 
 def con_extremo(src: str, extremo: str) -> tuple[str, dict[str, Any]]:
-    """Sustituye el value= de cada control por su mínimo o máximo.
+    """Replace the value= of each control with its minimum or maximum.
 
-    Devuelve el código actualizado y los valores usados por nombre de control.
+    Return the updated code and the values used, by control name.
     """
     lineas = src.encode("utf-8").split(b"\n")
     inicios = [0]
@@ -76,7 +76,7 @@ def con_extremo(src: str, extremo: str) -> tuple[str, dict[str, Any]]:
         limites = [ast.literal_eval(a) for a in call.args[:2]]
         limites += [ast.literal_eval(kw[k]) for k in ("start", "stop")[len(limites) :]]
         if "value" not in kw:
-            raise ValueError(f"{nombre}: el control no fija value=")
+            raise ValueError(f"{nombre}: the control does not set value=")
         valor = limites[0 if extremo == "min" else 1]
         v = kw["value"]
         assert v.end_lineno is not None and v.end_col_offset is not None
@@ -91,37 +91,37 @@ def con_extremo(src: str, extremo: str) -> tuple[str, dict[str, Any]]:
 
 
 def comprobar(f: Path) -> int:
-    """Devuelve 1 si el cuaderno falla, 0 si pasa o no tiene soluciones."""
+    """Return 1 if the notebook fails, 0 if it passes or has no solutions."""
     rel = f.resolve().relative_to(PR.resolve()).as_posix()
     try:
         sin = veredictos(f, f.resolve().parent)
     except Exception as e:
-        print(f"✗ {rel}: error sin resolver: {e!r}")
+        print(f"✗ {rel}: error unsolved: {e!r}")
         return 1
     solf = PR / "soluciones" / (rel.replace("/", "__").replace(".py", ".json"))
     if not solf.exists():
-        print(f"? {rel}: sin soluciones ({len(sin)} comprobaciones)")
+        print(f"? {rel}: no solutions ({len(sin)} checks)")
         return 0
     fallos = 0
     src = f.read_text(encoding="utf-8")
     for old, new in json.loads(solf.read_text(encoding="utf-8")):
         if old not in src:
-            print(f"✗ {rel}: la solución no encuentra «{old}»")
+            print(f"✗ {rel}: the solution does not find «{old}»")
             fallos += 1
         src = src.replace(old, new)
     carpeta = f.resolve().parent
     try:
         con = ejecutar(src, f.name, carpeta)
     except Exception as e:
-        print(f"✗ {rel}: error con soluciones: {e!r}")
+        print(f"✗ {rel}: error with solutions: {e!r}")
         return fallos + 1
     malos = [m for s, m in con if s == "❌"]
     pend = sum(1 for s, _ in sin if s == "❌")
     if malos:
-        print(f"✗ {rel}: con soluciones aún falla: {malos}")
+        print(f"✗ {rel}: still fails with solutions: {malos}")
         fallos += 1
     else:
-        print(f"✓ {rel}: {pend} misiones pendientes sin resolver, todas ✅ con soluciones")
+        print(f"✓ {rel}: {pend} pending missions unsolved, all ✅ with solutions")
     for extremo in ("min", "max"):
         try:
             nuevo, valores = con_extremo(src, extremo)
@@ -129,12 +129,12 @@ def comprobar(f: Path) -> int:
                 break
             ext = ejecutar(nuevo, f.name, carpeta)
         except Exception as e:
-            print(f"✗ {rel}: error en {extremo} con soluciones: {e!r}")
+            print(f"✗ {rel}: error at {extremo} with solutions: {e!r}")
             fallos += 1
             continue
         malos = [m for s, m in ext if s == "❌"]
         if malos:
-            print(f"! {rel}: ❌ en {extremo} con {valores}: {malos}")
+            print(f"! {rel}: ❌ at {extremo} with {valores}: {malos}")
     return fallos
 
 
@@ -143,14 +143,16 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8")
     import matplotlib
 
-    matplotlib.use("Agg")  # Evita que Tk libere figuras desde otro hilo y aborte el proceso.
+    matplotlib.use(
+        "Agg"
+    )  # Stops Tk from freeing figures on another thread and aborting the process.
     files = [Path(a) for a in sys.argv[1:]] or sorted(
         p
         for p in PR.rglob("*.py")
         if "soluciones" not in p.parts and "marimo.App(" in p.read_text(encoding="utf-8")
     )
     fallos = sum(comprobar(f) for f in files)
-    print("fallos:", fallos)
+    print("failures:", fallos)
     sys.exit(1 if fallos else 0)
 
 

@@ -1,15 +1,15 @@
-// Motor de lecciones animadas y narradas (Qiskit · guías de IBM Quantum).
-// Una lección es lessons/<id>/lesson.json: una lista de "beats". Cada beat tiene
-//   say      narración (con marcas [[nombre]] antes de la palabra que dispara algo)
-//   scene    bloques que se apilan en el escenario (texto, fórmulas, listas, recuadros, figuras)
-//   actions  qué pasa y cuándo: { at: "marca", t: segundos extra, do: "show", id: ... }
-//   ask      pregunta opcional al terminar la narración (choice, numeric, reveal)
+// Engine for animated, narrated lessons (Qiskit · IBM Quantum guides).
+// A lesson is lessons/<id>/lesson.json: a list of "beats". Each beat has
+//   say      narration (with [[name]] marks before the word that triggers something)
+//   scene    blocks stacked on the stage (text, formulas, lists, boxes, figures)
+//   actions  what happens and when: { at: "mark", t: extra seconds, do: "show", id: ... }
+//   ask      optional question when the narration ends (choice, numeric, reveal)
 
-// timings.json (de tools/tts.py) da la duración de cada clip, el segundo de cada marca y los subtítulos.
+// timings.json (from tools/tts.py) gives the duration of each clip, the second of each mark and the subtitles.
 //
-// Modo revisión: lesson.html?l=<id>&beat=N muestra el estado final del beat N sin audio.
+// Review mode: lesson.html?l=<id>&beat=N shows the final state of beat N without audio.
 /* oxlint-disable unicorn/consistent-function-scoping --
-   Script clásico en una función: sus ayudas no pueden salir al ámbito global. */
+   Classic script in a function: its helpers cannot move to the global scope. */
 (() => {
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
@@ -18,7 +18,7 @@
   const LID = qs.get("l");
   const REVIEW = qs.has("beat");
   const BASE = `lessons/${LID}/`;
-  // Los colores son variables CSS (cambian con el tema claro/oscuro).
+  // The colors are CSS variables (they change with the light/dark theme).
   const NAMES = new Set([
     "fg",
     "muted",
@@ -48,7 +48,7 @@
     steps = $("#steps"),
     playBtn = $("#play");
   const nar = new Audio();
-  window.QGNarration = nar; // para pruebas automáticas
+  window.QGNarration = nar; // for automated tests
   let onNarrationEnd = null;
   nar.addEventListener("ended", () => onNarrationEnd?.());
 
@@ -74,7 +74,7 @@
     const e = document.createElementNS(NS, tag);
     for (const k in attrs) {
       const v = attrs[k];
-      // var(--x) no vale en atributos de presentación SVG: va como estilo.
+      // var(--x) is not valid in SVG presentation attributes: it goes in as a style.
       if (
         (k === "stroke" || k === "fill") &&
         typeof v === "string" &&
@@ -94,7 +94,7 @@
       strict: false,
       trust: (ctx) => ctx.command === "\\htmlClass",
     });
-  // Texto con $matemática$ en línea y **negrita**.
+  // Text with inline $math$ and **bold**.
   function rich(node, str) {
     node.textContent = "";
     String(str)
@@ -127,7 +127,7 @@
   const compile = (expr) =>
     new Function("x", "P", `with (Math) { with (P) { return (${expr}); } }`);
   const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-  // Interpola algo en el tiempo con requestAnimationFrame (o al instante en modo revisión).
+  // Interpolates something over time with requestAnimationFrame (or instantly in review mode).
   function tween(dur, step, instant) {
     if (instant || !dur) {
       step(1);
@@ -146,7 +146,7 @@
 
   // ---------- escenario escalable ----------
   const tall = matchMedia("(max-aspect-ratio: 1/1)");
-  // Un paso con ejercicio no se escala. El editor necesita texto de tamaño real y una columna desplazable.
+  // A step with an exercise is not scaled. The editor needs real-size text and a scrollable column.
   let work = false;
   function setWork(on) {
     work = on;
@@ -178,7 +178,7 @@
       autoZoom();
     }
   }
-  // Fórmulas más anchas que el escenario se reducen hasta caber (sobre todo en vertical).
+  // Formulas wider than the stage shrink until they fit (mostly in portrait).
   function fitMath() {
     const avail = (work ? stage.clientWidth : portrait ? 720 : 1280) - 2 * 48;
     sceneEl.querySelectorAll(".math").forEach((m) => {
@@ -198,7 +198,7 @@
       if (k > lim) m.style.fontSize = Math.max(16, (base * lim) / k) + "px";
     });
   }
-  // Si los bloques no caben en el escenario, la escena entera se reduce (zoom) hasta caber.
+  // If the blocks do not fit on the stage, the whole scene shrinks (zoom) until it does.
   function autoZoom() {
     sceneEl.style.zoom = "";
     if (work) return;
@@ -206,7 +206,7 @@
     if (!kids.length) return;
     const cs = getComputedStyle(sceneEl),
       sr = sceneEl.getBoundingClientRect();
-    const k = sr.height / sceneEl.offsetHeight; // escala del escenario en pantalla
+    const k = sr.height / sceneEl.offsetHeight; // scale of the stage on screen
     const rs = kids.map((c) => c.getBoundingClientRect());
     const needH =
       (Math.max(...rs.map((r) => r.bottom)) -
@@ -246,7 +246,7 @@
     return d;
   }
 
-  // Gráfica de funciones con parámetros animables.
+  // Function plot with animatable parameters.
   function makePlot(box, s) {
     const o = { spec: s, P: { ...s.params }, show: {} };
     (s.curves || []).forEach((c, i) => (o.show["c" + i] = !c.hidden));
@@ -415,8 +415,8 @@
     return o;
   }
 
-  // Coloca las etiquetas de los vectores cerca de su punta sin pisarse entre ellas ni pisar flechas:
-  // prueba 16 posiciones alrededor de la punta (a dos distancias) y elige la de menor penalización.
+  // Places the vector labels near their tip without overlapping each other or the arrows:
+  // tries 16 positions around the tip (at two distances) and picks the one with the lowest penalty.
   function placeLabels(box, labs, obst, W, H) {
     const placed = [];
     const overlap = (r, q) =>
@@ -433,7 +433,7 @@
         }
       return n;
     };
-    // Primero las etiquetas de flechas más largas (suelen tener más sitio libre).
+    // Longer arrows' labels first (they usually have more free room).
     labs.sort(
       (p, q) =>
         Math.hypot(q.b[0] - q.a[0], q.b[1] - q.a[1]) -
@@ -470,7 +470,7 @@
     }
   }
 
-  // Plano 2D con rejilla que se deforma bajo una matriz (álgebra lineal).
+  // 2D plane with a grid that deforms under a matrix (linear algebra).
   function makePlane(box, s) {
     const R = s.range || 4;
     const o = {
@@ -582,7 +582,7 @@
         svg("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1] }, axes);
       }
       const obst = [],
-        labs = []; // obstáculos (segmentos en píxeles) y etiquetas por colocar
+        labs = []; // obstacles (segments in pixels) and labels left to place
       for (const ln of Object.values(o.lines)) {
         if (!ln.show) continue;
         const d = ln.fixed ? ln.dir : mul(o.M, ln.dir),
@@ -703,7 +703,7 @@
     return o;
   }
 
-  // Histograma de una distribución discreta con media y desviación estándar.
+  // Histogram of a discrete distribution with mean and standard deviation.
   function makeBars(box, s) {
     const o = { spec: s, show: { mean: false, sigma: false } };
     o.draw = () => {
@@ -794,7 +794,7 @@
     return o;
   }
 
-  // Pantalla de detección: partículas que llegan una a una (doble rendija).
+  // Detection screen: particles that arrive one at a time (double slit).
   function makeDots(box, s) {
     const o = { spec: s, n: 0, pts: [] };
     const I = (x) =>
@@ -845,8 +845,8 @@
     return o;
   }
 
-  // Utilidades que reciben los bloques definidos en blocks.js.
-  const afterBuild = []; // funciones que los bloques piden ejecutar cuando la escena ya está montada
+  // Utilities the blocks defined in blocks.js receive.
+  const afterBuild = []; // functions the blocks ask to run once the scene is mounted
   const API = {
     el,
     svg,
@@ -861,7 +861,7 @@
     after: (f) => afterBuild.push(f),
   };
 
-  // ---------- construcción de la escena ----------
+  // ---------- building the scene ----------
   function build(s, parent) {
     let e;
     switch (s.type) {
@@ -1094,8 +1094,8 @@
     return (a.at ? (marks[a.at] ?? 0) : 0) + (a.t || 0);
   };
 
-  // ---------- reproducción ----------
-  // Progreso guardado por lección: pasos ya escuchados y último paso visitado.
+  // ---------- playback ----------
+  // Progress saved per lesson: steps already heard and the last step visited.
   const store = {
     get(k, d) {
       try {
@@ -1123,7 +1123,7 @@
       `Paso ${k + 1} de ${beats.length}${beats[k].ask ? ", con pregunta" : ""}`;
   }
 
-  // Ir al paso i; si t0 > 0, empezar en ese segundo de la narración con la escena ya en su estado.
+  // Go to step i; if t0 > 0, start at that second of the narration with the scene already in its state.
   function goto(i, t0 = 0) {
     if (i < 0) i = 0;
     if (i >= beats.length) return finish();
@@ -1176,7 +1176,7 @@
       if (my !== token) return;
       pending.splice(0).forEach((a) => exec(a));
       if (beat.ask) return showAsk(beat);
-      if (work) return; // El ejercicio avanza con «Continuar».
+      if (work) return; // The exercise advances with «Continuar».
       setTimeout(
         () => {
           if (my === token && playing) goto(idx + 1);
@@ -1194,13 +1194,13 @@
         if (c) capEl.textContent = c[1];
       }
     };
-    // El clip se carga entero en memoria (blob): así se puede saltar dentro de él con cualquier servidor,
-    // incluso con `python -m http.server`, que no admite peticiones parciales.
+    // The clip loads whole into memory (blob): that lets it seek with any server,
+    // even `python -m http.server`, which does not support range requests.
     clip(beat.id).then((url) => {
       if (my !== token) return;
       nar.src = url;
       nar.addEventListener("loadedmetadata", start, { once: true });
-      if (beats[i + 1]) clip(beats[i + 1].id); // precarga el siguiente
+      if (beats[i + 1]) clip(beats[i + 1].id); // preload the next one
     });
     requestAnimationFrame(tick);
   }
@@ -1216,7 +1216,7 @@
     return clips.get(id);
   };
 
-  // Saltar segundos dentro del paso actual (hacia atrás se reconstruye la escena).
+  // Skip seconds within the current step (going back rebuilds the scene).
   function seekRel(d) {
     if (REVIEW || idx < 0 || askEl.classList.contains("on")) return;
     const dur = T[beats[idx].id].dur,
@@ -1370,7 +1370,7 @@
         asked--;
       });
     } else if (a.kind === "predict") {
-      // Apuesta: no hay respuesta correcta todavía; el paso siguiente revela el resultado.
+      // Bet: there is no correct answer yet; the next step reveals the result.
       asked--;
       askEl.querySelector(".qlabel").textContent = a.label || "Tu predicción";
       const key = `qiskit:predict:${LID}:${beat.id}`;
@@ -1393,7 +1393,7 @@
         });
       });
     } else if (a.kind === "reflect") {
-      // Preguntas abiertas: se guardan en el navegador y se recuperan al volver.
+      // Open questions: saved in the browser and restored on return.
       asked--;
       askEl.querySelector(".qlabel").textContent = a.label || "Reflexiona";
       askEl.querySelector(".prompt").remove();

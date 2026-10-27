@@ -1,9 +1,9 @@
-"""Capturas de una lección en varios tamaños, en beats concretos.
+"""Screenshots of a lesson at several sizes, at chosen beats.
 
-    python -m http.server 8810 -d site          # en otra terminal
-    uv run --group tools python tools/shot.py <id> <beat,beat,...> [movil|laptop] [ms de espera]
-Ej.: tools/shot.py p1-quickstart 0,3,8 laptop
-Deja shots/<tamaño>-b<beat>.png.
+    python -m http.server 8810 -d site          # in another terminal
+    uv run --group tools python tools/shot.py <id> <beat,beat,...> [movil|laptop] [wait ms]
+Example: tools/shot.py p1-quickstart 0,3,8 laptop
+Writes shots/<size>-b<beat>.png.
 """
 
 import sys
@@ -38,7 +38,7 @@ def main() -> None:
                 cur += 1
             pg.wait_for_timeout(wait)
             pg.screenshot(path=str(out / f"{which}-b{t}.png"))
-        print("errores:", errs)
+        print("errors:", errs)
         b.close()
 
 

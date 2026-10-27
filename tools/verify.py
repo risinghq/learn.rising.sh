@@ -1,12 +1,12 @@
-"""Ejecuta el código Python que aparece en las lecciones, en orden, con un espacio de nombres por lección.
+"""Runs the Python code that appears in the lessons, in order, with one namespace per lesson.
 
-    uv run python tools/verify.py [lección ...]
+    uv run python tools/verify.py [lesson ...]
 
-Así se comprueba que todo el código que se enseña funciona con las versiones instaladas.
-Si un bloque Out(…, check=True) sigue a un bloque de código en la misma escena, su texto debe
-coincidir exactamente con lo que imprime ese código. Bloques con norun=True se omiten
-(por ejemplo, los que necesitan una cuenta de IBM Quantum). Si un bloque trae setup="…", ese
-código se ejecuta antes que el bloque, sin mostrarse: da el contexto a un fragmento.
+This checks that all the code the course teaches works with the installed versions.
+If an Out(…, check=True) block follows a code block in the same scene, its text must
+match exactly what that code prints. Blocks with norun=True are skipped
+(for example, those that need an IBM Quantum account). If a block has setup="…", that
+code runs before the block, without being shown: it gives a fragment its context.
 """
 
 import contextlib
@@ -32,7 +32,7 @@ def blocks(scene: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
 
 
 def verify_lesson(lid: str, show: bool) -> tuple[int, int]:
-    """Ejecuta los bloques de una lección y devuelve (bloques ejecutados, fallos)."""
+    """Run a lesson's blocks and return (blocks run, failures)."""
     les = json.loads((COURSE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
     ns: dict[str, Any] = {"__name__": "__leccion__"}
     n, fails = 0, 0
@@ -65,7 +65,7 @@ def verify_lesson(lid: str, show: bool) -> tuple[int, int]:
             ):
                 fails += 1
                 print(
-                    f"✗ {lid}/{b['id']}: la salida no coincide\n--- esperado\n{nxt['src']}\n--- obtenido\n{out}"
+                    f"✗ {lid}/{b['id']}: the output does not match\n--- expected\n{nxt['src']}\n--- got\n{out}"
                 )
             if show:
                 print(f"· {lid}/{b['id']}\n{out}")
@@ -87,12 +87,12 @@ def main() -> None:
     fails = 0
     os.chdir(
         tempfile.mkdtemp(prefix="verify-")
-    )  # Aísla los archivos temporales que crean los ejemplos.
+    )  # Isolates the temporary files that the examples create.
     for lid in ids:
         n, f = verify_lesson(lid, show)
         fails += f
-        print(f"{lid}: {n} bloques ejecutados")
-    print("fallos:", fails)
+        print(f"{lid}: {n} blocks run")
+    print("failures:", fails)
     sys.exit(1 if fails else 0)
 
 

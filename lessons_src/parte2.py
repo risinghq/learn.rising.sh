@@ -2252,7 +2252,7 @@ with circuit.if_test((c0, 1)):
 circuit.measure(q0, c0)
 
 print(SamplerV2().run([circuit]).result()[0].data.c.get_counts())"""
-# Contexto de los fragmentos que siguen: un circuito de tres qubits y tres bits.
+# Context of the fragments that follow: a circuit of three qubits and three bits.
 CONTROL_SETUP = """from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.circuit.classical import expr
 
@@ -2260,7 +2260,7 @@ qubits = QuantumRegister(3, "q")
 clbits = ClassicalRegister(3, "c")
 circuit = QuantumCircuit(qubits, clbits)
 (q0, q1, q2), (c0, c1, c2) = qubits, clbits"""
-# Contexto del fragmento de expresiones clásicas: seis qubits, tres bits de medición y un registro.
+# Context of the classical-expressions fragment: six qubits, three measurement bits and a register.
 EXPR_SETUP = """from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.circuit.classical import expr
 
@@ -2676,7 +2676,7 @@ circuit.barrier()""",
 )
 
 # ------------------------------------------------------------------ 2.8 OpenQASM y QPY
-# Contexto del fragmento de puertas propias: un programa con la puerta rzx y otro que usa rxx sin definirla.
+# Context of the custom-gates fragment: a program with the rzx gate and another that uses rxx without defining it.
 QASM_CUSTOM_SETUP = '''program = """
 OPENQASM 2.0;
 include "qelib1.inc";
@@ -3143,7 +3143,7 @@ print(type(restored).__name__, restored[0] == qc)""",
 )
 
 # ------------------------------------------------------------------ 2.9 Visualizar
-# Contexto del fragmento de plot_histogram: dos resultados de Sampler con el registro meas.
+# Context of the plot_histogram fragment: two Sampler results with the meas register.
 HIST_SETUP = """from qiskit import QuantumCircuit
 from qiskit.primitives import StatevectorSampler
 from qiskit.visualization import plot_histogram

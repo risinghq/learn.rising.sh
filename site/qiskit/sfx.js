@@ -1,5 +1,5 @@
-// Sonidos discretos sintetizados con WebAudio (sin archivos): acierto, error y fin de lección.
-// oxlint-disable-next-line eslint/no-unused-vars -- Global que usa engine.js.
+// Discreet sounds synthesized with WebAudio (no files): success, error and end of lesson.
+// oxlint-disable-next-line eslint/no-unused-vars -- Global used by engine.js.
 const SFX = (() => {
   let ctx = null,
     muted = false;

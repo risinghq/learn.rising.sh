@@ -1,15 +1,15 @@
-"""Genera site/qiskit/lessons/<id>/lesson.json y site/qiskit/course.json a partir de plan.py y de los módulos parte*.py.
+"""Generates site/qiskit/lessons/<id>/lesson.json and site/qiskit/course.json from plan.py and the parte*.py modules.
 
-    python lessons_src/build.py              # escribe los JSON y comprueba la cobertura de las guías
-    python lessons_src/build.py --check      # no escribe: falla si los JSON de site/qiskit/ no coinciden con lo que se generaría
-    python lessons_src/build.py --tts        # además genera la narración (necesita uv, red y ffprobe)
+    python lessons_src/build.py              # writes the JSON and checks the coverage of the guides
+    python lessons_src/build.py --check      # writes nothing: fails if the JSON in site/qiskit/ differs from what would be generated
+    python lessons_src/build.py --tts        # also generates the narration (needs uv, network and ffprobe)
 
-La cobertura se comprueba contra .cache/qiskit-docs.
-tools/fetch_docs.py descarga esa caché.
+Coverage is checked against .cache/qiskit-docs.
+tools/fetch_docs.py downloads that cache.
 
-La numeración de secciones (1.1, 1.2, …) sale del orden de plan.PARTS; la primera parte de la
-etiqueta de cada paso se sustituye por esa sección. Cada lección del plan debe tener su módulo, y
-cada lección de un módulo debe estar en el plan.
+The section numbering (1.1, 1.2, …) comes from the order of plan.PARTS; the first part of
+each step's label is replaced by that section. Every lesson in the plan must have its module, and
+every lesson in a module must be in the plan.
 """
 
 import importlib
@@ -39,14 +39,14 @@ def load_lessons() -> dict[str, dict[str, Any]]:
     for f in sorted(HERE.glob("parte*.py")):
         for les in importlib.import_module(f.stem).LESSONS:
             if les["id"] in found:
-                raise SystemExit(f"lección duplicada: {les['id']}")
+                raise SystemExit(f"duplicate lesson: {les['id']}")
             found[les["id"]] = les
     return found
 
 
 def toc_pages() -> list[str]:
     if not TOC.exists():
-        raise SystemExit(f"falta {TOC.relative_to(ROOT)}: ejecuta python tools/fetch_docs.py")
+        raise SystemExit(f"missing {TOC.relative_to(ROOT)}: run python tools/fetch_docs.py")
     toc = json.loads(TOC.read_text(encoding="utf-8"))
     out: list[str] = []
 
@@ -70,7 +70,7 @@ def coverage() -> None:
     extra = [g for g in planned if g not in toc_pages()]
     if dup or missing or extra:
         raise SystemExit(
-            f"cobertura: repetidas {sorted(dup)}, sin lección {missing}, inexistentes {extra}"
+            f"coverage: repeated {sorted(dup)}, without lesson {missing}, nonexistent {extra}"
         )
 
 
@@ -78,7 +78,7 @@ ERRORS: list[str] = []
 
 
 def walk(blocks: Iterable[dict[str, Any]]) -> Iterator[dict[str, Any]]:
-    """Recorre bloques de escena, incluidos los anidados en filas y cajas."""
+    """Walk scene blocks, including those nested in rows and boxes."""
     for blk in blocks:
         yield blk
         children = blk.get("items", []) + blk.get("body", [])
@@ -86,33 +86,33 @@ def walk(blocks: Iterable[dict[str, Any]]) -> Iterator[dict[str, Any]]:
 
 
 def publish_exercises(lesson: dict[str, Any], seen: set[str]) -> None:
-    """Añade a cada ejercicio el código inicial y los casos visibles."""
+    """Add the starter code and the visible cases to each exercise."""
     for b in lesson["beats"]:
         for blk in walk(b["scene"]):
             if blk.get("type") != "exercise":
                 continue
             eid = blk["exercise"]
-            where = f"{lesson['id']}/{b['id']}: ejercicio {eid}"
+            where = f"{lesson['id']}/{b['id']}: exercise {eid}"
             try:
                 missing = spec.missing_files(eid)
             except ValueError as exc:
                 ERRORS.append(f"{where}: {exc}")
                 continue
             if not eid.startswith(lesson["id"] + "/"):
-                ERRORS.append(f"{where} debe estar en exercises/{lesson['id']}/")
+                ERRORS.append(f"{where} must be in exercises/{lesson['id']}/")
             elif eid in seen:
-                ERRORS.append(f"{where} está repetido")
+                ERRORS.append(f"{where} is repeated")
             elif missing:
-                ERRORS.append(f"{where} no tiene {', '.join(missing)}")
+                ERRORS.append(f"{where} has no {', '.join(missing)}")
             else:
                 seen.add(eid)
                 blk.update(spec.public(eid))
                 if not blk["cases"]:
-                    ERRORS.append(f"{where} no tiene ningún caso @visible en check.py")
+                    ERRORS.append(f"{where} has no @visible case in check.py")
 
 
 def check(lesson: dict[str, Any]) -> None:
-    """Errores de autoría que conviene detectar antes de generar audio (se acumulan en ERRORS)."""
+    """Authoring errors worth catching before generating audio (they accumulate in ERRORS)."""
 
     def fail(msg: str) -> None:
         ERRORS.append(msg)
@@ -120,7 +120,7 @@ def check(lesson: dict[str, Any]) -> None:
     for b in lesson["beats"]:
         marks = re.findall(r"\[\[(\w+)\]\]", b["say"])
         if len(marks) != len(set(marks)):
-            fail(f"{lesson['id']}/{b['id']}: marca repetida")
+            fail(f"{lesson['id']}/{b['id']}: repeated mark")
         ids: set[str] = set()
 
         def collect(items: list[dict[str, Any]], ids: set[str] = ids) -> None:
@@ -135,13 +135,13 @@ def check(lesson: dict[str, Any]) -> None:
         collect(b["scene"])
         for a in b["actions"]:
             if a.get("at") == b["id"] and a["at"] not in marks:
-                del a["at"]  # at=<id del paso> significa «al empezar el paso»
+                del a["at"]  # at=<step id> means «when the step starts»
             if a.get("at") and a["at"] not in marks:
-                fail(f"{lesson['id']}/{b['id']}: marca '{a['at']}' no está en la narración")
+                fail(f"{lesson['id']}/{b['id']}: mark '{a['at']}' is not in the narration")
             if a.get("id") and a["id"] not in ids:
-                fail(f"{lesson['id']}/{b['id']}: objeto '{a['id']}' no existe")
+                fail(f"{lesson['id']}/{b['id']}: object '{a['id']}' does not exist")
     if len({b["id"] for b in lesson["beats"]}) != len(lesson["beats"]):
-        fail(f"{lesson['id']}: ids de paso repetidos")
+        fail(f"{lesson['id']}: repeated step ids")
 
 
 def main() -> None:
@@ -150,8 +150,8 @@ def main() -> None:
     planned = {lid for part in PARTS for lid, _, _ in part["lessons"]}
     if planned != set(lessons):
         raise SystemExit(
-            f"plan y módulos no coinciden: sin módulo {sorted(planned - set(lessons))}, "
-            f"fuera del plan {sorted(set(lessons) - planned)}"
+            f"plan and modules do not match: without module {sorted(planned - set(lessons))}, "
+            f"outside the plan {sorted(set(lessons) - planned)}"
         )
     course: dict[str, Any] = dict(parts=[])
     ordered: list[dict[str, Any]] = []
@@ -209,7 +209,7 @@ def main() -> None:
             entry["lessons"].append(item)
         course["parts"].append(entry)
     ERRORS.extend(
-        f"exercises/{eid} no aparece en ninguna lección"
+        f"exercises/{eid} does not appear in any lesson"
         for eid in sorted(set(spec.all_ids()) - exercises)
     )
     if ERRORS:
@@ -229,18 +229,18 @@ def main() -> None:
         ]
         if stale:
             raise SystemExit(
-                f"{len(stale)} archivos generados desactualizados; ejecuta `mise run generate` y súbelos:\n  "
+                f"{len(stale)} generated files are out of date; run `mise run generate` and commit them:\n  "
                 + "\n  ".join(stale)
             )
-        print(f"{len(outputs)} archivos generados al día")
+        print(f"{len(outputs)} generated files up to date")
         return
     for path, text in outputs.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
     total = sum(len(p["lessons"]) for p in PARTS)
     print(
-        f"{len(ordered)} de {total} lecciones escritas, {sum(len(les['beats']) for les in ordered)} pasos; "
-        f"cobertura de las {len(toc_pages())} guías: completa"
+        f"{len(ordered)} of {total} lessons written, {sum(len(les['beats']) for les in ordered)} steps; "
+        f"coverage of the {len(toc_pages())} guides: complete"
     )
     if "--tts" in sys.argv:
         for les in ordered:

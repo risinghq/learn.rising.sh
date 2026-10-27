@@ -743,7 +743,7 @@ qc.measure([0, 1], [0, 1])""",
 )
 
 # ------------------------------------------------------------------ 4.3 Simulación exacta
-# Contexto del fragmento de disparos por PUB: dos circuitos con medición y un Sampler local.
+# Context of the shots-per-PUB fragment: two circuits with measurement and a local Sampler.
 SHOTS_SETUP = """from qiskit import QuantumCircuit
 from qiskit.primitives import StatevectorSampler
 
@@ -1007,7 +1007,7 @@ sampler.run([(circuit, None, 123), (circuit, None, 456)])""",
 )
 
 # ------------------------------------------------------------------ 4.4 Aer y ruido
-# Contexto del fragmento de relajación térmica: tiempos T1 y T2 en nanosegundos de cuatro qubits y un modelo vacío.
+# Context of the thermal-relaxation fragment: T1 and T2 times in nanoseconds for four qubits and an empty model.
 THERMAL_SETUP = """import numpy as np
 from qiskit_aer.noise import NoiseModel, thermal_relaxation_error
 

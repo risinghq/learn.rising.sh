@@ -1,9 +1,9 @@
-// Cuenta opcional para llevar el progreso a otro navegador (docs/runner.md#cuentas).
-// Sin cuenta no hace peticiones de cuenta. Con la marca qiskit:cuenta, junta el
-// progreso antes de pintar y envía los cambios que admite el Worker.
-// Las reflexiones (qiskit:reflect) no salen del navegador.
+// Optional account to carry progress to another browser (docs/runner.md#accounts).
+// Without an account it makes no account requests. With the qiskit:cuenta mark, it
+// merges the progress before painting and sends the changes the Worker accepts.
+// The reflections (qiskit:reflect) never leave the browser.
 /* oxlint-disable unicorn/consistent-function-scoping --
-   Script clásico en una función: sus ayudas no pueden salir al ámbito global. */
+   Classic script in a function: its helpers cannot move to the global scope. */
 (() => {
   "use strict";
   const FLAG = "qiskit:cuenta";
@@ -68,7 +68,7 @@
     return out;
   }
 
-  // Omite valores que harían fallar todo el cuerpo de POST /api/merge.
+  // Skip values that would make the whole body of POST /api/merge fail.
   function collect(keys) {
     const body = { done: [], exercises: {}, kv: {} };
     for (const key of keys) {
@@ -99,7 +99,7 @@
     return keys;
   };
 
-  // La respuesta incluye lo enviado y reemplaza los valores locales.
+  // The response includes what was sent and replaces the local values.
   function adopt(progress) {
     const done = new Set([
       ...(parse(read("qiskit:done")) || []),
@@ -126,7 +126,7 @@
       ...options,
     });
 
-  // 401: la sesión caducó o se cerró en otro sitio.
+  // 401: the session expired or was closed elsewhere.
   const lapsed = (resp) => {
     if (resp.status !== 401) return false;
     forget();
@@ -206,7 +206,7 @@
       update({ message: "No se pudo cerrar la sesión. Inténtalo de nuevo." });
     }
   }
-  // Borra la cuenta y lo que guarda. La copia de este navegador se queda.
+  // Delete the account and what it stores. The copy in this browser stays.
   async function deleteAccount() {
     clearTimeout(timer);
     dirty.clear();
@@ -314,7 +314,7 @@
       button.setAttribute("aria-expanded", String(!menu.hidden));
       if (menu.hidden) close();
     });
-    // Las teclas del menú no son atajos de la lección.
+    // The menu keys are not lesson shortcuts.
     host.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !menu.hidden) {
         close();
@@ -322,7 +322,7 @@
       }
       e.stopPropagation();
     });
-    // En captura: el clic de un elemento del menú lo repinta, y ya no estaría dentro de `host` al llegar aquí.
+    // In the capture phase: a click on a menu item repaints it, so the item would be outside `host` by the time the event got here.
     document.addEventListener(
       "click",
       (e) => {
@@ -337,7 +337,7 @@
     document.querySelectorAll("[data-account]").forEach(mount),
   );
 
-  // Con la marca, o al volver del proveedor, se junta antes de que la página lea su progreso.
+  // With the mark, or on return from the provider, the progress is merged before the page reads it.
   const returning = location.hash === RETURN_HASH;
   if (returning)
     history.replaceState(null, "", location.pathname + location.search);

@@ -1,7 +1,8 @@
-"""Mapa completo del curso: partes, lecciones y las guías originales que cubre cada una.
+"""Full map of the course: parts, lessons and the original guides each one covers.
 
-Cada guía de .cache/qiskit-docs/docs/guides/_toc.json debe aparecer en exactamente una lección
-(build.py lo comprueba), y cada lección de este plan debe tener su módulo parte*.py.
+Each guide in .cache/qiskit-docs/docs/guides/_toc.json must appear in exactly one lesson
+(build.py checks it), and each lesson in this plan must have its parte*.py module.
+The titles and descriptions are course text, so they are in Spanish.
 """
 
 from typing import Any

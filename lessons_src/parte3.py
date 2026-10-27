@@ -29,7 +29,7 @@ from lib import (
 )
 from parte2 import resumen
 
-# Chip de juguete en forma de T (5 qubits) para explicar layout y routing.
+# Toy chip in a T shape (5 qubits) to explain layout and routing.
 T5 = dict(
     nodes=[[0, 0], [1, 0], [2, 0], [1, 1], [1, 2]],
     edges=[[0, 1], [1, 2], [1, 3], [3, 4]],

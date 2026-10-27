@@ -1076,7 +1076,7 @@ opts["resilience_level"] = 2""")
 )
 
 # ------------------------------------------------------------------ 5.4 Estimator
-# Contexto de los fragmentos: un backend local de dos qubits, un circuito con dos parámetros ya transpilado y su Estimator.
+# Context of the fragments: a local two-qubit backend, an already transpiled circuit with two parameters and its Estimator.
 EST_SETUP = """import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
@@ -1489,7 +1489,7 @@ job = estimator.run([(chsh_isa, isa_ops, phases)])                   # evs: (4, 
 )
 
 # ------------------------------------------------------------------ 5.5 Sampler
-# Contexto del fragmento de ejemplos: un backend local, circuitos ya transpilados y un ansatz con tres juegos de parámetros.
+# Context of the examples fragment: a local backend, already transpiled circuits and an ansatz with three sets of parameters.
 SAMPLER_SETUP = """import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import real_amplitudes
@@ -2232,7 +2232,7 @@ program = QuantumProgram(shots=1024, meas_level="both")""",
 )
 
 # ------------------------------------------------------------------ 5.7 REST
-# Contexto del fragmento de circuitos con parámetros: el nombre del backend y un transpilador para su ISA.
+# Context of the parameterized-circuits fragment: the backend name and a transpiler for its ISA.
 REST_SETUP = """import qiskit.qasm3
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter

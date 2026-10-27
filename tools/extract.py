@@ -1,8 +1,8 @@
-"""Convierte las guías (.mdx / .ipynb) de .cache/qiskit-docs/docs/guides en texto legible en
-.cache/qiskit-docs/text/<nombre>.md.
+"""Converts the guides (.mdx / .ipynb) in .cache/qiskit-docs/docs/guides to readable text in
+.cache/qiskit-docs/text/<name>.md.
 
     python tools/fetch_docs.py && uv run python tools/extract.py
-Las celdas de código van entre ```python y sus salidas de texto entre ```salida (las imágenes se omiten).
+Code cells go between ```python and their text outputs between ```salida (images are omitted).
 """
 
 import json
@@ -32,7 +32,7 @@ def notebook_text(f: Path) -> str:
 
 def main() -> None:
     if not SRC.is_dir():
-        raise SystemExit(f"falta {SRC}: ejecuta python tools/fetch_docs.py")
+        raise SystemExit(f"missing {SRC}: run python tools/fetch_docs.py")
     OUT.mkdir(parents=True, exist_ok=True)
     for f in sorted(SRC.iterdir()):
         if f.suffix == ".mdx":
@@ -42,7 +42,7 @@ def main() -> None:
         else:
             continue
         (OUT / f"{f.stem}.md").write_text(txt, encoding="utf-8")
-    print(len(list(OUT.iterdir())), "páginas")
+    print(len(list(OUT.iterdir())), "pages")
 
 
 if __name__ == "__main__":

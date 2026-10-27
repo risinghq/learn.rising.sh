@@ -1,7 +1,7 @@
-"""Ayudantes para escribir lecciones en Python (cadenas crudas para LaTeX y código).
+"""Helpers for writing lessons in Python (raw strings for LaTeX and code).
 
-Cada módulo de contenido define LESSONS: una lista de dicts creados con lesson().
-build.py los escribe en site/qiskit/lessons/<id>/lesson.json y genera site/qiskit/course.json.
+Each content module defines LESSONS: a list of dicts created with lesson().
+build.py writes them to site/qiskit/lessons/<id>/lesson.json and generates site/qiskit/course.json.
 """
 
 from collections.abc import Iterable
@@ -39,14 +39,14 @@ def Plane(**k: Any) -> Block:
 
 
 def Code(src: str, lang: str = "python", **k: Any) -> Block:
-    """Código con resaltado. reveal=True oculta las líneas hasta la acción 'lines'.
-    norun=True excluye un bloque de Python de tools/verify.py cuando necesita una cuenta de IBM.
-    setup="…" aporta el contexto de un fragmento. tools/verify.py lo ejecuta antes del bloque y la página no lo muestra."""
+    """Highlighted code. reveal=True hides the lines until the 'lines' action.
+    norun=True excludes a Python block from tools/verify.py when it needs an IBM account.
+    setup="…" gives a fragment its context. tools/verify.py runs it before the block and the page does not show it."""
     return dict(type="code", src=src.strip(chr(10)), lang=lang, **k)
 
 
 def Out(src: str, **k: Any) -> Block:
-    """Salida de consola (texto tal como lo imprime Python)."""
+    """Console output (text exactly as Python prints it)."""
     return dict(type="code", src=src.strip(chr(10)), lang="out", **k)
 
 
@@ -60,7 +60,7 @@ def Circ(qubits: int, ops: list[Block], **k: Any) -> Block:
 
 
 def G(g: str, *q: int, **k: Any) -> Block:
-    """Atajo para una operación de circuito: G('cx', 0, 1, hidden=True)."""
+    """Shortcut for a circuit operation: G('cx', 0, 1, hidden=True)."""
     return dict(g=g, q=list(q), **k)
 
 
@@ -81,7 +81,7 @@ def Graph(nodes: Any, edges: Any, **k: Any) -> Block:
 
 
 def A(do: str, id: str | None = None, at: str | None = None, t: float = 0, **k: Any) -> Block:
-    """Acción: A('show', 'eq1', at='marca', t=0.5)."""
+    """Action: A('show', 'eq1', at='mark', t=0.5)."""
     d = dict(do=do, **k)
     if id is not None:
         d["id"] = id
@@ -158,18 +158,18 @@ def reveal(prompt: str, solution: str, button: str | None = None) -> Block:
 
 
 def predict(prompt: str, options: list[str], after: str) -> Block:
-    """Apuesta antes de ver el resultado: cualquier opción vale; no cuenta en la puntuación.
-    after: lo que se dice al elegir (el resultado se revela en el paso siguiente)."""
+    """A bet before seeing the result: any option is fine; it does not count in the score.
+    after: what is said on choosing (the result is revealed in the next step)."""
     return dict(kind="predict", prompt=prompt, options=options, after=after)
 
 
 def reflect(*prompts: str) -> Block:
-    """Preguntas abiertas con cuadro de texto; las respuestas se guardan en el navegador."""
+    """Open questions with a text box; the answers are saved in the browser."""
     return dict(kind="reflect", prompts=list(prompts))
 
 
 def Mission(notebook: str, tasks: Iterable[tuple[int, str]], **k: Any) -> Block:
-    """Tarjeta «Tu turno»: tasks = [(nivel, texto)] con nivel 1 (reproducir), 2 (modificar) o 3 (crear)."""
+    """«Tu turno» card: tasks = [(level, text)] with level 1 (reproduce), 2 (modify) or 3 (create)."""
     return dict(
         type="mission",
         notebook=notebook,
@@ -211,9 +211,9 @@ def lesson(
     sources: Iterable[str] = (),
     practice: Iterable[str] = (),
 ) -> Block:
-    """sources: nombres de las guías originales de Qiskit/documentation
-    (docs/guides/<nombre>) que cubre la lección.
-    practice: ejercicios para hacer en tu propio entorno al terminar."""
+    """sources: names of the original Qiskit/documentation guides
+    (docs/guides/<name>) that the lesson covers.
+    practice: exercises to do in your own environment when finished."""
     return dict(
         id=id,
         part="",

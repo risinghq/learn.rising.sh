@@ -1,9 +1,9 @@
-"""Prueba el avance dentro de un paso: clic a mitad de un segmento de la línea de tiempo.
+"""Tests seeking inside a step: a click in the middle of a timeline segment.
 
-    python -m http.server 8810 -d site          # en otra terminal
-    uv run --group tools python tools/seektest.py [lección [paso]]
+    python -m http.server 8810 -d site          # in another terminal
+    uv run --group tools python tools/seektest.py [lesson [step]]
 
-Por defecto usa el tercer paso («construir») de p1-composer, una lista que se va mostrando.
+By default it uses the third step («construir») of p1-composer, a list that is revealed item by item.
 """
 
 import sys
@@ -36,33 +36,33 @@ def main() -> None:
         pg.mouse.click(box["x"] + box["width"] * 0.6, box["y"] + box["height"] / 2)
         pg.wait_for_timeout(1500)
         t = pg.evaluate("[window.QGNarration.currentTime, window.QGNarration.duration]")
-        print("audio en", [round(x, 2) for x in t])
+        print("audio at", [round(x, 2) for x in t])
         print(
             "tag:",
             pg.inner_text("#tag"),
-            "| ítems visibles de la lista:",
+            "| visible list items:",
             pg.evaluate(VISIBLE_ITEMS),
         )
-        print("subtítulo:", pg.inner_text("#caption")[:80])
+        print("caption:", pg.inner_text("#caption")[:80])
         pg.screenshot(path=str(SHOTS / "seek-1.png"))
         pg.keyboard.press("Shift+ArrowLeft")
         pg.wait_for_timeout(1200)
-        print("tras −5 s, ítems visibles:", pg.evaluate(VISIBLE_ITEMS))
+        print("after −5 s, visible items:", pg.evaluate(VISIBLE_ITEMS))
         pg.click("#fwd5")
         pg.wait_for_timeout(800)
-        print("tras +5 s, tag:", pg.inner_text("#tag"))
+        print("after +5 s, tag:", pg.inner_text("#tag"))
         done = pg.evaluate(
             "[...document.querySelectorAll('#timeline .seg')].map(s => s.className).join(' | ')"
         )
-        print("segmentos:", done[:160])
+        print("segments:", done[:160])
         pg.goto(url)
         pg.wait_for_timeout(1000)
         print(
-            "botón continuar:",
+            "resume button:",
             pg.is_visible("#resume"),
             pg.inner_text("#resume") if pg.is_visible("#resume") else "",
         )
-        print("errores:", errs or "ninguno")
+        print("errors:", errs or "none")
         b.close()
 
 

@@ -1,18 +1,18 @@
-"""Genera la narración de una lección con Edge TTS y los tiempos por palabra.
+"""Generates a lesson's narration with Edge TTS and the per-word timings.
 
-Uso (desde la raíz del proyecto):
+Usage (from the project root):
     uv run --group tools python tools/tts.py site/qiskit/lessons/p1-quickstart
 
-Lee <lección>/lesson.json y escribe en la misma carpeta:
-    audio/<beat>.mp3          un clip por beat (y por cada texto de "extras")
-    timings.json              duración, marcas [[nombre]] y subtítulos por oración
+Reads <lesson>/lesson.json and writes in the same folder:
+    audio/<beat>.mp3          one clip per beat (and per text in "extras")
+    timings.json              duration, [[name]] marks and subtitles per sentence
 
-Las marcas [[nombre]] se escriben justo antes de una palabra; timings.json
-guarda el segundo en que empieza esa palabra para sincronizar animaciones.
-Antes de sintetizar se aplica el diccionario de tools/pronunciacion.py (siglas y nombres en
-inglés con ortografía española); los subtítulos conservan el texto original.
-Solo se regeneran los clips cuyo texto, voz o velocidad cambiaron.
-Requiere red y ffprobe (ffmpeg).
+The [[name]] marks are written right before a word; timings.json
+stores the second at which that word starts, to synchronise animations.
+Before synthesis the dictionary in tools/pronunciacion.py is applied (acronyms and English
+names with Spanish spelling); the subtitles keep the original text.
+Only the clips whose text, voice or speed changed are regenerated.
+Needs network access and ffprobe (ffmpeg).
 """
 
 import asyncio
@@ -37,14 +37,14 @@ Words = Sequence[tuple[float, str]]
 
 
 def split_marks(raw: str) -> tuple[str, dict[str, int]]:
-    """Texto limpio y {marca: posición de carácter en el texto limpio}."""
+    """Clean text and {mark: character position in the clean text}."""
     marks: dict[str, int] = {}
     clean: list[str] = []
     pos = 0
     for i, part in enumerate(MARK.split(raw)):
         if i % 2:
             if part in marks:
-                raise ValueError(f"marca duplicada {part!r}")
+                raise ValueError(f"duplicate mark {part!r}")
             marks[part] = pos
         else:
             clean.append(part)
@@ -53,7 +53,7 @@ def split_marks(raw: str) -> tuple[str, dict[str, int]]:
 
 
 def locator(clean: str, words: Words) -> Callable[[int], float | None]:
-    """f(pos): segundo en que empieza la primera palabra en o después de pos."""
+    """f(pos): second at which the first word at or after pos starts."""
     cursor = 0
     located: list[tuple[int, float]] = []
     for t, w in words:
@@ -66,12 +66,12 @@ def locator(clean: str, words: Words) -> Callable[[int], float | None]:
 
 
 def sentences(text: str) -> list[tuple[int, str]]:
-    """Pares (inicio, oración) del texto, partiendo en . ? ! y antes de ¿ ¡."""
+    """Pairs (start, sentence) of the text, splitting at . ? ! and before ¿ ¡."""
     out: list[tuple[int, str]] = []
     start = 0
     for m in [*re.finditer(r"[.?!¿¡]\s+", text), None]:
         end = len(text) if m is None else m.start() if m.group()[0] in "¿¡" else m.end()
-        # Los signos ¿ ¡ abren la oración siguiente.
+        # The signs ¿ ¡ open the next sentence.
         if text[start:end].strip():
             out.append((start, text[start:end].strip()))
         start = end
@@ -79,16 +79,16 @@ def sentences(text: str) -> list[tuple[int, str]]:
 
 
 def cues(spoken: str, words: Words, shown: str) -> list[list[Any]]:
-    """Subtítulos: tiempos del texto pronunciado, texto de la versión que se muestra."""
+    """Subtitles: timings of the spoken text, text of the version that is shown."""
     at = locator(spoken, words)
     timed, texts = sentences(spoken), sentences(shown)
-    if len(timed) != len(texts):  # no debería pasar: el diccionario no toca la puntuación
+    if len(timed) != len(texts):  # should not happen: the dictionary leaves punctuation alone
         texts = timed
     return [[at(start) or 0, text] for (start, _), (_, text) in zip(timed, texts, strict=True)]
 
 
 def speakable_marked(raw: str) -> str:
-    """Aplica el diccionario de pronunciación sin tocar las marcas [[nombre]]."""
+    """Apply the pronunciation dictionary without touching the [[name]] marks."""
     parts = MARK.split(raw)
     return "".join(f"[[{p}]]" if i % 2 else pronunciable(p) for i, p in enumerate(parts))
 
@@ -139,12 +139,12 @@ async def main(lesson_dir: str) -> None:
             words = old["words"]
         else:
             words = await synth(clean, voice, rate, mp3)
-            print(f"{cid}: sintetizado")
+            print(f"{cid}: synthesized")
         at = locator(clean, words)
         mt = {name: at(pos) for name, pos in marks.items()}
         missing = [n for n, t in mt.items() if t is None]
         if missing:
-            raise SystemExit(f"{cid}: marcas sin palabra: {missing}")
+            raise SystemExit(f"{cid}: marks without a word: {missing}")
         entry = {"key": key, "words": words}
         cache[cid] = entry
         timings[cid] = {"dur": duration(mp3), "marks": mt, "cues": cues(clean, words, shown)}
@@ -152,7 +152,7 @@ async def main(lesson_dir: str) -> None:
     (root / "timings.json").write_text(
         json.dumps(timings, ensure_ascii=False, indent=1), encoding="utf-8"
     )
-    print(f"listo: {len(timings)} clips")
+    print(f"done: {len(timings)} clips")
 
 
 if __name__ == "__main__":
