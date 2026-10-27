@@ -1,8 +1,8 @@
 """Servidor HTTP del corredor: POST /run y GET /health.
 
 No depende del anfitrión: lo mismo corre en Cloudflare Containers que en Docker.
-El contrato está en docs/runner.md y el ciclo de las ranuras en
-docs/architecture.md. Si no queda una ranura libre, responde 503.
+El contrato y el ciclo de las ranuras están en docs/runner.md. Si no queda una
+ranura libre, responde 503.
 """
 
 import json

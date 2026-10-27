@@ -1,4 +1,4 @@
-// Cuenta opcional para llevar el progreso a otro navegador (docs/runner.md#cuentas).
+// Cuenta opcional para llevar el progreso a otro navegador (docs/accounts.md).
 // Sin cuenta no hace peticiones de cuenta. Con la marca qiskit:cuenta, junta el
 // progreso antes de pintar y envía los cambios que admite el Worker.
 // Las reflexiones (qiskit:reflect) no salen del navegador.
