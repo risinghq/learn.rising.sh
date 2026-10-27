@@ -5,8 +5,8 @@ publicado en su cuenta de Cloudflare, con ejecución de código y cuentas. Qué
 hace cada pieza está en [runner.md](runner.md). Aquí solo hay pasos.
 
 Los valores entre `< >` son tuyos. `<worker>` es el nombre del Worker y `<host>`
-es su dirección, por ejemplo `<worker>.<subdominio>.workers.dev`. Ningún secreto
-va en el repositorio ni en un archivo que subas a git.
+es su dominio. En el despliegue de Rising son `duo` y `edu.rising.sh`. Ningún
+secreto va en el repositorio ni en un archivo que subas a git.
 
 ## Qué necesitas
 
@@ -29,13 +29,18 @@ cd runner/worker
 bunx cf auth login
 ```
 
-## 1. Elige el nombre del Worker
+## 1. Elige el nombre y el dominio
 
-El nombre está en `worker.name` de
-[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts). Si quieres otro
-distinto de `qiskit-guides`, cámbialo ahí. El nombre fija `<host>`. Un dominio
-propio va en el campo `domains` de `worker`; con uno, usa ese dominio como
-`<host>` en todo lo que sigue.
+Ambos están en [`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts).
+El nombre es `worker.name` (`duo`) y el dominio es `HOME_HOST`
+(`edu.rising.sh`), que el config pone en `worker.domains` y en la variable
+`HOME_HOST`. Cámbialos por los tuyos. `workersDev` es `false`: el Worker
+responde solo en su dominio, no en `<worker>.<subdominio>.workers.dev`.
+
+El dominio debe ser de una zona activa en tu cuenta de Cloudflare. Al desplegar,
+Cloudflare crea el registro DNS y el certificado. Si otro Worker ya sirve ese
+dominio, quítaselo antes en el panel (**Workers & Pages**, el Worker,
+**Settings**, **Domains & Routes**): un dominio sirve a un solo Worker.
 
 ## 2. Crea la base de datos
 
@@ -60,8 +65,12 @@ la base (`bunx cf d1 delete <uuid>`), crea otra y aplica el archivo de nuevo.
 ## 3. Crea el widget de Turnstile
 
 ```sh
-bunx cf turnstile widgets create --body '{"name":"qiskit-guides","domains":["<host>"],"mode":"managed","region":"world"}'
+bunx cf turnstile widgets create --body '{"name":"duo","domains":["<host>"],"mode":"managed","region":"world"}'
 ```
+
+Un widget ya creado solo vale en los dominios que lista. Si cambias de dominio,
+añade `<host>` a **Domains** en el panel de Turnstile (**Turnstile**, el widget,
+**Settings**) o crea otro widget y cambia `TURNSTILE_SITE_KEY` y el secreto.
 
 De la respuesta copia dos valores:
 
@@ -128,8 +137,8 @@ rm "$TMPDIR/secrets.env"
 unset GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET TURNSTILE_SECRET
 ```
 
-Para publicar un cambio de las lecciones o del Worker, vuelve a ejecutar
-`mise run deploy`.
+Esto despliega el Worker `<worker>` en `<host>`. Para publicar un cambio de las
+lecciones o del Worker, vuelve a ejecutar `mise run deploy`.
 
 ## 7. Rota un secreto
 
@@ -158,12 +167,15 @@ responde 503 y el otro sigue funcionando.
 ```sh
 curl -s https://<host>/health
 curl -s https://<host>/api/me
+curl -s https://<host>/ | grep -o '<title>[^<]*'
+curl -s https://<host>/qiskit/ | grep -o '<title>[^<]*'
 curl -sI https://<host>/auth/google | grep -i '^location'
 curl -sI https://<host>/auth/github | grep -i '^location'
 ```
 
-`/health` responde 200 y `/api/me` responde `{"signedIn":false}`. Las dos
-últimas imprimen una dirección de `accounts.google.com` y de `github.com` con
+`/health` responde 200 y `/api/me` responde `{"signedIn":false}`. `/` es el
+catálogo (`<title>Duo`) y `/qiskit/` la portada del curso. Las dos últimas
+imprimen una dirección de `accounts.google.com` y de `github.com` con
 `redirect_uri=https://<host>/auth/<proveedor>/callback`. Esa dirección debe ser
 la que registraste en los pasos 4 y 5, letra por letra.
 
@@ -203,9 +215,9 @@ manda un correo: no pausa ni limita el uso.
 1. Abre el [panel de Cloudflare](https://dash.cloudflare.com/), elige la cuenta
    y ve a **Manage Account** > **Billing** > **Billable Usage**.
 2. Pulsa **Create budget alert**.
-3. Pon un nombre (por ejemplo `qiskit-guides 1 USD`), en **Budget threshold
-   (USD)** `1` y tu correo en **Email recipients**. Pulsa **Save**.
-4. Repite con el nombre `qiskit-guides 2 USD` y el umbral `2`.
+3. Pon un nombre (por ejemplo `duo 1 USD`), en **Budget threshold (USD)** `1` y
+   tu correo en **Email recipients**. Pulsa **Save**.
+4. Repite con el nombre `duo 2 USD` y el umbral `2`.
 
 Las alertas miden el gasto por uso de toda la cuenta, no solo el de este Worker,
 y solo existen en cuentas de pago por uso. Si recibes la de 1 USD, mira
@@ -214,3 +226,26 @@ y solo existen en cuentas de pago por uso. Si recibes la de 1 USD, mira
 
 Los 5 USD al mes del plan Workers Paid no están en los 2 USD: son una cuota fija
 que se paga aparte de lo que el Worker gasta en Containers.
+
+## 11. Redirige la dirección antigua
+
+Solo hace falta si el sitio estuvo publicado antes con otro Worker y otra
+dirección, y quieres que sus enlaces sigan funcionando. En el despliegue de
+Rising, el Worker anterior es `qiskit-guides`, en
+`qiskit-guides.empirical.workers.dev`.
+
+`cloudflare.config.ts` define esa pareja en `LEGACY_WORKER` y `LEGACY_HOST`. Con
+`--mode legacy`, `cf deploy` sube el mismo código con el nombre `LEGACY_WORKER`
+y sin dominio, así que queda en `workers.dev`. El Worker responde allí con 301 a
+la misma ruta en `<host>`, y manda `/`, `/index.html`, `/lesson.html`,
+`/privacidad.html` y `/lessons/...` a `/qiskit/...`.
+
+```sh
+mise run deploy --mode legacy
+curl -sI 'https://<LEGACY_HOST>/lesson.html?l=p1-quickstart' | grep -iE '^(HTTP|location)'
+```
+
+Este Worker usa la misma base D1 que el del paso 6. Si ya existía con ese
+nombre, conserva sus secretos. Si es nuevo, el primer despliegue exige los
+secretos: añade `--secrets-file` como en el paso 6. La respuesta de `curl` es
+`301` y `location: https://<host>/qiskit/lesson.html?l=p1-quickstart`.

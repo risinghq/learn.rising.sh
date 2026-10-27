@@ -1,21 +1,24 @@
 # Diseño
 
-La portada (`site/index.html`) y el reproductor (`site/lesson.html`) comparten
-un solo tema: la marca «Qubit a qubit», tres fuentes y tres paletas, cada una en
-modo claro y oscuro. Este documento dice qué tokens existen y cómo se usan.
+El catálogo (`site/index.html`), la portada del curso de Qiskit
+(`site/qiskit/index.html`) y el reproductor (`site/qiskit/lesson.html`)
+comparten un solo tema: tres fuentes y tres paletas, cada una en modo claro y
+oscuro. La marca del catálogo es «Duo» y la del curso, «Qubit a qubit». Este
+documento dice qué tokens existen y cómo se usan.
 
 ## Archivos
 
-| Archivo               | Contenido                                                          |
-| --------------------- | ------------------------------------------------------------------ |
-| `site/theme.css`      | Los tokens de color y de fuente, la marca y el control de tema.    |
-| `site/theme.js`       | Fija paleta y modo antes de pintar y construye el control de tema. |
-| `site/index.css`      | Estilos de la portada.                                             |
-| `site/app.css`        | Estilos del reproductor.                                           |
-| `tests/theme_test.py` | Prueba de navegador: contraste, páginas, paleta guardada.          |
+| Archivo                 | Contenido                                                          |
+| ----------------------- | ------------------------------------------------------------------ |
+| `site/theme.css`        | Los tokens de color y de fuente, la marca y el control de tema.    |
+| `site/theme.js`         | Fija paleta y modo antes de pintar y construye el control de tema. |
+| `site/catalog.css`      | Estilos del catálogo.                                              |
+| `site/qiskit/index.css` | Estilos de la portada del curso.                                   |
+| `site/qiskit/app.css`   | Estilos del reproductor.                                           |
+| `tests/theme_test.py`   | Prueba de navegador: contraste, páginas, paleta guardada.          |
 
-Las dos páginas cargan `theme.css` antes de su propia hoja y `theme.js` en
-`<head>`.
+Cada página carga `theme.css` antes de su propia hoja y `theme.js` en `<head>`.
+Las del curso los enlazan como `../theme.css` y `../theme.js`.
 
 ## Paleta y modo
 
@@ -31,10 +34,12 @@ que el navegador pinte. `theme.css` define los tokens en seis bloques,
 `[data-paleta="…"][data-theme="…"]`. Un valor guardado que no existe se ignora.
 
 Todo elemento `[data-theme-ctl]` recibe un selector de paleta y el botón de
-modo, uno junto al otro. Las dos páginas lo tienen en su barra superior. En
+modo, uno junto al otro. Las tres páginas lo tienen en su barra superior. En
 pantallas de 600 px o menos el selector muestra solo el color de acento de la
-paleta. Al cambiar paleta o modo, `theme.js` lanza el evento `themechange` en
-`window`; `engine.js` lo usa para volver a dibujar los lienzos.
+paleta. Las etiquetas del control salen en el idioma del atributo `lang` de la
+página: inglés en el catálogo y español en el curso. Al cambiar paleta o modo,
+`theme.js` lanza el evento `themechange` en `window`; `engine.js` lo usa para
+volver a dibujar los lienzos.
 
 Cada paleta cambia el fondo, la tinta y los acentos:
 
@@ -100,9 +105,10 @@ Otros tokens, como `--fg-soft`, `--line-strong`, `--wire`, `--emph-bg`,
   cuatro. Los colores de acento que se usan como texto también.
 - Las líneas de ejes y de cables llevan significado y alcanzan 3:1 sobre
   `--stage` y `--card`. Las rejillas y los bordes son decoración y no se miden.
-- La marca es `<a class="brand"><span class="dot"></span>Qubit a qubit</a>`, con
-  el estilo de `theme.css`, en las dos páginas. En el reproductor, en pantallas
-  de 600 px o menos, el punto se oculta para dejar sitio al título.
+- La marca es `<a class="brand"><span class="dot"></span>Qubit a qubit</a>` en
+  el curso y `<a class="brand"><span class="dot"></span>Duo</a>` en el catálogo,
+  con el estilo de `theme.css`. En el reproductor, en pantallas de 600 px o
+  menos, el punto se oculta para dejar sitio al título.
 - Los títulos usan `--display` (Bricolage Grotesque), el texto `--sans` (Inter)
   y el código `--mono` (JetBrains Mono). Las tres páginas las cargan de
   `site/vendor/fonts.css`, en variable y solo con los rangos `latin` y
@@ -142,7 +148,7 @@ mise run install
 uv run python tests/theme_test.py --table
 ```
 
-La misma prueba carga la portada y tres lecciones, cada una en su primer y
-último paso, en las seis combinaciones y a 1366x768 y 390x844. Exige que la
-consola no registre errores y que ningún `#scene > .blk` quede fuera de
-`#stage`. `--shots CARPETA` guarda una captura de cada carga.
+La misma prueba carga el catálogo, la portada del curso y tres lecciones, cada
+una en su primer y último paso, en las seis combinaciones y a 1366x768 y
+390x844. Exige que la consola no registre errores y que ningún `#scene > .blk`
+quede fuera de `#stage`. `--shots CARPETA` guarda una captura de cada carga.

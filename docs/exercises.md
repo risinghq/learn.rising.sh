@@ -219,7 +219,7 @@ código del alumno; `mode="check"` además corre los casos. Devuelve:
 
 ## Editor en la lección
 
-[`exercise.js`](../site/exercise.js) dibuja cada bloque `Exercise`: el
+[`exercise.js`](../site/qiskit/exercise.js) dibuja cada bloque `Exercise`: el
 enunciado, un editor con `starter.py` y los botones **Ejecutar** (solo corre el
 código), **Comprobar** (además corre los casos), **Pista** y **Empezar de
 nuevo**. Muestra la salida, el error, con su línea marcada en el editor si la
@@ -280,15 +280,15 @@ que otra web abierta en tu navegador no ejecute código en tu equipo.
 
 ### Reconstruir el editor
 
-`site/editor.js` es el resultado de empaquetar [`editor/`](../editor) con
+`site/qiskit/editor.js` es el resultado de empaquetar [`editor/`](../editor) con
 esbuild; se versiona porque `site/` es estático. Tras cambiar `editor/src/`:
 
 ```sh
 mise run generate:editor
 ```
 
-`mise run build:editor` falla si `site/editor.js` no coincide con el paquete que
-saldría de `editor/src/`.
+`mise run build:editor` falla si `site/qiskit/editor.js` no coincide con el
+paquete que saldría de `editor/src/`.
 
 ### Actualizar KaTeX y las tipografías
 
@@ -312,8 +312,8 @@ uv run --group tools python tests/exercise_ui_test.py
 ```
 
 [`tools/exercises.py`](../tools/exercises.py) lee de
-`site/lessons/*/lesson.json` qué ejercicios existen, su `needs` y sus `hints`,
-por eso va después de `build.py`. Por cada ejercicio comprueba que:
+`site/qiskit/lessons/*/lesson.json` qué ejercicios existen, su `needs` y sus
+`hints`, por eso va después de `build.py`. Por cada ejercicio comprueba que:
 
 1. `solution.py` pasa todos los casos.
 2. `starter.py` se ejecuta sin error y falla algún caso.

@@ -1,9 +1,10 @@
 # Arquitectura
 
-El curso es una página estática (`site/`) que reproduce lecciones descritas en
-JSON. Las lecciones se escriben en Python, el audio se sintetiza aparte y los
-cuadernos de práctica son archivos marimo. Este documento dice qué posee cada
-carpeta y por dónde pasa una lección.
+Duo es una página estática (`site/`) con un catálogo de cursos y un Worker que
+atiende lo que comparten los cursos. El curso de Qiskit reproduce lecciones
+descritas en JSON. Las lecciones se escriben en Python, el audio se sintetiza
+aparte y los cuadernos de práctica son archivos marimo. Este documento dice qué
+posee cada carpeta y por dónde pasa una lección.
 
 ## Quién posee qué
 
@@ -11,11 +12,11 @@ carpeta y por dónde pasa una lección.
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `lessons_src/` | Las lecciones como código Python y el programa que las convierte en JSON.                                                                                                      |
 | `tools/`       | Programas auxiliares: guías originales, narración, comprobaciones y pruebas de navegador.                                                                                      |
-| `site/`        | La página estática: portada, reproductor de lecciones y los datos que lee.                                                                                                     |
+| `site/`        | La página estática: el catálogo, el tema común y una carpeta por curso, con su portada, su reproductor de lecciones y los datos que lee.                                       |
 | `tests/`       | Pruebas de navegador (`theme_test.py`, `proyecto_test.py`, `exercise_ui_test.py`, `account_ui_test.py`) de ejercicios (`exercises_test.py`) y del corredor (`runner_test.py`). |
 | `practica/`    | Los cuadernos marimo de las misiones y sus soluciones.                                                                                                                         |
 | `exercises/`   | Los ejercicios de código: código inicial, solución y casos de cada uno.                                                                                                        |
-| `editor/`      | El paquete que compila `site/editor.js` y copia KaTeX y las tipografías a `site/vendor/`.                                                                                      |
+| `editor/`      | El paquete que compila `site/qiskit/editor.js` y copia KaTeX y las tipografías a `site/vendor/`.                                                                               |
 | `qgcheck/`     | El corrector de ejercicios: lee `exercises/`, ejecuta el código de un alumno y devuelve el resultado de cada caso.                                                             |
 | `content/`     | La caché de la síntesis de voz.                                                                                                                                                |
 | `runner/`      | El corredor de código del alumno: imagen, servidor `/run` y Worker. [runner.md](runner.md)                                                                                     |
@@ -28,13 +29,13 @@ carpeta y por dónde pasa una lección.
   parte, con las funciones de `lib.py`: `lesson()`, `beat()`, los bloques
   (`Code`, `Out`, `Circ`, `Hist`…), las acciones (`A`) y las preguntas
   (`choice`, `numeric`, `reveal`, `predict`, `reflect`).
-- `build.py` une el plan con las lecciones y escribe los JSON de `site/`. Antes
-  comprueba que cada guía del índice de Qiskit/documentation esté en el plan,
-  que no haya marcas `[[nombre]]` repetidas en una narración y que cada acción
-  apunte a una marca y a un objeto que existan. Falla si una lección del plan no
-  tiene módulo o si un módulo define una lección que el plan no menciona.
-  También completa cada bloque `Exercise` con lo que el sitio puede mostrar de
-  `exercises/` (ver [exercises.md](exercises.md)).
+- `build.py` une el plan con las lecciones y escribe los JSON de `site/qiskit/`.
+  Antes comprueba que cada guía del índice de Qiskit/documentation esté en el
+  plan, que no haya marcas `[[nombre]]` repetidas en una narración y que cada
+  acción apunte a una marca y a un objeto que existan. Falla si una lección del
+  plan no tiene módulo o si un módulo define una lección que el plan no
+  menciona. También completa cada bloque `Exercise` con lo que el sitio puede
+  mostrar de `exercises/` (ver [exercises.md](exercises.md)).
 
 ### `tools/`
 
@@ -48,7 +49,7 @@ carpeta y por dónde pasa una lección.
 | `practica.py`                                        | Ejecuta cada cuaderno con y sin soluciones. También prueba `mo.ui.slider`/`number` en mínimo y máximo. Un error de ejecución falla. |
 | `exercises.py`                                       | Corre la solución y el código inicial de cada ejercicio con `qgcheck` y comprueba su `needs`.                                       |
 | `serve.py`                                           | Sirve `site/` en 127.0.0.1:8810 y añade `POST /run`, que corrige un ejercicio con `qgcheck`.                                        |
-| `playtest.py`, `seektest.py`, `shot.py`, `review.py` | Pruebas y capturas con Playwright sobre `site/` servido en el puerto 8810.                                                          |
+| `playtest.py`, `seektest.py`, `shot.py`, `review.py` | Pruebas y capturas con Playwright sobre el curso de Qiskit servido en el puerto 8810.                                               |
 
 `qiskit-docs.commit` guarda el hash de Qiskit/documentation contra el que se
 comprueba la cobertura. Para actualizar las guías se cambia ese hash, se ejecuta
@@ -56,24 +57,36 @@ comprueba la cobertura. Para actualizar las guías se cambia ese hash, se ejecut
 
 ### `site/`
 
-- `index.html` es la portada, con los estilos de `index.css`. Lee `course.json`
-  y pide en paralelo los `lesson.json` de las lecciones completadas para armar
-  el repaso.
-- `lesson.html` carga `engine.js`, el reproductor, con los estilos de `app.css`.
-  `blocks.js` dibuja los bloques propios del curso, `exercise.js` el bloque de
-  ejercicio y `sfx.js` los sonidos. Las fórmulas las dibuja KaTeX, que sale de
-  `vendor/`. Las dos páginas cargan KaTeX con `defer`, antes que sus propios
-  scripts.
+En la raíz están el catálogo y lo que comparten los cursos:
+
+- `index.html` y `catalog.css` son el catálogo, en inglés. Lee `courses.json`,
+  que tiene una entrada por curso (`slug`, `title`, `summary`, `language`), y de
+  cada `<slug>/course.json` el número de lecciones. Dibuja una tarjeta por curso
+  con un enlace a `<slug>/`. Añadir un curso es añadir su carpeta y su entrada.
+- `theme.css` y `theme.js` son el tema del catálogo y de los cursos: colores,
+  fuentes, y la paleta y el modo que elige el lector. Las etiquetas del control
+  de tema siguen el `lang` de la página. [design.md](design.md) los describe.
 - `vendor/` son KaTeX y las tres tipografías, copiados de `editor/node_modules`
   por `editor/vendor.js`. Git los ignora; `mise run install` y `mise run deploy`
   los generan de nuevo y borran antes lo que hubiera. Ninguna página pide nada a
   otro sitio salvo el script de Turnstile, que `exercise.js` descarga de
   Cloudflare cuando el corredor lo exige.
+
+`qiskit/` es el curso de Qiskit. Sus páginas enlazan el tema y `vendor/` con
+`../`, y llaman a las rutas de la plataforma por su ruta absoluta:
+
+- `index.html` es la portada del curso, con los estilos de `index.css`. Lee
+  `course.json` y pide en paralelo los `lesson.json` de las lecciones
+  completadas para armar el repaso.
+- `lesson.html` carga `engine.js`, el reproductor, con los estilos de `app.css`.
+  `blocks.js` dibuja los bloques propios del curso, `exercise.js` el bloque de
+  ejercicio y `sfx.js` los sonidos. Las fórmulas las dibuja KaTeX. Las dos
+  páginas cargan KaTeX con `defer`, antes que sus propios scripts.
+- `account.js` es el menú de la cuenta y `privacidad.html` la página que dice
+  qué se guarda.
 - `editor.js` es el editor CodeMirror 6 de los ejercicios, empaquetado desde
   `editor/`. Se describe en [exercises.md](exercises.md#editor-en-la-lección).
-- `theme.css` y `theme.js` son el tema de las dos páginas: colores, fuentes, y
-  la paleta y el modo que elige el lector. [design.md](design.md) los describe.
-  `notebooks.js` escribe la línea «cómo ejecutar los cuadernos» que acompaña a
+- `notebooks.js` escribe la línea «cómo ejecutar los cuadernos» que acompaña a
   cada comando de `marimo`.
 - `lessons/<id>/` contiene `lesson.json`, `timings.json` y `audio/<paso>.mp3`.
 - `course.json` es el índice: partes, lecciones, minutos y misiones.
@@ -95,7 +108,7 @@ para comprobar que todas las verificaciones dan ✅.
 `qgcheck/job.py` en un proceso aparte (que a su vez lanza `qgcheck/host.py` con
 el código del alumno), y `qgcheck/__init__.py` ofrece a `check.py` sus
 ayudantes. El formato, el resultado de `grade()` y las comprobaciones están en
-[exercises.md](exercises.md). `site/exercise.js` dibuja el editor de cada
+[exercises.md](exercises.md). `site/qiskit/exercise.js` dibuja el editor de cada
 ejercicio y llama a `POST /run` en su propio origen.
 
 ### `content/`

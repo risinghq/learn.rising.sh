@@ -169,8 +169,8 @@ protege el anfitrión y la corrección, no la clave de respuestas.
 | `runner/worker/src/log.ts`           | Las únicas líneas que el Worker escribe en su registro.                                        |
 | `runner/worker/test/`                | Las pruebas del Worker con un contenedor y un proveedor OAuth falsos.                          |
 | `runner/worker/test/serve.ts`        | El mismo Worker en local, para las pruebas de navegador de la cuenta.                          |
-| `site/account.js`                    | El cliente de la cuenta: el menú, la unión al cargar y el envío al escribir.                   |
-| `site/privacidad.html`               | La página de privacidad.                                                                       |
+| `site/qiskit/account.js`             | El cliente de la cuenta: el menú, la unión al cargar y el envío al escribir.                   |
+| `site/qiskit/privacidad.html`        | La página de privacidad.                                                                       |
 | [`deploy.md`](deploy.md)             | Los pasos para publicar una copia propia.                                                      |
 | `exercises/<lección>/<ejercicio>/`   | La imagen solo lleva `check.py` de cada uno.                                                   |
 
@@ -213,12 +213,13 @@ runtime local de Cloudflare (Miniflare), con `site/` como archivos estáticos y
 las mismas rutas de entrada que el despliegue, y con un contenedor falso que
 anota cada llamada, una base D1 local y un proveedor OAuth falso que hace de
 Google y de GitHub. No necesitan Docker ni cuenta. Comprueban que `GET /` sirve
-`index.html`, que `POST /run` devuelve el JSON del corredor y cada límite de
-[Protección del Worker](#protección-del-worker) por su respuesta y, con el
-contenedor falso, que una petición rechazada no lo alcanza. También recorren el
-inicio de sesión, los [endpoints de la cuenta](#cuentas), lo que se guarda de
-cada ejecución y la limpieza diaria. Dos pruebas llaman al `siteverify` real con
-las claves de prueba y se saltan si no hay red.
+el catálogo y `GET /qiskit/` el curso, que el host antiguo redirige con 301 a
+las páginas de `/qiskit/`, que `POST /run` devuelve el JSON del corredor y cada
+límite de [Protección del Worker](#protección-del-worker) por su respuesta y,
+con el contenedor falso, que una petición rechazada no lo alcanza. También
+recorren el inicio de sesión, los [endpoints de la cuenta](#cuentas), lo que se
+guarda de cada ejecución y la limpieza diaria. Dos pruebas llaman al
+`siteverify` real con las claves de prueba y se saltan si no hay red.
 
 `tests/account_ui_test.py` arranca `runner/worker/test/serve.ts`, que sirve ese
 mismo Worker en local con el proveedor falso, y lo recorre con un navegador:
@@ -228,19 +229,27 @@ en el navegador. Se ejecuta dentro de `mise run test:ui`.
 
 ## Cloudflare Containers
 
-`runner/worker/` es un solo Worker, `qiskit-guides`, que sirve el sitio, el
-corredor y las cuentas en el mismo origen: el editor llama a `/run` y la cookie
-de sesión de Turnstile es `SameSite=Strict`.
+`runner/worker/` es un solo Worker, `duo`, que sirve el catálogo, los cursos, el
+corredor y las cuentas en el mismo origen, `edu.rising.sh`: el editor llama a
+`/run` y la cookie de sesión de Turnstile es `SameSite=Strict`.
 
 - Los archivos de `site/` son sus archivos estáticos. El directorio lo fija
   [`wrangler.config.ts`](../runner/worker/wrangler.config.ts).
 - `/run`, `/health`, `/auth/*` y `/api/*` entran al código del Worker antes que
-  a los archivos (`run_worker_first`). La lista está en
+  a los archivos (`run_worker_first`). También entran `/`, `/index.html`,
+  `/lesson.html`, `/privacidad.html` y `/lessons/*`, las rutas que tenía el
+  curso de Qiskit cuando ocupaba la raíz. La lista está en
   [`src/routes.ts`](../runner/worker/src/routes.ts), que usan también el
   despliegue y las pruebas. Cualquier otra ruta la responde el servicio de
   archivos sin ejecutar el Worker, y una ruta que no es un archivo responde 404.
   Una ruta de `/auth/*` o de `/api/*` que no existe la responde el Worker con
   404 y `reason` `not_found`.
+- Las rutas antiguas del curso solo se redirigen en `LEGACY_HOST`, la dirección
+  `workers.dev` del Worker anterior. `legacyRedirect` responde allí 301 a
+  `https://<HOME_HOST>/qiskit/` con la misma ruta y la misma consulta (`/` y
+  `/index.html` van a `/qiskit/`). En cualquier otro host, esas rutas pasan a
+  los archivos: `/` es el catálogo. `HOME_HOST` y `LEGACY_HOST` son variables de
+  `cloudflare.config.ts`.
 - Una clase `Runner` que extiende `Container` (`@cloudflare/containers`) reparte
   las peticiones de `/run` entre dos instancias. Si la instancia elegida
   responde 503, repite la petición una vez en la otra. La instancia no tiene
@@ -256,8 +265,10 @@ desplegar.
 El plan Workers Paid, Docker, la base D1, el widget de Turnstile y los clientes
 OAuth son de la cuenta de quien despliega. [deploy.md](deploy.md) da los pasos.
 Los valores y los secretos que el Worker lee están en
-[Variables y secretos](#variables-y-secretos). El Worker no declara `domains`:
-sale en `<nombre>.<subdominio>.workers.dev`.
+[Variables y secretos](#variables-y-secretos). El Worker `duo` declara
+`domains: ["edu.rising.sh"]` y no usa `workers.dev`. Con `--mode legacy`,
+`cloudflare.config.ts` despliega el mismo código con el nombre `qiskit-guides`,
+sin dominio, para que `qiskit-guides.empirical.workers.dev` redirija.
 
 ## Cuentas
 
@@ -383,10 +394,10 @@ endpoint de `/api` cuenta contra el límite por usuario de
 
 ### En el sitio
 
-[`site/account.js`](../site/account.js) es el cliente. Pone el menú _Entrar_ en
-la cabecera de la portada, de las lecciones y de
-[`privacidad.html`](../site/privacidad.html), la página que dice qué se guarda,
-cuánto tiempo y cómo borrarlo.
+[`site/qiskit/account.js`](../site/qiskit/account.js) es el cliente. Pone el
+menú _Entrar_ en la cabecera de la portada del curso, de las lecciones y de
+[`privacidad.html`](../site/qiskit/privacidad.html), la página que dice qué se
+guarda, cuánto tiempo y cómo borrarlo.
 
 - Sin cuenta, la página no hace ninguna petición salvo `/run`. Lo que mira para
   saberlo es la marca `qiskit:cuenta` de `localStorage`.
@@ -708,10 +719,10 @@ Cloudflare Turnstile se verifica en la primera ejecución de cada sesión, con
 cuenta o sin ella. Solo un [mantenedor](#mantenedores) no pasa por Turnstile: la
 petición ni llama a `siteverify` ni recibe `qg_session`. Una petición sin sesión
 de Turnstile y sin token recibe 403 `turnstile_missing` con la clave del sitio
-en el campo `sitekey`. Con ella, `site/exercise.js` carga el widget, y repite la
-petición con el token del widget en la cabecera `X-Turnstile-Token`. El Worker
-lo comprueba con `siteverify`, al que envía solo el secreto y el token, y si
-vale responde con la cookie `qg_session` además del resultado:
+en el campo `sitekey`. Con ella, `site/qiskit/exercise.js` carga el widget, y
+repite la petición con el token del widget en la cabecera `X-Turnstile-Token`.
+El Worker lo comprueba con `siteverify`, al que envía solo el secreto y el
+token, y si vale responde con la cookie `qg_session` además del resultado:
 
 ```text
 qg_session=<caducidad>.<mac>; Max-Age=28800; Path=/run; HttpOnly; Secure; SameSite=Strict
