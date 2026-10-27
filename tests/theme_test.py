@@ -2,11 +2,11 @@
 
     uv run --group tools python tests/theme_test.py [--shots CARPETA] [--table]
 
-Carga la portada y tres lecciones (primer y último paso) en cada paleta y modo, en 1366x768
-y 390x844. Exige: ninguna salida de error en la consola, ningún `#scene > .blk` fuera de
-`#stage`, la marca y las fuentes iguales en las dos páginas, la paleta guardada una sola vez,
-el contraste WCAG AA de cada token de texto y la portada pidiendo los lesson.json en paralelo.
---shots guarda una captura por página, paleta, modo y tamaño. --table imprime los contrastes
+Carga la portada y tres lecciones (primer y último paso) en cada modo, en 1366x768 y 390x844.
+Exige: ninguna salida de error en la consola, ningún `#scene > .blk` fuera de `#stage`, la marca
+y las fuentes iguales en las dos páginas, el modo guardado una sola vez, el contraste WCAG AA de
+cada token de texto y de cada borde de control, y la portada pidiendo los lesson.json en
+paralelo. --shots guarda una captura por página, modo y tamaño. --table imprime los contrastes
 mínimos en Markdown.
 """
 
@@ -26,27 +26,13 @@ from offline import new_context, verify
 from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 
 SITE = Path(__file__).resolve().parent.parent / "site"
-PALETAS = ["fosforo", "cobre", "medianoche"]
 MODOS = ["dark", "light"]
 TAMANOS = {"1366x768": (1366, 768), "390x844": (390, 844)}
 LECCIONES = ["p1-quickstart", "p3-target", "p6-panorama"]
 
-TEXTO = [
-    "ink",
-    "fg-soft",
-    "card-text",
-    "muted",
-    "acc",
-    "acc2",
-    "gold",
-    "red",
-    "blue",
-    "teal",
-    "violet",
-    "green",
-]
+TEXTO = ["ink", "muted", "acc-text", "gold", "red", "blue", "teal", "violet", "green"]
 SUPERFICIES = ["bg", "bg2", "card", "stage"]
-GRAFICOS = ["axis", "wire"]
+GRAFICOS = ["axis", "wire", "edge"]
 DEMORA_LESSON_JSON = 0.4
 
 
@@ -93,8 +79,15 @@ def parse_color(s: str) -> tuple[float, ...]:
 RESOLVER = """names => {
   const probe = document.createElement('span');
   document.body.appendChild(probe);
+  const px = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
   const out = {};
-  for (const n of names) { probe.style.color = `var(--${n})`; out[n] = getComputedStyle(probe).color; }
+  for (const n of names) {
+    probe.style.color = `var(--${n})`;
+    px.clearRect(0, 0, 1, 1);
+    px.fillStyle = getComputedStyle(probe).color;
+    px.fillRect(0, 0, 1, 1);
+    out[n] = `rgb(${px.getImageData(0, 0, 1, 1).data.slice(0, 3).join(' ')})`;
+  }
   probe.remove();
   return out;
 }"""
@@ -114,12 +107,11 @@ class Report:
 def nueva_pagina(
     browser: Browser,
     size: tuple[int, int],
-    paleta: str,
     modo: str,
     extra_storage: dict[str, str] | None = None,
 ) -> tuple[BrowserContext, Page, list[str]]:
     ctx = new_context(browser, viewport={"width": size[0], "height": size[1]})
-    storage = {"qiskit:paleta": paleta, "qiskit:theme": modo, **(extra_storage or {})}
+    storage = {"qiskit:theme": modo, **(extra_storage or {})}
     ctx.add_init_script(
         f"for (const [k, v] of Object.entries({json.dumps(storage)})) localStorage.setItem(k, v);"
     )
@@ -145,55 +137,50 @@ def fuera_del_stage(pg: Page) -> Any:
 def visitar(
     rep: Report, browser: Browser, base: str, shots: str | None, ultimos: dict[str, int]
 ) -> None:
-    marcas: dict[tuple[str, str, str, bool], Any] = {}
-    catalogos: dict[tuple[str, str, str], Any] = {}
-    for paleta in PALETAS:
-        for modo in MODOS:
-            for tam, size in TAMANOS.items():
-                etiqueta = f"{paleta}/{modo}/{tam}"
-                paginas = [("catalogo", f"{base}/"), ("index", f"{base}/qiskit/index.html")]
-                for lid in LECCIONES:
-                    paginas += [
-                        (f"{lid}-b0", f"{base}/qiskit/lesson.html?l={lid}&beat=0"),
-                        (f"{lid}-bN", f"{base}/qiskit/lesson.html?l={lid}&beat={ultimos[lid]}"),
-                    ]
-                for nombre, url in paginas:
-                    ctx, pg, errores = nueva_pagina(browser, size, paleta, modo)
-                    pg.goto(url)
-                    pg.wait_for_selector("[data-theme-ctl] select")
-                    pg.wait_for_timeout(1500 if nombre == "index" else 900)
-                    rep.check(not errores, f"{etiqueta} {nombre}: {errores}")
-                    attrs = pg.evaluate(
-                        "[document.documentElement.dataset.paleta, document.documentElement.dataset.theme]"
-                    )
-                    rep.check(attrs == [paleta, modo], f"{etiqueta} {nombre}: atributos {attrs}")
-                    if nombre not in ("index", "catalogo"):
-                        fuera = fuera_del_stage(pg)
-                        rep.check(
-                            not fuera, f"{etiqueta} {nombre}: bloques fuera de #stage {fuera}"
-                        )
-                    marca = pg.evaluate(
-                        "[document.querySelector('.brand').textContent.trim(), getComputedStyle(document.querySelector('.brand')).fontFamily,"
-                        " getComputedStyle(document.body).fontFamily]"
-                    )
-                    if nombre == "catalogo":
-                        catalogos[(paleta, modo, tam)] = marca
-                    else:
-                        marcas.setdefault((paleta, modo, tam, nombre.startswith("index")), marca)
-                    if shots:
-                        d = Path(shots) / paleta / modo
-                        d.mkdir(parents=True, exist_ok=True)
-                        pg.screenshot(path=str(d / f"{tam}-{nombre}.png"))
-                    ctx.close()
-    for (paleta, modo, tam), valor in catalogos.items():
-        curso = marcas[(paleta, modo, tam, True)]
+    marcas: dict[tuple[str, str, bool], Any] = {}
+    catalogos: dict[tuple[str, str], Any] = {}
+    for modo in MODOS:
+        for tam, size in TAMANOS.items():
+            etiqueta = f"{modo}/{tam}"
+            paginas = [("catalogo", f"{base}/"), ("index", f"{base}/qiskit/index.html")]
+            for lid in LECCIONES:
+                paginas += [
+                    (f"{lid}-b0", f"{base}/qiskit/lesson.html?l={lid}&beat=0"),
+                    (f"{lid}-bN", f"{base}/qiskit/lesson.html?l={lid}&beat={ultimos[lid]}"),
+                ]
+            for nombre, url in paginas:
+                ctx, pg, errores = nueva_pagina(browser, size, modo)
+                pg.goto(url)
+                pg.wait_for_selector("[data-theme-ctl] button")
+                pg.wait_for_timeout(1500 if nombre == "index" else 900)
+                rep.check(not errores, f"{etiqueta} {nombre}: {errores}")
+                attr = pg.evaluate("document.documentElement.dataset.theme")
+                rep.check(attr == modo, f"{etiqueta} {nombre}: data-theme {attr}")
+                if nombre not in ("index", "catalogo"):
+                    fuera = fuera_del_stage(pg)
+                    rep.check(not fuera, f"{etiqueta} {nombre}: bloques fuera de #stage {fuera}")
+                marca = pg.evaluate(
+                    "[document.querySelector('.brand').textContent.trim(), getComputedStyle(document.querySelector('.brand')).fontFamily,"
+                    " getComputedStyle(document.body).fontFamily]"
+                )
+                if nombre == "catalogo":
+                    catalogos[(modo, tam)] = marca
+                else:
+                    marcas.setdefault((modo, tam, nombre.startswith("index")), marca)
+                if shots:
+                    d = Path(shots) / modo
+                    d.mkdir(parents=True, exist_ok=True)
+                    pg.screenshot(path=str(d / f"{tam}-{nombre}.png"))
+                ctx.close()
+    for (modo, tam), valor in catalogos.items():
+        curso = marcas[(modo, tam, True)]
         rep.check(valor[0] == "Duo", f"marca del catálogo {valor[0]!r}")
         rep.check(
             valor[1:] == curso[1:],
             f"las fuentes del catálogo difieren de las del curso: {valor[1:]} / {curso[1:]}",
         )
-    for (paleta, modo, tam, es_index), valor in marcas.items():
-        otro = marcas[(paleta, modo, tam, not es_index)]
+    for (modo, tam, es_index), valor in marcas.items():
+        otro = marcas[(modo, tam, not es_index)]
         rep.check(valor[0] == "Qubit a qubit", f"marca {valor[0]!r}")
         rep.check(
             valor[1] == otro[1],
@@ -201,76 +188,72 @@ def visitar(
         )
 
 
-def contrastes(rep: Report, browser: Browser, base: str) -> dict[tuple[str, str, str], float]:
-    tabla: dict[tuple[str, str, str], float] = {}
-    for paleta in PALETAS:
-        for modo in MODOS:
-            ctx, pg, _ = nueva_pagina(browser, (1366, 768), paleta, modo)
-            pg.goto(f"{base}/qiskit/index.html")
-            pg.wait_for_selector("[data-theme-ctl] select")
-            nombres = set(TEXTO + SUPERFICIES + GRAFICOS + ["acc-ink"])
-            col = {k: parse_color(v) for k, v in pg.evaluate(RESOLVER, sorted(nombres)).items()}
-            ctx.close()
-            for t in TEXTO:
-                peor = min(contraste(col[t], col[s]) for s in SUPERFICIES)
-                tabla[(t, paleta, modo)] = peor
-                rep.check(peor >= 4.5, f"contraste {t} en {paleta}/{modo}: {peor:.2f} < 4,5")
-            for g in GRAFICOS:
-                peor = min(contraste(col[g], col[s]) for s in ("stage", "card"))
-                tabla[(g, paleta, modo)] = peor
-                rep.check(peor >= 3, f"contraste {g} en {paleta}/{modo}: {peor:.2f} < 3")
-            r = contraste(col["acc-ink"], col["acc"])
-            tabla[("acc-ink/acc", paleta, modo)] = r
-            rep.check(r >= 4.5, f"contraste acc-ink sobre acc en {paleta}/{modo}: {r:.2f} < 4,5")
+def contrastes(rep: Report, browser: Browser, base: str) -> dict[tuple[str, str], float]:
+    tabla: dict[tuple[str, str], float] = {}
+    for modo in MODOS:
+        ctx, pg, _ = nueva_pagina(browser, (1366, 768), modo)
+        pg.goto(f"{base}/qiskit/index.html")
+        pg.wait_for_selector("[data-theme-ctl] button")
+        nombres = set(TEXTO + SUPERFICIES + GRAFICOS + ["acc-ink", "acc"])
+        col = {k: parse_color(v) for k, v in pg.evaluate(RESOLVER, sorted(nombres)).items()}
+        ctx.close()
+        for t in TEXTO:
+            peor = min(contraste(col[t], col[s]) for s in SUPERFICIES)
+            tabla[(t, modo)] = peor
+            rep.check(peor >= 4.5, f"contraste {t} en {modo}: {peor:.2f} < 4,5")
+        for g in GRAFICOS:
+            peor = min(contraste(col[g], col[s]) for s in SUPERFICIES)
+            tabla[(g, modo)] = peor
+            rep.check(peor >= 3, f"contraste {g} en {modo}: {peor:.2f} < 3")
+        r = contraste(col["acc-ink"], col["acc"])
+        tabla[("acc-ink/acc", modo)] = r
+        rep.check(r >= 4.5, f"contraste acc-ink sobre acc en {modo}: {r:.2f} < 4,5")
     return tabla
 
 
-def imprimir_tabla(tabla: dict[tuple[str, str, str], float]) -> None:
-    cols = [(p, m) for p in PALETAS for m in MODOS]
+def imprimir_tabla(tabla: dict[tuple[str, str], float]) -> None:
     filas = [*TEXTO, "acc-ink/acc", *GRAFICOS]
-    print("| token | " + " | ".join(f"{p} {m}" for p, m in cols) + " |")
-    print("| --- | " + " | ".join("---:" for _ in cols) + " |")
+    print("| token | " + " | ".join(MODOS) + " |")
+    print("| --- | " + " | ".join("---:" for _ in MODOS) + " |")
     for f in filas:
-        print(f"| `{f}` | " + " | ".join(f"{tabla[(f, p, m)]:.2f}" for p, m in cols) + " |")
+        print(f"| `{f}` | " + " | ".join(f"{tabla[(f, m)]:.2f}" for m in MODOS) + " |")
 
 
-def paleta_guardada_una_vez(rep: Report, browser: Browser, base: str) -> None:
-    ctx = new_context(browser, viewport={"width": 1366, "height": 768})
+def modo_guardado_una_vez(rep: Report, browser: Browser, base: str) -> None:
+    ctx = new_context(browser, viewport={"width": 1366, "height": 768}, color_scheme="light")
     pg = ctx.new_page()
     pg.goto(f"{base}/qiskit/index.html")
-    pg.wait_for_selector("[data-theme-ctl] select")
+    pg.wait_for_selector("[data-theme-ctl] button")
     rep.check(
-        pg.evaluate("document.documentElement.dataset.paleta") == "fosforo",
-        "la paleta por defecto no es fosforo",
+        pg.evaluate("document.documentElement.dataset.theme") is None,
+        "sin modo guardado la página fija data-theme en vez de seguir al sistema",
     )
-    pg.select_option("[data-theme-ctl] select", "cobre")
-    rep.check(
-        pg.evaluate("localStorage.getItem('qiskit:paleta')") == "cobre",
-        "la portada no guardó la paleta",
-    )
-    acc = pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()")
-    rep.check(acc == "#ff8a4c" or acc == "#bd3f0c", f"--acc no cambió con la paleta: {acc}")
-    pg.goto(f"{base}/qiskit/lesson.html?l=p1-quickstart&beat=0")
-    pg.wait_for_selector("[data-theme-ctl] select")
-    rep.check(
-        pg.evaluate("document.documentElement.dataset.paleta") == "cobre",
-        "el reproductor no leyó la paleta guardada",
-    )
-    rep.check(
-        pg.evaluate("document.querySelector('[data-theme-ctl] select').value") == "cobre",
-        "el selector del reproductor no muestra la paleta",
-    )
-    pg.select_option("[data-theme-ctl] select", "medianoche")
-    pg.goto(f"{base}/qiskit/index.html")
-    pg.wait_for_selector("[data-theme-ctl] select")
-    rep.check(
-        pg.evaluate("document.documentElement.dataset.paleta") == "medianoche",
-        "la portada no leyó la paleta elegida en el reproductor",
-    )
+    fondo = pg.evaluate("getComputedStyle(document.body).backgroundColor")
     pg.click("[data-theme-ctl] button")
     rep.check(
-        pg.evaluate("localStorage.getItem('qiskit:theme')") in ("light", "dark"),
-        "el botón de modo no guardó el modo",
+        pg.evaluate("localStorage.getItem('qiskit:theme')") == "dark",
+        "el botón de modo no guardó el modo oscuro",
+    )
+    rep.check(
+        pg.evaluate("getComputedStyle(document.body).backgroundColor") != fondo,
+        "el fondo no cambió con el modo",
+    )
+    pg.goto(f"{base}/qiskit/lesson.html?l=p1-quickstart&beat=0")
+    pg.wait_for_selector("[data-theme-ctl] button")
+    rep.check(
+        pg.evaluate("document.documentElement.dataset.theme") == "dark",
+        "el reproductor no leyó el modo guardado",
+    )
+    rep.check(
+        pg.inner_text("[data-theme-ctl] button") == "Tema claro",
+        "el botón del reproductor no ofrece el otro modo",
+    )
+    pg.click("[data-theme-ctl] button")
+    pg.goto(f"{base}/qiskit/index.html")
+    pg.wait_for_selector("[data-theme-ctl] button")
+    rep.check(
+        pg.evaluate("document.documentElement.dataset.theme") == "light",
+        "la portada no leyó el modo elegido en el reproductor",
     )
     ctx.close()
 
@@ -279,9 +262,7 @@ def repaso_en_paralelo(rep: Report, browser: Browser, base: str) -> float:
     hechas = json.dumps(
         ["p1-quickstart", "p1-instalar", "p1-composer", "p1-patrones", "p3-target", "p6-panorama"]
     )
-    ctx, pg, errores = nueva_pagina(
-        browser, (1366, 768), "fosforo", "dark", {"qiskit:done": hechas}
-    )
+    ctx, pg, errores = nueva_pagina(browser, (1366, 768), "dark", {"qiskit:done": hechas})
     t0 = time.time()
     pg.goto(f"{base}/qiskit/index.html")
     pg.wait_for_selector("#repaso .rq", timeout=15000)
@@ -313,7 +294,7 @@ def main() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"])
         tabla = contrastes(rep, browser, base)
-        paleta_guardada_una_vez(rep, browser, base)
+        modo_guardado_una_vez(rep, browser, base)
         dt = repaso_en_paralelo(rep, browser, base)
         visitar(rep, browser, base, args.shots, ultimos)
         browser.close()

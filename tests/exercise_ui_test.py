@@ -350,7 +350,7 @@ def keyboard(browser: Browser, base: str) -> None:
     write(page, panel, "x")
     page.keyboard.type(" c")
     check(
-        editor_text(panel) == "x c" and page.locator("#cc.on").count() == 1,
+        editor_text(panel) == "x c" and page.locator('#cc[aria-pressed="true"]').count() == 1,
         "teclado: escribir espacio y «c» en el editor no activa los atajos de la lección",
     )
     page.keyboard.press("ArrowLeft")
