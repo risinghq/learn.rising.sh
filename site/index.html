@@ -10,18 +10,19 @@
 <script src="theme.js"></script>
 </head>
 <body>
-<div class="wrap">
-  <header class="bar">
-    <a class="brand" href="/"><span class="dot"></span>Duo</a>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="/">Duo</a>
     <span class="sp"></span>
     <div data-theme-ctl></div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <h1>Courses</h1>
-    <ul class="courses" id="courses"></ul>
-  </main>
-</div>
+<main id="main">
+  <h1>Courses</h1>
+  <ul class="courses" id="courses"></ul>
+</main>
 
 <script type="module">
 const list = document.getElementById('courses');
@@ -38,21 +39,16 @@ const counts = await Promise.allSettled(courses.map((c) => get(`${c.slug}/course
 courses.forEach((c, i) => {
   const li = document.createElement('li');
   const a = document.createElement('a');
-  a.className = 'card';
   a.href = `${c.slug}/`;
   const h = document.createElement('h2');
   h.textContent = c.title;
   const p = document.createElement('p');
   p.textContent = c.summary;
-  const meta = document.createElement('div');
-  meta.className = 'meta';
   const facts = [c.language];
   if (counts[i].status === 'fulfilled') facts.push(`${lessonCount(counts[i].value)} lessons`);
-  facts.forEach((f) => {
-    const s = document.createElement('span');
-    s.textContent = f;
-    meta.append(s);
-  });
+  const meta = document.createElement('p');
+  meta.className = 'meta';
+  meta.textContent = facts.join(', ');
   a.append(h, p, meta);
   li.append(a);
   list.append(li);

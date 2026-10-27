@@ -14,50 +14,53 @@
 <script src="notebooks.js"></script>
 </head>
 <body>
-<div class="wrap">
-  <header class="bar">
-    <a class="brand" href="index.html"><span class="dot"></span>Qubit a qubit</a>
-    <span class="pill">Qiskit · en español</span>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="index.html">Qubit a qubit</a>
+    <nav aria-label="Principal"><a href="../">Duo</a></nav>
     <span class="sp"></span>
-    <span class="pill" id="prog"></span>
-    <a class="pill" href="../">Duo</a>
     <div data-account></div>
     <div data-theme-ctl></div>
-  </header>
+  </div>
+</header>
 
-  <section class="hero">
-    <div>
-      <h1>Aprende Qiskit<br><span>haciendo</span>, qubit a qubit.</h1>
-      <p class="lead">Lecciones animadas y narradas que recorren todas las guías de IBM Quantum. En cada una predices, practicas en tu cuaderno y reflexionas; a lo largo del curso construyes un experimento real.</p>
-      <div class="next" id="next"></div>
-      <div class="stats" id="stats"></div>
+<main id="main">
+  <section class="intro" aria-labelledby="t-intro">
+    <h1 id="t-intro">Aprende Qiskit haciendo, qubit a qubit</h1>
+    <p class="lead">Lecciones animadas y narradas que recorren todas las guías de IBM Quantum. En cada una predices, practicas en tu cuaderno y reflexionas; a lo largo del curso construyes un experimento real.</p>
+    <div class="next" id="next"></div>
+    <div class="progress">
+      <p id="prog"></p>
+      <progress id="bar" max="1" value="0" aria-labelledby="prog"></progress>
+      <p class="facts" id="facts"></p>
     </div>
     <svg class="bloch" viewBox="-170 -170 340 340" id="bloch" aria-hidden="true"></svg>
   </section>
 
-  <div class="two">
-    <section class="blk">
-      <div class="sh"><h2>Repaso de hoy</h2><span class="note" id="rnote"></span></div>
-      <div class="panel" id="repaso"></div>
-    </section>
-    <section class="blk">
-      <div class="sh"><h2>Proyecto Ising</h2><span class="note">una cadena de espines, de la pizarra al QPU</span></div>
-      <div class="panel">
-        <div class="track" id="track"></div>
-        <div class="hcur" id="hito"></div>
-      </div>
-    </section>
-  </div>
-
-  <section class="blk">
-    <div class="sh"><h2>El curso</h2><span class="note">10 partes · basado en las guías oficiales de IBM Quantum</span></div>
-    <div class="parts" id="parts"></div>
+  <section class="today" aria-labelledby="t-repaso">
+    <h2 id="t-repaso">Repaso de hoy</h2>
+    <p class="note" id="rnote"></p>
+    <div id="repaso"></div>
   </section>
 
-  <footer>
-    Contenido basado en las <a href="https://quantum.cloud.ibm.com/docs/en/guides">guías de IBM Quantum</a> (CC BY-SA 4.0). Todo el código se ejecutó con Qiskit 2.5.
-  </footer>
-</div>
+  <section class="project" aria-labelledby="t-ising">
+    <h2 id="t-ising">Proyecto Ising</h2>
+    <p class="note">Una cadena de espines, de la pizarra al QPU.</p>
+    <ol class="track" id="track" aria-label="Hitos del proyecto"></ol>
+    <div class="hcur" id="hito"></div>
+  </section>
+
+  <section class="course" aria-labelledby="t-curso">
+    <h2 id="t-curso">El curso</h2>
+    <p class="note">10 partes, basadas en las guías oficiales de IBM Quantum.</p>
+    <ol class="parts" id="parts"></ol>
+  </section>
+</main>
+
+<footer>
+  <p>Contenido basado en las <a href="https://quantum.cloud.ibm.com/docs/en/guides">guías de IBM Quantum</a> (CC BY-SA 4.0). Todo el código se ejecutó con Qiskit 2.5.</p>
+</footer>
 
 <script type="module">
 const $ = s => document.querySelector(s);
@@ -78,7 +81,6 @@ function rich(s) {
 (() => {
   const s = $('#bloch'), ns = 'http://www.w3.org/2000/svg', R = 120, tilt = 0.24;
   const E = (t, a) => { const e = document.createElementNS(ns, t); for (const k in a) e.setAttribute(k, a[k]); s.appendChild(e); return e; };
-  s.innerHTML = '<defs><radialGradient id="gl" cx="35%" cy="30%" r="75%"><stop offset="0%" stop-color="var(--acc)" stop-opacity=".16"/><stop offset="100%" stop-color="var(--acc)" stop-opacity="0"/></radialGradient></defs>';
   E('circle', { class: 'sph', r: R });
   E('ellipse', { class: 'eq', rx: R, ry: R * tilt });
   E('line', { class: 'ax', x1: 0, y1: -R - 20, x2: 0, y2: R + 20 });
@@ -121,27 +123,29 @@ function renderProyecto(course) {
   const cur = HITOS.find(h => !done.includes(h.n)) || HITOS[HITOS.length - 1];
   const track = $('#track'); track.textContent = '';
   HITOS.forEach(h => {
-    const d = document.createElement('div');
-    d.className = 'hito' + (done.includes(h.n) ? ' done' : notebookForHito(h) ? ' open' : '');
-    d.textContent = h.n; d.title = `Hito ${h.n} · ${h.t}`;
+    const d = document.createElement('li');
+    d.className = 'hito' + (done.includes(h.n) ? ' done' : notebookForHito(h) ? ' open' : '') + (h === cur ? ' cur' : '');
+    d.textContent = h.n; d.title = `Hito ${h.n}: ${h.t}`;
+    if (h === cur) d.setAttribute('aria-current', 'step');
+    if (done.includes(h.n)) d.insertAdjacentHTML('beforeend', '<span class="sr"> (hecho)</span>');
     track.appendChild(d);
   });
   const partTitle = course.parts[cur.part - 1].title.split(' · ')[1];
   const box = $('#hito');
-  box.innerHTML = `<div class="k">Hito ${cur.n} de 10 · Parte ${cur.part}</div><h3></h3><p></p>`;
-  box.querySelector('h3').textContent = cur.t; box.querySelector('p').textContent = cur.d;
+  box.innerHTML = `<p class="k">Hito ${cur.n} de 10, parte ${cur.part}</p><h3></h3><p class="d"></p>`;
+  box.querySelector('h3').textContent = cur.t; box.querySelector('.d').textContent = cur.d;
   const currentNotebook = notebookForHito(cur);
   if (currentNotebook) {
     const cmd = `uv run marimo edit ${currentNotebook}`;
     const row = document.createElement('div'); row.className = 'cmd';
-    row.innerHTML = `<code></code><button>Copiar</button><button class="chk">Marcar como hecho</button>`;
+    row.innerHTML = `<code></code><button type="button" class="btn">Copiar</button><button type="button" class="btn chk">Marcar como hecho</button>`;
     row.querySelector('code').textContent = cmd;
-    row.children[1].onclick = e => navigator.clipboard?.writeText(cmd).then(() => { e.target.textContent = 'Copiado ✓'; });
+    row.children[1].onclick = e => navigator.clipboard?.writeText(cmd).then(() => { e.target.textContent = 'Copiado'; });
     row.children[2].onclick = () => { LS.set('qiskit:hitos', [...new Set([...done, cur.n])]); renderProyecto(course); };
     window.notebookHelp(row);
     box.appendChild(row);
   } else {
-    const p = document.createElement('p'); p.textContent = `Se abre cuando llegues a la Parte ${cur.part} (${partTitle}).`; box.appendChild(p);
+    const p = document.createElement('p'); p.className = 'wait'; p.textContent = `Se abre cuando llegues a la parte ${cur.part} (${partTitle}).`; box.appendChild(p);
   }
 }
 
@@ -165,22 +169,22 @@ async function renderRepaso(course, doneSet) {
   const todo = items.slice(0, 3);
   $('#rnote').textContent = todo.length ? `${todo.length} de ${items.length} pendientes` : '';
   box.textContent = '';
-  if (!todo.length) { box.innerHTML = '<p class="empty">Nada que repasar hoy. ✓ Vuelve mañana.</p>'; return; }
+  if (!todo.length) { box.innerHTML = '<p class="empty">Nada que repasar hoy. Vuelve mañana.</p>'; return; }
   const answer = (it, ok, el) => {
     const s = LS.get('qiskit:repaso', {}), prev = s[it.id] || { box: -1 };
     const nb = ok ? Math.min(prev.box + 1, GAPS.length - 1) : 0;
     s[it.id] = { box: nb, due: Date.now() + (ok ? GAPS[nb] : 1) * DAY };
     LS.set('qiskit:repaso', s);
     const fb = el.querySelector('.fb');
-    fb.innerHTML = (ok ? '✓ ' : '✗ ') + rich(ok ? (it.a.why || 'Correcto.') : (it.a.hint || 'No es correcto: volverá mañana.')) + `<br><span class="mono">próximo repaso en ${ok ? GAPS[nb] : 1} día(s)</span>`;
+    fb.innerHTML = `<b>${ok ? 'Correcto.' : 'Incorrecto.'}</b> ` + rich(ok ? (it.a.why || '') : (it.a.hint || 'Volverá mañana.')) + `<br><span class="when">Próximo repaso en ${ok ? GAPS[nb] : 1} día(s).</span>`;
   };
   for (const it of todo) {
     const el = document.createElement('div'); el.className = 'rq';
-    el.innerHTML = `<div class="from">${esc(it.l.section)} · ${esc(it.l.title)}</div><div class="p">${rich(it.a.prompt)}</div>`;
+    el.innerHTML = `<p class="from">${esc(it.l.section)} ${esc(it.l.title)}</p><div class="p">${rich(it.a.prompt)}</div>`;
     if (it.a.kind === 'choice') {
       const o = document.createElement('div'); o.className = 'opts';
       it.a.options.forEach((t, k) => {
-        const b = document.createElement('button'); b.innerHTML = rich(t);
+        const b = document.createElement('button'); b.type = 'button'; b.innerHTML = rich(t);
         b.onclick = () => { if (el.dataset.done) return; el.dataset.done = 1; const ok = k === it.a.right; b.classList.add(ok ? 'ok' : 'no');
           if (!ok) o.children[it.a.right].classList.add('ok'); answer(it, ok, el); };
         o.appendChild(b);
@@ -188,7 +192,7 @@ async function renderRepaso(course, doneSet) {
       el.appendChild(o);
     } else {
       const r = document.createElement('div'); r.className = 'num';
-      r.innerHTML = '<input inputmode="decimal" placeholder="Tu respuesta"><button>Comprobar</button>';
+      r.innerHTML = '<label class="sr" for="rn">Tu respuesta</label><input id="rn" inputmode="decimal" placeholder="Tu respuesta"><button type="button" class="btn">Comprobar</button>';
       const inp = r.querySelector('input');
       const go = () => { if (el.dataset.done) return; const v = Number(inp.value.replace(',', '.')); if (!isFinite(v) || inp.value.trim() === '') return;
         el.dataset.done = 1; const tol = it.a.tol ?? 0.01; answer(it, Math.abs(v - it.a.answer) <= tol * Math.max(1, Math.abs(it.a.answer)), el); };
@@ -196,6 +200,7 @@ async function renderRepaso(course, doneSet) {
       el.appendChild(r);
     }
     el.appendChild(Object.assign(document.createElement('div'), { className: 'fb' }));
+    el.querySelector('.fb').setAttribute('role', 'status');
     box.appendChild(el);
   }
 }
@@ -207,8 +212,9 @@ async function renderRepaso(course, doneSet) {
   const course = await (await fetch('course.json')).json();
   const all = course.parts.flatMap(p => p.lessons);
   const mins = all.reduce((a, l) => a + (l.minutes || 0), 0);
-  $('#prog').textContent = `${doneSet.size}/${all.length} lecciones`;
-  $('#stats').innerHTML = `<div><b>${all.length}</b>lecciones</div><div><b>${(mins / 60).toFixed(1)} h</b>narradas</div><div><b>10</b>hitos de proyecto</div><div><b>${doneSet.size}</b>completadas</div>`;
+  $('#prog').textContent = `${doneSet.size}/${all.length} lecciones completadas`;
+  const bar = $('#bar'); bar.max = all.length; bar.value = doneSet.size;
+  $('#facts').textContent = `${all.length} lecciones y ${(mins / 60).toLocaleString('es', { maximumFractionDigits: 1 })} h de narración.`;
 
   // siguiente paso: misión pendiente de una lección hecha, o la siguiente lección
   const misDone = LS.get('qiskit:misiones', []);
@@ -217,44 +223,44 @@ async function renderRepaso(course, doneSet) {
   const nx = $('#next');
   if (pendMis) {
     const cmd = `uv run marimo edit ${pendMis.m.notebook}`;
-    nx.innerHTML = `<div class="k">Tu turno · misión pendiente</div><div class="t"></div><div class="s">${pendMis.m.tasks === 1 ? '1 misión' : pendMis.m.tasks + ' misiones'} en el cuaderno de práctica. Busca ${pendMis.m.tasks === 1 ? 'la ✅' : 'las ✅'}.</div>
-      <div class="cmd"><code></code><button>Copiar</button><button class="chk">Ya la hice</button></div>`;
-    nx.querySelector('.t').textContent = `${pendMis.l.section} · ${pendMis.l.title}`;
+    nx.innerHTML = `<p class="k">Tu turno: misión pendiente</p><h2 class="t"></h2><p class="s">${pendMis.m.tasks === 1 ? '1 misión' : pendMis.m.tasks + ' misiones'} en el cuaderno de práctica. Busca ${pendMis.m.tasks === 1 ? 'la ✅' : 'las ✅'}.</p>
+      <div class="cmd"><code></code><button type="button" class="btn">Copiar</button><button type="button" class="btn chk">Ya la hice</button></div>`;
+    nx.querySelector('.t').textContent = `${pendMis.l.section} ${pendMis.l.title}`;
     nx.querySelector('code').textContent = cmd;
     const [cp, ok] = nx.querySelectorAll('.cmd button');
-    cp.onclick = () => navigator.clipboard?.writeText(cmd).then(() => { cp.textContent = 'Copiado ✓'; });
+    cp.onclick = () => navigator.clipboard?.writeText(cmd).then(() => { cp.textContent = 'Copiado'; });
     ok.onclick = () => { LS.set('qiskit:misiones', [...misDone, pendMis.m.notebook]); location.reload(); };
     window.notebookHelp(nx.querySelector('.cmd'));
   } else {
-    nx.innerHTML = `<div class="k">${doneSet.size ? 'Continúa' : 'Empieza aquí'} · ${esc(nextL.section)}</div><div class="t"></div><div class="s"></div><a class="go" href="lesson.html?l=${encodeURIComponent(nextL.id)}">${doneSet.size ? 'Continuar' : 'Empezar'} · ${nextL.minutes} min →</a>`;
-    nx.querySelector('.t').textContent = nextL.title; nx.querySelector('.s').textContent = nextL.summary;
+    nx.innerHTML = `<p class="k">${doneSet.size ? 'Continúa donde lo dejaste' : 'Empieza aquí'}</p><h2 class="t"></h2><p class="s"></p><a class="btn primary go" href="lesson.html?l=${encodeURIComponent(nextL.id)}">${doneSet.size ? 'Continuar' : 'Empezar'} la lección, ${nextL.minutes} min</a>`;
+    nx.querySelector('.t').textContent = `${nextL.section} ${nextL.title}`; nx.querySelector('.s').textContent = nextL.summary;
   }
 
   renderProyecto(course);
   renderRepaso(course, doneSet);
 
-  const COLORS = ['--acc', '--acc2', '--acc3'];
   const root = $('#parts');
-  course.parts.forEach((part, i) => {
+  course.parts.forEach((part) => {
     const [num, name] = part.title.split(' · ');
     const pd = part.lessons.filter(l => doneSet.has(l.id)).length, n = part.lessons.length;
-    const C = 2 * Math.PI * 22, col = `var(${COLORS[i % 3]})`;
-    const card = document.createElement('article'); card.className = 'part';
-    card.innerHTML = `<div class="h"><svg class="ring" viewBox="0 0 54 54"><circle cx="27" cy="27" r="22" stroke="var(--line)"/>
-      <circle cx="27" cy="27" r="22" stroke="${col}" stroke-linecap="${pd ? 'round' : 'butt'}" stroke-dasharray="${C * pd / n} ${C}" transform="rotate(-90 27 27)"/><text x="27" y="27">${pd}/${n}</text></svg>
-      <div><div class="no"></div><h3></h3><p class="d"></p></div></div>
-      <details><summary>${n} lecciones · ${part.lessons.reduce((a, l) => a + (l.minutes || 0), 0)} min</summary></details>`;
+    const card = document.createElement('li'); card.className = 'part';
+    card.innerHTML = `<div class="h"><p class="no"></p><h3></h3><p class="d"></p>
+      <div class="pr"><progress max="${n}" value="${pd}" aria-label="Lecciones completadas de esta parte"></progress><span class="n">${pd}/${n}</span></div></div>
+      <details><summary>${n} lecciones, ${part.lessons.reduce((a, l) => a + (l.minutes || 0), 0)} min</summary></details>`;
     card.querySelector('.no').textContent = num; card.querySelector('h3').textContent = name || num; card.querySelector('.d').textContent = part.desc;
     const det = card.querySelector('details');
     if (part.lessons.some(l => !doneSet.has(l.id)) && part.lessons.some(l => doneSet.has(l.id))) det.open = true;
+    const ul = document.createElement('ul'); ul.className = 'lessons';
     for (const l of part.lessons) {
-      const a = document.createElement('a'); a.href = 'lesson.html?l=' + encodeURIComponent(l.id); a.title = l.summary;
+      const li = document.createElement('li');
+      const a = document.createElement('a'); a.href = 'lesson.html?l=' + encodeURIComponent(l.id);
       if (doneSet.has(l.id)) a.className = 'done';
-      a.innerHTML = `<span class="s">${esc(l.section)}</span><span class="t"></span><span class="m">${l.minutes} min</span>`;
+      a.innerHTML = `<span class="s">${esc(l.section)}</span><span class="t"></span><span class="m">${doneSet.has(l.id) ? 'Hecha' : l.minutes + ' min'}</span>`;
       a.querySelector('.t').textContent = l.title;
-      if (l.missions) a.querySelector('.t').insertAdjacentHTML('beforeend', '<span class="tag">práctica</span>');
-      det.appendChild(a);
+      if (l.missions) a.querySelector('.t').insertAdjacentHTML('beforeend', '<span class="tag"> con práctica</span>');
+      li.appendChild(a); ul.appendChild(li);
     }
+    det.appendChild(ul);
     root.appendChild(card);
   });
 })();
