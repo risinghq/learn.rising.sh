@@ -25,14 +25,14 @@ from build import walk  # noqa: E402
 
 from qgcheck import grade, spec  # noqa: E402
 
-SITE = ROOT / "site"
+COURSE = ROOT / "site" / "qiskit"
 NO_AER = ("qiskit_aer",)
 
 
 def published() -> dict[str, dict[str, Any]]:
     """Devuelve los bloques de ejercicio publicados, por id."""
     found: dict[str, dict[str, Any]] = {}
-    for f in sorted((SITE / "lessons").glob("*/lesson.json")):
+    for f in sorted((COURSE / "lessons").glob("*/lesson.json")):
         for beat in json.loads(f.read_text(encoding="utf-8"))["beats"]:
             for blk in walk(beat["scene"]):
                 if blk.get("type") == "exercise":

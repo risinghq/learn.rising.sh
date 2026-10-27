@@ -110,13 +110,13 @@ description = "Run every test that needs no service, network or secret"
 depends = ["test:py", "test:notebooks", "test:ui", "test:worker", "test:lessons"]
 
 [tasks."generate:lessons"]
-description = "Rewrite site/lessons/*/lesson.json and site/course.json from lessons_src"
+description = "Rewrite site/qiskit/lessons/*/lesson.json and site/qiskit/course.json from lessons_src"
 run = "uv run python lessons_src/build.py"
 
 [tasks."generate:editor"]
-description = "Rewrite site/editor.js from editor/src"
+description = "Rewrite site/qiskit/editor.js from editor/src"
 dir = "editor"
-run = "esbuild src/index.js --bundle --minify --format=iife --target=es2020 --outfile=../site/editor.js"
+run = "esbuild src/index.js --bundle --minify --format=iife --target=es2020 --outfile=../site/qiskit/editor.js"
 
 [tasks."generate:vendor"]
 description = "Copy KaTeX and the fonts from editor/node_modules into site/vendor, which git ignores"
@@ -132,13 +132,13 @@ description = "Fail without writing if the committed lesson JSON differs from th
 run = "uv run python lessons_src/build.py --check"
 
 [tasks."build:editor"]
-description = "Fail without writing if site/editor.js differs from the bundle built from editor/src"
+description = "Fail without writing if site/qiskit/editor.js differs from the bundle built from editor/src"
 dir = "editor"
 run = """
 out="$(mktemp)"
 trap 'rm -f "$out"' EXIT
 esbuild src/index.js --bundle --minify --format=iife --target=es2020 --outfile="$out" --log-level=warning
-cmp "$out" ../site/editor.js
+cmp "$out" ../site/qiskit/editor.js
 """
 
 [tasks.build]

@@ -52,7 +52,9 @@ def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     lesson = json.loads(
-        (ROOT / "site" / "lessons" / lesson_id / "lesson.json").read_text(encoding="utf-8")
+        (ROOT / "site" / "qiskit" / "lessons" / lesson_id / "lesson.json").read_text(
+            encoding="utf-8"
+        )
     )
     SHOTS.mkdir(exist_ok=True)
     with sync_playwright() as p:
@@ -61,7 +63,7 @@ def main() -> None:
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
-        pg.goto(f"{base_url}/lesson.html?l={lesson_id}")
+        pg.goto(f"{base_url}/qiskit/lesson.html?l={lesson_id}")
         pg.wait_for_timeout(1500)
         print("inicio:", pg.inner_text("#start-meta"))
         pg.click("#go")

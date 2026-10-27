@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw
 from playwright.sync_api import Page, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
-SITE, OUT = ROOT / "site", ROOT / "shots"
+COURSE, OUT = ROOT / "site" / "qiskit", ROOT / "shots"
 SIZES = {"land": (1366, 768), "port": (390, 844)}
 
 # Detecta bloques fuera del escenario o bajo la etiqueta superior.
@@ -52,15 +52,15 @@ def main() -> None:
     port = sys.argv[sys.argv.index("--port") + 1] if "--port" in sys.argv else "8810"
     ids = [a for a in sys.argv[1:] if not a.startswith("--") and a != port] or [
         les["id"]
-        for p in json.loads((SITE / "course.json").read_text(encoding="utf-8"))["parts"]
+        for p in json.loads((COURSE / "course.json").read_text(encoding="utf-8"))["parts"]
         for les in p["lessons"]
     ]
     errors: dict[str, list[str]] = {}
     with sync_playwright() as p:
         b = p.chromium.launch()
         for lid in ids:
-            les = json.loads((SITE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
-            if not (SITE / "lessons" / lid / "timings.json").exists():
+            les = json.loads((COURSE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
+            if not (COURSE / "lessons" / lid / "timings.json").exists():
                 print(lid, "sin timings, se omite")
                 continue
             (OUT / lid).mkdir(parents=True, exist_ok=True)
@@ -69,7 +69,7 @@ def main() -> None:
                 watch(pg, errors, lid)
                 files: list[Path] = []
                 for n, beat in enumerate(les["beats"]):
-                    pg.goto(f"http://localhost:{port}/lesson.html?l={lid}&beat={n}")
+                    pg.goto(f"http://localhost:{port}/qiskit/lesson.html?l={lid}&beat={n}")
                     pg.wait_for_timeout(1700)
                     f = OUT / lid / f"{n:02d}-{beat['id']}-{tag}.png"
                     pg.screenshot(path=str(f))

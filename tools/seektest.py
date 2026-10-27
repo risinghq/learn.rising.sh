@@ -20,7 +20,7 @@ VISIBLE_ITEMS = (
 def main() -> None:
     lesson = sys.argv[1] if len(sys.argv) > 1 else "p1-composer"
     step = int(sys.argv[2]) if len(sys.argv) > 2 else 2
-    url = f"http://localhost:8810/lesson.html?l={lesson}"
+    url = f"http://localhost:8810/qiskit/lesson.html?l={lesson}"
     SHOTS.mkdir(exist_ok=True)
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"])

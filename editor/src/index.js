@@ -1,5 +1,5 @@
 // El editor usa CodeMirror 6 con Python y los tokens de theme.css.
-// `mise run generate:editor` lo empaqueta en site/editor.js. blocks.js lo carga al abrir el primer ejercicio.
+// `mise run generate:editor` lo empaqueta en site/qiskit/editor.js. blocks.js lo carga al abrir el primer ejercicio.
 import {
   defaultKeymap,
   history,

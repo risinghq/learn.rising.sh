@@ -19,7 +19,7 @@
     }
   ],
   "ignorePatterns": [
-    "site/editor.js",
+    "site/qiskit/editor.js",
     "site/vendor/**",
     ".cache/**",
     "**/node_modules/**"

@@ -20,7 +20,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-SITE = Path(__file__).resolve().parent.parent / "site"
+COURSE = Path(__file__).resolve().parent.parent / "site" / "qiskit"
 
 
 def blocks(scene: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
@@ -33,7 +33,7 @@ def blocks(scene: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
 
 def verify_lesson(lid: str, show: bool) -> tuple[int, int]:
     """Ejecuta los bloques de una lección y devuelve (bloques ejecutados, fallos)."""
-    les = json.loads((SITE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
+    les = json.loads((COURSE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
     ns: dict[str, Any] = {"__name__": "__leccion__"}
     n, fails = 0, 0
     for b in les["beats"]:
@@ -80,7 +80,7 @@ def main() -> None:
     matplotlib.use("Agg")
     ids = [a for a in sys.argv[1:] if not a.startswith("-")] or [
         les["id"]
-        for p in json.loads((SITE / "course.json").read_text(encoding="utf-8"))["parts"]
+        for p in json.loads((COURSE / "course.json").read_text(encoding="utf-8"))["parts"]
         for les in p["lessons"]
     ]
     show = "-v" in sys.argv or "--show" in sys.argv

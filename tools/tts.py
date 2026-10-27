@@ -1,7 +1,7 @@
 """Genera la narración de una lección con Edge TTS y los tiempos por palabra.
 
 Uso (desde la raíz del proyecto):
-    uv run --group tools python tools/tts.py site/lessons/p1-quickstart
+    uv run --group tools python tools/tts.py site/qiskit/lessons/p1-quickstart
 
 Lee <lección>/lesson.json y escribe en la misma carpeta:
     audio/<beat>.mp3          un clip por beat (y por cada texto de "extras")

@@ -28,7 +28,7 @@ def main() -> None:
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
-        pg.goto(f"http://localhost:8810/lesson.html?l={lid}")
+        pg.goto(f"http://localhost:8810/qiskit/lesson.html?l={lid}")
         pg.wait_for_timeout(1200)
         pg.click("#go")
         cur = 0

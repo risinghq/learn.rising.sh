@@ -1,7 +1,7 @@
-"""Genera site/lessons/<id>/lesson.json y site/course.json a partir de plan.py y de los módulos parte*.py.
+"""Genera site/qiskit/lessons/<id>/lesson.json y site/qiskit/course.json a partir de plan.py y de los módulos parte*.py.
 
     python lessons_src/build.py              # escribe los JSON y comprueba la cobertura de las guías
-    python lessons_src/build.py --check      # no escribe: falla si los JSON de site/ no coinciden con lo que se generaría
+    python lessons_src/build.py --check      # no escribe: falla si los JSON de site/qiskit/ no coinciden con lo que se generaría
     python lessons_src/build.py --tts        # además genera la narración (necesita uv, red y ffprobe)
 
 La cobertura se comprueba contra .cache/qiskit-docs.
@@ -29,7 +29,7 @@ from plan import PARTS  # noqa: E402
 
 from qgcheck import spec  # noqa: E402
 
-SITE = ROOT / "site"
+COURSE = ROOT / "site" / "qiskit"
 GUIDE = "https://quantum.cloud.ibm.com/docs/en/guides/"
 TOC = ROOT / ".cache" / "qiskit-docs" / "docs" / "guides" / "_toc.json"
 
@@ -173,7 +173,7 @@ def main() -> None:
             check(les)
             publish_exercises(les, exercises)
             ordered.append(les)
-            tf = SITE / "lessons" / lid / "timings.json"
+            tf = COURSE / "lessons" / lid / "timings.json"
             beat_ids = {b["id"] for b in les["beats"]}
             if tf.exists():
                 secs = sum(
@@ -217,10 +217,10 @@ def main() -> None:
     outputs: dict[Path, str] = {}
     for a, b in zip(ordered, [*ordered[1:], None], strict=True):
         a["next"] = b["id"] if b else None
-        outputs[SITE / "lessons" / a["id"] / "lesson.json"] = json.dumps(
+        outputs[COURSE / "lessons" / a["id"] / "lesson.json"] = json.dumps(
             a, ensure_ascii=False, indent=1
         )
-    outputs[SITE / "course.json"] = json.dumps(course, ensure_ascii=False, indent=1)
+    outputs[COURSE / "course.json"] = json.dumps(course, ensure_ascii=False, indent=1)
     if "--check" in sys.argv:
         stale = [
             p.relative_to(ROOT).as_posix()
@@ -252,7 +252,7 @@ def main() -> None:
                     "tools",
                     "python",
                     str(ROOT / "tools" / "tts.py"),
-                    str(SITE / "lessons" / les["id"]),
+                    str(COURSE / "lessons" / les["id"]),
                 ],
                 check=True,
                 cwd=ROOT,

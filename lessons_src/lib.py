@@ -1,7 +1,7 @@
 """Ayudantes para escribir lecciones en Python (cadenas crudas para LaTeX y código).
 
 Cada módulo de contenido define LESSONS: una lista de dicts creados con lesson().
-build.py los escribe en site/lessons/<id>/lesson.json y genera site/course.json.
+build.py los escribe en site/qiskit/lessons/<id>/lesson.json y genera site/qiskit/course.json.
 """
 
 from collections.abc import Iterable
