@@ -16,7 +16,7 @@ says what each folder holds and where a request goes.
 | `runner/`      | The runner image (`server.py`, `sandbox.py`) and the Worker (`worker/`).                           |
 | `editor/`      | The package that bundles `site/qiskit/editor.js` and copies KaTeX and the fonts to `site/vendor/`. |
 | `content/`     | The speech synthesis cache.                                                                        |
-| `tools/`       | Helper programs: original guides, narration, checks, local server and dashboard.                   |
+| `tools/`       | Helper programs: original guides, narration, checks, local server, dashboard and browser tools.    |
 | `tests/`       | Browser tests, exercise tests, runner tests and dashboard tests.                                   |
 | `stubs/`       | Types of `qiskit` and `qiskit_aer` for mypy.                                                       |
 

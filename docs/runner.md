@@ -241,6 +241,6 @@ the routes, each limit of [protection.md](protection.md), the endpoints of
 Two tests call the real `siteverify` of Turnstile with the test keys and are
 skipped if there is no network.
 
-`tests/account_ui_test.py` starts `runner/worker/test/serve.ts`, which serves
+`tests/account_ui_test.ts` starts `runner/worker/test/serve.ts`, which serves
 that same Worker locally with the fake provider, and walks through it with a
 browser. It runs inside `mise run test:ui`.

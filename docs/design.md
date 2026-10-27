@@ -19,7 +19,7 @@ surface come from the same hue as the accent.
 | `site/catalog.css`      | Catalog styles.                                         |
 | `site/qiskit/index.css` | Styles of the course home page and the privacy page.    |
 | `site/qiskit/app.css`   | Player styles.                                          |
-| `tests/theme_test.py`   | Browser test: contrast, pages, saved mode.              |
+| `tests/theme_test.ts`   | Browser test: contrast, pages, saved mode.              |
 
 Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`. The
 course pages link them as `../theme.css` and `../theme.js`. `theme.js` is the
@@ -128,7 +128,7 @@ their own.
   value. A translucent background is written with `color-mix()` over
   `transparent`.
 - A new color is added to `theme.css` with its light value and its dark value
-  and passes `tests/theme_test.py` before it is used.
+  and passes `tests/theme_test.ts` before it is used.
 - In SVG presentation attributes `var(--x)` does not work: `engine.ts` sets it
   as a style. A canvas reads the color with `cssv('name')` each time it draws.
 - Text sits on `--bg`, `--bg2`, `--card` or `--stage` and reaches 4.5:1 on all
@@ -143,7 +143,7 @@ their own.
 ## Contrast
 
 Criterion: WCAG 2.x AA. Text needs 4.5:1; axes, wires and the border of a
-control, 3:1. `tests/theme_test.py` reads each token in the browser, in both
+control, 3:1. `tests/theme_test.ts` reads each token in the browser, in both
 modes, and fails if any falls below. Each cell is the worst ratio among the four
 surfaces (`--bg`, `--bg2`, `--card`, `--stage`), and `acc-ink/acc` is the button
 text on its fill.
@@ -168,7 +168,7 @@ To repeat the measurement:
 
 ```sh
 mise run install
-uv run --group tools python tests/theme_test.py --table
+bun tests/theme_test.ts --table
 ```
 
 The same test loads the catalog, the course home page and three lessons, each at

@@ -221,11 +221,11 @@ with it.
 
 ## Where learners get stuck
 
-`tools/dashboard.py` reads the database with `wrangler d1 execute` and writes
+`tools/dashboard.ts` reads the database with `wrangler d1 execute` and writes
 nothing.
 
 ```sh
-uv run python tools/dashboard.py --database-id <uuid>
+bun tools/dashboard.ts --database-id <uuid>
 ```
 
 It reads the remote database, with the session of `bunx wrangler login` (in

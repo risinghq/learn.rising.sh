@@ -67,8 +67,10 @@ guides, change the hash in `qiskit-docs.commit`, run `fetch_docs.py` and fix
 | `practica.py`                                        | Runs each notebook with and without solutions. It also tests `mo.ui.slider`/`number` at minimum and maximum. A runtime error fails. |
 | `exercises.py`                                       | Runs the solution and the starter code of each exercise with `qgcheck` and checks its `needs`.                                      |
 | `serve.py`                                           | Serves `site/` locally and answers `POST /run`.                                                                                     |
-| `dashboard.py`                                       | The operator dashboard ([accounts.md](accounts.md#where-learners-get-stuck)).                                                       |
-| `playtest.py`, `seektest.py`, `shot.py`, `review.py` | Playwright tests and screenshots on the course served on port 8810.                                                                 |
+| `dashboard.ts`                                       | The operator dashboard ([accounts.md](accounts.md#where-learners-get-stuck)).                                                       |
+| `playtest.ts`, `seektest.ts`, `shot.ts`, `review.ts` | Playwright tests and screenshots on the course served on port 8810.                                                                 |
+
+The `.ts` programs run with Bun: `bun tools/shot.ts <lesson> <beats>`.
 
 ## The cycle of a lesson
 

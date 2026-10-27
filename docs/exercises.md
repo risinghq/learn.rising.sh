@@ -343,6 +343,7 @@ the lessons in the browser against `serve.py`, on desktop and on a phone: it
 writes wrong code, corrects it, reloads and checks the panel, the keyboard, the
 hints, the timeout, the errors and the Turnstile check with a test widget.
 `mise run test:ui` runs the browser tests. All of them use
-[`tests/offline.py`](../tests/offline.py): the browser aborts any request that
+[`tests/offline.py`](../tests/offline.py) or its TypeScript twin
+[`tests/offline.ts`](../tests/offline.ts): the browser aborts any request that
 does not go to `127.0.0.1` or `localhost`, and the test ends with an error that
 names the address.
