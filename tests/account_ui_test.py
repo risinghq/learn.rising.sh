@@ -82,7 +82,7 @@ def start_worker() -> tuple[subprocess.Popen[str], dict[str, str]]:
 
 def last_beat(lesson: str) -> int:
     beats = json.loads(
-        (ROOT / "site" / "lessons" / lesson / "lesson.json").read_text(encoding="utf-8")
+        (ROOT / "site" / "qiskit" / "lessons" / lesson / "lesson.json").read_text(encoding="utf-8")
     )["beats"]
     return len(beats) - 1
 
@@ -140,16 +140,16 @@ def sign_in(page: Page) -> None:
 
 def anonymous(browser: Browser, site: str, control: str) -> Tab:
     page, errors, requests = new_page(browser, site, control)
-    page.goto(f"{site}/index.html")
+    page.goto(f"{site}/qiskit/index.html")
     page.locator("#parts .part").first.wait_for()
     page.locator("#hito .chk").click()
-    page.goto(f"{site}/privacidad.html")
+    page.goto(f"{site}/qiskit/privacidad.html")
     panel = open_panel(page, site, LESSON, 1)
     write(page, panel, FAILING)
     press(panel, "Comprobar")
     wait_result(panel)
     check(panel.locator(".xstatus.bad").count() == 1, "anónimo: la comprobación falla")
-    page.goto(f"{site}/lesson.html?l={LESSON}&beat={last_beat(LESSON)}")
+    page.goto(f"{site}/qiskit/lesson.html?l={LESSON}&beat={last_beat(LESSON)}")
     page.locator("#next").click()
     page.locator("#end:not(.hide)").wait_for()
     check(
@@ -196,7 +196,7 @@ def main() -> None:
                 "anónimo: el servidor no tiene ninguna cuenta",
             )
 
-            one.goto(f"{site}/lesson.html?l={LESSON}&beat={last_beat(LESSON)}")
+            one.goto(f"{site}/qiskit/lesson.html?l={LESSON}&beat={last_beat(LESSON)}")
             sign_in(one)
             rows = call(f"{control}/rows")
             check(
@@ -213,7 +213,7 @@ def main() -> None:
             )
 
             two, two_errors, _ = new_page(browser, site, control)
-            two.goto(f"{site}/index.html")
+            two.goto(f"{site}/qiskit/index.html")
             sign_in(two)
             two.locator("#parts .part").first.wait_for()
             check(

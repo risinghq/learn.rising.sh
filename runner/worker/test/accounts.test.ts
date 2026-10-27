@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import {
   type Harness,
+  HOME_HOST,
   type Options,
   TOKEN,
   clearOfMinuteEnd,
@@ -60,6 +61,14 @@ describe("inicio de sesión con OAuth", () => {
       expect(url.searchParams.get("redirect_uri")).toBe(
         `http://runner.test/auth/${provider}/callback`,
       );
+      // El URI de vuelta sale del host de la petición, así que el dominio del
+      // sitio lo lleva sin más configuración.
+      const home = await h.request("GET", `/auth/${provider}`, {
+        host: HOME_HOST,
+      });
+      expect(
+        new URL(home.headers.get("location")!).searchParams.get("redirect_uri"),
+      ).toBe(`http://${HOME_HOST}/auth/${provider}/callback`);
       // Solo el identificador: ni correo ni nombre.
       expect(url.searchParams.get("scope")).toBe(
         provider === "google" ? "openid" : null,

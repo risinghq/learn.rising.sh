@@ -4,6 +4,8 @@ import {
   type Harness,
   type Options,
   FAIL_SECRET,
+  HOME_HOST,
+  LEGACY_HOST,
   SPENT_SECRET,
   TOKEN,
   VARS,
@@ -37,20 +39,53 @@ describe("GET /health", () => {
 });
 
 describe("el sitio y /run en un solo Worker", () => {
-  it("sirve index.html en / sin llamar al contenedor", async () => {
+  it("sirve el catálogo en / y el curso en /qiskit/ sin llamar al contenedor", async () => {
     const h = await worker();
-    const reply = await h.get("/");
-    expect(reply.status).toBe(200);
-    expect(reply.headers.get("content-type")).toContain("text/html");
-    expect(reply.body).toContain("<title>");
+    const catalog = await h.get("/");
+    expect(catalog.status).toBe(200);
+    expect(catalog.headers.get("content-type")).toContain("text/html");
+    expect(catalog.body).toContain("<title>Duo</title>");
+    const course = await h.get("/qiskit/");
+    expect(course.status).toBe(200);
+    expect(course.body).toContain("<title>Qubit a qubit</title>");
     expect(h.runnerCalls()).toHaveLength(0);
   });
 
   it("sirve las lecciones y responde 404 a lo que no es un archivo", async () => {
     const h = await worker();
-    expect((await h.get("/lesson.html")).status).toBe(200);
-    expect((await h.get("/course.json")).body.parts).toBeDefined();
+    expect((await h.get("/qiskit/lesson.html")).status).toBe(200);
+    expect((await h.get("/qiskit/course.json")).body.parts).toBeDefined();
+    expect((await h.get("/courses.json")).body[0].slug).toBe("qiskit");
     expect((await h.get("/no-existe.html")).status).toBe(404);
+  });
+
+  // Las rutas del curso en la raíz deben conservar su destino bajo /qiskit/.
+  it.each([
+    ["/", "/qiskit/"],
+    ["/index.html", "/qiskit/"],
+    ["/lesson.html?l=p1-quickstart", "/qiskit/lesson.html?l=p1-quickstart"],
+    ["/privacidad.html", "/qiskit/privacidad.html"],
+    [
+      "/lessons/p1-quickstart/lesson.json",
+      "/qiskit/lessons/p1-quickstart/lesson.json",
+    ],
+  ])("el host antiguo redirige %s con 301 a %s", async (from, to) => {
+    const h = await worker();
+    const reply = await h.request("GET", from, { host: LEGACY_HOST });
+    expect(reply.status).toBe(301);
+    expect(reply.headers.get("location")).toBe(`https://${HOME_HOST}${to}`);
+  });
+
+  it("solo redirige las páginas antiguas del curso en el host antiguo", async () => {
+    const h = await worker();
+    // En el host nuevo, / es el catálogo.
+    expect((await h.request("GET", "/", { host: HOME_HOST })).status).toBe(200);
+    // La plataforma sigue respondiendo en el host antiguo.
+    const health = await h.request("GET", "/health", { host: LEGACY_HOST });
+    expect(health.status).toBe(200);
+    // Un POST no se convierte en GET por un 301.
+    const post = await h.request("POST", "/", { host: LEGACY_HOST });
+    expect(post.status).not.toBe(301);
   });
 
   it("ejecuta el código y devuelve el JSON del corredor con el token de prueba", async () => {

@@ -146,15 +146,16 @@ def visitar(
     rep: Report, browser: Browser, base: str, shots: str | None, ultimos: dict[str, int]
 ) -> None:
     marcas: dict[tuple[str, str, str, bool], Any] = {}
+    catalogos: dict[tuple[str, str, str], Any] = {}
     for paleta in PALETAS:
         for modo in MODOS:
             for tam, size in TAMANOS.items():
                 etiqueta = f"{paleta}/{modo}/{tam}"
-                paginas = [("index", f"{base}/index.html")]
+                paginas = [("catalogo", f"{base}/"), ("index", f"{base}/qiskit/index.html")]
                 for lid in LECCIONES:
                     paginas += [
-                        (f"{lid}-b0", f"{base}/lesson.html?l={lid}&beat=0"),
-                        (f"{lid}-bN", f"{base}/lesson.html?l={lid}&beat={ultimos[lid]}"),
+                        (f"{lid}-b0", f"{base}/qiskit/lesson.html?l={lid}&beat=0"),
+                        (f"{lid}-bN", f"{base}/qiskit/lesson.html?l={lid}&beat={ultimos[lid]}"),
                     ]
                 for nombre, url in paginas:
                     ctx, pg, errores = nueva_pagina(browser, size, paleta, modo)
@@ -166,23 +167,31 @@ def visitar(
                         "[document.documentElement.dataset.paleta, document.documentElement.dataset.theme]"
                     )
                     rep.check(attrs == [paleta, modo], f"{etiqueta} {nombre}: atributos {attrs}")
-                    if nombre != "index":
+                    if nombre not in ("index", "catalogo"):
                         fuera = fuera_del_stage(pg)
                         rep.check(
                             not fuera, f"{etiqueta} {nombre}: bloques fuera de #stage {fuera}"
                         )
-                    marcas.setdefault(
-                        (paleta, modo, tam, nombre.startswith("index")),
-                        pg.evaluate(
-                            "[document.querySelector('.brand').textContent.trim(), getComputedStyle(document.querySelector('.brand')).fontFamily,"
-                            " getComputedStyle(document.body).fontFamily]"
-                        ),
+                    marca = pg.evaluate(
+                        "[document.querySelector('.brand').textContent.trim(), getComputedStyle(document.querySelector('.brand')).fontFamily,"
+                        " getComputedStyle(document.body).fontFamily]"
                     )
+                    if nombre == "catalogo":
+                        catalogos[(paleta, modo, tam)] = marca
+                    else:
+                        marcas.setdefault((paleta, modo, tam, nombre.startswith("index")), marca)
                     if shots:
                         d = Path(shots) / paleta / modo
                         d.mkdir(parents=True, exist_ok=True)
                         pg.screenshot(path=str(d / f"{tam}-{nombre}.png"))
                     ctx.close()
+    for (paleta, modo, tam), valor in catalogos.items():
+        curso = marcas[(paleta, modo, tam, True)]
+        rep.check(valor[0] == "Duo", f"marca del catálogo {valor[0]!r}")
+        rep.check(
+            valor[1:] == curso[1:],
+            f"las fuentes del catálogo difieren de las del curso: {valor[1:]} / {curso[1:]}",
+        )
     for (paleta, modo, tam, es_index), valor in marcas.items():
         otro = marcas[(paleta, modo, tam, not es_index)]
         rep.check(valor[0] == "Qubit a qubit", f"marca {valor[0]!r}")
@@ -197,7 +206,7 @@ def contrastes(rep: Report, browser: Browser, base: str) -> dict[tuple[str, str,
     for paleta in PALETAS:
         for modo in MODOS:
             ctx, pg, _ = nueva_pagina(browser, (1366, 768), paleta, modo)
-            pg.goto(f"{base}/index.html")
+            pg.goto(f"{base}/qiskit/index.html")
             pg.wait_for_selector("[data-theme-ctl] select")
             nombres = set(TEXTO + SUPERFICIES + GRAFICOS + ["acc-ink"])
             col = {k: parse_color(v) for k, v in pg.evaluate(RESOLVER, sorted(nombres)).items()}
@@ -228,7 +237,7 @@ def imprimir_tabla(tabla: dict[tuple[str, str, str], float]) -> None:
 def paleta_guardada_una_vez(rep: Report, browser: Browser, base: str) -> None:
     ctx = new_context(browser, viewport={"width": 1366, "height": 768})
     pg = ctx.new_page()
-    pg.goto(f"{base}/index.html")
+    pg.goto(f"{base}/qiskit/index.html")
     pg.wait_for_selector("[data-theme-ctl] select")
     rep.check(
         pg.evaluate("document.documentElement.dataset.paleta") == "fosforo",
@@ -241,7 +250,7 @@ def paleta_guardada_una_vez(rep: Report, browser: Browser, base: str) -> None:
     )
     acc = pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()")
     rep.check(acc == "#ff8a4c" or acc == "#bd3f0c", f"--acc no cambió con la paleta: {acc}")
-    pg.goto(f"{base}/lesson.html?l=p1-quickstart&beat=0")
+    pg.goto(f"{base}/qiskit/lesson.html?l=p1-quickstart&beat=0")
     pg.wait_for_selector("[data-theme-ctl] select")
     rep.check(
         pg.evaluate("document.documentElement.dataset.paleta") == "cobre",
@@ -252,7 +261,7 @@ def paleta_guardada_una_vez(rep: Report, browser: Browser, base: str) -> None:
         "el selector del reproductor no muestra la paleta",
     )
     pg.select_option("[data-theme-ctl] select", "medianoche")
-    pg.goto(f"{base}/index.html")
+    pg.goto(f"{base}/qiskit/index.html")
     pg.wait_for_selector("[data-theme-ctl] select")
     rep.check(
         pg.evaluate("document.documentElement.dataset.paleta") == "medianoche",
@@ -274,7 +283,7 @@ def repaso_en_paralelo(rep: Report, browser: Browser, base: str) -> float:
         browser, (1366, 768), "fosforo", "dark", {"qiskit:done": hechas}
     )
     t0 = time.time()
-    pg.goto(f"{base}/index.html")
+    pg.goto(f"{base}/qiskit/index.html")
     pg.wait_for_selector("#repaso .rq", timeout=15000)
     dt = time.time() - t0
     n = len(json.loads(hechas))
@@ -294,7 +303,10 @@ def main() -> None:
     args = ap.parse_args()
     srv, base = serve()
     ultimos = {
-        lid: len(json.loads((SITE / "lessons" / lid / "lesson.json").read_text())["beats"]) - 1
+        lid: len(
+            json.loads((SITE / "qiskit" / "lessons" / lid / "lesson.json").read_text())["beats"]
+        )
+        - 1
         for lid in LECCIONES
     }
     rep = Report()

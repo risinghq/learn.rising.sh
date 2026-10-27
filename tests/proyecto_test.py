@@ -39,7 +39,7 @@ def vigilar(pg: Page, errores: list[str]) -> None:
 
 
 def cuadernos_enlazados() -> set[str]:
-    curso = json.loads((SITE / "course.json").read_text())
+    curso = json.loads((SITE / "qiskit" / "course.json").read_text())
     return {
         m["notebook"]
         for parte in curso["parts"]
@@ -65,7 +65,7 @@ def main() -> None:
             pg = ctx.new_page()
             errores: list[str] = []
             vigilar(pg, errores)
-            pg.goto(f"{base}/index.html")
+            pg.goto(f"{base}/qiskit/index.html")
             pg.wait_for_selector("#track .hito")
             comandos = pg.locator("#hito .cmd code").all_text_contents()
             esperados = [f"uv run marimo edit {nb}"] if esperado else []

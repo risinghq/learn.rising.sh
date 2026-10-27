@@ -13,7 +13,12 @@ export const PASS_SECRET = "1x0000000000000000000000000000000AA";
 export const FAIL_SECRET = "2x0000000000000000000000000000000AA";
 export const SPENT_SECRET = "3x0000000000000000000000000000000AA";
 
+export const LEGACY_HOST = "old.example.workers.dev";
+export const HOME_HOST = "edu.example.test";
+
 export const VARS = {
+  HOME_HOST,
+  LEGACY_HOST,
   TURNSTILE_SECRET: PASS_SECRET,
   TURNSTILE_SITE_KEY: "1x00000000000000000000AA",
   RATE_PER_MINUTE: "1000",
@@ -77,7 +82,13 @@ export interface Harness {
   request(
     method: string,
     pathname: string,
-    options?: { ip?: string; headers?: Record<string, string>; body?: unknown },
+    options?: {
+      ip?: string;
+      headers?: Record<string, string>;
+      body?: unknown;
+      // El host de la URL. Por defecto, runner.test.
+      host?: string;
+    },
   ): Promise<Reply>;
   // Manda solo los encabezados de una petición que declara `length` bytes de cuerpo
   // y devuelve el estado de la respuesta, sin enviar el cuerpo.
@@ -159,11 +170,10 @@ export async function start(options: Options = {}): Promise<Harness> {
       bindings: { ...VARS, ...options.vars },
       // Sirve site/ sin invocar el Worker, salvo en las rutas de WORKER_FIRST.
       assets: {
+        binding: "ASSETS",
         directory: path.join(import.meta.dirname, "../../../site"),
-        routerConfig: {
-          has_user_worker: true,
-          static_routing: { user_worker: WORKER_FIRST },
-        },
+        run_worker_first: WORKER_FIRST,
+        routerConfig: { has_user_worker: true },
       },
       durableObjects: {
         Runner: { className: "Runner", useSQLite: true },
@@ -211,10 +221,10 @@ export async function start(options: Options = {}): Promise<Harness> {
     request: async (
       method,
       pathname,
-      { ip = "198.51.100.7", headers = {}, body } = {},
+      { ip = "198.51.100.7", headers = {}, body, host = "runner.test" } = {},
     ) =>
       reply(
-        await mf.dispatchFetch(`http://runner.test${pathname}`, {
+        await mf.dispatchFetch(`http://${host}${pathname}`, {
           method,
           redirect: "manual",
           headers: {

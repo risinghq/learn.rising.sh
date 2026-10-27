@@ -100,9 +100,9 @@ def quiet(base: type[SimpleHTTPRequestHandler]) -> type[SimpleHTTPRequestHandler
 
 def mission_url(lesson: str) -> str:
     beats = json.loads(
-        (ROOT / "site" / "lessons" / lesson / "lesson.json").read_text(encoding="utf-8")
+        (ROOT / "site" / "qiskit" / "lessons" / lesson / "lesson.json").read_text(encoding="utf-8")
     )["beats"]
-    return f"/lesson.html?l={lesson}&beat={next(i for i, b in enumerate(beats) if b['id'] == 'mision')}"
+    return f"/qiskit/lesson.html?l={lesson}&beat={next(i for i, b in enumerate(beats) if b['id'] == 'mision')}"
 
 
 def read(lesson: str, name: str, part: str) -> str:
@@ -275,7 +275,7 @@ def feedback(browser: Browser, base: str, shots: str | None) -> None:
             encoding="utf-8",
         )
         lesson = json.loads(
-            (ROOT / "site" / "lessons" / "p1-quickstart" / "lesson.json").read_text(
+            (ROOT / "site" / "qiskit" / "lessons" / "p1-quickstart" / "lesson.json").read_text(
                 encoding="utf-8"
             )
         )
@@ -396,7 +396,9 @@ def hints(browser: Browser, base: str) -> None:
     page = new_context(browser, **DESKTOP).new_page()
     panel = open_panel(page, base, "p1-quickstart", 1)
     lesson = json.loads(
-        (ROOT / "site" / "lessons" / "p1-quickstart" / "lesson.json").read_text(encoding="utf-8")
+        (ROOT / "site" / "qiskit" / "lessons" / "p1-quickstart" / "lesson.json").read_text(
+            encoding="utf-8"
+        )
     )
     total = next(
         len(blk["hints"])
