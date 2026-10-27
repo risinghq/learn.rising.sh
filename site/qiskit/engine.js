@@ -45,7 +45,7 @@
     askEl = $("#ask");
   const tagEl = $("#tag"),
     capEl = $("#caption"),
-    timeline = $("#timeline"),
+    steps = $("#steps"),
     playBtn = $("#play");
   const nar = new Audio();
   window.QGNarration = nar; // para pruebas automáticas
@@ -937,7 +937,7 @@
     if (work) {
       stage.scrollTop = 0;
       const go = el("button", "abtn primary xnext", sceneEl);
-      go.textContent = "Continuar →";
+      go.textContent = "Continuar";
       go.addEventListener("click", () => {
         setPlaying(true);
         goto(idx + 1);
@@ -1112,18 +1112,15 @@
       QGAccount.changed(`qiskit:${k}:${LID}`);
     },
   };
-  let heard = new Set();
-  const markHeard = (k) => {
-    heard.add(k);
-    store.set("heard", [...heard]);
-  };
-
-  function paintTimeline(prog = 0) {
-    [...timeline.children].forEach((sg, k) => {
-      sg.classList.toggle("done", heard.has(k) && k !== idx);
-      sg.classList.toggle("now", k === idx);
-      sg.firstChild.style.width = k === idx ? prog * 100 + "%" : "";
-    });
+  function paintSteps() {
+    const k = Math.max(idx, 0);
+    steps.value = k;
+    steps.style.setProperty(
+      "--p",
+      `${(k / Math.max(beats.length - 1, 1)) * 100}%`,
+    );
+    $("#stepno").textContent =
+      `Paso ${k + 1} de ${beats.length}${beats[k].ask ? ", con pregunta" : ""}`;
   }
 
   // Ir al paso i; si t0 > 0, empezar en ese segundo de la narración con la escena ya en su estado.
@@ -1139,7 +1136,7 @@
     const beat = beats[i],
       tm = T[beat.id];
     buildScene(beat);
-    paintTimeline(0);
+    paintSteps();
     capEl.textContent = "";
     const pending = (beat.actions || [])
       .map((a) => Object.assign({}, a, { time: atTime(a, tm.marks) }))
@@ -1173,15 +1170,12 @@
         cue = c;
         capEl.textContent = tm.cues[c][1];
       }
-      paintTimeline(Math.min(1, now / tm.dur));
       if (!nar.ended) requestAnimationFrame(tick);
     };
     onNarrationEnd = () => {
       if (my !== token) return;
       pending.splice(0).forEach((a) => exec(a));
-      paintTimeline(1);
       if (beat.ask) return showAsk(beat);
-      markHeard(i);
       if (work) return; // El ejercicio avanza con «Continuar».
       setTimeout(
         () => {
@@ -1198,7 +1192,6 @@
       else {
         const c = tm.cues.findLast((q) => q[0] <= t0 + 0.05);
         if (c) capEl.textContent = c[1];
-        paintTimeline(t0 / tm.dur);
       }
     };
     // El clip se carga entero en memoria (blob): así se puede saltar dentro de él con cualquier servidor,
@@ -1236,8 +1229,7 @@
 
   function setPlaying(p) {
     playing = p;
-    playBtn.textContent = p ? "❚❚" : "▶";
-    playBtn.setAttribute("aria-label", p ? "Pausa" : "Reproducir");
+    playBtn.textContent = p ? "Pausa" : "Reproducir";
   }
   function togglePlay() {
     if (REVIEW) return;
@@ -1281,10 +1273,8 @@
       if (solved) return;
       solved = true;
       if (ok && tries === 0) firstTry++;
-      markHeard(idx);
-      paintTimeline(1);
       const b = el("button", "abtn primary", nextRow);
-      b.textContent = "Continuar →";
+      b.textContent = "Continuar";
       b.addEventListener("click", () => {
         setPlaying(true);
         goto(idx + 1);
@@ -1494,39 +1484,26 @@
     beats = L.beats;
     document.title = `${L.section} · ${L.title}`;
     $("#crumb-part").textContent = L.part;
-    $("#crumb-title").textContent = `${L.section} · ${L.title}`;
-    $("#start-eyebrow").textContent = `${L.part} · ${L.section}`;
+    $("#crumb-title").textContent = `${L.section} ${L.title}`;
+    $("#start-eyebrow").textContent = `${L.part}, lección ${L.section}`;
     $("#start-title").textContent = L.title;
     const mins = Math.round(
       beats.reduce((s, b) => s + (T[b.id]?.dur || 0), 0) / 60,
     );
     $("#start-meta").textContent =
-      `≈ ${mins + 1} min · ${beats.filter((b) => b.ask).length} preguntas`;
+      `Unos ${mins + 1} min y ${beats.filter((b) => b.ask).length} preguntas.`;
     const ul = $("#start-goals");
     (L.goals || []).forEach((g) => rich(el("li", "", ul), g));
 
-    beats.forEach((b, k) => {
-      const sg = el("div", "seg" + (b.ask ? " q" : ""), timeline);
-      el("i", "", sg);
-      sg.title = (b.tag ? b.tag.join(" ") + " — " : "") + (b.title || b.id);
-      // Clic en cualquier punto del segmento: salta a ese momento de la narración.
-      sg.addEventListener("click", (e) => {
-        const r = sg.getBoundingClientRect(),
-          f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-        goto(k, f < 0.03 ? 0 : f * T[b.id].dur);
-      });
-      sg.addEventListener("mousemove", (e) => {
-        const r = sg.getBoundingClientRect(),
-          f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)),
-          t = f * T[b.id].dur;
-        sg.title = `${b.tag ? b.tag[1] : b.id} · ${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
-      });
+    steps.max = beats.length - 1;
+    steps.addEventListener("change", () => {
+      setPlaying(true);
+      goto(+steps.value);
     });
     fit();
 
-    heard = new Set(store.get("heard", []));
     const pos = store.get("pos", 0);
-    paintTimeline(0);
+    paintSteps();
     $("#go").addEventListener("click", () => {
       SFX.unlock();
       $("#start").classList.add("hide");
@@ -1581,13 +1558,13 @@
     } catch {}
     $("#cc").addEventListener("click", () => {
       capEl.classList.toggle("off");
-      $("#cc").classList.toggle("on", !capEl.classList.contains("off"));
+      $("#cc").setAttribute(
+        "aria-pressed",
+        String(!capEl.classList.contains("off")),
+      );
     });
     const muteLabel = () => {
-      $("#mute").textContent = SFX.muted ? "🔇" : "🔊";
-      $("#mute").title = SFX.muted
-        ? "Efectos de sonido: no"
-        : "Efectos de sonido: sí";
+      $("#mute").setAttribute("aria-pressed", String(!SFX.muted));
     };
     $("#mute").addEventListener("click", () => {
       SFX.toggle();

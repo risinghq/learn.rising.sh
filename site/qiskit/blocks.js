@@ -961,11 +961,7 @@
 
   // ---------------------------------------------------------------- misión «Tu turno»
   // notebook: ruta del cuaderno marimo · tasks: [{level: 1|2|3, text}]
-  const LV = {
-    1: ["🟢", "Reproduce"],
-    2: ["🟡", "Modifica"],
-    3: ["🔴", "Crea"],
-  };
+  const LV = { 1: "Reproduce", 2: "Modifica", 3: "Crea" };
 
   B.mission = (box, s, A) => {
     const o = { spec: s };
@@ -974,8 +970,7 @@
     A.el("div", "mtitle", card).textContent = s.title || "Tu turno";
     o.items = s.tasks.map((t) => {
       const r = A.el("div", "mtask" + (s.stagger ? " hid" : ""), card);
-      const [dot, name] = LV[t.level] || LV[1];
-      A.el("span", "mlv", r).textContent = `${dot} ${name}`;
+      A.el("span", "mlv", r).textContent = LV[t.level] || LV[1];
       A.rich(A.el("span", "mtx", r), t.text);
       return r;
     });
@@ -987,7 +982,7 @@
     b.addEventListener("click", (e) => {
       e.stopPropagation();
       navigator.clipboard?.writeText(cmd).then(() => {
-        b.textContent = "Copiado ✓";
+        b.textContent = "Copiado";
       });
     });
     window.notebookHelp(row);

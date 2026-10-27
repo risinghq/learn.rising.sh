@@ -12,22 +12,26 @@
 <script src="account.js"></script>
 </head>
 <body>
-<header class="bar">
-  <a class="brand" href="index.html"><span class="dot"></span>Qubit a qubit</a>
-  <div class="crumb"><small id="crumb-part"></small><b id="crumb-title"></b></div>
-  <div class="tools">
-    <select class="tool" id="speed" aria-label="Velocidad">
-      <option value="0.85">0,85×</option><option value="1" selected>1×</option>
-      <option value="1.15">1,15×</option><option value="1.3">1,3×</option><option value="1.5">1,5×</option>
-    </select>
-    <button class="tool on" id="cc" title="Subtítulos (C)">CC</button>
-    <button class="tool" id="mute">🔊</button>
-    <div data-account></div>
-    <div data-theme-ctl></div>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="index.html">Qubit a qubit</a>
+    <p class="crumb"><span id="crumb-part"></span><b id="crumb-title"></b></p>
+    <div class="tools">
+      <label class="tool" for="speed">Velocidad</label>
+      <select class="tool" id="speed">
+        <option value="0.85">0,85×</option><option value="1" selected>1×</option>
+        <option value="1.15">1,15×</option><option value="1.3">1,3×</option><option value="1.5">1,5×</option>
+      </select>
+      <button type="button" class="tool" id="cc" aria-pressed="true" title="Subtítulos (C)">Subtítulos</button>
+      <button type="button" class="tool" id="mute" aria-pressed="true">Efectos</button>
+      <div data-account></div>
+      <div data-theme-ctl></div>
+    </div>
   </div>
 </header>
 
-<main class="player">
+<main id="main" class="player">
   <div id="viewport">
     <div id="stage">
       <div id="tag"></div>
@@ -38,44 +42,47 @@
   <div id="caption"></div>
   <div class="controls">
     <div class="btns">
-      <button class="cbtn" id="prev" aria-label="Paso anterior" title="Paso anterior (←)">⏮</button>
-      <button class="cbtn play" id="play" aria-label="Pausa" title="Pausa / reproducir (espacio)">❚❚</button>
-      <button class="cbtn" id="replay" aria-label="Repetir paso" title="Repetir este paso">↺</button>
-      <button class="cbtn small" id="back5" aria-label="Retroceder 5 segundos" title="−5 s (Mayús + ←)">−5</button>
-      <button class="cbtn small" id="fwd5" aria-label="Avanzar 5 segundos" title="+5 s (Mayús + →)">+5</button>
-      <button class="cbtn" id="next" aria-label="Paso siguiente" title="Paso siguiente (→)">⏭</button>
+      <button type="button" class="cbtn" id="prev" title="Paso anterior (←)">Anterior</button>
+      <button type="button" class="cbtn play" id="play" title="Pausa / reproducir (espacio)">Pausa</button>
+      <button type="button" class="cbtn" id="replay" title="Repetir este paso">Repetir</button>
+      <button type="button" class="cbtn" id="back5" aria-label="Retroceder 5 segundos" title="−5 s (Mayús + ←)">−5 s</button>
+      <button type="button" class="cbtn" id="fwd5" aria-label="Avanzar 5 segundos" title="+5 s (Mayús + →)">+5 s</button>
+      <button type="button" class="cbtn" id="next" title="Paso siguiente (→)">Siguiente</button>
     </div>
-    <div id="timeline"></div>
+    <div class="prog">
+      <label class="stepno" id="stepno" for="steps"></label>
+      <input type="range" id="steps" min="0" max="1" step="1" value="0">
+    </div>
   </div>
 </main>
 
-<div class="overlay" id="start">
+<div class="overlay" id="start" role="dialog" aria-modal="true" aria-labelledby="start-title">
   <div class="card">
-    <div class="eyebrow" id="start-eyebrow"></div>
+    <p class="kicker" id="start-eyebrow"></p>
     <h1 id="start-title"></h1>
-    <div class="meta" id="start-meta"></div>
+    <p class="meta" id="start-meta"></p>
     <p>Al terminar esta lección podrás:</p>
     <ul id="start-goals"></ul>
     <div class="actions">
-      <button class="cta primary" id="go">Comenzar ▶</button>
-      <button class="cta" id="resume" style="display:none"></button>
+      <button type="button" class="cta primary" id="go">Comenzar</button>
+      <button type="button" class="cta" id="resume" style="display:none"></button>
       <a class="cta" href="index.html">Índice</a>
     </div>
   </div>
 </div>
 
-<div class="overlay hide" id="end">
+<div class="overlay hide" id="end" role="dialog" aria-modal="true" aria-labelledby="end-title">
   <div class="card">
-    <div class="eyebrow">Lección completada</div>
+    <p class="kicker">Lección completada</p>
     <h1 id="end-title"></h1>
-    <div class="score" id="end-score"></div>
+    <p class="score" id="end-score"></p>
     <div id="end-practice-wrap">
       <p>Practica y profundiza:</p>
       <ul id="end-practice"></ul>
     </div>
     <div class="actions">
-      <a class="cta primary" id="end-next">Siguiente lección →</a>
-      <button class="cta" id="again">Repetir</button>
+      <a class="cta primary" id="end-next">Siguiente lección</a>
+      <button type="button" class="cta" id="again">Repetir</button>
       <a class="cta" href="index.html">Índice</a>
     </div>
   </div>

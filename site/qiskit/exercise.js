@@ -106,10 +106,9 @@
 
     const head = A.el("div", "xhead", card);
     A.el("div", "mtitle", head).textContent = "Ejercicio";
-    const [dot, name] = LEVELS[s.level] || LEVELS[1];
-    A.el("span", "xlevel", head).textContent = `${dot} ${name}`;
+    A.el("span", "xlevel", head).textContent = LEVELS[s.level] || LEVELS[1];
     const solved = A.el("span", "xsolved", head);
-    solved.textContent = "✓ Resuelto";
+    solved.textContent = "Resuelto";
     solved.hidden = !saved.passed;
     A.rich(A.el("div", "xprompt", card), s.prompt);
 

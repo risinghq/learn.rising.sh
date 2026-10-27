@@ -15,7 +15,7 @@
   const LESSON = /^[a-z0-9][a-z0-9-]{0,59}$/;
   const EXERCISE = /^qiskit:exercise:([a-z0-9-]{1,40}\/[a-z0-9-]{1,40})$/;
   const KV =
-    /^qiskit:(?:heard:[a-z0-9-]{1,60}|pos:[a-z0-9-]{1,60}|predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}|hitos|misiones|repaso)$/;
+    /^qiskit:(?:pos:[a-z0-9-]{1,60}|predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}|hitos|misiones|repaso)$/;
 
   const read = (key) => {
     try {
