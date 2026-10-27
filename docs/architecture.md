@@ -64,9 +64,9 @@ En la raíz están el catálogo y lo que comparten los cursos:
   cada `<slug>/course.json` el número de lecciones. Dibuja una tarjeta por curso
   con un enlace a `<slug>/`. Añadir un curso es añadir su carpeta y su entrada.
 - `theme.css` y `theme.js` son el tema del catálogo y de los cursos: colores,
-  fuentes, y la paleta y el modo que elige el lector. Las etiquetas del control
-  de tema siguen el `lang` de la página. [design.md](design.md) los describe.
-- `vendor/` son KaTeX y las tres tipografías, copiados de `editor/node_modules`
+  fuentes, y el modo que elige el lector. Las etiquetas del control de tema
+  siguen el `lang` de la página. [design.md](design.md) los describe.
+- `vendor/` son KaTeX y las dos tipografías, copiados de `editor/node_modules`
   por `editor/vendor.js`. Git los ignora; `mise run install` y `mise run deploy`
   los generan de nuevo y borran antes lo que hubiera. Ninguna página pide nada a
   otro sitio salvo el script de Turnstile, que `exercise.js` descarga de

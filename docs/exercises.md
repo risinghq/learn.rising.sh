@@ -292,10 +292,10 @@ paquete que saldría de `editor/src/`.
 
 ### Actualizar KaTeX y las tipografías
 
-`site/vendor/` guarda KaTeX y las fuentes Bricolage Grotesque, Inter y JetBrains
-Mono, copiados de los paquetes npm `katex` y `@fontsource-variable/*` de
-`editor/package.json`. Git lo ignora: `mise run install` lo genera con
-`editor/vendor.js`. Para cambiar una versión:
+`site/vendor/` guarda KaTeX y las fuentes Newsreader y JetBrains Mono, copiados
+de los paquetes npm `katex` y `@fontsource-variable/*` de `editor/package.json`.
+Git lo ignora: `mise run install` lo genera con `editor/vendor.js`. Para cambiar
+una versión:
 
 ```sh
 bun add --cwd editor --exact katex@<versión>
