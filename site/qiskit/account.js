@@ -1,4 +1,4 @@
-// Optional account to carry progress to another browser (docs/runner.md#accounts).
+// Optional account to carry progress to another browser (docs/accounts.md).
 // Without an account it makes no account requests. With the qiskit:cuenta mark, it
 // merges the progress before painting and sends the changes the Worker accepts.
 // The reflections (qiskit:reflect) never leave the browser.

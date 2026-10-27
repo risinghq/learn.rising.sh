@@ -1,7 +1,7 @@
 """HTTP server of the runner: POST /run and GET /health.
 
 It does not depend on the host: it runs the same on Cloudflare Containers and on Docker.
-The contract is in docs/runner.md and the slot cycle in docs/architecture.md.
+The contract and the slot cycle are in docs/runner.md.
 If no slot is free, it answers 503.
 
 The `error` texts of the replies are in Spanish: the site shows them to the learner.
