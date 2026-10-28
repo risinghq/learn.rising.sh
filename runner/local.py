@@ -87,11 +87,15 @@ def start(
     runtime: str | None = None,
     egress: bool = False,
     caps: tuple[str, ...] = CAPS,
+    cpus: str = "1",
+    memory: str = "1g",
 ) -> Container:
     """Start the container, building the image first if it is missing, and wait for /health.
 
     With `egress=True` it uses Docker's default network, which does reach the internet.
     It serves to check that the learner's code cannot get out even when the network allows it.
+    `cpus` and `memory` are Docker's `--cpus` and `--memory`; `sizing.py` uses them to model
+    a Cloudflare instance type.
     """
     ensure_image(image)
     runtime = runtime or default_runtime()
@@ -121,9 +125,9 @@ def start(
         "--tmpfs",
         "/tmp:size=4m,mode=0755",
         "--memory",
-        "1g",
+        memory,
         "--cpus",
-        "1",
+        cpus,
         "--pids-limit",
         "256",
         "--cap-drop",
