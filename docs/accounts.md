@@ -88,8 +88,10 @@ each provider is in [deploy.md](deploy.md#4-create-the-google-client).
 
 `done` are the finished lessons. `exercises` holds per exercise the code (only
 if the page sends it), the hints and the checks, whether it passed and `at`, the
-Unix milliseconds of the last edit. `kv` holds the `localStorage` keys that
-follow one of these shapes:
+Unix milliseconds of the last edit. `passed` is the server's record, never the
+page's: it becomes true when `/run` with `mode: "check"` returns a passing
+result for this user and exercise ([Data stored](#data-stored)). `kv` holds the
+`localStorage` keys that follow one of these shapes:
 
 | Key                                     | Value              | When merging two values                                                  |
 | --------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
@@ -103,9 +105,10 @@ follow one of these shapes:
 `exercises` and `kv`, all optional) and merge it with what is stored:
 
 - `done` is united.
-- Per exercise, `hints` and `checks` are the larger, `passed` is true if either
-  was, and the code is that of the edit with the greater `at`. A missing or
-  `null` code does not delete the stored one.
+- Per exercise, `hints` and `checks` are the larger, and the code is that of the
+  edit with the greater `at`. A missing or `null` code does not delete the
+  stored one. The `passed` the page sends must be present and a boolean, and is
+  ignored: a guest's local passes do not reach the account.
 - `kv` is merged according to the table.
 
 A write removes nothing and no rule depends on order, so two devices that sync
@@ -206,6 +209,12 @@ which could repeat what the learner wrote. A run is recorded only with `mode`
 `run` or `check` and an `exercise` shaped like an exercise id. A failure to
 write the row is logged and the response does not change. A row is not modified
 after it is written.
+
+The same step sets `exercise_state.passed` to 1, creating the row if needed,
+when the attempt has an account, `mode` `check` and the result `pass`. It is the
+only writer of that column and nothing clears it, so the retention of attempts
+does not undo a pass. A pass is never granted to a guest, to a `run`, or by a
+progress write.
 
 ## Retention
 

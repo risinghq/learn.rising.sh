@@ -51,7 +51,9 @@ It answers 200 with:
 ```
 
 - `passed` is true if `error` is `null` and, with `check`, there is at least one
-  case and all pass.
+  case and all pass. With a signed-in learner and `check`, the Worker records a
+  `true` as the exercise's pass; the account's `passed` comes only from there
+  ([accounts.md](accounts.md#data-stored)).
 - `stdout` joins standard output and standard error, in the order they were
   written. With `check` it is that of the learner's code when it loads, once,
   and what its functions print.
