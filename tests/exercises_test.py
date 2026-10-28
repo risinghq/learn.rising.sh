@@ -476,8 +476,11 @@ MUTANTS = [
 
 
 # The runner gives a job 10 s with 1/4 of a vCPU, about 4 times the time of one core, so a job
-# that goes over 2.5 s of CPU does not fit. The slowest solution (fidelidad) uses 1.9 s.
+# that goes over 2.5 s of CPU does not fit. A solution may use 60% of it: the rest absorbs a
+# slower host, so a correct answer is never reported as failed because the runner was busy.
+# The measure assumes compiled bytecode in the environment, as `mise run install` leaves it.
 CPU_BUDGET_S = 2.5
+CPU_LIMIT_S = 0.6 * CPU_BUDGET_S
 
 
 @pytest.mark.parametrize("exercise_id", REAL)
@@ -493,11 +496,12 @@ def test_solution_passes_within_the_cpu_budget(exercise_id: str) -> None:
             t["passed"] and t["message"] is None for t in result["tests"]
         )
         runs.append(after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime)
-        if runs[-1] <= CPU_BUDGET_S:
+        if runs[-1] <= CPU_LIMIT_S:
             break
     cpu = min(runs)
-    assert cpu <= CPU_BUDGET_S, (
-        f"The solution used {cpu:.1f} s of CPU; the limit is {CPU_BUDGET_S} s."
+    assert cpu <= CPU_LIMIT_S, (
+        f"The solution used {cpu:.2f} s of CPU; the limit is {CPU_LIMIT_S:.1f} s,"
+        f" 60% of the {CPU_BUDGET_S} s the runner allows."
     )
 
 

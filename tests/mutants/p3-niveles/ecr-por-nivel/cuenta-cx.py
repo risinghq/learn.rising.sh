@@ -1,7 +1,7 @@
 # Wrong: counts `cx` instead of `ecr`.
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
-from qiskit.quantum_info import random_unitary
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
@@ -9,8 +9,10 @@ backend = FakeSherbrooke()
 
 
 def unitaria_y_swap(semilla):
+    azar = np.random.default_rng(semilla)
+    q, _ = np.linalg.qr(azar.normal(size=(4, 4)) + 1j * azar.normal(size=(4, 4)))
     qc = QuantumCircuit(2)
-    qc.append(UnitaryGate(random_unitary(4, seed=semilla)), range(2))
+    qc.append(UnitaryGate(q), range(2))
     qc.swap(0, 1)
     return qc
 
