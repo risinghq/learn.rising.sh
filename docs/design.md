@@ -1,10 +1,10 @@
 # Design
 
-The catalog (`site/index.html`), the Qiskit course home page
-(`site/qiskit/index.html`), the privacy page and the player
-(`site/qiskit/lesson.html`) share one theme. The catalog brand is "Duo" and the
-course brand is "Qubit a qubit". This document lists the tokens, how they are
-used and the measures that fix legibility.
+The catalog (`site/index.html`), the course home pages
+(`site/<course>/index.html`), the privacy page and the player
+(`site/<course>/lesson.html`) share one theme. The catalog brand is "Duo" and
+each course has its own brand, which is the name in its pages. This document
+lists the tokens, how they are used and the measures that fix legibility.
 
 The direction is that of a printed syllabus: one reading column, a bookish
 serif, thin rules instead of cards and a single violet accent. The ink and the
@@ -17,8 +17,9 @@ surface come from the same hue as the accent.
 | `site/theme.css`        | Tokens, the top bar, the buttons and `<progress>`.      |
 | `site/theme.ts`         | Sets the mode before paint and builds the theme button. |
 | `site/catalog.css`      | Catalog styles.                                         |
-| `site/qiskit/index.css` | Styles of the course home page and the privacy page.    |
-| `site/qiskit/app.css`   | Player styles.                                          |
+| `site/course.css`       | Styles of the course home pages and the privacy page.   |
+| `site/qiskit/index.css` | What only the Qiskit home page shows.                   |
+| `site/player/app.css`   | Player styles.                                          |
 | `tests/theme_test.ts`   | Browser test: contrast, pages, saved mode.              |
 
 Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`. The

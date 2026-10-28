@@ -182,11 +182,12 @@ Container is `duo-runner`.
   files (`run_worker_first`). The list is in
   [`src/routes.ts`](../runner/worker/src/routes.ts), which the deploy and the
   tests also use. A file of the site is answered by the file service without
-  running the Worker: `/` is the catalog and `/qiskit/` the course. A route that
-  is not a file goes to the Worker, which hands it back to the file service, and
-  this answers 404. A route under `/auth/*` or `/api/*` that does not exist is
-  answered by the Worker with 404 and `reason` `not_found`. A `/run` that is not
-  a `POST` answers 405 with `Allow: POST`.
+  running the Worker: `/` is the catalog and `/qiskit/` or
+  `/computational-physics/` a course. A route that is not a file goes to the
+  Worker, which hands it back to the file service, and this answers 404. A route
+  under `/auth/*` or `/api/*` that does not exist is answered by the Worker with
+  404 and `reason` `not_found`. A `/run` that is not a `POST` answers 405 with
+  `Allow: POST`.
 - A `Runner` class that extends `Container` (`@cloudflare/containers`) spreads
   the `/run` requests between the two instances (`INSTANCES`). If the chosen
   instance answers 503, it repeats the request once on the other. The instance

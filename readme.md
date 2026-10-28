@@ -5,10 +5,14 @@ Duo is a platform of courses for learning by doing, published at
 of `site/`. The platform provides what the courses share: the theme, the
 accounts with their progress and code execution in the browser.
 
-The only course is **Qiskit**, at `/qiskit/`, in Spanish: narrated lessons with
-animations, code exercises that are checked on the page, practice notebooks and
-a project that grows part by part. The lessons are a static page; the notebooks
-use the project's Python environment.
+There are two courses, both in Spanish, with narrated lessons, animations and
+code exercises that are checked on the page:
+
+- **Qiskit**, at `/qiskit/`, with practice notebooks and a project that grows
+  part by part. The lessons are a static page; the notebooks use the project's
+  Python environment.
+- **Física computacional**, at `/computational-physics/`, which teaches
+  numerical methods by simulating oscillators, pendulums and planets.
 
 ## Install
 
@@ -30,18 +34,18 @@ original Qiskit guides.
 mise run serve
 ```
 
-The browser scripts are written in TypeScript (`site/theme.ts`,
-`site/qiskit/*.ts` and `editor/src/`). `mise run generate:scripts` bundles them
-with `bun build` into `site/theme.js` and
-`site/qiskit/{account,notebooks,engine,editor}.js`, which the pages load and Git
-ignores; `mise run serve` runs it before serving.
+The browser scripts are written in TypeScript (`site/*.ts`, `site/player/*.ts`,
+`site/qiskit/notebooks.ts` and `editor/src/`). `mise run generate:scripts`
+bundles them with `bun build` into `site/{theme,account,course-home}.js`,
+`site/player/{engine,editor}.js` and `site/qiskit/notebooks.js`, which the pages
+load and Git ignores; `mise run serve` runs it before serving.
 
-Open <http://localhost:8810/>: it is the catalog. The Qiskit course is at
-<http://localhost:8810/qiskit/>, and a lesson opens at
-`qiskit/lesson.html?l=<id>`, for example
-<http://localhost:8810/qiskit/lesson.html?l=p1-quickstart>. The page needs no
-internet. `tools/serve.py` serves `site/` and grades the code exercises on your
-machine, without accounts.
+Open <http://localhost:8810/>: it is the catalog. Each course is at
+`/<course>/`, and a lesson opens at `<course>/lesson.html?l=<id>`, for example
+<http://localhost:8810/qiskit/lesson.html?l=p1-quickstart> or
+<http://localhost:8810/computational-physics/lesson.html?l=f1-euler-leapfrog>.
+The page needs no internet. `tools/serve.py` serves `site/` and grades the code
+exercises on your machine, without accounts.
 
 ## Open a practice notebook
 

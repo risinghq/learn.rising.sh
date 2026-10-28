@@ -6,19 +6,19 @@ says what each folder holds and where a request goes.
 
 ## Folders
 
-| Folder         | Contents                                                                                           |
-| -------------- | -------------------------------------------------------------------------------------------------- |
-| `site/`        | The static site: the catalog, the shared theme and one folder per course. [Detail](#site)          |
-| `lessons_src/` | The lessons of the Qiskit course as Python code and the program that turns them into JSON.         |
-| `practica/`    | The marimo notebooks of the missions, the project and their solutions.                             |
-| `exercises/`   | The code exercises: starter code, solution and cases of each.                                      |
-| `qgcheck/`     | The exercise grader: runs a learner's code and returns the result of each case.                    |
-| `runner/`      | The runner image (`server.py`, `sandbox.py`) and the Worker (`worker/`).                           |
-| `editor/`      | The package that bundles `site/qiskit/editor.js` and copies KaTeX and the fonts to `site/vendor/`. |
-| `content/`     | The speech synthesis cache.                                                                        |
-| `tools/`       | Helper programs: original guides, narration, checks, local server, dashboard and browser tools.    |
-| `tests/`       | Browser tests, exercise tests, runner tests and dashboard tests.                                   |
-| `stubs/`       | Types of `qiskit` and `qiskit_aer` for mypy.                                                       |
+| Folder         | Contents                                                                                            |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| `site/`        | The static site: the catalog, what the courses share and one folder per course. [Detail](#site)     |
+| `lessons_src/` | The lessons of each course as Python code, one folder per course, and the program that builds them. |
+| `practica/`    | The marimo notebooks of the missions, the project and their solutions.                              |
+| `exercises/`   | The code exercises: starter code, solution and cases of each.                                       |
+| `qgcheck/`     | The exercise grader: runs a learner's code and returns the result of each case.                     |
+| `runner/`      | The runner image (`server.py`, `sandbox.py`) and the Worker (`worker/`).                            |
+| `editor/`      | The package that bundles `site/player/editor.js` and copies KaTeX and the fonts to `site/vendor/`.  |
+| `content/`     | The speech synthesis cache.                                                                         |
+| `tools/`       | Helper programs: original guides, narration, checks, local server, dashboard and browser tools.     |
+| `tests/`       | Browser tests, exercise tests, runner tests and dashboard tests.                                    |
+| `stubs/`       | Types of `qiskit` and `qiskit_aer` for mypy.                                                        |
 
 Each part has its own document:
 
@@ -43,38 +43,53 @@ The root holds the catalog and what the courses share:
 - `theme.css` and `theme.ts` are the theme of the catalog and of the courses
   ([design.md](design.md)). The labels of the theme control follow the page's
   `lang`.
+- `course.css` and `course-home.ts` are the course home page: the styles, and
+  `QGHome.renderParts`, which draws the card of each part with the progress of
+  its lessons.
+- `account.ts` is the account menu and `privacidad.html` the page that says what
+  is stored ([accounts.md](accounts.md#on-the-site)).
 - `vendor/` is KaTeX and the two fonts, copied from `editor/node_modules` by
   `editor/vendor.ts`. Git ignores it; `mise run install` and `mise run deploy`
   generate it. No page requests anything from another site except the Turnstile
   script, which `exercise.ts` downloads from Cloudflare when the runner requires
   it.
 - The page scripts are written in TypeScript. `mise run generate:scripts`
-  bundles them with `bun build` into `theme.js` and
-  `qiskit/{account,notebooks,engine,editor}.js`, which the pages load and Git
-  ignores. The `install`, `serve`, `deploy` and `test:ui` tasks run it.
-  `tsconfig.json` types them and `globals.d.ts` declares what they share through
-  `window`.
+  bundles them with `bun build` into `theme.js`, `account.js`, `course-home.js`,
+  `player/engine.js`, `player/editor.js` and `qiskit/notebooks.js`, which the
+  pages load and Git ignores. The `install`, `serve`, `deploy` and `test:ui`
+  tasks run it. `tsconfig.json` types them and `globals.d.ts` declares what they
+  share through `window`.
 
-`qiskit/` is the Qiskit course. Its pages link the theme and `vendor/` with
-`../`, and call the platform routes by their absolute path:
+`player/` is the lesson player, the same for every course. A course page loads
+it with `../player/`:
 
-- `index.html` is the course home page, styled by `index.css`. It reads
-  `course.json` and requests the `lesson.json` of the completed lessons to build
-  the review.
-- `lesson.html` loads `engine.js`, the player, styled by `app.css`. `engine.ts`
-  imports `blocks.ts`, which draws the course's own blocks, `exercise.ts`, the
-  exercise block, and `sfx.ts`, the sounds; `lesson.ts` holds the types of
-  `lesson.json` and of the contract between the engine and the blocks. KaTeX
-  draws the formulas and both pages load it with `defer`, before their own
-  scripts.
-- `account.ts` is the account menu and `privacidad.html` the page that says what
-  is stored ([accounts.md](accounts.md#on-the-site)).
+- `engine.ts` loads `lesson.json` and plays it. It imports `blocks.ts`, which
+  draws the blocks, `exercise.ts`, the exercise block, and `sfx.ts`, the sounds.
+  `lesson.ts` holds the types of `lesson.json` and of the contract between the
+  engine and the blocks.
+- `app.css` styles the player.
 - `editor.js` is the CodeMirror 6 editor of the exercises, bundled from
   `editor/src/index.ts` ([exercises.md](exercises.md#rebuild-the-editor)).
-- `notebooks.ts` writes the "how to run the notebooks" line that goes with each
-  `marimo` command.
-- `lessons/<id>/` holds `lesson.json`, `timings.json` and `audio/<step>.mp3`.
-- `course.json` is the index: parts, lessons, minutes and missions.
+
+A course is a folder `site/<slug>/`. It links the theme and `vendor/` with
+`../`, and calls the platform routes by their absolute path:
+
+- `course.json` is the index, generated: parts, lessons, minutes and missions.
+- `index.html` is the course home page. It links `../course.css` and reads
+  `course.json`.
+- `lesson.html` loads `../player/engine.js` and `../player/app.css`. KaTeX draws
+  the formulas and both pages load it with `defer`, before their own scripts.
+- `lessons/<id>/` holds `lesson.json`, `timings.json` and `audio/<step>.mp3`,
+  all generated ([lessons.md](lessons.md)).
+
+A course adds its own files beside those. `qiskit/` has `index.css`, for its
+home page, and `notebooks.ts`, which writes the "how to run the notebooks" line
+that goes with each `marimo` command. `computational-physics/` has none.
+
+Every course stores its progress under the `qiskit:` keys of `localStorage`
+(`qiskit:done`, `qiskit:pos:<id>`, …) and on the account, by lesson id. For that
+reason a lesson id belongs to one course, and a course home page counts only its
+own lessons.
 
 ## A request
 

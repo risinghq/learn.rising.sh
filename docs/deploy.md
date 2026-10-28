@@ -175,15 +175,16 @@ curl -s https://<host>/health
 curl -s https://<host>/api/me
 curl -s https://<host>/ | grep -o '<title>[^<]*'
 curl -s https://<host>/qiskit/ | grep -o '<title>[^<]*'
+curl -s https://<host>/computational-physics/ | grep -o '<title>[^<]*'
 curl -sI https://<host>/auth/google | grep -i '^location'
 curl -sI https://<host>/auth/github | grep -i '^location'
 ```
 
 `/health` answers 200 and `/api/me` answers `{"signedIn":false}`. `/` is the
-catalog (`<title>Duo`) and `/qiskit/` the course home page. The last two print
-an address on `accounts.google.com` and on `github.com` with
-`redirect_uri=https://<host>/auth/<provider>/callback`. That address must be the
-one you registered in steps 4 and 5, letter for letter.
+catalog (`<title>Duo`) and `/qiskit/` and `/computational-physics/` the course
+home pages. The last two print an address on `accounts.google.com` and on
+`github.com` with `redirect_uri=https://<host>/auth/<provider>/callback`. That
+address must be the one you registered in steps 4 and 5, letter for letter.
 
 Open any lesson page with an exercise on `<host>` and click **Ejecutar**. The
 browser gets the Turnstile token, repeats the `POST /run` with that token and

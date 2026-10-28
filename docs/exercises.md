@@ -36,18 +36,18 @@ Exercise(
 )
 ```
 
-| Field   | Meaning                                                                               |
-| ------- | ------------------------------------------------------------------------------------- |
-| `level` | 1 reproduce, 2 modify, 3 create.                                                      |
-| `needs` | `"qiskit"` if the code runs with Qiskit alone, `"aer"` if it also needs `qiskit-aer`. |
-| `hints` | Hints in order, from the vaguest to the most concrete.                                |
+| Field   | Meaning                                                                                                                 |
+| ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `level` | 1 reproduce, 2 modify, 3 create.                                                                                        |
+| `needs` | `"python"` if the code needs no Qiskit, `"qiskit"` if it runs with Qiskit alone, `"aer"` if it also needs `qiskit-aer`. |
+| `hints` | Hints in order, from the vaguest to the most concrete.                                                                  |
 
 [`build.py`](../lessons_src/build.py) completes the block with `starter` and
 with `cases`, the list of names of the visible cases, and writes it to
 `lesson.json`. It does not publish `solution.py` or the hidden cases. It fails
 if the exercise is not in the folder of its lesson, if a file is missing, if no
 case is visible, if two blocks use the same exercise or if a folder of
-`exercises/` appears in no lesson.
+`exercises/` appears in no lesson of the course or of another built course.
 
 ## Write `check.py`
 
@@ -226,7 +226,7 @@ or `null`. The fields are those of the runner contract
 
 ## Editor in the lesson
 
-[`exercise.ts`](../site/qiskit/exercise.ts) draws each `Exercise` block: the
+[`exercise.ts`](../site/player/exercise.ts) draws each `Exercise` block: the
 statement, an editor with `starter.py` and the buttons **Ejecutar** (only runs
 the code), **Comprobar** (also runs the cases), **Pista** and **Empezar de
 nuevo**. It shows the output, the error, with its line marked in the editor if
@@ -290,7 +290,7 @@ machine.
 
 ### Rebuild the editor
 
-`site/qiskit/editor.js` is the result of bundling
+`site/player/editor.js` is the result of bundling
 [`editor/src/index.ts`](../editor/src/index.ts) with `bun build`. Git ignores
 it: `mise run install`, `mise run serve` and `mise run deploy` generate it.
 After changing `editor/src/`:
@@ -317,20 +317,22 @@ mise run generate:vendor
 ## Check the exercises
 
 ```sh
-uv run python lessons_src/build.py
+uv run python lessons_src/build.py qiskit
+uv run python lessons_src/build.py computational-physics
 uv run python tools/exercises.py [lesson/exercise ...]
 uv run pytest tests/exercises_test.py
 uv run --group tools python tests/exercise_ui_test.py
 ```
 
 [`tools/exercises.py`](../tools/exercises.py) reads from
-`site/qiskit/lessons/*/lesson.json` which exercises exist, their `needs` and
-their `hints`, so it goes after `build.py`. For each exercise it checks that:
+`site/*/lessons/*/lesson.json` which exercises exist, their `needs` and their
+`hints`, so it goes after `build.py`. For each exercise it checks that:
 
 1. `solution.py` passes every case.
 2. `starter.py` runs without error and fails some case.
-3. `needs` is true: with `"qiskit"`, `solution.py` passes without `qiskit_aer`;
-   with `"aer"`, it does not pass without it.
+3. `needs` is true: with `"python"`, `solution.py` passes without `qiskit` and
+   `qiskit_aer`; with `"qiskit"`, it passes without `qiskit_aer`; with `"aer"`,
+   it does not pass without it.
 4. Each `@hint(n)` names a hint that the exercise has in `hints`.
 
 [`tests/exercises_test.py`](../tests/exercises_test.py) runs each exercise with

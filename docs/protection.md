@@ -187,7 +187,7 @@ Cloudflare Turnstile is verified on the first run of each session, with an
 account or without one. Only a maintainer skips Turnstile: the request neither
 calls `siteverify` nor receives `qg_session`. A request with no Turnstile
 session and no token receives 403 `turnstile_missing` with the site key in the
-`sitekey` field. With it, `site/qiskit/exercise.ts` loads the widget and repeats
+`sitekey` field. With it, `site/player/exercise.ts` loads the widget and repeats
 the request with the token in the `X-Turnstile-Token` header. The Worker checks
 it with `siteverify`, to which it sends only the secret and the token, and if it
 is valid it answers with the `qg_session` cookie besides the result:
