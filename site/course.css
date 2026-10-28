@@ -70,6 +70,7 @@ footer p {
   margin: var(--s3) 0 0;
   color: var(--muted);
   font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 
@@ -116,14 +117,24 @@ footer p {
   min-height: 2.75rem;
   color: var(--acc-text);
   cursor: pointer;
+  transition: color var(--d-fast) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .part summary:hover {
+    color: var(--acc-text-hover);
+    text-decoration: underline;
+  }
 }
 .part summary:active {
-  opacity: 0.7;
+  color: var(--acc-text-hover);
 }
 .lessons {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.lessons li {
+  border-top: 1px solid var(--line);
 }
 .lessons a {
   display: grid;
@@ -131,13 +142,26 @@ footer p {
   gap: var(--s3);
   align-items: baseline;
   min-height: 2.75rem;
-  padding: var(--s2) 0;
-  border-top: 1px solid var(--line);
+  margin: 0 calc(-1 * var(--s2));
+  padding: var(--s2);
+  border-radius: var(--r1);
   color: var(--ink);
   text-decoration: none;
+  transition: background-color var(--d-fast) ease;
 }
-.lessons a:hover .t {
-  text-decoration: underline;
+.lessons a:focus-visible {
+  outline-offset: -2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lessons a:hover {
+    background: var(--bg2);
+  }
+  .lessons a:hover .t {
+    text-decoration: underline;
+  }
+}
+.lessons a:active {
+  background: var(--bg3);
 }
 .lessons .s,
 .lessons .m,

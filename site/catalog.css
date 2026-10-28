@@ -20,17 +20,33 @@ h1 {
 }
 .courses a {
   display: block;
-  padding: var(--s6) 0;
+  margin: 0 calc(-1 * var(--s4));
+  padding: var(--s6) var(--s4);
+  border-radius: var(--r2);
   color: var(--ink);
   text-decoration: none;
+  transition: var(--tr-control);
+}
+.courses a:focus-visible {
+  outline-offset: -2px;
 }
 .courses h2 {
   margin: 0 0 var(--s2);
   font-size: var(--t-xl);
   color: var(--acc-text);
+  transition: color var(--d-fast) ease;
 }
-.courses a:hover h2 {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .courses a:hover {
+    background: var(--bg2);
+  }
+  .courses a:hover h2 {
+    color: var(--acc-text-hover);
+    text-decoration: underline;
+  }
+}
+.courses a:active {
+  background: var(--bg3);
 }
 .courses p {
   margin: 0;
@@ -40,6 +56,7 @@ h1 {
   margin-top: var(--s2);
   color: var(--muted);
   font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 40rem) {
