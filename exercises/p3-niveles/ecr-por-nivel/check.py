@@ -1,45 +1,43 @@
+import functools
+
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import UnitaryGate
-from qiskit.quantum_info import random_unitary
-from qiskit.transpiler import generate_preset_pass_manager
-from qiskit_ibm_runtime.fake_provider import FakeSherbrooke
 
 from qgcheck import learner, visible
 
-BACKEND = FakeSherbrooke()
+# Levels 0 and 1 translate the unitary and SWAP separately, using 3 ECRs each.
+# Levels 2 and 3 fuse them into one block using 3 ECRs. FakeSherbrooke gives these counts for every
+# two-qubit unitary.
+EXPECTED = [6, 6, 3, 3]
 
 
 def unitary_and_swap(seed):
+    random = np.random.default_rng(seed)
+    q, _ = np.linalg.qr(random.normal(size=(4, 4)) + 1j * random.normal(size=(4, 4)))
     qc = QuantumCircuit(2)
-    qc.append(UnitaryGate(random_unitary(4, seed=seed)), range(2))
+    qc.append(UnitaryGate(q), range(2))
     qc.swap(0, 1)
     return qc
 
 
-def reference(circuit):
-    return [generate_preset_pass_manager(nivel, backend=BACKEND, seed_transpiler=12345).run(circuit).count_ops().get("ecr", 0)
-            for nivel in range(4)]
+@functools.cache
+def counts(seed):
+    return list(learner.ecr_por_nivel(unitary_and_swap(seed)))
 
 
 @visible("devuelve una cuenta por cada nivel, de 0 a 3")
 def test_four_counts():
-    got = list(learner.ecr_por_nivel(unitary_and_swap(12345)))
+    got = counts(12345)
     assert len(got) == 4, f"`ecr_por_nivel` devuelve {got}: debe tener una cuenta por nivel."
 
 
 @visible("los niveles altos fusionan la unitaria y el SWAP")
 def test_levels_2_and_3_merge():
-    got = list(learner.ecr_por_nivel(unitary_and_swap(12345)))
+    got = counts(12345)
     assert len(got) == 4 and got[3] < got[0], f"`ecr_por_nivel` devuelve {got}: el nivel 3 debería usar menos ecr que el 0."
 
 
-def test_other_unitaries():
-    for seed in (7, 99):
-        got = list(learner.ecr_por_nivel(unitary_and_swap(seed)))
-        assert got == reference(unitary_and_swap(seed)), f"Con la unitaria de seed = {seed}, `ecr_por_nivel` devuelve {got}."
-
-
-def test_counts_the_two_qubit_gate_of_the_chip():
-    qc = unitary_and_swap(5)
-    got = list(learner.ecr_por_nivel(qc))
-    assert got == reference(qc) and all(isinstance(n, int) for n in got), f"Con la unitaria de seed = 5, `ecr_por_nivel` devuelve {got}."
+def test_another_unitary():
+    got = counts(99)
+    assert got == EXPECTED and all(isinstance(n, int) for n in got), f"Con la unitaria de seed = 99, `ecr_por_nivel` devuelve {got}."

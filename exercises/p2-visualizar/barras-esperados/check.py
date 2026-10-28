@@ -26,7 +26,6 @@ def exact(circuit, labels):
 @inside
 def bars(circuit, labels):
     axes = learner.graficar(circuit, labels)
-    axes.figure.canvas.draw()
     heights = [patch.get_height() for patch in axes.patches]
     names = [tick.get_text() for tick in axes.get_xticklabels()]
     return names, heights

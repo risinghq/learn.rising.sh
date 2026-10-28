@@ -4,9 +4,9 @@ from qiskit.quantum_info import Statevector, hellinger_fidelity
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_aer.noise import NoiseModel
 from qiskit_aer.primitives import SamplerV2
-from qiskit_ibm_runtime.fake_provider import FakeTorino
+from qiskit_ibm_runtime.fake_provider import FakePeekskill
 
-backend = FakeTorino()
+backend = FakePeekskill()
 ruido = NoiseModel.from_backend(backend, thermal_relaxation=False)
 SHOTS = 4000
 

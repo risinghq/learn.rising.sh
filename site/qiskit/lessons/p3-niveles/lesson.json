@@ -542,7 +542,7 @@
      ],
      "id": "e1",
      "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.circuit.library import UnitaryGate\nfrom qiskit.quantum_info import random_unitary\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeSherbrooke\n\nbackend = FakeSherbrooke()\n\n\ndef unitaria_y_swap(semilla):\n    qc = QuantumCircuit(2)\n    qc.append(UnitaryGate(random_unitary(4, seed=semilla)), range(2))\n    qc.swap(0, 1)\n    return qc\n\n\ndef ecr_por_nivel(circuito):\n    # ✏️ devuelve [ecr con el nivel 0, con el 1, con el 2, con el 3]; transpila con seed_transpiler=12345\n    return []\n\n\nprint(ecr_por_nivel(unitaria_y_swap(12345)))",
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit.library import UnitaryGate\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeSherbrooke\n\nbackend = FakeSherbrooke()\n\n\ndef unitaria_y_swap(semilla):\n    azar = np.random.default_rng(semilla)\n    q, _ = np.linalg.qr(azar.normal(size=(4, 4)) + 1j * azar.normal(size=(4, 4)))\n    qc = QuantumCircuit(2)\n    qc.append(UnitaryGate(q), range(2))\n    qc.swap(0, 1)\n    return qc\n\n\ndef ecr_por_nivel(circuito):\n    # ✏️ devuelve [ecr con el nivel 0, con el 1, con el 2, con el 3]; transpila con seed_transpiler=12345\n    return []\n\n\nprint(ecr_por_nivel(unitaria_y_swap(12345)))",
      "cases": [
       "devuelve una cuenta por cada nivel, de 0 a 3",
       "los niveles altos fusionan la unitaria y el SWAP"
@@ -561,7 +561,7 @@
      ],
      "id": "e2",
      "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.circuit.library import UnitaryGate\nfrom qiskit.quantum_info import random_unitary\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeSherbrooke\n\nbackend = FakeSherbrooke()\n\nqc = QuantumCircuit(2)\nqc.append(UnitaryGate(random_unitary(4, seed=99)), range(2))\nqc.swap(0, 1)\n\ngrado = 1.0   # ✏️ 1.0 es exacto; un valor menor permite aproximar\n\npm = generate_preset_pass_manager(3, backend=backend, approximation_degree=grado, seed_transpiler=12345)\nprint(\"ecr:\", pm.run(qc).count_ops().get(\"ecr\", 0))",
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit.library import UnitaryGate\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeSherbrooke\n\nbackend = FakeSherbrooke()\n\nazar = np.random.default_rng(8)\nq, _ = np.linalg.qr(azar.normal(size=(4, 4)) + 1j * azar.normal(size=(4, 4)))\nqc = QuantumCircuit(2)\nqc.append(UnitaryGate(q), range(2))\nqc.swap(0, 1)\n\ngrado = 1.0   # ✏️ 1.0 es exacto; un valor menor permite aproximar\n\npm = generate_preset_pass_manager(3, backend=backend, approximation_degree=grado, seed_transpiler=12345)\nprint(\"ecr:\", pm.run(qc).count_ops().get(\"ecr\", 0))",
      "cases": [
       "el nivel 3 usa 2 ecr o menos"
      ]
@@ -569,7 +569,7 @@
     {
      "type": "exercise",
      "exercise": "p3-niveles/fidelidad",
-     "prompt": "Completa `fidelidad(circuito, nivel)`: transpila `medido` para `FakeTorino` con ese `nivel` y `seed_transpiler=0`, simúlalo con `SamplerV2` de Aer, con el ruido `ruido` y `SHOTS` repeticiones, y devuelve la fidelidad de Hellinger entre lo medido y la distribución `ideal`. Trampa: `hellinger_fidelity` espera probabilidades y `get_counts()` da conteos; divide cada conteo entre `SHOTS`.",
+     "prompt": "Completa `fidelidad(circuito, nivel)`: transpila `medido` para `FakePeekskill` con ese `nivel` y `seed_transpiler=0`, simúlalo con `SamplerV2` de Aer, con el ruido `ruido` y `SHOTS` repeticiones, y devuelve la fidelidad de Hellinger entre lo medido y la distribución `ideal`. Trampa: `hellinger_fidelity` espera probabilidades y `get_counts()` da conteos; divide cada conteo entre `SHOTS`.",
      "level": 3,
      "needs": "aer",
      "hints": [
@@ -579,7 +579,7 @@
      ],
      "id": "e3",
      "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.circuit.library import DiagonalGate, grover_operator\nfrom qiskit.quantum_info import Statevector, hellinger_fidelity\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer.noise import NoiseModel\nfrom qiskit_aer.primitives import SamplerV2\nfrom qiskit_ibm_runtime.fake_provider import FakeTorino\n\nbackend = FakeTorino()\nruido = NoiseModel.from_backend(backend, thermal_relaxation=False)\nSHOTS = 4000\n\n\ndef grover3():\n    qc = QuantumCircuit(3)\n    qc.h([0, 1, 2])\n    qc = qc.compose(grover_operator(DiagonalGate([1] * 7 + [-1])))\n    return qc\n\n\ndef fidelidad(circuito, nivel):\n    ideal = Statevector.from_instruction(circuito).probabilities_dict()\n    medido = circuito.measure_all(inplace=False)\n    # ✏️ transpila `medido` con ese nivel (seed_transpiler=0), simúlalo con ruido y compara con `ideal`\n    return 0.0\n\n\nprint(\"nivel 3:\", round(fidelidad(grover3(), 3), 3))",
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.circuit.library import DiagonalGate, grover_operator\nfrom qiskit.quantum_info import Statevector, hellinger_fidelity\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer.noise import NoiseModel\nfrom qiskit_aer.primitives import SamplerV2\nfrom qiskit_ibm_runtime.fake_provider import FakePeekskill\n\nbackend = FakePeekskill()\nruido = NoiseModel.from_backend(backend, thermal_relaxation=False)\nSHOTS = 4000\n\n\ndef grover3():\n    qc = QuantumCircuit(3)\n    qc.h([0, 1, 2])\n    qc = qc.compose(grover_operator(DiagonalGate([1] * 7 + [-1])))\n    return qc\n\n\ndef fidelidad(circuito, nivel):\n    ideal = Statevector.from_instruction(circuito).probabilities_dict()\n    medido = circuito.measure_all(inplace=False)\n    # ✏️ transpila `medido` con ese nivel (seed_transpiler=0), simúlalo con ruido y compara con `ideal`\n    return 0.0\n\n\nprint(\"nivel 3:\", round(fidelidad(grover3(), 3), 3))",
      "cases": [
       "la fidelidad está entre 0 y 1",
       "el nivel 3 se acerca a la distribución ideal"

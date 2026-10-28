@@ -1136,7 +1136,7 @@ for res in result:
                 ),
                 Exercise(
                     "p3-niveles/fidelidad",
-                    "Completa `fidelidad(circuito, nivel)`: transpila `medido` para `FakeTorino` con ese `nivel` y `seed_transpiler=0`, simúlalo con `SamplerV2` de Aer, con el ruido `ruido` y `SHOTS` repeticiones, y devuelve la fidelidad de Hellinger entre lo medido y la distribución `ideal`. "
+                    "Completa `fidelidad(circuito, nivel)`: transpila `medido` para `FakePeekskill` con ese `nivel` y `seed_transpiler=0`, simúlalo con `SamplerV2` de Aer, con el ruido `ruido` y `SHOTS` repeticiones, y devuelve la fidelidad de Hellinger entre lo medido y la distribución `ideal`. "
                     "Trampa: `hellinger_fidelity` espera probabilidades y `get_counts()` da conteos; divide cada conteo entre `SHOTS`.",
                     level=3,
                     id="e3",
