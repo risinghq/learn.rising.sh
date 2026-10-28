@@ -54,23 +54,26 @@ Changing `--hue` changes the whole theme.
 
 The component sheets read roles, not steps:
 
-| Token                                     | Use                                                             |
-| ----------------------------------------- | --------------------------------------------------------------- |
-| `--bg`                                    | Page background.                                                |
-| `--bg2`                                   | Inline code, buttons and boxes. `--code-bg` has the same value. |
-| `--card`                                  | Panels and cards. `--fig-bg` and `--node` have the same value.  |
-| `--stage`                                 | Player stage. It is also the text on a given color.             |
-| `--line`                                  | Rules and separators.                                           |
-| `--edge`                                  | Border of a control. It reaches 3:1 on the surfaces.            |
-| `--ink`                                   | Main text. `--fg` has the same value.                           |
-| `--muted`                                 | Secondary text.                                                 |
-| `--acc`, `--acc-hover`, `--acc-ink`       | Fill of the main button, its hover state and the text on it.    |
-| `--acc-text`                              | The accent when it is text: links and states.                   |
-| `--bad`                                   | Error. `--red` has the same value.                              |
-| `--focus`                                 | Focus ring.                                                     |
-| `--blue`, `--teal`, `--violet`, `--green` | Named colors of the player.                                     |
-| `--gold`                                  | Emphasis and question labels.                                   |
-| `--font`, `--mono`                        | Newsreader for text and titles; JetBrains Mono for code.        |
+| Token                                                                   | Use                                                                                                                             |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `--bg`                                                                  | Page background.                                                                                                                |
+| `--bg2`                                                                 | Inline code, buttons and boxes. `--code-bg` has the same value.                                                                 |
+| `--bg3`                                                                 | A control while pressed, and the row under the pointer.                                                                         |
+| `--card`                                                                | Panels and cards. `--fig-bg` and `--node` have the same value.                                                                  |
+| `--stage`                                                               | Player stage. It is also the text on a given color.                                                                             |
+| `--line`                                                                | Rules and separators.                                                                                                           |
+| `--edge`                                                                | Border of a control. It reaches 3:1 on the surfaces.                                                                            |
+| `--ink`                                                                 | Main text. `--fg` has the same value.                                                                                           |
+| `--muted`                                                               | Secondary text.                                                                                                                 |
+| `--acc`, `--acc-hover`, `--acc-active`                                  | Fill of the main button, at rest, under the pointer, pressed.                                                                   |
+| `--acc-ink`                                                             | Text on those fills.                                                                                                            |
+| `--acc-text`, `--acc-text-hover`                                        | The accent when it is text: links and states, and under the pointer.                                                            |
+| `--shadow-ring`, `--shadow-raised`, `--shadow-overlay`, `--shadow-emph` | Depth in place of a border: a 1 px tinted ring, a raised surface, a menu or dialog, and the gold ring of an emphasised formula. |
+| `--bad`                                                                 | Error. `--red` has the same value.                                                                                              |
+| `--focus`                                                               | Focus ring.                                                                                                                     |
+| `--blue`, `--teal`, `--violet`, `--green`                               | Named colors of the player.                                                                                                     |
+| `--gold`                                                                | Emphasis and question labels.                                                                                                   |
+| `--font`, `--mono`                                                      | Newsreader for text and titles; JetBrains Mono for code.                                                                        |
 
 ### Named colors
 
@@ -103,6 +106,38 @@ their own.
   4 px, `--r2` 8 px and `--r3` 16 px.
 - The player stage is 1280×720 and scales by `transform`, so its sizes are
   design pixels and not `rem`.
+- Counters (`.meta`, `.facts`, `.pr .n`, the lesson list, `.stepno`, `.score`)
+  set `font-variant-numeric: tabular-nums`, so the digits do not shift as the
+  value changes.
+
+## Motion and states
+
+Every duration and curve is a token in `theme.css`:
+
+| Token                                               | Use                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--ease`                                            | Ease-out curve for entrances and movement.                                     |
+| `--d-fast`, `--d-base`, `--d-slow`                  | 120, 180 and 280 ms: controls, menus and dialogs, panels.                      |
+| `--d-reveal`                                        | 450 ms: a block that appears on the player stage.                              |
+| `--tr-control`                                      | The transition of a control, with each property named.                         |
+| `--press`, `--grab`, `--enter`, `--rise`, `--slide` | The transform of a press, a grabbed thumb, an entrance, a rise and a slide-in. |
+| `--disabled`                                        | Opacity of a disabled control.                                                 |
+
+- A transition lists the properties it changes. Nothing transitions `all`.
+  Controls stay under 300 ms. Only `--d-reveal` is longer, and only on the
+  stage, where the narration paces it.
+- A press scales to 0.97. A menu or dialog enters from `scale(0.95)` with
+  `@starting-style`, never from 0.
+- A leaving block is faster than an entering one.
+- With `prefers-reduced-motion: reduce`, the transform tokens become `none`.
+  Colour and opacity changes stay, and the spinner slows down.
+- Each button, link, course card and lesson row has a hover, a `:focus-visible`,
+  an `:active` and, for a control, a disabled state. Hover applies only where
+  the device has a pointer that hovers, so a touch never leaves a row
+  highlighted. A disabled control, native or `aria-disabled`, drops to
+  `--disabled` and shows `not-allowed`.
+- The focus ring is `--focus`, 2 px, in both modes. It reaches 3:1 on every
+  surface listed under Contrast.
 
 ## Reading
 
@@ -132,12 +167,13 @@ their own.
   and passes `tests/theme_test.ts` before it is used.
 - In SVG presentation attributes `var(--x)` does not work: `engine.ts` sets it
   as a style. A canvas reads the color with `cssv('name')` each time it draws.
-- Text sits on `--bg`, `--bg2`, `--card` or `--stage` and reaches 4.5:1 on all
-  four. The accent colors used as text do too.
+- Text sits on `--bg`, `--bg2`, `--bg3`, `--card` or `--stage` and reaches 4.5:1
+  on all five. The accent colors used as text do too.
 - Axes, wires and the border of a control carry meaning and reach 3:1 on the
-  four surfaces. Grids and rules are decoration and are not measured.
+  five surfaces. Grids and rules are decoration and are not measured.
 - Every button has an `:active` state, and only one per screen is filled with
-  `--acc`.
+  `--acc`. The step that checks an exercise is that button; the one that moves
+  on is not filled.
 - The brand is `<a class="brand">Qubit a qubit</a>` in the course and
   `<a class="brand">Duo</a>` in the catalog, styled by `theme.css`.
 
@@ -145,25 +181,26 @@ their own.
 
 Criterion: WCAG 2.x AA. Text needs 4.5:1; axes, wires and the border of a
 control, 3:1. `tests/theme_test.ts` reads each token in the browser, in both
-modes, and fails if any falls below. Each cell is the worst ratio among the four
-surfaces (`--bg`, `--bg2`, `--card`, `--stage`), and `acc-ink/acc` is the button
-text on its fill.
+modes, and fails if any falls below. Each cell is the worst ratio among the five
+surfaces (`--bg`, `--bg2`, `--bg3`, `--card`, `--stage`), and `acc-ink/acc` is
+the button text on its fill.
 
-| token         |  dark | light |
-| ------------- | ----: | ----: |
-| `ink`         | 14.00 | 15.22 |
-| `muted`       |  7.73 |  6.52 |
-| `acc-text`    |  9.32 |  7.24 |
-| `gold`        | 10.17 |  4.90 |
-| `red`         |  6.90 |  5.32 |
-| `blue`        |  7.79 |  5.34 |
-| `teal`        |  9.33 |  4.86 |
-| `violet`      |  7.46 |  5.79 |
-| `green`       |  9.43 |  4.92 |
-| `acc-ink/acc` |  7.66 |  6.17 |
-| `axis`        |  4.60 |  3.76 |
-| `wire`        |  4.60 |  3.76 |
-| `edge`        |  3.89 |  3.46 |
+| token            |  dark | light |
+| ---------------- | ----: | ----: |
+| `ink`            | 13.02 | 14.39 |
+| `muted`          |  7.19 |  6.16 |
+| `acc-text`       |  8.67 |  6.84 |
+| `acc-text-hover` | 12.54 | 11.62 |
+| `gold`           |  9.46 |  4.63 |
+| `red`            |  6.42 |  5.03 |
+| `blue`           |  7.25 |  5.04 |
+| `teal`           |  8.68 |  4.60 |
+| `violet`         |  6.94 |  5.48 |
+| `green`          |  8.77 |  4.65 |
+| `acc-ink/acc`    |  7.66 |  6.17 |
+| `axis`           |  4.28 |  3.55 |
+| `wire`           |  4.28 |  3.55 |
+| `edge`           |  3.62 |  3.27 |
 
 To repeat the measurement:
 
