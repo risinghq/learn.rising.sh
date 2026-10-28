@@ -58,7 +58,7 @@ export interface Limits {
   caps: Caps;
   // What one instance second costs, according to `INSTANCE_TYPE`.
   rates: Rates;
-  // Instances among which the Worker spreads the runs.
+  // Instances the Worker has: the second serves a run only while the first is busy.
   instances: number;
   // The container time that a run sets aside before it starts. It is a
   // cap: when `reserveMs` is reached the instance is stopped.

@@ -21,9 +21,10 @@ import { take } from "./throttle.ts";
 
 export { Budget, RateLimiter };
 
-// An instance serves one job at a time (runner/server.py). The Worker spreads
-// runs among `INSTANCES` and retries once on the next one when the chosen one
-// answers 503.
+// An instance serves one job at a time (runner/server.py). The Worker sends
+// every run to instance 0 and retries once on the next one when it answers 503.
+// So the next instance is on only while the first is busy, and a learner's
+// following run finds instance 0 on within `SLEEP_AFTER_SECONDS`.
 export class Runner extends Container {
   defaultPort = 8080;
   sleepAfter = `${SLEEP_AFTER_SECONDS}s`;
@@ -304,8 +305,7 @@ async function run(
       attempts.push(attempt);
       return attempt;
     };
-    const firstIndex = Math.floor(Math.random() * limits.instances);
-    const first = await reserve(firstIndex);
+    const first = await reserve(0);
 
     let cookie: string | undefined;
     // A maintainer signs in with GitHub and skips Turnstile. Everyone else,
@@ -397,10 +397,10 @@ async function run(
       );
     });
     const work = (async () => {
-      const response = await send(firstIndex, first);
+      const response = await send(0, first);
       if (response.status !== 503) return response;
-      // That instance is serving another learner: try the next one.
-      const next = (firstIndex + 1) % limits.instances;
+      // Instance 0 is serving another learner: try the next one.
+      const next = 1 % limits.instances;
       if (stopped) throw new Error("run stopped");
       const retry = await reserve(next);
       // The cap may have hit while setting aside: nobody will adjust this reservation.
