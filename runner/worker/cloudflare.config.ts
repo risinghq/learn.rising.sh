@@ -17,7 +17,8 @@ const miseVersion = (tool: string) =>
 
 // The instance type and count set what the Worker counts as spend
 // (src/container.ts), so they are declared once here and passed to `env`.
-const INSTANCE_TYPE = "standard-2";
+// Half a vCPU: the heaviest solution takes 4 s of the 10 s wall (docs/runner.md#sizing).
+const INSTANCE_TYPE = "standard-1";
 const INSTANCES = 2;
 
 const runner = defineContainer({

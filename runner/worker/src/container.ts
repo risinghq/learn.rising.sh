@@ -22,8 +22,9 @@ const CPU_NANO = 20_000;
 const MEMORY_NANO = 2_500;
 const DISK_NANO = 70;
 
-// Seconds without requests after which the instance shuts down.
-export const SLEEP_AFTER_SECONDS = 60;
+// Seconds without requests after which the instance shuts down: the 30 s a
+// learner takes between runs, plus 5 s (docs/runner.md#sizing).
+export const SLEEP_AFTER_SECONDS = 35;
 
 export interface Rates {
   // Only while the instance works.
