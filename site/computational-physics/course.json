@@ -1,0 +1,31 @@
+{
+ "parts": [
+  {
+   "title": "Parte I · Integrar el movimiento",
+   "desc": "Tres sistemas, un mismo problema: cómo avanzar en el tiempo sin que la energía se escape. Euler y leapfrog en el oscilador, el péndulo sin aproximar y la órbita de un planeta.",
+   "lessons": [
+    {
+     "id": "f1-euler-leapfrog",
+     "section": "1.1",
+     "title": "Euler contra leapfrog: por qué la energía se desvía",
+     "summary": "El oscilador armónico integrado con dos métodos de coste casi igual: Euler gana energía en cada paso y leapfrog la conserva. Se ve en una cuenta de una línea.",
+     "minutes": 8
+    },
+    {
+     "id": "f1-pendulo",
+     "section": "1.2",
+     "title": "El péndulo más allá de los ángulos pequeños",
+     "summary": "El periodo de un péndulo depende de la amplitud. Se integra la ecuación sin aproximar el seno y se mide el periodo en función del ángulo inicial.",
+     "minutes": 6
+    },
+    {
+     "id": "f1-kepler",
+     "section": "1.3",
+     "title": "Integrar un planeta: la órbita de Kepler",
+     "summary": "La órbita de un planeta con leapfrog y con Euler: la energía y el momento angular se conservan en un caso y se escapan en el otro.",
+     "minutes": 7
+    }
+   ]
+  }
+ ]
+}

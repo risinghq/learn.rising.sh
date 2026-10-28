@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Física computacional</title>
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../course.css">
+<script src="../theme.js"></script>
+<script src="../account.js"></script>
+<script src="../course-home.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="index.html">Física computacional</a>
+    <nav aria-label="Principal"><a href="../">Duo</a></nav>
+    <span class="sp"></span>
+    <div data-account></div>
+    <div data-theme-ctl></div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="intro" aria-labelledby="t-intro">
+    <h1 id="t-intro">Física computacional: simula, mide y comprueba</h1>
+    <p class="lead">Lecciones animadas y narradas en las que programas el movimiento: eliges un método, predices qué hará la energía, lo ejecutas y lo escribes tú en la página.</p>
+    <div class="next" id="next"></div>
+    <div class="progress">
+      <p id="prog"></p>
+      <progress id="bar" max="1" value="0" aria-labelledby="prog"></progress>
+      <p class="facts" id="facts"></p>
+    </div>
+  </section>
+
+  <section class="course" aria-labelledby="t-curso">
+    <h2 id="t-curso">El curso</h2>
+    <ol class="parts" id="parts"></ol>
+  </section>
+</main>
+
+<footer>
+  <p>Todo el código de las lecciones se ejecuta y se comprueba antes de publicarlas.</p>
+</footer>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const read = k => { try { return JSON.parse(localStorage.getItem(k) ?? 'null'); } catch { return null; } };
+(async () => {
+  await QGAccount.ready;
+  const course = await (await fetch('course.json')).json();
+  const all = course.parts.flatMap(p => p.lessons);
+  // qiskit:done holds the lessons of every course
+  const done = new Set((read('qiskit:done') ?? []).filter(id => all.some(l => l.id === id)));
+  $('#prog').textContent = `${done.size}/${all.length} lecciones completadas`;
+  const bar = $('#bar'); bar.max = all.length; bar.value = done.size;
+  const hours = QGHome.minutesOf(all) / 60;
+  $('#facts').textContent = `${all.length} lecciones y ${hours.toLocaleString('es', { maximumFractionDigits: 1 })} h de narración.`;
+
+  const next = all.find(l => !done.has(l.id)) || all[0];
+  $('#next').innerHTML = `<p class="k">${done.size ? 'Continúa donde lo dejaste' : 'Empieza aquí'}</p><h2 class="t"></h2><p class="s"></p><a class="btn primary go" href="lesson.html?l=${encodeURIComponent(next.id)}">${done.size ? 'Continuar' : 'Empezar'} la lección, ${next.minutes} min</a>`;
+  $('#next .t').textContent = `${next.section} ${next.title}`;
+  $('#next .s').textContent = next.summary;
+
+  QGHome.renderParts($('#parts'), course.parts, done);
+})();
+</script>
+</body>
+</html>

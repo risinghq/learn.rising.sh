@@ -1,0 +1,279 @@
+{
+ "gravedad": {
+  "dur": 37.416,
+  "marks": {
+   "ley": 4.571,
+   "e": 14.988,
+   "l": 22.673,
+   "circ": 31.165
+  },
+  "cues": [
+   [
+    0.107,
+    "Un planeta de masa despreciable gira alrededor del Sol."
+   ],
+   [
+    4.571,
+    "Con unidades en las que la constante de gravitación por la masa del Sol vale uno, la aceleración apunta al Sol y vale uno entre la distancia al cuadrado."
+   ],
+   [
+    14.988,
+    "Dos cantidades no cambian nunca."
+   ],
+   [
+    18.144,
+    "La energía, que suma la cinética y la potencial."
+   ],
+   [
+    22.673,
+    "Y el momento angular, la posición en x por la velocidad en y, menos la posición en y por la velocidad en x."
+   ],
+   [
+    31.165,
+    "A distancia uno, la órbita circular tiene velocidad uno y periodo dos pi."
+   ]
+  ]
+ },
+ "apuesta": {
+  "dur": 13.848,
+  "marks": {
+   "apuesta": 8.506
+  },
+  "cues": [
+   [
+    0.107,
+    "Lanzamos el planeta desde distancia uno, con velocidad cero coma ocho, perpendicular a la dirección del Sol."
+   ],
+   [
+    8.506,
+    "Es menos que la velocidad circular."
+   ],
+   [
+    11.705,
+    "¿Qué órbita sigue?"
+   ]
+  ]
+ },
+ "orbita": {
+  "dur": 18.456,
+  "marks": {
+   "sol": 4.034,
+   "lejos": 8.648,
+   "cerca": 12.922
+  },
+  "cues": [
+   [
+    0.107,
+    "Integramos con leapfrog y dibujamos una vuelta."
+   ],
+   [
+    4.034,
+    "El Sol está en un foco de la elipse, no en el centro."
+   ],
+   [
+    8.648,
+    "Aquí empezó el planeta, en el punto más lejano."
+   ],
+   [
+    12.922,
+    "Y aquí pasa más cerca y más deprisa: es la segunda ley de Kepler."
+   ]
+  ]
+ },
+ "fuerza": {
+  "dur": 16.32,
+  "marks": {
+   "acel": 2.236,
+   "ener": 10.332
+  },
+  "cues": [
+   [
+    0.107,
+    "Ahora el código."
+   ],
+   [
+    2.236,
+    "La aceleración recibe la posición y devuelve las dos componentes: menos la posición entre la distancia al cubo."
+   ],
+   [
+    10.332,
+    "La energía suma la cinética y la potencial, menos uno entre la distancia."
+   ]
+  ]
+ },
+ "bucle": {
+  "dur": 24.24,
+  "marks": {
+   "kick": 3.326,
+   "drift": 6.68,
+   "nueva": 8.28,
+   "out": 15.696
+  },
+  "cues": [
+   [
+    0.107,
+    "El bucle repite los tres pasos."
+   ],
+   [
+    3.326,
+    "Medio paso de velocidad en las dos componentes, un paso de posición, y la aceleración de la nueva posición, que se usa para el segundo medio paso y se guarda para el siguiente."
+   ],
+   [
+    15.696,
+    "Tras tres vueltas, el error de energía es del orden de diez a la menos nueve, y el del momento angular, redondeo."
+   ]
+  ]
+ },
+ "euler_orbita": {
+  "dur": 24.768,
+  "marks": {
+   "codigo": 6.326,
+   "out": 12.766
+  },
+  "cues": [
+   [
+    0.107,
+    "Repetimos con Euler, el mismo paso de tiempo y el mismo número de pasos."
+   ],
+   [
+    6.326,
+    "La posición avanza con la velocidad vieja, y la velocidad con la aceleración vieja."
+   ],
+   [
+    12.766,
+    "El error de energía ya no es de diez a la menos nueve: es de cero coma veintiséis."
+   ],
+   [
+    19.192,
+    "Y el momento angular cambia en cero coma dieciséis, un veinte por ciento."
+   ]
+  ]
+ },
+ "dos_orbitas": {
+  "dur": 19.056,
+  "marks": {
+   "salto": 4.571,
+   "euler": 10.572
+  },
+  "cues": [
+   [
+    0.107,
+    "Las dos órbitas, dibujadas durante tres vueltas."
+   ],
+   [
+    4.571,
+    "Leapfrog se cierra sobre sí misma: las tres vueltas caen una encima de otra."
+   ],
+   [
+    10.572,
+    "Con Euler, el planeta gana energía y se aleja un poco más en cada vuelta."
+   ],
+   [
+    16.686,
+    "La elipse se abre."
+   ]
+  ]
+ },
+ "momento": {
+  "dur": 17.376,
+  "marks": {
+   "salto": 3.439,
+   "euler": 8.251
+  },
+  "cues": [
+   [
+    0.107,
+    "Miremos el momento angular en el tiempo."
+   ],
+   [
+    3.439,
+    "Con leapfrog es una recta: cero coma ocho, siempre."
+   ],
+   [
+    8.251,
+    "Con Euler sube sin parar."
+   ],
+   [
+    10.997,
+    "La segunda ley de Kepler, áreas iguales en tiempos iguales, deja de cumplirse."
+   ]
+  ]
+ },
+ "q1": {
+  "dur": 3.552,
+  "marks": {},
+  "cues": [
+   [
+    0.107,
+    "Lo que hemos visto tiene una explicación."
+   ]
+  ]
+ },
+ "q2": {
+  "dur": 5.592,
+  "marks": {},
+  "cues": [
+   [
+    0.107,
+    "La tercera ley de Kepler relaciona el periodo con el tamaño de la elipse."
+   ]
+  ]
+ },
+ "mision": {
+  "dur": 10.896,
+  "marks": {
+   "n1": 2.137
+  },
+  "cues": [
+   [
+    0.107,
+    "Ahora te toca."
+   ],
+   [
+    2.137,
+    "Escribe la función que avanza un planeta con leapfrog, y comprueba que la energía y el momento angular se quedan donde estaban."
+   ]
+  ]
+ },
+ "reflexion": {
+  "dur": 3.408,
+  "marks": {},
+  "cues": [
+   [
+    0.107,
+    "Dos preguntas para pensar con calma."
+   ]
+  ]
+ },
+ "cierre": {
+  "dur": 24.96,
+  "marks": {
+   "r1": 1.868,
+   "r2": 6.525,
+   "r3": 13.191,
+   "r4": 18.286
+  },
+  "cues": [
+   [
+    0.107,
+    "Resumen."
+   ],
+   [
+    1.868,
+    "La energía y el momento angular de un planeta no cambian."
+   ],
+   [
+    6.525,
+    "Leapfrog conserva el momento angular exactamente, y la energía con un error acotado."
+   ],
+   [
+    13.191,
+    "Euler hace crecer los dos, y la órbita se abre en espiral."
+   ],
+   [
+    18.286,
+    "El periodo sale de la tercera ley: dos pi por el semieje mayor elevado a tres medios."
+   ]
+  ]
+ }
+}

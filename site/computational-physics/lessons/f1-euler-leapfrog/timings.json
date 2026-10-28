@@ -1,0 +1,340 @@
+{
+ "oscilador": {
+  "dur": 36.72,
+  "marks": {
+   "ec": 6.298,
+   "sol": 13.063,
+   "en": 18.526
+  },
+  "cues": [
+   [
+    0.107,
+    "Empecemos por el sistema más simple de la física: una masa colgada de un muelle."
+   ],
+   [
+    6.298,
+    "Con la masa y la constante del muelle iguales a uno, la aceleración es menos la posición."
+   ],
+   [
+    13.063,
+    "La solución exacta es un coseno, y la velocidad es menos un seno."
+   ],
+   [
+    18.526,
+    "Lo importante es lo que no cambia."
+   ],
+   [
+    21.555,
+    "La energía, un medio de la velocidad al cuadrado más un medio de la posición al cuadrado, vale siempre lo mismo."
+   ],
+   [
+    30.047,
+    "Si soltamos la masa desde la posición uno, en reposo, la energía es un medio."
+   ]
+  ]
+ },
+ "euler": {
+  "dur": 27.144,
+  "marks": {
+   "idea": 5.378,
+   "codigo": 18.498
+  },
+  "cues": [
+   [
+    0.107,
+    "Un ordenador no resuelve la ecuación: avanza a pasos pequeños."
+   ],
+   [
+    5.378,
+    "El método de Euler es el más directo."
+   ],
+   [
+    8.86,
+    "En cada paso de tiempo, la posición avanza con la velocidad que tiene ahora, y la velocidad cambia con la aceleración que tiene ahora."
+   ],
+   [
+    18.498,
+    "En Python son dos asignaciones en una sola línea, que usan a la vez los valores viejos de la posición y de la velocidad."
+   ]
+  ]
+ },
+ "apuesta": {
+  "dur": 17.592,
+  "marks": {
+   "apuesta": 3.34
+  },
+  "cues": [
+   [
+    0.107,
+    "Antes de ejecutarlo, apuesta."
+   ],
+   [
+    3.34,
+    "Con un paso de tiempo de cero coma uno y doscientos pasos, el reloj llega al tiempo veinte, unas tres oscilaciones."
+   ],
+   [
+    12.214,
+    "La energía empezó en un medio."
+   ],
+   [
+    15.3,
+    "¿Cómo estará al final?"
+   ]
+  ]
+ },
+ "resultado": {
+  "dur": 15.84,
+  "marks": {
+   "out": 2.123,
+   "mal": 9.582
+  },
+  "cues": [
+   [
+    0.107,
+    "Ejecutamos."
+   ],
+   [
+    2.123,
+    "La energía final es tres coma sesenta y seis."
+   ],
+   [
+    6.256,
+    "Siete veces la que había al principio."
+   ],
+   [
+    9.582,
+    "No hay ninguna fuerza que empuje la masa: la energía la fabrica el propio método."
+   ]
+  ]
+ },
+ "crece": {
+  "dur": 13.416,
+  "marks": {
+   "euler": 3.651,
+   "ref": 8.152
+  },
+  "cues": [
+   [
+    0.107,
+    "Esta es la energía en función del tiempo."
+   ],
+   [
+    3.651,
+    "Con Euler sube en cada oscilación, y no se detiene."
+   ],
+   [
+    8.152,
+    "La línea discontinua es lo que debería hacer: quedarse en un medio."
+   ]
+  ]
+ },
+ "espiral": {
+  "dur": 17.136,
+  "marks": {
+   "fase": 2.732,
+   "espiral": 10.983
+  },
+  "cues": [
+   [
+    0.107,
+    "Veámoslo de otra forma."
+   ],
+   [
+    2.732,
+    "En el plano de la posición y la velocidad, el movimiento correcto es un círculo, porque la energía fija el radio."
+   ],
+   [
+    10.983,
+    "Euler dibuja una espiral que se abre: el radio crece un poco en cada paso."
+   ]
+  ]
+ },
+ "porque": {
+  "dur": 31.392,
+  "marks": {
+   "uno": 2.901,
+   "dos": 11.238,
+   "tres": 20.947
+  },
+  "cues": [
+   [
+    0.107,
+    "La causa cabe en una cuenta."
+   ],
+   [
+    2.901,
+    "Tras un paso de Euler, la energía es un medio de la nueva posición al cuadrado más la nueva velocidad al cuadrado."
+   ],
+   [
+    11.238,
+    "Al desarrollar, los términos cruzados se cancelan, y queda la energía anterior multiplicada por uno más el paso de tiempo al cuadrado."
+   ],
+   [
+    20.947,
+    "Es un factor fijo, mayor que uno, en cada paso."
+   ],
+   [
+    25.66,
+    "No es un error de redondeo ni una mala elección del paso: es el método."
+   ]
+  ]
+ },
+ "q1": {
+  "dur": 4.704,
+  "marks": {},
+  "cues": [
+   [
+    0.107,
+    "Usa la fórmula para calcular cuánto crece la energía."
+   ]
+  ]
+ },
+ "leapfrog": {
+  "dur": 34.992,
+  "marks": {
+   "kick": 9.284,
+   "drift": 13.927,
+   "kick2": 18.371,
+   "costo": 24.06
+  },
+  "cues": [
+   [
+    0.107,
+    "Hay una alternativa que cuesta casi lo mismo."
+   ],
+   [
+    3.864,
+    "Se llama leapfrog, salto de rana, y divide el paso en tres."
+   ],
+   [
+    9.284,
+    "Medio paso que cambia la velocidad con la aceleración de ahora."
+   ],
+   [
+    13.927,
+    "Un paso entero que mueve la posición con esa velocidad."
+   ],
+   [
+    18.371,
+    "Y otro medio paso de velocidad, con la aceleración de la nueva posición."
+   ],
+   [
+    24.06,
+    "En un problema real, esa última aceleración es la del principio del paso siguiente, así que se calcula una sola vez por paso, igual que en Euler."
+   ]
+  ]
+ },
+ "salto": {
+  "dur": 20.64,
+  "marks": {
+   "bucle": 1.953,
+   "out": 12.752
+  },
+  "cues": [
+   [
+    0.107,
+    "El código."
+   ],
+   [
+    1.953,
+    "Tres líneas dentro del bucle, en el orden del salto de rana."
+   ],
+   [
+    6.963,
+    "Con la aceleración igual a menos la posición, cada medio paso es una resta."
+   ],
+   [
+    12.752,
+    "Ahora la energía no crece: oscila muy poco, entre cero coma cuatro nueve nueve y cero coma cinco."
+   ]
+  ]
+ },
+ "comparacion": {
+  "dur": 14.568,
+  "marks": {
+   "salto": 3.326,
+   "euler": 10.87
+  },
+  "cues": [
+   [
+    0.107,
+    "Los dos métodos en el mismo plano."
+   ],
+   [
+    3.326,
+    "Leapfrog recorre un círculo, o casi: una elipse muy poco achatada que se cierra sobre sí misma."
+   ],
+   [
+    10.87,
+    "Euler se aleja del círculo y no vuelve."
+   ]
+  ]
+ },
+ "q2": {
+  "dur": 3.312,
+  "marks": {},
+  "cues": [
+   [
+    0.107,
+    "Una última pregunta sobre Euler."
+   ]
+  ]
+ },
+ "mision": {
+  "dur": 10.44,
+  "marks": {
+   "n1": 2.137
+  },
+  "cues": [
+   [
+    0.107,
+    "Ahora te toca."
+   ],
+   [
+    2.137,
+    "Escribe tú el paso de leapfrog para el oscilador, y comprueba que la energía no se escapa aunque des diez mil pasos."
+   ]
+  ]
+ },
+ "reflexion": {
+  "dur": 3.408,
+  "marks": {},
+  "cues": [
+   [
+    0.107,
+    "Dos preguntas para pensar con calma."
+   ]
+  ]
+ },
+ "cierre": {
+  "dur": 26.856,
+  "marks": {
+   "r1": 1.868,
+   "r2": 9.568,
+   "r3": 16.842,
+   "r4": 21.046
+  },
+  "cues": [
+   [
+    0.107,
+    "Resumen."
+   ],
+   [
+    1.868,
+    "Euler multiplica la energía por uno más el paso de tiempo al cuadrado en cada paso: crece sin parar."
+   ],
+   [
+    9.568,
+    "Leapfrog alterna medio paso de velocidad, un paso de posición y otro medio paso de velocidad."
+   ],
+   [
+    16.842,
+    "Su energía oscila un poco, pero no se escapa."
+   ],
+   [
+    21.046,
+    "Un método se elige por lo que conserva, no solo por su precisión en un paso."
+   ]
+  ]
+ }
+}

@@ -202,6 +202,8 @@ PALABRAS = {
     "qiskit": "kískit",
     "runtime": "rántaim",
     "composer": "compóuser",
+    "leapfrog": "lípfrog",
+    "euler": "óiler",
     "serverless": "sérverles",
     "functions": "fánkshons",
     "function": "fánkshon",

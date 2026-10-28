@@ -4,5 +4,11 @@
     "title": "Qiskit en español",
     "summary": "Narrated, animated lessons that cover the IBM Quantum guides, with code exercises you run on the page.",
     "language": "Spanish"
+  },
+  {
+    "slug": "computational-physics",
+    "title": "Física computacional",
+    "summary": "Narrated, animated lessons that teach numerical methods by simulating oscillators, pendulums and planets, with code exercises you run on the page.",
+    "language": "Spanish"
   }
 ]

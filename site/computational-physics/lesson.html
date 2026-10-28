@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Física computacional</title>
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="../vendor/katex/katex.min.css">
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../player/app.css">
+<script src="../theme.js"></script>
+<script src="../account.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top">
+  <div class="in">
+    <a class="brand" href="index.html">Física computacional</a>
+    <p class="crumb"><span id="crumb-part"></span><b id="crumb-title"></b></p>
+    <div class="tools">
+      <label class="tool" for="speed">Velocidad</label>
+      <select class="tool" id="speed">
+        <option value="0.85">0,85×</option><option value="1" selected>1×</option>
+        <option value="1.15">1,15×</option><option value="1.3">1,3×</option><option value="1.5">1,5×</option>
+      </select>
+      <button type="button" class="tool" id="cc" aria-pressed="true" title="Subtítulos (C)">Subtítulos</button>
+      <button type="button" class="tool" id="mute" aria-pressed="true">Efectos</button>
+      <div data-account></div>
+      <div data-theme-ctl></div>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="player">
+  <div id="viewport">
+    <div id="stage">
+      <div id="tag"></div>
+      <div id="scene" class="scene"></div>
+      <div id="ask"></div>
+    </div>
+  </div>
+  <div id="caption"></div>
+  <div class="controls">
+    <div class="btns">
+      <button type="button" class="cbtn" id="prev" title="Paso anterior (←)">Anterior</button>
+      <button type="button" class="cbtn play" id="play" title="Pausa / reproducir (espacio)">Pausa</button>
+      <button type="button" class="cbtn" id="replay" title="Repetir este paso">Repetir</button>
+      <button type="button" class="cbtn" id="back5" aria-label="Retroceder 5 segundos" title="−5 s (Mayús + ←)">−5 s</button>
+      <button type="button" class="cbtn" id="fwd5" aria-label="Avanzar 5 segundos" title="+5 s (Mayús + →)">+5 s</button>
+      <button type="button" class="cbtn" id="next" title="Paso siguiente (→)">Siguiente</button>
+    </div>
+    <div class="prog">
+      <label class="stepno" id="stepno" for="steps"></label>
+      <input type="range" id="steps" min="0" max="1" step="1" value="0">
+    </div>
+  </div>
+</main>
+
+<div class="overlay" id="start" role="dialog" aria-modal="true" aria-labelledby="start-title">
+  <div class="card">
+    <p class="kicker" id="start-eyebrow"></p>
+    <h1 id="start-title"></h1>
+    <p class="meta" id="start-meta"></p>
+    <p>Al terminar esta lección podrás:</p>
+    <ul id="start-goals"></ul>
+    <div class="actions">
+      <button type="button" class="cta primary" id="go">Comenzar</button>
+      <button type="button" class="cta" id="resume" style="display:none"></button>
+      <a class="cta" href="index.html">Índice</a>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hide" id="end" role="dialog" aria-modal="true" aria-labelledby="end-title">
+  <div class="card">
+    <p class="kicker">Lección completada</p>
+    <h1 id="end-title"></h1>
+    <p class="score" id="end-score"></p>
+    <div id="end-practice-wrap">
+      <p>Practica y profundiza:</p>
+      <ul id="end-practice"></ul>
+    </div>
+    <div class="actions">
+      <a class="cta primary" id="end-next">Siguiente lección</a>
+      <button type="button" class="cta" id="again">Repetir</button>
+      <a class="cta" href="index.html">Índice</a>
+    </div>
+  </div>
+</div>
+
+<script defer src="../vendor/katex/katex.min.js"></script>
+<script defer src="../player/engine.js"></script>
+</body>
+</html>
