@@ -164,6 +164,7 @@ repeat the `id` and treats it as a broken channel. The learner can read
 | `runner/Dockerfile`  | The image. Python and uv come from `mise.toml`; the libraries, from the `runner` group of `uv.lock`. |
 | `runner/local.py`    | Builds the image and runs it with Docker and the isolation flags.                                    |
 | `runner/bench.py`    | Measures cold and warm latency.                                                                      |
+| `runner/sizing.py`   | Measures the time, CPU and memory of the solutions on each instance type.                            |
 | `qgcheck/job.py`     | The job: the checker of `check` and the execution of `run`.                                          |
 | `qgcheck/host.py`    | The learner's process of `check`.                                                                    |
 | `qgcheck/wire.py`    | The message format between those two processes.                                                      |
@@ -190,15 +191,84 @@ and the Turnstile session cookie is `SameSite=Strict`. Its Container is
   under `/auth/*` or `/api/*` that does not exist is answered by the Worker with
   404 and `reason` `not_found`. A `/run` that is not a `POST` answers 405 with
   `Allow: POST`.
-- A `Runner` class that extends `Container` (`@cloudflare/containers`) spreads
-  the `/run` requests between the two instances (`INSTANCES`). If the chosen
-  instance answers 503, it repeats the request once on the other. The instance
-  has no internet access (`enableInternet = false`) and shuts down after 60
-  seconds without requests.
+- A `Runner` class that extends `Container` (`@cloudflare/containers`) sends
+  every `/run` request to instance 0. If it answers 503 because it serves
+  another learner, the Worker repeats the request once on the next of the
+  `INSTANCES`. So the second instance is on only while the first is busy. The
+  instance has no internet access (`enableInternet = false`) and shuts down 35
+  seconds after its last request.
 
 A single `cf deploy` builds the image, packages the Worker and uploads `site/`
 as one version. To publish a change to the lessons, deploy again:
 [deploy.md](deploy.md).
+
+## Sizing
+
+The instance type (`INSTANCE_TYPE` in
+[`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts)) and the
+shutdown window (`SLEEP_AFTER_SECONDS` in
+[`src/container.ts`](../runner/worker/src/container.ts)) set what a run costs
+([protection.md](protection.md#what-a-run-costs)). They are the cheapest that
+meet these limits:
+
+- Every solution ends under the 10 s wall and uses under 60 % of the CPU its
+  type gives in that wall (vCPU × 10 s).
+- The memory peak of the container stays under 75 % of the type's memory.
+- A learner who runs again up to 30 s after the previous run finds the instance
+  on.
+
+```sh
+python runner/sizing.py --types basic standard-1 standard-2 --warm 4 \
+  --exercises p3-niveles/fidelidad --out sizing.json
+```
+
+`sizing.py` runs the solution of each exercise in a new container limited to the
+`--cpus` and `--memory` of each type, once cold and `--warm` times more, and
+writes the runner's time, the CPU the container used and the memory peak of each
+request. Without `--exercises` it measures all of them. The times are those of
+Docker's CPU quota, so those of a Cloudflare instance can differ: measure the
+heaviest solution on the deployed instance before moving to a smaller type.
+
+The worst case of 11 solutions (the three of `p3-niveles`, the slowest and the
+most memory-hungry of each part, and a typical one) on each type. `lite` ran
+only two of them:
+
+| Type       | Slowest solution | CPU used | Share of CPU in the wall | Memory peak | Share of memory |
+| ---------- | ---------------- | -------- | ------------------------ | ----------- | --------------- |
+| lite       | killed at 10 s   | 0.71 s   | 114 % of 0.6 s           | 52 MiB      | 20 %            |
+| basic      | 7.9 s            | 1.96 s   | 78 % of 2.5 s            | 152 MiB     | 15 %            |
+| standard-1 | 4.0 s            | 1.95 s   | 39 % of 5 s              | 152 MiB     | 4 %             |
+| standard-2 | 2.0 s            | 1.96 s   | 20 % of 10 s             | 151 MiB     | 2 %             |
+
+The solutions are CPU-bound and the memory is far below any type, so the CPU
+decides. `basic` (0.25 vCPU) has the heaviest solution at 78 % of its CPU in the
+wall and 7.9 s of 10 s, which leaves 2 s before the runner kills a correct
+answer. `standard-1` is the smallest type that keeps every solution under 60 %.
+The three solutions of `p3-niveles` take 2.4 to 2.7 s there and the slowest of
+all 4.0 s. The memory peak is the cgroup's `memory.peak`, which counts the page
+cache.
+
+The cost of a learner session of 20 runs, one every 30 s, of the heaviest
+solution (`p3-transpilar/pass-manager-completo`), computed with `ratesOf`. A run
+that finds the instance off also pays its start (measured here with Docker, 1
+s):
+
+| Type       | Window | Session (USD) | Per run (USD) | Runs a day |
+| ---------- | ------ | ------------- | ------------- | ---------- |
+| basic      | 35 s   | 0.00249       | 0.00012       | 803        |
+| standard-1 | 10 s   | 0.00403       | 0.00020       | 496        |
+| standard-1 | 30 s   | 0.00713       | 0.00036       | 280        |
+| standard-1 | 35 s   | 0.00718       | 0.00036       | 278        |
+| standard-1 | 60 s   | 0.00745       | 0.00037       | 268        |
+| standard-2 | 35 s   | 0.01036       | 0.00052       | 192        |
+| standard-2 | 60 s   | 0.01076       | 0.00054       | 185        |
+
+Below 30 s every run finds the instance off, pays its start and makes the
+learner wait for it. From 30 s on, the session keeps the instance on from the
+first run to the last, and a longer window only adds the seconds after the last
+run. The window is 30 s plus 5 s, so a run that arrives at the limit does not
+race the shutdown. Runs a day are those of the public's 0.10 USD of
+[protection.md](protection.md#what-is-rejected).
 
 ## Run it with Docker
 

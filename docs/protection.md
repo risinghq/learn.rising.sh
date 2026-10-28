@@ -81,8 +81,8 @@ paid apart.
 | `MONTHLY_BUDGET_USD`    | 2          | Estimated spend of the UTC month that is not exceeded.           |
 | `PUBLIC_BUDGET_SHARE`   | 0.75       | Share of the budget spent by whoever does not maintain the site. |
 | `PUBLIC_BUDGET_DAYS`    | 15         | A day of public spend does not pass 1/15 of that share.          |
-| `INSTANCE_TYPE`         | standard-2 | Instance type. The prices come from it.                          |
-| `INSTANCES`             | 2          | Instances the Worker spreads the runs between.                   |
+| `INSTANCE_TYPE`         | standard-1 | Instance type. The prices come from it.                          |
+| `INSTANCES`             | 2          | Instances. The second serves a run only while the first is busy. |
 | `RESERVED_BUSY_SECONDS` | 30         | Seconds a run sets aside from the budget before it starts.       |
 | `MAINTAINERS`           | ids        | See [Maintainers](#maintainers).                                 |
 
@@ -94,18 +94,22 @@ Cloudflare's rate and the measures of each type.
 ### What a run costs
 
 Cloudflare bills CPU only while the instance works, and memory and disk for the
-whole time it is on, working or not. The instance shuts down 60 s
+whole time it is on, working or not. The instance shuts down 35 s
 (`SLEEP_AFTER_SECONDS`) after its last request. Seconds are billed in steps of
-10 ms. With `standard-2` (1 vCPU, 6 GiB and 12 GB) one second costs:
+10 ms. With `standard-1` (0.5 vCPU, 4 GiB and 8 GB) one second costs:
 
-| Item              | Calculation                     | USD per second |
-| ----------------- | ------------------------------- | -------------- |
-| CPU, only working | 1 × 0.00002                     | 0.00002        |
-| On, always        | 6 × 0.0000025 + 12 × 0.00000007 | 0.00001584     |
+| Item              | Calculation                    | USD per second |
+| ----------------- | ------------------------------ | -------------- |
+| CPU, only working | 0.5 × 0.00002                  | 0.00001        |
+| On, always        | 4 × 0.0000025 + 8 × 0.00000007 | 0.00001056     |
 
-An isolated 2 s run, with no other in the previous 60 s, costs 2 × 0.00002 of
-CPU plus 62 s on × 0.00001584: 0.00102 USD. Almost all of it is the wait. Runs
-that arrive while the instance is on only extend its window.
+An isolated 2 s run, with no other in the previous 35 s, costs 2 × 0.00001 of
+CPU plus 37 s on × 0.00001056: 0.00041 USD. Almost all of it is the wait. The
+public's 0.10 USD a day covers about 240 of them. Runs that arrive while the
+instance is on only extend its window, and the Worker sends every run to
+instance 0 unless it is busy, so one learner's session keeps one instance on.
+[runner.md](runner.md#sizing) gives the cost of a session and why this type and
+window.
 
 The Worker sets aside and charges like this, in the `Budget` Durable Object,
 which keeps the spend of the month and of the day (this one counts only the
@@ -114,14 +118,14 @@ public) and, per instance, the instant it is expected to shut down
 
 1. Before it starts the container it sets aside the most expensive run that fits
    in `RESERVED_BUSY_SECONDS`: those seconds of CPU and the seconds on from
-   `max(now, awakeUntil)` to `now + RESERVED_BUSY_SECONDS + 60 s`.
+   `max(now, awakeUntil)` to `now + RESERVED_BUSY_SECONDS + 35 s`.
 2. If the reservation does not fit, it does not run
    ([What is rejected](#what-is-rejected)). Checking and reserving is a single
    operation of the object, so several simultaneous requests cannot set aside
    together what fits only once.
 3. When it ends it swaps the reservation for the measured cost: the time it
    waited for the container (start included) at the CPU rate and the on-window
-   until 60 s after it answered, and never more than was set aside. If another
+   until 35 s after it answered, and never more than was set aside. If another
    run extended `awakeUntil` meanwhile, that part stays charged.
 4. A request rejected after reserving (by Turnstile) gives back the whole
    reservation.
