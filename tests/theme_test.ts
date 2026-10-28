@@ -25,6 +25,7 @@ const TEXT = [
   "ink",
   "muted",
   "acc-text",
+  "acc-text-hover",
   "gold",
   "red",
   "blue",
@@ -32,7 +33,7 @@ const TEXT = [
   "violet",
   "green",
 ];
-const SURFACES = ["bg", "bg2", "card", "stage"];
+const SURFACES = ["bg", "bg2", "bg3", "card", "stage"];
 const GRAPHICS = ["axis", "wire", "edge"];
 const LESSON_JSON_DELAY_MS = 400;
 
