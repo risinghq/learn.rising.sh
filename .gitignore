@@ -1,9 +1,10 @@
 .cache/
 site/vendor/
 site/theme.js
-site/qiskit/account.js
-site/qiskit/editor.js
-site/qiskit/engine.js
+site/account.js
+site/course-home.js
+site/player/editor.js
+site/player/engine.js
 site/qiskit/notebooks.js
 shots/
 __pycache__/

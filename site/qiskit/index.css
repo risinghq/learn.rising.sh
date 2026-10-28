@@ -1,35 +1,4 @@
-/* Course home and the privacy page. Tokens and shared chrome come from ../theme.css. */
-
-main {
-  max-width: 46rem;
-  margin: 0 auto;
-  padding: var(--s12) var(--s4) var(--s16);
-}
-main > section {
-  margin-top: var(--s16);
-}
-main > section:first-child {
-  margin-top: 0;
-}
-main h2 {
-  margin: 0 0 var(--s2);
-  font-size: var(--t-xl);
-}
-.note {
-  margin: 0 0 var(--s6);
-  color: var(--muted);
-}
-footer {
-  max-width: 46rem;
-  margin: 0 auto;
-  padding: var(--s6) var(--s4) var(--s16);
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: var(--t-sm);
-}
-footer p {
-  margin: 0;
-}
+/* What only the Qiskit home page has: the Bloch sphere, the notebook command, the daily review and the Ising milestones. The rest is ../course.css. */
 
 .intro {
   display: grid;
@@ -39,16 +8,6 @@ footer p {
 }
 .intro > * {
   grid-column: 1;
-}
-.intro h1 {
-  margin: 0 0 var(--s4);
-  font-size: var(--t-3xl);
-  letter-spacing: -0.02em;
-}
-.lead {
-  margin: 0 0 var(--s8);
-  font-size: var(--t-lg);
-  line-height: 1.45;
 }
 .bloch {
   grid-column: 2;
@@ -84,35 +43,6 @@ footer p {
 .bloch text {
   fill: var(--muted);
   font: var(--w-regular) 16px var(--mono);
-}
-
-.next {
-  padding: var(--s6) 0;
-  border-top: 1px solid var(--line);
-}
-.next .k {
-  margin: 0 0 var(--s1);
-  color: var(--muted);
-  font-size: var(--t-sm);
-}
-.next .t {
-  margin: 0 0 var(--s2);
-  font-size: var(--t-xl);
-}
-.next .s {
-  margin: 0 0 var(--s6);
-  max-width: 38rem;
-}
-.progress {
-  padding: var(--s4) 0 0;
-}
-.progress p {
-  margin: 0 0 var(--s2);
-}
-.progress .facts {
-  margin: var(--s3) 0 0;
-  color: var(--muted);
-  font-size: var(--t-sm);
 }
 
 .cmd {
@@ -255,129 +185,11 @@ footer p {
   color: var(--muted);
 }
 
-.parts {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-.part {
-  padding: var(--s6) 0;
-  border-bottom: 1px solid var(--line);
-}
-.part .no {
-  margin: 0 0 var(--s1);
-  color: var(--muted);
-  font-size: var(--t-sm);
-}
-.part h3 {
-  margin: 0 0 var(--s2);
-  font-size: var(--t-lg);
-}
-.part .d {
-  margin: 0 0 var(--s4);
-  max-width: 38rem;
-}
-.pr {
-  display: flex;
-  align-items: center;
-  gap: var(--s3);
-  max-width: 20rem;
-}
-.pr .n {
-  color: var(--muted);
-  font-size: var(--t-sm);
-  font-variant-numeric: tabular-nums;
-}
-.part details {
-  margin-top: var(--s3);
-}
-.part summary {
-  display: flex;
-  align-items: center;
-  min-height: 2.75rem;
-  color: var(--acc-text);
-  cursor: pointer;
-}
-.part summary:active {
-  opacity: 0.7;
-}
-.lessons {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.lessons a {
-  display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
-  gap: var(--s3);
-  align-items: baseline;
-  min-height: 2.75rem;
-  padding: var(--s2) 0;
-  border-top: 1px solid var(--line);
-  color: var(--ink);
-  text-decoration: none;
-}
-.lessons a:hover .t {
-  text-decoration: underline;
-}
-.lessons .s,
-.lessons .m,
-.lessons .tag {
-  color: var(--muted);
-  font-size: var(--t-sm);
-  font-variant-numeric: tabular-nums;
-}
-.lessons .done .m {
-  color: var(--acc-text);
-}
-
-.doc ~ footer a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-}
-.doc h1 {
-  margin: 0 0 var(--s4);
-  font-size: var(--t-3xl);
-  letter-spacing: -0.02em;
-}
-.doc h2 {
-  margin: var(--s12) 0 var(--s2);
-}
-.doc li {
-  margin: var(--s2) 0;
-}
-.doc .lead {
-  margin-bottom: var(--s6);
-}
-
 @media (max-width: 40rem) {
-  main {
-    padding-top: var(--s8);
-  }
-  main > section {
-    margin-top: var(--s12);
-  }
   .intro {
     display: block;
   }
-  .intro h1 {
-    font-size: var(--t-2xl);
-  }
-  .lead {
-    font-size: var(--t-md);
-  }
   .bloch {
     display: none;
-  }
-  .lessons a {
-    grid-template-columns: 2.75rem minmax(0, 1fr);
-  }
-  .lessons .m {
-    grid-column: 2;
-  }
-  .doc h1 {
-    font-size: var(--t-2xl);
   }
 }

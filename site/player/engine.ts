@@ -1,4 +1,4 @@
-// Engine for animated, narrated lessons (Qiskit · IBM Quantum guides).
+// Engine for animated, narrated lessons, shared by every course.
 // A lesson is lessons/<id>/lesson.json: a list of "beats". Each beat has
 //   say      narration (with [[name]] marks before the word that triggers something)
 //   scene    blocks stacked on the stage (text, formulas, lists, boxes, figures)
@@ -168,6 +168,16 @@ const compile = (expr: string) =>
     "P",
     `with (Math) { with (P) { return (${expr}); } }`,
   ) as Curve;
+// Linear interpolation of a polyline whose x grows. Areas and points that follow a data curve read it here.
+const interpolate =
+  (pts: Vec[]): Curve =>
+  (x) => {
+    const k = pts.findIndex((p) => p[0] >= x);
+    if (k <= 0) return pts[Math.max(k, 0)]?.[1] ?? NaN;
+    const [xa, ya] = pts[k - 1],
+      [xb, yb] = pts[k];
+    return xb === xa ? yb : ya + ((yb - ya) * (x - xa)) / (xb - xa);
+  };
 const ease = (t: number) =>
   t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 // Interpolates something over time with requestAnimationFrame (or instantly in review mode).
@@ -303,7 +313,9 @@ function makePlot(box: HTMLElement, s: PlotSpec) {
   (s.areas || []).forEach((a, i) => (o.show["a" + i] = !a.hidden));
   (s.vlines || []).forEach((v, i) => (o.show["v" + i] = !v.hidden));
   (s.points || []).forEach((v, i) => (o.show["p" + i] = !v.hidden));
-  const fns = (s.curves || []).map((c) => compile(c.expr));
+  const fns = (s.curves || []).map((c) =>
+    c.pts ? interpolate(c.pts) : compile(c.expr ?? "NaN"),
+  );
   const draw = () => {
     box.textContent = "";
     const [W, H] = figSize(s),
@@ -372,7 +384,7 @@ function makePlot(box: HTMLElement, s: PlotSpec) {
     });
     o.paths = [];
     (s.curves || []).forEach((c, i) => {
-      const pts = sample(fns[i], c.from ?? x0, c.to ?? x1);
+      const pts = c.pts ?? sample(fns[i], c.from ?? x0, c.to ?? x1);
       const d = pts
         .map(
           (p, k) =>

@@ -1,5 +1,5 @@
 // The editor uses CodeMirror 6 with Python and the tokens of theme.css.
-// `mise run generate:scripts` bundles it into site/qiskit/editor.js. exercise.ts loads it when the first exercise opens.
+// `mise run generate:scripts` bundles it into site/player/editor.js. exercise.ts loads it when the first exercise opens.
 import {
   defaultKeymap,
   history,

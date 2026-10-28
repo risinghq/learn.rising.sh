@@ -13,3 +13,24 @@ declare var QGNarration: HTMLAudioElement;
 declare var notebookHelp: (parent: Element) => HTMLParagraphElement;
 /** theme.ts: switches between the light and the dark theme. */
 declare var toggleTheme: () => void;
+/** course-home.ts: the list of parts of a course home page. */
+declare var QGHome: {
+  /** Appends a card per part of `course.json` to `root`. */
+  renderParts: (
+    root: HTMLElement,
+    parts: {
+      title: string;
+      desc: string;
+      lessons: {
+        id: string;
+        section: string;
+        title: string;
+        minutes?: number;
+        missions?: unknown;
+      }[];
+    }[],
+    done: Set<string>,
+  ) => void;
+  /** The minutes of narration of the lessons. */
+  minutesOf: (lessons: { minutes?: number }[]) => number;
+};

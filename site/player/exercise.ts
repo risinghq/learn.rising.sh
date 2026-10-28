@@ -74,7 +74,7 @@ let editorLib: Promise<Window["QGEditor"]> | null = null,
 const loadEditor = () =>
   (editorLib ??= new Promise((ok, no) => {
     const sc = document.createElement("script");
-    sc.src = "editor.js";
+    sc.src = "../player/editor.js";
     sc.addEventListener("load", () => ok(window.QGEditor));
     sc.addEventListener("error", () => {
       editorLib = null;

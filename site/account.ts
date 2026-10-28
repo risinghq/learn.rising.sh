@@ -269,7 +269,7 @@ function mount(host: HTMLElement) {
   };
   const privacy = () => {
     const a = document.createElement("a");
-    a.href = "privacidad.html";
+    a.href = "/privacidad.html";
     a.textContent = "Privacidad";
     menu.append(a);
   };

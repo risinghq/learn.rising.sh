@@ -65,7 +65,10 @@ export interface PlotSpec extends SpecBase, FigureSize {
   xlabel?: string;
   ylabel?: string;
   curves?: {
-    expr: string;
+    /** A formula in `x` and the parameters. Use `pts` for data computed in the lesson source. */
+    expr?: string;
+    /** A polyline of [x, y] points, drawn as given. It may loop, as an orbit does. */
+    pts?: Vec[];
     hidden?: boolean;
     from?: number;
     to?: number;
