@@ -3,11 +3,14 @@
 //     mise run serve                              # in another terminal
 //     bun tools/shot.ts <id> <beat,beat,...> [movil|laptop] [wait ms]
 // Example: bun tools/shot.ts p1-quickstart 0,3,8 laptop
+// The lesson id says which course to open.
 // Writes shots/<size>-b<beat>.png.
 import { mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import { chromium } from "playwright";
+
+import { courseOf } from "./course";
 
 const SIZES: Record<string, [number, number]> = {
   movil: [390, 844],
@@ -30,7 +33,9 @@ async function main(): Promise<void> {
   page.on("console", (m) => {
     if (m.type() === "error") errors.push(m.text());
   });
-  await page.goto(`http://localhost:8810/qiskit/lesson.html?l=${lessonId}`);
+  await page.goto(
+    `http://localhost:8810/${courseOf(lessonId)}/lesson.html?l=${lessonId}`,
+  );
   await page.waitForTimeout(1200);
   await page.click("#go");
   let current = 0;

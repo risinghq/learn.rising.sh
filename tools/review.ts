@@ -1,7 +1,8 @@
 // Visual review: captures the final state of each beat (?beat=N mode) and builds contact sheets.
 //
 //     mise run serve                              # in another terminal
-//     bun tools/review.ts [lesson ...] [--port 8810]
+//     bun tools/review.ts [lesson ...] [--port 8810] [--course qiskit]
+// Without lessons it reviews every lesson of --course.
 // Output: shots/<lesson>/NN-<beat>-land.png, NN-<beat>-port.png and shots/<lesson>-hoja-{land,port}.png
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
@@ -10,8 +11,9 @@ import { parseArgs } from "node:util";
 import { chromium } from "playwright";
 import type { Browser, Page } from "playwright";
 
+import { courseOf, lessonDir } from "./course";
+
 const ROOT = resolve(import.meta.dirname, "..");
-const COURSE = join(ROOT, "site", "qiskit");
 const OUT = join(ROOT, "shots");
 const SIZES: Record<string, [number, number]> = {
   land: [1366, 768],
@@ -82,19 +84,24 @@ async function sheet(
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({
-    options: { port: { type: "string", default: "8810" } },
+    options: {
+      port: { type: "string", default: "8810" },
+      course: { type: "string", default: "qiskit" },
+    },
     allowPositionals: true,
   });
   const ids = positionals.length
     ? positionals
     : readJson<{ parts: { lessons: { id: string }[] }[] }>(
-        join(COURSE, "course.json"),
+        join(ROOT, "site", values.course, "course.json"),
       ).parts.flatMap((part) => part.lessons.map((lesson) => lesson.id));
   const errors: Record<string, string[]> = {};
   const browser = await chromium.launch();
   for (const id of ids) {
-    const lesson = readJson<Lesson>(join(COURSE, "lessons", id, "lesson.json"));
-    if (!existsSync(join(COURSE, "lessons", id, "timings.json"))) {
+    const course = courseOf(id);
+    const dir = lessonDir(id);
+    const lesson = readJson<Lesson>(join(dir, "lesson.json"));
+    if (!existsSync(join(dir, "timings.json"))) {
       console.log(id, "has no timings, skipped");
       continue;
     }
@@ -107,7 +114,7 @@ async function main(): Promise<void> {
       const files: string[] = [];
       for (const [n, beat] of lesson.beats.entries()) {
         await page.goto(
-          `http://localhost:${values.port}/qiskit/lesson.html?l=${id}&beat=${n}`,
+          `http://localhost:${values.port}/${course}/lesson.html?l=${id}&beat=${n}`,
         );
         await page.waitForTimeout(1700);
         const name = `${String(n).padStart(2, "0")}-${beat.id}-${tag}`;

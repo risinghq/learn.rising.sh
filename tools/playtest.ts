@@ -10,6 +10,8 @@ import { join, resolve } from "node:path";
 import { chromium } from "playwright";
 import type { Page } from "playwright";
 
+import { courseOf, lessonDir } from "./course";
+
 const ROOT = resolve(import.meta.dirname, "..");
 const SHOTS = join(ROOT, "shots");
 
@@ -58,11 +60,9 @@ async function main(): Promise<void> {
     /\/+$/,
     "",
   );
+  const course = courseOf(lessonId);
   const lesson = JSON.parse(
-    readFileSync(
-      join(ROOT, "site", "qiskit", "lessons", lessonId, "lesson.json"),
-      "utf8",
-    ),
+    readFileSync(join(lessonDir(lessonId), "lesson.json"), "utf8"),
   ) as Lesson;
   mkdirSync(SHOTS, { recursive: true });
   const browser = await chromium.launch({
@@ -76,7 +76,7 @@ async function main(): Promise<void> {
   page.on("console", (m) => {
     if (m.type() === "error") errors.push(m.text());
   });
-  await page.goto(`${baseUrl}/qiskit/lesson.html?l=${lessonId}`);
+  await page.goto(`${baseUrl}/${course}/lesson.html?l=${lessonId}`);
   await page.waitForTimeout(1500);
   console.log("start:", await page.innerText("#start-meta"));
   await page.click("#go");

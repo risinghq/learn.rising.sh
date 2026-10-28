@@ -9,6 +9,8 @@ import { join, resolve } from "node:path";
 
 import { chromium } from "playwright";
 
+import { courseOf } from "./course";
+
 const SHOTS = resolve(import.meta.dirname, "..", "shots");
 const VISIBLE_ITEMS =
   "[...document.querySelectorAll('#scene li')].filter(li => !li.classList.contains('hid')).length";
@@ -18,7 +20,7 @@ const round = (x: number): number => Math.round(x * 100) / 100;
 async function main(): Promise<void> {
   const [lesson = "p1-composer", stepText = "2"] = process.argv.slice(2);
   const step = Number(stepText);
-  const url = `http://localhost:8810/qiskit/lesson.html?l=${lesson}`;
+  const url = `http://localhost:8810/${courseOf(lesson)}/lesson.html?l=${lesson}`;
   mkdirSync(SHOTS, { recursive: true });
   const browser = await chromium.launch({
     args: ["--autoplay-policy=no-user-gesture-required"],
