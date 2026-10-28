@@ -1113,7 +1113,7 @@ function buildScene(beat: Beat) {
   setWork(!!sceneEl.querySelector(".xpanel"));
   if (work) {
     stage.scrollTop = 0;
-    const go = el("button", "abtn primary xnext", sceneEl);
+    const go = el("button", "abtn xnext", sceneEl);
     go.textContent = "Continuar";
     go.addEventListener("click", () => {
       setPlaying(true);
