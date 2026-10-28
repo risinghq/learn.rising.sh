@@ -69,6 +69,47 @@ def ghz(n):
 """
 
 
+LEAPFROG_EULER = """
+def leapfrog(x, v, dt, pasos):
+    for _ in range(pasos):
+        x, v = x + dt * v, v - dt * x
+    return x, v
+"""
+
+LEAPFROG_KICK_THEN_DRIFT = """
+def leapfrog(x, v, dt, pasos):
+    for _ in range(pasos):
+        v -= dt * x
+        x += dt * v
+    return x, v
+"""
+
+PERIODO_SMALL_ANGLE = """
+import math
+def periodo(theta0, dt=0.001):
+    return 2 * math.pi
+"""
+
+ORBITA_EULER = """
+def orbita(x, y, vx, vy, dt, pasos):
+    for _ in range(pasos):
+        r3 = (x * x + y * y) ** 1.5
+        x, y, vx, vy = x + dt * vx, y + dt * vy, vx - dt * x / r3, vy - dt * y / r3
+    return x, y, vx, vy
+"""
+
+ORBITA_KICK_THEN_DRIFT = """
+def orbita(x, y, vx, vy, dt, pasos):
+    for _ in range(pasos):
+        r3 = (x * x + y * y) ** 1.5
+        vx -= dt * x / r3
+        vy -= dt * y / r3
+        x += dt * vx
+        y += dt * vy
+    return x, y, vx, vy
+"""
+
+
 def broken(exercise_id: str, old: str, new: str) -> str:
     """Return the reference solution with an incorrect change."""
     code = (spec.folder(exercise_id) / "solution.py").read_text(encoding="utf-8")
@@ -99,6 +140,9 @@ WRONG = [
     ),
     ("p1-quickstart/ghz", GHZ_WITHOUT_CHAIN, "Con n = 3 salen ['000', '011']"),
     ("p1-quickstart/ghz", GHZ_WITHOUT_MEASURE, "falta `measure_all()`"),
+    ("f1-euler-leapfrog/leapfrog", LEAPFROG_EULER, "pasos = 10, `leapfrog` devuelve"),
+    ("f1-pendulo/periodo", PERIODO_SMALL_ANGLE, "theta0 = 3.0, `periodo` devuelve 6.28"),
+    ("f1-kepler/orbita", ORBITA_EULER, "pasos = 1000, `orbita` devuelve"),
     (
         "p2-control-clasico/siempre-uno",
         textwrap.dedent("""
@@ -338,6 +382,11 @@ MUTANTS = [
         "p1-quickstart/bell-distinto",
         "from qiskit import QuantumCircuit\nanti = QuantumCircuit(2)\nanti.x(0)\nanti.measure_all()\n",
     ),
+    ("f1-euler-leapfrog/leapfrog", LEAPFROG_EULER),
+    ("f1-euler-leapfrog/leapfrog", LEAPFROG_KICK_THEN_DRIFT),
+    ("f1-pendulo/periodo", PERIODO_SMALL_ANGLE),
+    ("f1-kepler/orbita", ORBITA_EULER),
+    ("f1-kepler/orbita", ORBITA_KICK_THEN_DRIFT),
     *[
         (eid, broken(eid, old, new))
         for eid, old, new in [
@@ -1102,6 +1151,11 @@ def test_tool_flags_needs_that_does_not_match_the_solution(fixture_dir: Path) ->
     assert exercises_tool.problems("leccion/uno", "aer") == []
     assert 'needs="aer" but solution.py passes without qiskit_aer' in exercises_tool.problems(
         "leccion/dos", "aer"
+    )
+    assert exercises_tool.problems("leccion/dos", "python") == []
+    assert any(
+        'needs="python" but solution.py needs qiskit or qiskit_aer' in p
+        for p in exercises_tool.problems("leccion/uno", "python")
     )
 
 

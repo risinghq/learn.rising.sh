@@ -231,7 +231,7 @@ async function anonymous(
   await page.goto(`${site}/qiskit/index.html`);
   await page.locator("#parts .part").first().waitFor();
   await page.locator("#hito .chk").click();
-  await page.goto(`${site}/qiskit/privacidad.html`);
+  await page.goto(`${site}/privacidad.html`);
   const panel = await openPanel(page, site, LESSON, 1);
   await write(page, panel, FAILING);
   await press(panel, "Comprobar");
