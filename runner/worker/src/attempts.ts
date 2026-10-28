@@ -79,22 +79,37 @@ export async function recordAttempt(
   attempt: Attempt,
   now: number,
 ): Promise<void> {
-  await db
-    .prepare(
-      `INSERT INTO attempts (at, user_id, exercise, mode, outcome, failed, error_kind, hints, ms, code_bytes)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)`,
-    )
-    .bind(
-      unixSeconds(now),
-      userId,
-      attempt.exercise,
-      attempt.mode,
-      attempt.outcome,
-      JSON.stringify(attempt.failed),
-      attempt.errorKind,
-      attempt.hints,
-      attempt.ms,
-      attempt.codeBytes,
-    )
-    .run();
+  const statements = [
+    db
+      .prepare(
+        `INSERT INTO attempts (at, user_id, exercise, mode, outcome, failed, error_kind, hints, ms, code_bytes)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)`,
+      )
+      .bind(
+        unixSeconds(now),
+        userId,
+        attempt.exercise,
+        attempt.mode,
+        attempt.outcome,
+        JSON.stringify(attempt.failed),
+        attempt.errorKind,
+        attempt.hints,
+        attempt.ms,
+        attempt.codeBytes,
+      ),
+  ];
+  // Only a passing check for an authenticated user sets `exercise_state.passed`.
+  // The pass survives attempt retention, while `updated_at = 0` lets page edits win.
+  if (userId && attempt.mode === "check" && attempt.outcome === "pass") {
+    statements.push(
+      db
+        .prepare(
+          `INSERT INTO exercise_state (user_id, exercise, passed, updated_at)
+           VALUES (?1, ?2, 1, 0)
+           ON CONFLICT (user_id, exercise) DO UPDATE SET passed = 1`,
+        )
+        .bind(userId, attempt.exercise),
+    );
+  }
+  await db.batch(statements);
 }

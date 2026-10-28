@@ -40,6 +40,7 @@ CREATE TABLE exercise_state (
   code       TEXT,
   hints      INTEGER NOT NULL DEFAULT 0,
   checks     INTEGER NOT NULL DEFAULT 0,
+  -- The server sets this only after a passing check for the user.
   passed     INTEGER NOT NULL DEFAULT 0,
   updated_at INTEGER NOT NULL,
   PRIMARY KEY (user_id, exercise)

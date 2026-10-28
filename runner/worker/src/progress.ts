@@ -243,7 +243,8 @@ function mergeExercise(
   stored: ExerciseState | undefined,
   incoming: ExerciseState,
 ): ExerciseState {
-  if (!stored) return incoming;
+  // The server records `passed`; the page's value is ignored.
+  if (!stored) return { ...incoming, passed: false };
   const newer = incoming.at > stored.at;
   // Without code (`undefined` or null) the page did not send it: it does not erase the stored one.
   const code =
@@ -252,7 +253,7 @@ function mergeExercise(
     ...(code === undefined || code === null ? {} : { code }),
     hints: Math.max(stored.hints, incoming.hints),
     checks: Math.max(stored.checks, incoming.checks),
-    passed: stored.passed || incoming.passed,
+    passed: stored.passed,
     at: Math.max(stored.at, incoming.at),
   };
 }
@@ -324,7 +325,6 @@ function plan(
       code: next.code ?? null,
       hints: next.hints,
       checks: next.checks,
-      passed: next.passed ? 1 : 0,
       at: next.at,
     });
   }
@@ -366,13 +366,13 @@ function plan(
     statements.push(
       db
         .prepare(
-          `INSERT INTO exercise_state (user_id, exercise, code, hints, checks, passed, updated_at)
+          `INSERT INTO exercise_state (user_id, exercise, code, hints, checks, updated_at)
            SELECT ?1, value ->> '$.exercise', value ->> '$.code', value ->> '$.hints',
-                  value ->> '$.checks', value ->> '$.passed', value ->> '$.at'
+                  value ->> '$.checks', value ->> '$.at'
            FROM json_each(?2) WHERE ${current}
            ON CONFLICT (user_id, exercise) DO UPDATE SET
              code = excluded.code, hints = excluded.hints, checks = excluded.checks,
-             passed = excluded.passed, updated_at = excluded.updated_at`,
+             updated_at = excluded.updated_at`,
         )
         .bind(userId, JSON.stringify(exerciseRows), seconds, version),
     );
