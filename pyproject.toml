@@ -50,7 +50,8 @@ allowed-confusables = ["×", "−", "–", "‘", "’", "′"]
 
 [tool.mypy]
 strict = true
-files = ["qgcheck", "runner", "tools", "tests", "lessons_src"]
+# A course folder has its own `plan` and `parte*` modules, so mise runs mypy once per folder.
+files = ["qgcheck", "runner", "tools", "tests", "lessons_src/lib.py", "lessons_src/build.py"]
 exclude = ["tests/mutants/", "runner/worker/"]
 mypy_path = ["stubs", "runner", "lessons_src", "tools", "tests"]
 explicit_package_bases = true

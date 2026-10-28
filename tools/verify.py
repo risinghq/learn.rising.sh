@@ -20,7 +20,12 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-COURSE = Path(__file__).resolve().parent.parent / "site" / "qiskit"
+SITE = Path(__file__).resolve().parent.parent / "site"
+
+
+def lessons() -> dict[str, Path]:
+    """The lesson.json of every lesson of every course, by lesson id."""
+    return {f.parent.name: f for f in sorted(SITE.glob("*/lessons/*/lesson.json"))}
 
 
 def blocks(scene: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
@@ -31,9 +36,10 @@ def blocks(scene: list[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         )
 
 
-def verify_lesson(lid: str, show: bool) -> tuple[int, int]:
-    """Run a lesson's blocks and return (blocks run, failures)."""
-    les = json.loads((COURSE / "lessons" / lid / "lesson.json").read_text(encoding="utf-8"))
+def verify_lesson(path: Path, show: bool) -> tuple[int, int]:
+    """Run the blocks of the lesson at `path` and return (blocks run, failures)."""
+    les = json.loads(path.read_text(encoding="utf-8"))
+    lid = les["id"]
     ns: dict[str, Any] = {"__name__": "__leccion__"}
     n, fails = 0, 0
     for b in les["beats"]:
@@ -78,18 +84,15 @@ def main() -> None:
     import matplotlib
 
     matplotlib.use("Agg")
-    ids = [a for a in sys.argv[1:] if not a.startswith("-")] or [
-        les["id"]
-        for p in json.loads((COURSE / "course.json").read_text(encoding="utf-8"))["parts"]
-        for les in p["lessons"]
-    ]
+    every = lessons()
+    ids = [a for a in sys.argv[1:] if not a.startswith("-")] or list(every)
     show = "-v" in sys.argv or "--show" in sys.argv
     fails = 0
     os.chdir(
         tempfile.mkdtemp(prefix="verify-")
     )  # Isolates the temporary files that the examples create.
     for lid in ids:
-        n, f = verify_lesson(lid, show)
+        n, f = verify_lesson(every[lid], show)
         fails += f
         print(f"{lid}: {n} blocks run")
     print("failures:", fails)

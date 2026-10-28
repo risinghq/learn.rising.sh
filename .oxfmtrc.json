@@ -5,6 +5,8 @@
   "ignorePatterns": [
     "site/qiskit/lessons/**",
     "site/qiskit/course.json",
+    "site/computational-physics/lessons/**",
+    "site/computational-physics/course.json",
     "site/vendor/**",
     "content/**",
     "practica/soluciones/**",

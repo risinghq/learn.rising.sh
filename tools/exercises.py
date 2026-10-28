@@ -5,11 +5,12 @@
 For each exercise it checks that:
   1. solution.py passes every case of check.py.
   2. starter.py runs without error and fails some case: it never arrives solved.
-  3. `needs` is true. With needs="qiskit", solution.py passes without qiskit_aer. With
-     needs="aer", it does not pass without it.
+  3. `needs` is true. With needs="python", solution.py passes without qiskit. With
+     needs="qiskit", it passes without qiskit_aer. With needs="aer", it does not pass
+     without it.
   4. Each `@hint(n)` in check.py names a hint that the exercise has in its lesson.
 
-`needs` is read from site/lessons/*/lesson.json, so run lessons_src/build.py first.
+`needs` is read from site/<course>/lessons/*/lesson.json, so run lessons_src/build.py first.
 """
 
 import io
@@ -25,14 +26,15 @@ from build import walk  # noqa: E402
 
 from qgcheck import grade, spec  # noqa: E402
 
-COURSE = ROOT / "site" / "qiskit"
-NO_AER = ("qiskit_aer",)
+SITE = ROOT / "site"
+# The modules an exercise must not need, by the `needs` it declares.
+WITHOUT = {"python": ("qiskit", "qiskit_aer"), "qiskit": ("qiskit_aer",)}
 
 
 def published() -> dict[str, dict[str, Any]]:
-    """Return the published exercise blocks, by id."""
+    """Return the published exercise blocks of every course, by id."""
     found: dict[str, dict[str, Any]] = {}
-    for f in sorted((COURSE / "lessons").glob("*/lesson.json")):
+    for f in sorted(SITE.glob("*/lessons/*/lesson.json")):
         for beat in json.loads(f.read_text(encoding="utf-8"))["beats"]:
             for blk in walk(beat["scene"]):
                 if blk.get("type") == "exercise":
@@ -76,11 +78,16 @@ def problems(eid: str, needs: str, hints: int | None = None) -> list[str]:
     elif starter["passed"]:
         found.append("starter.py already passes every case")
     if solved["passed"]:
-        without = grade(eid, solution, block=NO_AER)
-        if needs == "qiskit" and not without["passed"]:
-            found.append(f'needs="qiskit" but solution.py needs qiskit_aer: {failures(without)}')
-        if needs == "aer" and without["passed"]:
-            found.append('needs="aer" but solution.py passes without qiskit_aer')
+        if needs in WITHOUT:
+            without = grade(eid, solution, block=WITHOUT[needs])
+            if not without["passed"]:
+                found.append(
+                    f'needs="{needs}" but solution.py needs {" or ".join(WITHOUT[needs])}: '
+                    f"{failures(without)}"
+                )
+        else:
+            if grade(eid, solution, block=("qiskit_aer",))["passed"]:
+                found.append('needs="aer" but solution.py passes without qiskit_aer')
     return found
 
 

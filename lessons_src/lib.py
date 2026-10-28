@@ -1,7 +1,7 @@
 """Helpers for writing lessons in Python (raw strings for LaTeX and code).
 
 Each content module defines LESSONS: a list of dicts created with lesson().
-build.py writes them to site/qiskit/lessons/<id>/lesson.json and generates site/qiskit/course.json.
+build.py writes them to site/<course>/lessons/<id>/lesson.json and generates site/<course>/course.json.
 """
 
 from collections.abc import Iterable
@@ -189,8 +189,8 @@ def Exercise(
     """Declara un ejercicio y valida sus opciones antes de publicarlo."""
     if level not in (1, 2, 3):
         raise ValueError(f"{path}: level debe ser 1, 2 o 3, no {level!r}")
-    if needs not in ("qiskit", "aer"):
-        raise ValueError(f"{path}: needs debe ser 'qiskit' o 'aer', no {needs!r}")
+    if needs not in ("python", "qiskit", "aer"):
+        raise ValueError(f"{path}: needs debe ser 'python', 'qiskit' o 'aer', no {needs!r}")
     return dict(
         type="exercise",
         exercise=path,
@@ -211,8 +211,8 @@ def lesson(
     sources: Iterable[str] = (),
     practice: Iterable[str] = (),
 ) -> Block:
-    """sources: names of the original Qiskit/documentation guides
-    (docs/guides/<name>) that the lesson covers.
+    """sources: where the lesson comes from (for Qiskit, the names of the original
+    Qiskit/documentation guides, docs/guides/<name>).
     practice: exercises to do in your own environment when finished."""
     return dict(
         id=id,

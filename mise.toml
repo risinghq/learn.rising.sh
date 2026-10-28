@@ -58,7 +58,10 @@ run = [
 
 [tasks."typecheck:py"]
 description = "Check Python types with mypy in strict mode"
-run = "uv run mypy"
+run = [
+  "uv run mypy",
+  "for dir in lessons_src/*/; do case $dir in *__pycache__*) continue;; esac; MYPYPATH=${dir%/} uv run mypy ${dir%/} || exit 1; done",
+]
 
 [tasks."typecheck:ts"]
 description = "Check the TypeScript of the Worker, the editor, the site, the tools and the tests with tsc"
@@ -118,14 +121,17 @@ description = "Run every test that needs no service, network or secret"
 depends = ["test:py", "test:notebooks", "test:ui", "test:tools", "test:worker", "test:lessons"]
 
 [tasks."generate:lessons"]
-description = "Rewrite site/qiskit/lessons/*/lesson.json and site/qiskit/course.json from lessons_src"
-run = "uv run python lessons_src/build.py"
+description = "Rewrite site/<course>/lessons/*/lesson.json and site/<course>/course.json of every course from lessons_src"
+run = [
+  "uv run python lessons_src/build.py qiskit",
+  "uv run python lessons_src/build.py computational-physics",
+]
 
 [tasks."generate:scripts"]
 description = "Bundle the TypeScript in site/ and editor/src into the JavaScript the pages load, which git ignores"
 run = [
-  "bun build site/theme.ts site/qiskit/account.ts site/qiskit/notebooks.ts site/qiskit/engine.ts --root site --outdir site --format=iife --target=browser",
-  "bun build editor/src/index.ts --outfile site/qiskit/editor.js --format=iife --target=browser --minify",
+  "bun build site/theme.ts site/account.ts site/course-home.ts site/qiskit/notebooks.ts site/player/engine.ts --root site --outdir site --format=iife --target=browser",
+  "bun build editor/src/index.ts --outfile site/player/editor.js --format=iife --target=browser --minify",
 ]
 
 [tasks."generate:vendor"]
@@ -139,7 +145,10 @@ depends = ["generate:*"]
 
 [tasks."build:lessons"]
 description = "Fail without writing if the committed lesson JSON differs from the build output"
-run = "uv run python lessons_src/build.py --check"
+run = [
+  "uv run python lessons_src/build.py qiskit --check",
+  "uv run python lessons_src/build.py computational-physics --check",
+]
 
 [tasks.build]
 description = "Check that the shipped site files match their sources"

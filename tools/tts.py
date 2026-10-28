@@ -1,7 +1,10 @@
 """Generates a lesson's narration with Edge TTS and the per-word timings.
 
 Usage (from the project root):
-    uv run --group tools python tools/tts.py site/qiskit/lessons/p1-quickstart
+    uv run --group tools python tools/tts.py site/<course>/lessons/<lesson>
+
+`build.py <course> --tts` runs it for every lesson of a course. The cache of the words'
+timings is content/<lesson>.cache.json.
 
 Reads <lesson>/lesson.json and writes in the same folder:
     audio/<beat>.mp3          one clip per beat (and per text in "extras")
@@ -31,6 +34,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from pronunciacion import limpiar, pronunciable
 
 MARK = re.compile(r"\[\[(\w+)\]\]")
+CONTENT = Path(__file__).resolve().parent.parent / "content"
 
 
 Words = Sequence[tuple[float, str]]
@@ -120,7 +124,7 @@ async def main(lesson_dir: str) -> None:
     spec = json.loads((root / "lesson.json").read_text(encoding="utf-8"))
     out = root / "audio"
     out.mkdir(exist_ok=True)
-    cache_path = root.parent.parent.parent / "content" / f"{spec['id']}.cache.json"
+    cache_path = CONTENT / f"{spec['id']}.cache.json"
     cache_path.parent.mkdir(exist_ok=True)
     cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
     voice, rate = spec["voice"], spec.get("rate", "+0%")

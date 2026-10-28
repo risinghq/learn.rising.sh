@@ -1,15 +1,19 @@
-"""Generates site/qiskit/lessons/<id>/lesson.json and site/qiskit/course.json from plan.py and the parte*.py modules.
+"""Generates site/<course>/lessons/<id>/lesson.json and site/<course>/course.json from the course's
+plan.py and parte*.py modules.
 
-    python lessons_src/build.py              # writes the JSON and checks the coverage of the guides
-    python lessons_src/build.py --check      # writes nothing: fails if the JSON in site/qiskit/ differs from what would be generated
-    python lessons_src/build.py --tts        # also generates the narration (needs uv, network and ffprobe)
+    python lessons_src/build.py qiskit           # writes the JSON and runs the course's own checks
+    python lessons_src/build.py qiskit --check   # writes nothing: fails if the JSON in site/qiskit/ differs from what would be generated
+    python lessons_src/build.py qiskit --tts     # also generates the narration (needs uv, network and ffprobe)
 
-Coverage is checked against .cache/qiskit-docs.
-tools/fetch_docs.py downloads that cache.
+<course> is the folder name in site/. Its source is lessons_src/<course>/, with dashes written as
+underscores so that the folder is a Python package name. That folder holds plan.py (PARTS: each
+lesson is (id, title) or (id, title, sources)), parte*.py (LESSONS) and, if the course checks more
+than its lessons, hooks.py with `check() -> str` and `references(sources) -> list[str]`.
 
 The section numbering (1.1, 1.2, …) comes from the order of plan.PARTS; the first part of
 each step's label is replaced by that section. Every lesson in the plan must have its module, and
-every lesson in a module must be in the plan.
+every lesson in a module must be in the plan. A lesson id belongs to one course: the browser and
+the account store progress by lesson id.
 """
 
 import importlib
@@ -19,24 +23,26 @@ import subprocess
 import sys
 from collections.abc import Iterable, Iterator
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT))
-from plan import PARTS  # noqa: E402
 
 from qgcheck import spec  # noqa: E402
 
-COURSE = ROOT / "site" / "qiskit"
-GUIDE = "https://quantum.cloud.ibm.com/docs/en/guides/"
-TOC = ROOT / ".cache" / "qiskit-docs" / "docs" / "guides" / "_toc.json"
+SITE = ROOT / "site"
 
 
-def load_lessons() -> dict[str, dict[str, Any]]:
+def source_dir(course: str) -> Path:
+    return HERE / course.replace("-", "_")
+
+
+def load_lessons(source: Path) -> dict[str, dict[str, Any]]:
     found: dict[str, dict[str, Any]] = {}
-    for f in sorted(HERE.glob("parte*.py")):
+    for f in sorted(source.glob("parte*.py")):
         for les in importlib.import_module(f.stem).LESSONS:
             if les["id"] in found:
                 raise SystemExit(f"duplicate lesson: {les['id']}")
@@ -44,34 +50,16 @@ def load_lessons() -> dict[str, dict[str, Any]]:
     return found
 
 
-def toc_pages() -> list[str]:
-    if not TOC.exists():
-        raise SystemExit(f"missing {TOC.relative_to(ROOT)}: run python tools/fetch_docs.py")
-    toc = json.loads(TOC.read_text(encoding="utf-8"))
-    out: list[str] = []
-
-    def walk(n: dict[str, Any]) -> None:
-        for c in n.get("children", []):
-            u = c.get("url", "")
-            if u == "/docs/guides":
-                out.append("index")
-            elif u.startswith("/docs/guides/"):
-                out.append(u.rsplit("/", 1)[1])
-            walk(c)
-
-    walk(toc)
-    return list(dict.fromkeys(out))
-
-
-def coverage() -> None:
-    planned = [g for p in PARTS for _, _, gs in p["lessons"] for g in gs]
-    dup = {g for g in planned if planned.count(g) > 1}
-    missing = [g for g in toc_pages() if g not in planned]
-    extra = [g for g in planned if g not in toc_pages()]
-    if dup or missing or extra:
-        raise SystemExit(
-            f"coverage: repeated {sorted(dup)}, without lesson {missing}, nonexistent {extra}"
-        )
+def other_lesson_ids(course: str) -> dict[str, str]:
+    """Lesson id -> course, for the lessons of the other courses in site/."""
+    found: dict[str, str] = {}
+    for path in sorted(SITE.glob("*/course.json")):
+        if path.parent.name == course:
+            continue
+        for part in json.loads(path.read_text(encoding="utf-8"))["parts"]:
+            for les in part["lessons"]:
+                found[les["id"]] = path.parent.name
+    return found
 
 
 ERRORS: list[str] = []
@@ -144,36 +132,44 @@ def check(lesson: dict[str, Any]) -> None:
         fail(f"{lesson['id']}: repeated step ids")
 
 
-def main() -> None:
-    coverage()
-    lessons = load_lessons()
-    planned = {lid for part in PARTS for lid, _, _ in part["lessons"]}
+def main(course: str) -> None:
+    source = source_dir(course)
+    if not (source / "plan.py").is_file():
+        raise SystemExit(f"no course {course!r}: missing {source.relative_to(ROOT)}/plan.py")
+    sys.path.insert(0, str(source))
+    parts: list[dict[str, Any]] = importlib.import_module("plan").PARTS
+    hooks: ModuleType | None = (
+        importlib.import_module("hooks") if (source / "hooks.py").is_file() else None
+    )
+    out = SITE / course
+    notes = [hooks.check()] if hooks else []
+    lessons = load_lessons(source)
+    planned = {lesson[0] for part in parts for lesson in part["lessons"]}
     if planned != set(lessons):
         raise SystemExit(
             f"plan and modules do not match: without module {sorted(planned - set(lessons))}, "
             f"outside the plan {sorted(set(lessons) - planned)}"
         )
-    course: dict[str, Any] = dict(parts=[])
+    taken = other_lesson_ids(course)
+    if clash := sorted(planned & set(taken)):
+        raise SystemExit(f"lesson ids already used by another course: {clash}")
+    course_json: dict[str, Any] = dict(parts=[])
     ordered: list[dict[str, Any]] = []
     exercises: set[str] = set()
-    for part in PARTS:
+    for part in parts:
         entry: dict[str, Any] = dict(title=part["title"], desc=part["desc"], lessons=[])
-        for k, (lid, _title, guides) in enumerate(part["lessons"], 1):
+        for k, (lid, _title, *rest) in enumerate(part["lessons"], 1):
             section = f"{part['n']}.{k}"
             les = lessons[lid]
             les["part"], les["section"] = part["title"], section
             for b in les["beats"]:
                 b["tag"][0] = section
-            names = {g: g for g in guides}
-            les["practice"] = [
-                *les["practice"],
-                "Guías originales: "
-                + " · ".join(f"[{g}]({GUIDE}{'' if g == 'index' else g})" for g in names),
-            ]
+            if hooks:
+                les["practice"] = [*les["practice"], *hooks.references(rest[0] if rest else [])]
             check(les)
             publish_exercises(les, exercises)
             ordered.append(les)
-            tf = COURSE / "lessons" / lid / "timings.json"
+            tf = out / "lessons" / lid / "timings.json"
             beat_ids = {b["id"] for b in les["beats"]}
             if tf.exists():
                 secs = sum(
@@ -207,20 +203,21 @@ def main() -> None:
                     for m in missions
                 ]
             entry["lessons"].append(item)
-        course["parts"].append(entry)
+        course_json["parts"].append(entry)
     ERRORS.extend(
         f"exercises/{eid} does not appear in any lesson"
-        for eid in sorted(set(spec.all_ids()) - exercises)
+        for eid in sorted(spec.all_ids())
+        if eid not in exercises and eid.split("/")[0] not in set(taken)
     )
     if ERRORS:
         raise SystemExit("\n".join(ERRORS))
     outputs: dict[Path, str] = {}
     for a, b in zip(ordered, [*ordered[1:], None], strict=True):
         a["next"] = b["id"] if b else None
-        outputs[COURSE / "lessons" / a["id"] / "lesson.json"] = json.dumps(
+        outputs[out / "lessons" / a["id"] / "lesson.json"] = json.dumps(
             a, ensure_ascii=False, indent=1
         )
-    outputs[COURSE / "course.json"] = json.dumps(course, ensure_ascii=False, indent=1)
+    outputs[out / "course.json"] = json.dumps(course_json, ensure_ascii=False, indent=1)
     if "--check" in sys.argv:
         stale = [
             p.relative_to(ROOT).as_posix()
@@ -232,15 +229,14 @@ def main() -> None:
                 f"{len(stale)} generated files are out of date; run `mise run generate` and commit them:\n  "
                 + "\n  ".join(stale)
             )
-        print(f"{len(outputs)} generated files up to date")
+        print(f"{course}: {len(outputs)} generated files up to date")
         return
     for path, text in outputs.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
-    total = sum(len(p["lessons"]) for p in PARTS)
     print(
-        f"{len(ordered)} of {total} lessons written, {sum(len(les['beats']) for les in ordered)} steps; "
-        f"coverage of the {len(toc_pages())} guides: complete"
+        f"{course}: {len(ordered)} lessons written, "
+        f"{sum(len(les['beats']) for les in ordered)} steps" + "".join(f"; {n}" for n in notes)
     )
     if "--tts" in sys.argv:
         for les in ordered:
@@ -252,7 +248,7 @@ def main() -> None:
                     "tools",
                     "python",
                     str(ROOT / "tools" / "tts.py"),
-                    str(COURSE / "lessons" / les["id"]),
+                    str(out / "lessons" / les["id"]),
                 ],
                 check=True,
                 cwd=ROOT,
@@ -260,4 +256,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    names = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if len(names) != 1:
+        raise SystemExit("usage: build.py <course> [--check] [--tts]")
+    main(names[0])
