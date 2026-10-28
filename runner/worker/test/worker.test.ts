@@ -312,13 +312,15 @@ describe("code size", () => {
   });
 });
 
-// The test prices are those of `standard-2` with a `sleepAfter` of 60 s:
+// The test prices are those of `standard-2` with a `sleepAfter` of 35 s:
 // 20,000 nanodollars per CPU second and 15,840 per second on (6 GiB and
-// 12 GB). An isolated 2 s run costs 2 × 20,000 for CPU and 62 × 15,840 for the
-// instance being on, which is 1,022,080. Reserving an isolated run sets aside
-// 30 × 20,000 + 90 × 15,840 = 2,025,600.
+// 12 GB). An isolated 2 s run costs 2 × 20,000 for CPU and 37 × 15,840 for the
+// instance being on, which is 626,080. Reserving an isolated run sets aside
+// 30 × 20,000 + 65 × 15,840 = 1,629,600. The Worker sends every run to
+// instance 0, so a run is isolated when `QUIET_MS` have passed since the last.
 const CLOCK = "2026-10-15T12:00:00Z";
-const ISOLATED_2S = 1_022_080;
+const ISOLATED_2S = 626_080;
+const QUIET_MS = 600_000;
 
 const work = (ms: number) => ({ code: `TRABAJO-${ms}`, mode: "run" });
 
@@ -336,28 +338,27 @@ describe("monthly budget", () => {
   const hang = { code: "colgar", mode: "run" };
 
   it("charges the on-window of an isolated run and only the extension of the next one", async () => {
-    // Chosen instances: 0, 0, 1 and 0.
-    const h = await worker({
-      vars: { FAKE_CLOCK: CLOCK, FAKE_PICKS: "0,0,1,0" },
-    });
+    const h = await worker({ vars: { FAKE_CLOCK: CLOCK } });
     await h.post(work(2000), verified);
     // Inside the first run's window: 1 s of CPU and the second that extends the
     // on-window (1 × 20,000 + 1 × 15,840).
     await h.post(work(1000), verified);
-    // Another instance does not share the window.
-    await h.post(work(2000), verified);
     // Once the window has passed, instance 0 shut down and is charged in full again.
-    await h.advance(600_000);
+    await h.advance(QUIET_MS);
     await h.post(work(2000), verified);
 
-    expect(costs(h)).toEqual([ISOLATED_2S, 35_840, ISOLATED_2S, ISOLATED_2S]);
+    expect(costs(h)).toEqual([ISOLATED_2S, 35_840, ISOLATED_2S]);
+    // A free instance 0 serves every run, so the window above is shared.
+    expect(new Set(h.runnerCalls().map((call) => call.instance))).toEqual(
+      new Set(["instance-0"]),
+    );
   });
 
   it.each([
-    { type: "lite", nano: 49_930 },
-    { type: "standard-1", nano: 674_720 },
+    { type: "lite", nano: 30_805 },
+    { type: "standard-1", nano: 410_720 },
     { type: "standard-2", nano: ISOLATED_2S },
-    { type: "standard-4", nano: 2_106_800 },
+    { type: "standard-4", nano: 1_321_800 },
   ])(
     "the price comes from the instance type: $type",
     async ({ type, nano }) => {
@@ -377,11 +378,9 @@ describe("monthly budget", () => {
   });
 
   it("stops a run that exceeds what was set aside and charges no more than the reservation", async () => {
-    // The reservation is 0.05 × 20,000 for CPU and 60.05 × 15,840 for the instance being on.
-    const reserved = 952_192;
-    const h = await worker({
-      vars: { RESERVED_BUSY_SECONDS: "0.05", FAKE_PICKS: "0" },
-    });
+    // The reservation is 0.05 × 20,000 for CPU and 35.05 × 15,840 for the instance being on.
+    const reserved = 556_192;
+    const h = await worker({ vars: { RESERVED_BUSY_SECONDS: "0.05" } });
     const reply = await h.post(hang, verified);
     expect(reply.status).toBe(504);
     expect(reply.body.reason).toBe("run_too_long");
@@ -394,15 +393,13 @@ describe("monthly budget", () => {
     expect(line.busy_ms).toBeLessThan(1000);
     // What is charged is the window set aside, not the one the job would have lasted.
     expect(line.cost_nano_usd).toBeLessThanOrEqual(reserved);
-    expect(line.cost_nano_usd).toBeGreaterThan(900_000);
+    expect(line.cost_nano_usd).toBeGreaterThan(500_000);
   });
 
   it("when the cap is reached it stops only the request's instance, not the one serving another learner", async () => {
     // The first attempt lands on instance 0, which serves another learner and answers
     // 503; the retry lands on 1, where the job hangs.
-    const h = await worker({
-      vars: { RESERVED_BUSY_SECONDS: "0.4", FAKE_PICKS: "0,1" },
-    });
+    const h = await worker({ vars: { RESERVED_BUSY_SECONDS: "0.4" } });
     const other = h.get("/other-learner");
     while (h.runnerCalls().length < 1)
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -411,7 +408,11 @@ describe("monthly budget", () => {
     expect(reply.status).toBe(504);
     expect(reply.body.reason).toBe("run_too_long");
     // The other learner's job, the first attempt (503) and the retry.
-    expect(h.runnerCalls()).toHaveLength(3);
+    expect(h.runnerCalls().map((call) => call.instance)).toEqual([
+      "instance-0",
+      "instance-0",
+      "instance-1",
+    ]);
     expect(h.runnerStops()).toBe(1);
 
     const finished = await other;
@@ -421,7 +422,7 @@ describe("monthly budget", () => {
 
   it("does not run if the reservation for a run no longer fits", async () => {
     // With 0.001 USD the public has 750,000 nanodollars and the reservation for one
-    // isolated run is 2,025,600.
+    // isolated run is 1,629,600.
     const h = await worker({ vars: { MONTHLY_BUDGET_USD: "0.001" } });
     const reply = await h.post(run, verified);
     expect(reply.status).toBe(503);
@@ -432,7 +433,7 @@ describe("monthly budget", () => {
 
   it("with room for a single run, of several simultaneous ones only one reaches the container", async () => {
     // The public has 2,100,000 nanodollars: one isolated reservation fits
-    // (2,025,600) and no other, neither on its instance nor on the adjacent one.
+    // (1,629,600) and no other: the next sets aside 600,000 of CPU more.
     const h = await worker({ vars: { MONTHLY_BUDGET_USD: "0.0028" } });
     const replies = await Promise.all(
       Array.from({ length: 8 }, () => h.post(run, verified)),
@@ -446,20 +447,17 @@ describe("monthly budget", () => {
   });
 
   it("on finishing it swaps the reservation for the measured cost and leaves room for the next one", async () => {
-    // The public has 3,000,000 nanodollars. Each run on its own
-    // instance sets aside 2,025,600 and the first spends 950,400 (the clock does not advance):
+    // The public has 2,475,000 nanodollars. Each isolated run sets aside
+    // 1,629,600 and the first spends 554,400 (the clock does not advance):
     // the second fits only if the first returned what it did not spend.
     const h = await worker({
-      vars: {
-        MONTHLY_BUDGET_USD: "0.004",
-        FAKE_CLOCK: CLOCK,
-        FAKE_PICKS: "0,1",
-      },
+      vars: { MONTHLY_BUDGET_USD: "0.0033", FAKE_CLOCK: CLOCK },
     });
     expect((await h.post(run, verified)).status).toBe(200);
+    await h.advance(QUIET_MS);
     expect((await h.post(run, verified)).status).toBe(200);
     expect(h.runnerCalls()).toHaveLength(2);
-    expect(costs(h)).toEqual([950_400, 950_400]);
+    expect(costs(h)).toEqual([554_400, 554_400]);
   });
 
   it("returns the reservation if Turnstile rejects the request", async () => {
@@ -514,20 +512,21 @@ describe("budget caps", () => {
   }
 
   it("the public stops at 75 % of the budget and a maintainer carries on to 100 %", async () => {
-    // The public has 3,075,000 of the 4,100,000 nanodollars. An isolated 2 s
-    // run spends 1,022,080 and the next reservation fits (3,047,680);
-    // another on instance 0 sets aside 1,106,880 more, which exceeds 75 % but not the total.
+    // The public has 2,775,000 of the 3,700,000 nanodollars. Two isolated 2 s
+    // runs spend 1,252,160 and the reservation of a third (1,629,600) exceeds
+    // 75 % but not the total.
     const h = await worker({
       vars: {
-        MONTHLY_BUDGET_USD: "0.0041",
+        MONTHLY_BUDGET_USD: "0.0037",
         MAINTAINERS: MAINTAINER,
         FAKE_CLOCK: CLOCK,
-        FAKE_PICKS: "0,1,0,0,0",
       },
     });
     const staff = await maintainer(h);
     expect((await h.post(work(2000), verified)).status).toBe(200);
+    await h.advance(QUIET_MS);
     expect((await h.post(work(2000), verified)).status).toBe(200);
+    await h.advance(QUIET_MS);
 
     const refused = await h.post(work(1000), verified);
     expect(refused.status).toBe(503);
@@ -536,8 +535,8 @@ describe("budget caps", () => {
     const allowed = await h.post(work(1000), staff);
     expect(allowed.status).toBe(200);
     expect(h.siteverify.calls).toHaveLength(2);
-    // 1 s of CPU and the 3 s that extend the window of instance 0.
-    expect(costs(h)).toEqual([ISOLATED_2S, ISOLATED_2S, 67_520]);
+    // 1 s of CPU and the 36 s the instance is on.
+    expect(costs(h)).toEqual([ISOLATED_2S, ISOLATED_2S, 590_240]);
 
     // Another month starts: the public can run again.
     await h.advance(20 * 86_400_000);
@@ -545,26 +544,26 @@ describe("budget caps", () => {
   });
 
   it("the public stops at its daily cap, a maintainer does not, and the next day it resumes", async () => {
-    // 1/10 of the public's 30,000,000 is 3,000,000 per day: one isolated run fits
-    // (1,022,080 spent) and the reservation of another (2,025,600) does not.
+    // 1/10 of the public's 20,025,000 is 2,002,500 per day: one isolated run fits
+    // (626,080 spent) and the reservation of another (1,629,600) does not.
     const h = await worker({
       vars: {
-        MONTHLY_BUDGET_USD: "0.04",
+        MONTHLY_BUDGET_USD: "0.0267",
         PUBLIC_BUDGET_DAYS: "10",
         MAINTAINERS: MAINTAINER,
         FAKE_CLOCK: CLOCK,
-        FAKE_PICKS: "0,1,1,1",
       },
     });
     const staff = await maintainer(h);
     expect((await h.post(work(2000), verified)).status).toBe(200);
+    await h.advance(QUIET_MS);
 
     const refused = await h.post(work(2000), verified);
     expect(refused.status).toBe(503);
     expect(refused.body.reason).toBe("budget_day");
     expect(refused.body.error).toContain("hoy");
-    // 12 h minus the run's 2 s remain until UTC midnight.
-    expect(refused.headers.get("retry-after")).toBe("43198");
+    // 12 h minus the run's 2 s and the 10 minutes remain until UTC midnight.
+    expect(refused.headers.get("retry-after")).toBe("42598");
 
     expect((await h.post(work(2000), staff)).status).toBe(200);
 
@@ -573,18 +572,18 @@ describe("budget caps", () => {
   });
 
   it("at 100 % not even a maintainer runs", async () => {
-    // An isolated run spends 950,400 and the next sets aside 2,025,600: 2,976,000
-    // exceeds the budget's 2,800,000.
+    // An isolated run spends 554,400 and the next sets aside 1,629,600: 2,184,000
+    // exceeds the budget's 2,000,000.
     const h = await worker({
       vars: {
-        MONTHLY_BUDGET_USD: "0.0028",
+        MONTHLY_BUDGET_USD: "0.002",
         MAINTAINERS: MAINTAINER,
         FAKE_CLOCK: CLOCK,
-        FAKE_PICKS: "0,1",
       },
     });
     const staff = await maintainer(h);
     expect((await h.post(run, staff)).status).toBe(200);
+    await h.advance(QUIET_MS);
 
     const refused = await h.post(run, staff);
     expect(refused.status).toBe(503);
@@ -593,18 +592,18 @@ describe("budget caps", () => {
   });
 
   it("if the adjustment fails the spend stays at what was set aside and can only be over", async () => {
-    // With the adjustment, two isolated runs spend 950,400 and set aside 2,025,600:
-    // 2,976,000 fits in the public's 3,000,000. Without it, the first stays
-    // at 2,025,600 and the second does not fit.
+    // With the adjustment, two isolated runs spend 554,400 and set aside 1,629,600:
+    // 2,184,000 fits in the public's 3,000,000. Without it, the first stays
+    // at 1,629,600 and the second does not fit.
     const h = await worker({
       vars: {
         MONTHLY_BUDGET_USD: "0.004",
         FAKE_SETTLE_FAILS: "1",
         FAKE_CLOCK: CLOCK,
-        FAKE_PICKS: "0,1",
       },
     });
     expect((await h.post(run, verified)).status).toBe(200);
+    await h.advance(QUIET_MS);
     const refused = await h.post(run, verified);
     expect(refused.status).toBe(503);
     expect(refused.body.reason).toBe("budget");

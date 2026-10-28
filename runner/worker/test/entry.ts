@@ -20,15 +20,11 @@ export class Budget extends RealBudget {
 }
 
 interface TestEnv {
-  // Instances the Worker picks, in order, separated by commas ("0,1").
-  FAKE_PICKS?: string;
-  INSTANCES: string;
   // ISO date at which the clock stops. It advances only with /clock?advance=<ms>
   // and with the fake runner's job ("TRABAJO-<ms>").
   FAKE_CLOCK?: string;
 }
 
-let picked = false;
 let frozen: number | undefined;
 
 function freeze(env: TestEnv): void {
@@ -115,12 +111,6 @@ export default {
         }),
       );
     }
-    if (env.FAKE_PICKS && !picked) {
-      picked = true;
-      const picks = env.FAKE_PICKS.split(",").map(Number);
-      // getRandom picks with Math.random: this way the test decides which instance comes up.
-      Math.random = () => ((picks.shift() ?? 0) + 0.5) / Number(env.INSTANCES);
-    }
     return real.fetch(request, env as never, ctx);
   },
   scheduled: (controller: ScheduledController, env: never) =>
@@ -135,7 +125,7 @@ export class Runner extends DurableObject {
   async fetch(request: Request): Promise<Response> {
     const headers = [...request.headers.keys()].toSorted();
     console.log(
-      `FAKE_RUNNER_CALL ${JSON.stringify({ path: new URL(request.url).pathname, headers })}`,
+      `FAKE_RUNNER_CALL ${JSON.stringify({ path: new URL(request.url).pathname, headers, instance: this.ctx.id.name })}`,
     );
     const { code } = (await request.json()) as { code: string };
     if (code === "romper-contenedor")

@@ -102,7 +102,7 @@ export interface Harness {
   purge(at?: Date): Promise<void>;
   // Lines the Worker wrote to Workers Logs.
   workerLogs(): string[];
-  runnerCalls(): { path: string; headers: string[] }[];
+  runnerCalls(): { path: string; headers: string[]; instance: string }[];
   // How many times the Worker stopped an instance.
   runnerStops(): number;
   // Advances by `ms` the stopped clock set by the `FAKE_CLOCK` option.
@@ -129,11 +129,10 @@ function fakeSiteverify(siteverify: Siteverify, down: boolean) {
 }
 
 export interface Options {
-  // FAKE_SETTLE_FAILS makes the budget adjustment fail, FAKE_PICKS picks the
-  // container instances and FAKE_CLOCK stops the clock (test/entry.ts).
+  // FAKE_SETTLE_FAILS makes the budget adjustment fail and FAKE_CLOCK stops the
+  // clock (test/entry.ts).
   vars?: Partial<typeof VARS> & {
     FAKE_SETTLE_FAILS?: string;
-    FAKE_PICKS?: string;
     FAKE_CLOCK?: string;
   };
   // Without this the Worker calls the real Turnstile service.
