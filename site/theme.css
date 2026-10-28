@@ -35,10 +35,22 @@
   --r2: 8px;
   --r3: 16px;
 
+  /* Controls and menus use --d-fast and --d-base. The lesson stage alone uses --d-reveal. */
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
   --d-fast: 120ms;
   --d-base: 180ms;
   --d-slow: 280ms;
+  --d-reveal: 450ms;
+  --press: scale(0.97);
+  --grab: scale(1.15);
+  --enter: scale(0.95);
+  --rise: translateY(10px);
+  --slide: translateX(-8px);
+  --disabled: 0.5;
+  /* Controls name each transitioned property. Colour eases and movement uses --ease. */
+  --tr-control:
+    color var(--d-fast) ease, background-color var(--d-fast) ease, border-color var(--d-fast) ease,
+    box-shadow var(--d-fast) ease, opacity var(--d-fast) ease, transform var(--d-fast) var(--ease);
 
   color-scheme: light dark;
 }
@@ -91,6 +103,7 @@
   --card: var(--n2);
   --stage: var(--n2);
   --bg2: var(--n3);
+  --bg3: var(--n4);
   --code-bg: var(--n3);
   --line: var(--n6);
   --edge: var(--n9);
@@ -98,16 +111,19 @@
   --muted: var(--n11);
   --acc: var(--a9);
   --acc-hover: var(--a10);
+  --acc-active: var(--a11);
   --acc-text: var(--a11);
+  --acc-text-hover: var(--a12);
   --acc-ink: light-dark(oklch(0.985 0.01 var(--hue)), oklch(0.2 0.04 var(--hue)));
   --bad: var(--red);
   --focus: var(--a9);
 
+  --shadow-ring: 0 0 0 1px oklch(from var(--shadow-color) l c h / 0.1);
   --shadow-raised:
-    0 0 0 1px oklch(from var(--shadow-color) l c h / 0.08), 0 1px 2px oklch(from var(--shadow-color) l c h / 0.14),
+    var(--shadow-ring), 0 1px 2px oklch(from var(--shadow-color) l c h / 0.14),
     0 4px 8px -2px oklch(from var(--shadow-color) l c h / 0.08);
   --shadow-overlay:
-    0 0 0 1px oklch(from var(--shadow-color) l c h / 0.08), 0 2px 4px oklch(from var(--shadow-color) l c h / 0.12),
+    var(--shadow-ring), 0 2px 4px oklch(from var(--shadow-color) l c h / 0.12),
     0 12px 24px -6px oklch(from var(--shadow-color) l c h / 0.14);
 
   --fg: var(--ink);
@@ -121,16 +137,20 @@
   --dot: var(--blue);
   --emph-bg: color-mix(in oklch, var(--gold) 16%, transparent);
   --emph-ring: color-mix(in oklch, var(--gold) 55%, transparent);
+  --shadow-emph: 0 0 0 2px var(--emph-ring);
   --cursor: color-mix(in oklch, var(--blue) 11%, transparent);
   --barrier: color-mix(in oklch, var(--muted) 13%, transparent);
   --code-hl: color-mix(in oklch, var(--gold) 14%, transparent);
 }
 
+/* Reduced motion keeps colour and opacity changes that signal state changes. */
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --d-fast: 0ms;
-    --d-base: 0ms;
-    --d-slow: 0ms;
+    --press: none;
+    --grab: none;
+    --enter: none;
+    --rise: none;
+    --slide: none;
   }
 }
 
@@ -165,6 +185,22 @@ p {
 a {
   color: var(--acc-text);
   text-underline-offset: 0.2em;
+  transition: color var(--d-fast) ease;
+}
+/* :where keeps these below link classes, including button and row styles. */
+@media (hover: hover) and (pointer: fine) {
+  a:where(:hover) {
+    color: var(--acc-text-hover);
+    text-decoration-thickness: 2px;
+  }
+}
+a:where(:active) {
+  color: var(--acc-text-hover);
+}
+button:disabled,
+[aria-disabled="true"] {
+  opacity: var(--disabled);
+  cursor: not-allowed;
 }
 button,
 select,
@@ -218,29 +254,29 @@ code {
   font-weight: var(--w-strong);
   text-decoration: none;
   cursor: pointer;
-  transition:
-    background-color var(--d-fast) var(--ease),
-    border-color var(--d-fast) var(--ease),
-    transform var(--d-fast) var(--ease);
-}
-.btn:hover {
-  background: var(--bg2);
-}
-.btn:active {
-  transform: translateY(1px);
+  transition: var(--tr-control);
 }
 .btn.primary {
   background: var(--acc);
   border-color: var(--acc);
   color: var(--acc-ink);
 }
-.btn.primary:hover {
-  background: var(--acc-hover);
-  border-color: var(--acc-hover);
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover {
+    background: var(--bg2);
+  }
+  .btn.primary:not(:disabled):hover {
+    background: var(--acc-hover);
+    border-color: var(--acc-hover);
+  }
 }
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn:not(:disabled):active {
+  background: var(--bg3);
+  transform: var(--press);
+}
+.btn.primary:not(:disabled):active {
+  background: var(--acc-active);
+  border-color: var(--acc-active);
 }
 
 .top {
@@ -277,9 +313,14 @@ code {
   color: var(--muted);
   text-decoration: none;
 }
-.top nav a:hover {
+@media (hover: hover) and (pointer: fine) {
+  .top nav a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+}
+.top nav a:active {
   color: var(--ink);
-  text-decoration: underline;
 }
 .top .sp {
   flex: 1;
@@ -299,15 +340,20 @@ code {
   font-size: var(--t-sm);
   white-space: nowrap;
   cursor: pointer;
+  transition: var(--tr-control);
 }
-.theme-ctl button:hover,
-.acct > button:hover {
+@media (hover: hover) and (pointer: fine) {
+  .theme-ctl button:not(:disabled):hover,
+  .acct > button:not(:disabled):hover {
+    color: var(--ink);
+    background: var(--bg2);
+  }
+}
+.theme-ctl button:not(:disabled):active,
+.acct > button:not(:disabled):active {
   color: var(--ink);
-  background: var(--bg2);
-}
-.theme-ctl button:active,
-.acct > button:active {
-  transform: translateY(1px);
+  background: var(--bg3);
+  transform: var(--press);
 }
 .acct {
   position: relative;
@@ -324,6 +370,14 @@ code {
   background: var(--card);
   border-radius: var(--r3);
   box-shadow: var(--shadow-overlay);
+  transform-origin: top right;
+  transition:
+    opacity var(--d-base) var(--ease),
+    transform var(--d-base) var(--ease);
+  @starting-style {
+    opacity: 0;
+    transform: var(--enter);
+  }
 }
 .acct-menu[hidden] {
   display: none;
@@ -339,12 +393,16 @@ code {
   background: transparent;
   border-radius: var(--r2);
   cursor: pointer;
+  transition: var(--tr-control);
 }
-.acct-menu button:hover {
-  background: var(--bg2);
+@media (hover: hover) and (pointer: fine) {
+  .acct-menu button:not(:disabled):hover {
+    background: var(--bg2);
+  }
 }
-.acct-menu button:active {
-  transform: translateY(1px);
+.acct-menu button:not(:disabled):active {
+  background: var(--bg3);
+  transform: var(--press);
 }
 .acct-menu button.danger {
   color: var(--bad);
