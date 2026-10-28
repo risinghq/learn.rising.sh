@@ -15,10 +15,8 @@ lesson.json + timings.json + audio -> engine.ts
 ```
 
 - A course is `site/<slug>/` and its source `lessons_src/<slug>/`, with the
-  dashes of the slug written as underscores (`computational_physics`). To start
-  a course, create that folder with a `plan.py` and at least one `parte*.py`,
-  add the entry to `site/courses.json` and copy the `index.html` and
-  `lesson.html` of an existing course.
+  dashes of the slug written as underscores (`computational_physics`). See
+  [Add a course](#add-a-course).
 - `plan.py` defines `PARTS`: the parts (`n`, `title`, `desc`), the order of
   their lessons, and for each lesson `(id, title)`. A lesson id belongs to one
   course. The Qiskit plan adds a third element, the original guides that the
@@ -80,6 +78,21 @@ continues where it stopped.
 version `tools/qiskit-docs.commit` pins (only needed the first time). To update
 the guides, change the hash in `qiskit-docs.commit`, run `fetch_docs.py` and fix
 the Qiskit `plan.py` until `build.py qiskit` passes.
+
+## Add a course
+
+The platform code does not change.
+
+1. Create `lessons_src/<slug>/` with a `plan.py` and at least one `parte*.py`.
+2. Create `site/<slug>/` with a copy of the `index.html` and `lesson.html` of an
+   existing course. They link the shared theme, account menu and player, and
+   call the platform routes by their absolute path (`/api/me`, `/run`).
+3. Add an entry to `site/courses.json` with `slug` (the folder name), `title`,
+   `summary` and `language`. `language` is the name of the course language that
+   the catalog shows on the card, such as `"Spanish"`. The catalog counts the
+   lessons from `site/<slug>/course.json`, which `build.py` writes.
+4. Add the course to `generate:lessons` and `build:lessons` in `mise.toml`, then
+   run `uv run python lessons_src/build.py <slug>`.
 
 ## Charts
 
