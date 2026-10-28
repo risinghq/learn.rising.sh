@@ -6,8 +6,7 @@ is in [runner.md](runner.md), [accounts.md](accounts.md) and
 [protection.md](protection.md). Here are only steps.
 
 Values between `< >` are yours. `<worker>` is the Worker name and `<host>` is
-its domain. The repository ships `duo` and `edu.rising.sh`. No secret goes in
-the repository or in a file you push to git.
+its domain. No secret goes in the repository or in a file you push to git.
 
 ## What you need
 
@@ -33,7 +32,7 @@ bunx cf auth login
 ## 1. Choose the name and the domain
 
 Both are in [`cloudflare.config.ts`](../runner/worker/cloudflare.config.ts). The
-name is `worker.name` (`duo`) and the domain is `HOME_HOST` (`edu.rising.sh`),
+name is `worker.name` (`duo`) and the domain is `HOME_HOST` (`learn.rising.sh`),
 which the config puts in `worker.domains`. The container is `duo-runner`. Change
 them to yours. `workersDev` is `false`: the Worker answers only on its domain,
 not on `<worker>.<subdomain>.workers.dev`.

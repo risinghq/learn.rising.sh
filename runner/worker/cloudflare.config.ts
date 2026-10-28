@@ -36,7 +36,7 @@ const runner = defineContainer({
 
 // The host of the site. Accounts, progress and the runs of all
 // courses go through it.
-const HOME_HOST = "edu.rising.sh";
+const HOME_HOST = "learn.rising.sh";
 
 export default defineConfig({
   worker: {

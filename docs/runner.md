@@ -172,9 +172,9 @@ repeat the `id` and treats it as a broken channel. The learner can read
 ## On Cloudflare
 
 `runner/worker/` is a single Worker, `duo`, that serves the catalog, the
-courses, the runner and the accounts on the same origin, `edu.rising.sh`: the
-editor calls `/run` and the Turnstile session cookie is `SameSite=Strict`. Its
-Container is `duo-runner`.
+courses, the runner and the accounts on the same origin: the editor calls `/run`
+and the Turnstile session cookie is `SameSite=Strict`. Its Container is
+`duo-runner`.
 
 - The files of `site/` are its static files. The directory is set by
   [`wrangler.config.ts`](../runner/worker/wrangler.config.ts).
