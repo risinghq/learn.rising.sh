@@ -932,12 +932,12 @@ describe("/api", () => {
     expect(merged.body.progress).toEqual({
       done: ["intro", "puertas", "qubit"],
       exercises: {
-        // The most recent code wins; hints and checks take the maximum; a pass is never lost.
+        // The most recent code wins. Hints and checks take the maximum. The claimed pass is ignored.
         "intro/uno": {
           code: "nuevo",
           hints: 1,
           checks: 5,
-          passed: true,
+          passed: false,
           at: 2000,
         },
         "intro/dos": { hints: 2, checks: 1, passed: false, at: 500 },
@@ -1048,7 +1048,13 @@ describe("/api", () => {
       await put(h, who.cookie, {
         done: ["intro"],
         exercises: {
-          "intro/uno": { code: "a", hints: 0, checks: 1, passed: true, at: 10 },
+          "intro/uno": {
+            code: "a",
+            hints: 0,
+            checks: 1,
+            passed: false,
+            at: 10,
+          },
         },
         kv: { "qiskit:hitos": [1] },
       });
@@ -1102,6 +1108,110 @@ describe("/api", () => {
       headers: { cookie: ada.cookie },
     });
     expect(me.body).toEqual({ signedIn: false });
+  });
+});
+
+describe("passed follows the server's record", () => {
+  const origin = { origin: "http://runner.test" };
+  const claim = (exercise: string) => ({
+    exercises: {
+      [exercise]: { code: "x", hints: 0, checks: 1, passed: true, at: 10 },
+    },
+  });
+  const passedIn = (progress: any) =>
+    Object.fromEntries(
+      Object.entries<any>(progress.exercises).map(([id, item]) => [
+        id,
+        item.passed,
+      ]),
+    );
+
+  async function passedOf(h: Harness, cookie: string) {
+    const me = await h.request("GET", "/api/me", { headers: { cookie } });
+    return passedIn(me.body.progress);
+  }
+  const send = (h: Harness, cookie: string, route: string, body: unknown) =>
+    h.request(route === "/api/merge" ? "POST" : "PUT", route, {
+      headers: { ...origin, cookie },
+      body,
+    });
+  const run = (h: Harness, cookie: string, mode: string, code: string) =>
+    h.post(
+      { code, mode, exercise: "intro/uno" },
+      { headers: signedIn(cookie) },
+    );
+
+  it.each(["/api/progress", "/api/merge"])(
+    "a client body that claims passed leaves it false (%s)",
+    async (route) => {
+      const h = await worker();
+      const { cookie } = await signIn(h, "google", "sub-1");
+      const reply = await send(h, cookie!, route, claim("intro/uno"));
+      expect(reply.status).toBe(route === "/api/merge" ? 200 : 204);
+      if (route === "/api/merge") {
+        expect(reply.body.progress.exercises["intro/uno"].passed).toBe(false);
+      }
+      expect(await passedOf(h, cookie!)).toEqual({ "intro/uno": false });
+    },
+  );
+
+  it("a recorded passing check makes it true and the client cannot take it back", async () => {
+    const h = await worker();
+    const { cookie } = await signIn(h, "google", "sub-1");
+    const other = await signIn(h, "google", "sub-2");
+    await send(h, cookie!, "/api/progress", {
+      exercises: {
+        "intro/uno": { code: "a", hints: 0, checks: 0, passed: false, at: 100 },
+      },
+    });
+    expect((await run(h, cookie!, "check", "print(1)")).body.passed).toBe(true);
+    expect(await passedOf(h, cookie!)).toEqual({ "intro/uno": true });
+    // A recorded pass does not replace the learner's code or edit order.
+    const me = await h.request("GET", "/api/me", {
+      headers: { cookie: cookie! },
+    });
+    expect(me.body.progress.exercises["intro/uno"]).toMatchObject({
+      code: "a",
+      at: 100,
+    });
+
+    await send(h, cookie!, "/api/merge", {
+      exercises: {
+        "intro/uno": { hints: 0, checks: 0, passed: false, at: 900 },
+      },
+    });
+    await run(h, cookie!, "check", "FALLA");
+    expect(await passedOf(h, cookie!)).toEqual({ "intro/uno": true });
+    expect(await passedOf(h, other.cookie!)).toEqual({});
+  });
+
+  it("only a passing check of a signed-in user records a pass", async () => {
+    const h = await worker();
+    const { cookie } = await signIn(h, "google", "sub-1");
+    await run(h, cookie!, "run", "print(1)");
+    await run(h, cookie!, "check", "FALLA");
+    await h.post(
+      { code: "print(1)", mode: "check", exercise: "intro/uno" },
+      { headers: { "x-turnstile-token": TOKEN } },
+    );
+    expect(await passedOf(h, cookie!)).toEqual({});
+    expect(await count(h, "exercise_state", "passed = 1")).toBe(0);
+  });
+
+  it("a guest's merge on sign-in does not grant a pass the server never recorded", async () => {
+    const h = await worker();
+    const { cookie } = await signIn(h, "google", "sub-1");
+    await run(h, cookie!, "check", "print(1)");
+    const merged = await send(h, cookie!, "/api/merge", {
+      exercises: {
+        ...claim("intro/dos").exercises,
+        "intro/uno": { hints: 0, checks: 0, passed: false, at: 1 },
+      },
+    });
+    expect(passedIn(merged.body.progress)).toEqual({
+      "intro/uno": true,
+      "intro/dos": false,
+    });
   });
 });
 
