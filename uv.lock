@@ -1663,7 +1663,10 @@ dev = [
 ]
 runner = [
     { name = "matplotlib" },
+    { name = "pylatexenc" },
     { name = "qiskit" },
+    { name = "qiskit-addon-obp" },
+    { name = "qiskit-addon-utils" },
     { name = "qiskit-aer" },
     { name = "qiskit-ibm-runtime" },
 ]
@@ -1696,7 +1699,10 @@ dev = [
 ]
 runner = [
     { name = "matplotlib" },
+    { name = "pylatexenc" },
     { name = "qiskit" },
+    { name = "qiskit-addon-obp", specifier = ">=0.3.0" },
+    { name = "qiskit-addon-utils", specifier = "~=0.4.0" },
     { name = "qiskit-aer" },
     { name = "qiskit-ibm-runtime" },
 ]
