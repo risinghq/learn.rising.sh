@@ -56,13 +56,13 @@ def test_budget():
 
 @visible("si ni un paso cabe, devuelve 0")
 def test_nothing_fits():
-    got = learner.pasos_max(2, 0)
-    assert got == 0, f"Con n = 2 y presupuesto = 0, `pasos_max` devuelve {got}; ni un paso cabe."
+    got = learner.pasos_max(1, 0)
+    assert got == 0, f"Con n = 1 y presupuesto = 0, `pasos_max` devuelve {got}; ni un paso cabe."
 
 
 def test_everything_fits():
-    got = learner.pasos_max(2, 100000)
-    assert got == 10, f"Con n = 2 y presupuesto = 100000, `pasos_max` devuelve {got}."
+    got = learner.pasos_max(1, 100000)
+    assert got == 10, f"Con n = 1 y presupuesto = 100000, `pasos_max` devuelve {got}."
 
 
 def test_equal_depth_fits():

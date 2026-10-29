@@ -155,7 +155,7 @@
      ],
      "id": "e1",
      "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef paso(n, J=1.0, h=0.5, dt=0.1):\n    qc = QuantumCircuit(n)\n    for i in range(n - 1):\n        qc.rzz(2 * J * dt, i, i + 1)\n    for i in range(n):\n        qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef trotter(n, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        qc.compose(paso(n), inplace=True)\n    return qc\n\n\ndef pasos_max(n, presupuesto):\n    # ✏️ tu código aquí\n    return 0\n\n\nprint(pasos_max(6, 150))",
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef paso(n, J=1.0, h=0.5, dt=0.1):\n    qc = QuantumCircuit(n)\n    for i in range(n - 1):\n        qc.rzz(2 * J * dt, i, i + 1)\n    for i in range(n):\n        qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef trotter(n, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        qc.compose(paso(n), inplace=True)\n    return qc\n\n\ndef pasos_max(n, presupuesto):\n    # ✏️ tu código aquí\n    return 0\n\n\nprint(pasos_max(2, 15))",
      "cases": [
       "con 6 espines y un presupuesto de 150 caben tantos pasos como indica la profundidad transpilada",
       "si ni un paso cabe, devuelve 0"

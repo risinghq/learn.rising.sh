@@ -27,4 +27,4 @@ def pasos_max(n, presupuesto):
     return max([p for p, d in profundidad_por_pasos.items() if d <= presupuesto], default=0)
 
 
-print(pasos_max(6, 150))
+print(pasos_max(2, 15))

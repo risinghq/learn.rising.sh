@@ -24,4 +24,4 @@ def pasos_max(n, presupuesto):
     return 0
 
 
-print(pasos_max(6, 150))
+print(pasos_max(2, 15))
