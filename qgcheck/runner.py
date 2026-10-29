@@ -75,6 +75,18 @@ def job_env(work: str, path: str) -> dict[str, str]:
     }
 
 
+def font_cache() -> Path:
+    """The directory where local jobs keep matplotlib's font list.
+
+    A job's own directory is empty, so every job would scan the host's fonts again: 0.5 s of CPU
+    with a few hundred system fonts, more than the rest of a plot. The runner's container has no
+    system fonts, so there the scan is short and each job keeps its own directory.
+    """
+    cache = Path(tempfile.gettempdir()) / f"qgcheck-matplotlib-{os.getuid()}"
+    cache.mkdir(mode=0o700, exist_ok=True)
+    return cache
+
+
 def drain(fd: int, cap: int, box: bytearray, over: threading.Event) -> None:
     while True:
         try:
@@ -180,7 +192,11 @@ def grade(
         main.write_text(code, encoding="utf-8")
         report_r, report_w = os.pipe()
         env = job_env(work, os.environ.get("PATH", ""))
-        env |= {"QG_REPORT_FD": str(report_w), "QG_BLOCK": ",".join(block)}
+        env |= {
+            "MPLCONFIGDIR": str(font_cache()),
+            "QG_REPORT_FD": str(report_w),
+            "QG_BLOCK": ",".join(block),
+        }
         proc = subprocess.Popen(
             job_argv(mode, str(main), str(d / "check.py") if mode == "check" else None),
             cwd=work,
