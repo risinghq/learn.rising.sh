@@ -96,6 +96,11 @@ run = [
   "bun tests/theme_test.ts",
 ]
 
+[tasks."test:walkthrough"]
+description = "Play one learner through the whole Qiskit course in a browser, reloading and resuming, and read the home page after every step. Not part of test: it takes 25 s on an idle host and over a minute on a busy one."
+depends = ["generate:scripts"]
+run = "bun tests/walkthrough_test.ts"
+
 [tasks."test:tools"]
 description = "Test the dashboard tool against a local D1 database"
 wait_for = ["test:py"]
