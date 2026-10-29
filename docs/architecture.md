@@ -89,7 +89,10 @@ that goes with each `marimo` command. `computational-physics/` has none.
 Every course stores its progress under the `qiskit:` keys of `localStorage`
 (`qiskit:done`, `qiskit:pos:<id>`, …) and on the account, by lesson id. For that
 reason a lesson id belongs to one course, and a course home page counts only its
-own lessons.
+own lessons. `mise run test:walkthrough` plays one learner through that state in
+a browser: it finishes every lesson of the Qiskit course and reads back the home
+page after each step. `mise run test` does not run it, because it takes over a
+minute beside the other suites.
 
 ## A request
 
