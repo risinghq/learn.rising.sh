@@ -5,13 +5,14 @@
 // fonts, the mode stored once, WCAG AA contrast and parallel lesson.json
 // requests. --shots saves screenshots; --table prints the contrasts as Markdown.
 import { mkdirSync, readFileSync } from "node:fs";
-import { join, resolve, sep } from "node:path";
+import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 import { chromium } from "playwright";
 import type { Browser, BrowserContext, Page } from "playwright";
 
 import { newContext, verify } from "./offline.ts";
+import { serveSite } from "./site.ts";
 
 const SITE = resolve(import.meta.dirname, "..", "site");
 const MODES = ["dark", "light"];
@@ -39,34 +40,6 @@ const LESSON_JSON_DELAY_MS = 400;
 
 type Rgb = [number, number, number];
 type Brand = [string, string, string];
-
-// Serves site/ with a delay on every lesson.json, so that a front page that
-// requests them in series takes visibly longer.
-function serve(): { stop: () => Promise<void>; base: string } {
-  const server = Bun.serve({
-    hostname: "127.0.0.1",
-    port: 0,
-    async fetch(request) {
-      const { pathname } = new URL(request.url);
-      if (pathname.endsWith("/lesson.json")) {
-        await Bun.sleep(LESSON_JSON_DELAY_MS);
-      }
-      const path = resolve(
-        SITE,
-        `.${decodeURIComponent(pathname)}${pathname.endsWith("/") ? "index.html" : ""}`,
-      );
-      const file = Bun.file(path);
-      if (!path.startsWith(SITE + sep) || !(await file.exists())) {
-        return new Response("Not found", { status: 404 });
-      }
-      return new Response(file);
-    },
-  });
-  return {
-    stop: () => server.stop(true),
-    base: `http://127.0.0.1:${server.port}`,
-  };
-}
 
 function linear(c: number): number {
   const unit = c / 255;
@@ -396,7 +369,7 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: { shots: { type: "string" }, table: { type: "boolean" } },
   });
-  const { stop, base } = serve();
+  const { stop, base } = serveSite(LESSON_JSON_DELAY_MS);
   const lastBeats = Object.fromEntries(
     LESSONS.map((id) => {
       const lesson = JSON.parse(
