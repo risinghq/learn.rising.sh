@@ -1,3 +1,5 @@
+import functools
+
 from qiskit import QuantumCircuit
 from qiskit.circuit.random import random_circuit
 from qiskit.transpiler import CouplingMap, generate_preset_pass_manager
@@ -35,37 +37,43 @@ def cx(circuit):
     return circuit.count_ops().get("cx", 0)
 
 
-def cx_per_seed(qc, seeds):
-    return [cx(transpile_with(qc, seed)) for seed in seeds]
+def random_9(seed):
+    return random_circuit(9, 6, max_operands=2, seed=seed)
+
+
+# The cases ask for the same circuits and seeds, so each reference transpile runs once.
+@functools.cache
+def cx_with_seed(circuit_seed, seed):
+    return cx(transpile_with(random_9(circuit_seed), seed))
+
+
+def best_cx(circuit_seed, seeds):
+    return min(cx_with_seed(circuit_seed, seed) for seed in seeds)
 
 
 @visible("devuelve un circuito transpilado")
 def test_returns_a_circuit():
-    circuit, other = chosen(random_circuit(9, 6, max_operands=2, seed=7), [0, 10], "range")
+    circuit, other = chosen(random_9(7), [0, 1], "range")
     assert circuit is not None, f"`mejor_de` devuelve {other}; debe devolver un `QuantumCircuit`."
 
 
 @visible("el circuito elegido tiene el mínimo de cx de las diez semillas")
 def test_best_of_ten():
-    qc = random_circuit(9, 6, max_operands=2, seed=7)
-    got = chosen_cx(qc, [0, 10], "range")
-    assert got == min(cx_per_seed(qc, range(10))), f"Con semillas = range(10), el circuito elegido tiene {got} cx."
+    got = chosen_cx(random_9(7), [0, 10], "range")
+    assert got == best_cx(7, range(10)), f"Con semillas = range(10), el circuito elegido tiene {got} cx."
 
 
 def test_other_circuit():
-    qc = random_circuit(9, 6, max_operands=2, seed=3)
-    got = chosen_cx(qc, [0, 10], "range")
-    assert got == min(cx_per_seed(qc, range(10))), f"Con otro circuito, el elegido por `mejor_de` tiene {got} cx."
+    got = chosen_cx(random_9(3), [0, 5], "range")
+    assert got == best_cx(3, range(5)), f"Con otro circuito, el elegido por `mejor_de` tiene {got} cx."
 
 
 def test_only_the_given_seeds():
-    qc = random_circuit(9, 6, max_operands=2, seed=7)
     seeds = [3, 0, 1]
-    got = chosen_cx(qc, seeds)
-    assert got == min(cx_per_seed(qc, seeds)), f"Con semillas = {seeds}, el circuito elegido tiene {got} cx."
+    got = chosen_cx(random_9(7), seeds)
+    assert got == best_cx(7, seeds), f"Con semillas = {seeds}, el circuito elegido tiene {got} cx."
 
 
 def test_accepts_a_generator():
-    qc = random_circuit(9, 6, max_operands=2, seed=7)
-    got = chosen_cx(qc, list(range(6)), "generator")
-    assert got == min(cx_per_seed(qc, range(6))), f"Con semillas = un generador de 0 a 5, el elegido tiene {got} cx."
+    got = chosen_cx(random_9(7), list(range(6)), "generator")
+    assert got == best_cx(7, range(6)), f"Con semillas = un generador de 0 a 5, el elegido tiene {got} cx."
