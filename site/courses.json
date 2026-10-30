@@ -2,13 +2,18 @@
   {
     "slug": "qiskit",
     "title": "Qiskit",
-    "summary": "Programa circuitos cuánticos y ejecútalos en un procesador real de IBM.",
-    "language": "Español"
+    "outcome": "Programa circuitos cuánticos y ejecútalos en un procesador real de IBM.",
+    "source": {
+      "label": "guías de IBM Quantum",
+      "url": "https://quantum.cloud.ibm.com/docs/en/guides",
+      "license": "CC BY-SA 4.0"
+    },
+    "note": "Todo el código se ejecutó con Qiskit 2.5."
   },
   {
     "slug": "computational-physics",
     "title": "Física computacional",
-    "summary": "Simula péndulos, osciladores y órbitas con Python.",
-    "language": "Español"
+    "outcome": "Simula péndulos, osciladores y órbitas con Python.",
+    "note": "Todo el código de las lecciones se ejecuta y se comprueba antes de publicarlas."
   }
 ]

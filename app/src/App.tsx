@@ -1,0 +1,15 @@
+import { Catalog } from "./components/Catalog.tsx";
+import { CoursePath } from "./components/CoursePath.tsx";
+import { Privacy } from "./components/Privacy.tsx";
+import type { Page } from "./model.ts";
+
+export function App({ page }: { page: Page }) {
+  switch (page.kind) {
+    case "catalog":
+      return <Catalog page={page} />;
+    case "course":
+      return <CoursePath page={page} />;
+    case "privacy":
+      return <Privacy />;
+  }
+}
