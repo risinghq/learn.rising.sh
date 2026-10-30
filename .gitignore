@@ -2,11 +2,16 @@
 site/vendor/
 site/theme.js
 site/account.js
-site/course-home.js
 site/player/editor.js
 site/player/engine.js
 site/qiskit/notebooks.js
 site/*/items.json
+site/index.html
+site/privacidad.html
+site/*/index.html
+site/assets/
+site/sw.js
+app/dist/
 shots/
 __pycache__/
 .venv/

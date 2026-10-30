@@ -15,8 +15,10 @@ run = [
   "uv sync --locked --all-groups --compile-bytecode",
   "bun install --frozen-lockfile",
   "bun install --cwd editor --frozen-lockfile",
+  "bun install --cwd app --frozen-lockfile",
   "mise run generate:vendor",
   "mise run generate:scripts",
+  "mise run generate:app",
   "bun install --cwd runner/worker --frozen-lockfile",
   "uv run --group tools playwright install ${CI:+--with-deps} chromium",
   "bunx playwright install chromium",
@@ -64,8 +66,8 @@ run = [
 ]
 
 [tasks."typecheck:ts"]
-description = "Check the TypeScript of the Worker, the editor, the site, the tools and the tests with tsc"
-run = ["tsc -p runner/worker", "tsc -p editor", "tsc -p site", "tsc -p ."]
+description = "Check the TypeScript of the Worker, the editor, the app, the site, the tools and the tests with tsc"
+run = ["tsc -p runner/worker", "tsc -p editor", "tsc -p app", "tsc -p site", "tsc -p ."]
 
 [tasks.typecheck]
 description = "Run every type check"
@@ -86,19 +88,21 @@ run = [
 ]
 
 [tasks."test:ui"]
-description = "Drive the exercise editor, the project panel, the theme and the optional account in a browser"
-depends = ["generate:scripts"]
+description = "Drive the exercise editor, the project panel, the shell, the theme and the optional account in a browser, and hold the shell to its script budget"
+depends = ["generate:scripts", "generate:app"]
 wait_for = ["test:py"]
 run = [
   "uv run python tests/exercise_ui_test.py",
   "uv run python tests/proyecto_test.py",
   "bun tests/account_ui_test.ts",
   "bun tests/theme_test.ts",
+  "bun tests/shell_test.ts",
+  "bun tests/budget_test.ts",
 ]
 
 [tasks."test:walkthrough"]
-description = "Play one learner through the whole Qiskit course in a browser, reloading and resuming, and read the home page after every step. Not part of test: it takes 25 s on an idle host and over a minute on a busy one."
-depends = ["generate:scripts"]
+description = "Play one learner through the whole Qiskit course in a browser, reloading and resuming, and read the path page after every step. Not part of test: it takes 25 s on an idle host and over a minute on a busy one."
+depends = ["generate:scripts", "generate:app"]
 run = "bun tests/walkthrough_test.ts"
 
 [tasks."test:tools"]
@@ -109,6 +113,7 @@ run = "bunx vitest run"
 [tasks."test:worker"]
 description = "Test the runner Worker's limits and accounts against a fake container"
 dir = "runner/worker"
+depends = ["generate:app"]
 wait_for = ["test:py"]
 run = "vitest run"
 
@@ -139,9 +144,14 @@ run = "bun drill/build.ts"
 [tasks."generate:scripts"]
 description = "Bundle the TypeScript in site/ and editor/src into the JavaScript the pages load, which git ignores"
 run = [
-  "bun build site/theme.ts site/account.ts site/course-home.ts site/qiskit/notebooks.ts site/player/engine.ts --root site --outdir site --format=iife --target=browser",
+  "bun build site/theme.ts site/account.ts site/qiskit/notebooks.ts site/player/engine.ts --root site --outdir site --format=iife --target=browser",
   "bun build editor/src/index.ts --outfile site/player/editor.js --format=iife --target=browser --minify",
 ]
+
+[tasks."generate:app"]
+description = "Build the React shell in app/ and write its prerendered pages, assets and service worker into site/, which git ignores"
+dir = "app"
+run = "node scripts/build.ts"
 
 [tasks."generate:vendor"]
 description = "Copy KaTeX and the fonts from editor/node_modules into site/vendor, which git ignores"
@@ -168,13 +178,13 @@ description = "Check that the shipped site files match their sources"
 depends = ["build:*"]
 
 [tasks.serve]
-description = "Bundle the scripts, then serve site/ and grade the exercises on http://127.0.0.1:8810"
-depends = ["generate:scripts"]
+description = "Bundle the scripts and build the shell, then serve site/ and grade the exercises on http://127.0.0.1:8810"
+depends = ["generate:scripts", "generate:app"]
 run = "uv run python tools/serve.py"
 
 [tasks.deploy]
-description = "Copy KaTeX and the fonts into site/vendor and bundle the scripts, then run cf deploy in runner/worker with the given arguments"
-depends = ["generate:vendor", "generate:scripts"]
+description = "Copy KaTeX and the fonts into site/vendor, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
 dir = "runner/worker"
 run = "bunx cf deploy"
 
