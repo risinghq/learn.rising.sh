@@ -3,9 +3,9 @@
     uv run --group tools python tests/proyecto_test.py
 
 For each milestone n, store the earlier milestones as done in `qiskit:hitos` and
-load the front page. The command shown matches the notebook that
-`missions[].notebook` links in course.json. The track uses the same condition,
-and the console must log no errors.
+load the course page. The command shown matches the notebook that
+`missions[].notebook` links in course.json. The track marks the same milestones
+as open, and the console must log no errors.
 """
 
 import json
@@ -66,19 +66,31 @@ def main() -> None:
             pg = ctx.new_page()
             errores: list[str] = []
             vigilar(pg, errores)
-            pg.goto(f"{base}/qiskit/index.html")
-            pg.wait_for_selector("#track .hito")
-            comandos = pg.locator("#hito .cmd code").all_text_contents()
+            pg.goto(f"{base}/qiskit/")
+            # The page paints what the server rendered first, then what the browser stored.
+            pg.wait_for_function(
+                "n => document.querySelector('.hcur p')?.textContent?.startsWith(`Hito ${n} de`)",
+                arg=n,
+            )
+            comandos = pg.locator(".hcur .cmd code").all_text_contents()
             esperados = [f"uv run marimo edit {nb}"] if esperado else []
             if comandos != esperados:
                 fallos.append(f"hito {n}: command {comandos}, expected {esperados}")
-            pista = pg.locator("#track .hito").nth(n - 1)
-            abierto = "open" in (pista.get_attribute("class") or "").split()
-            if abierto != esperado:
-                fallos.append(f"hito {n}: track open={abierto}, expected {esperado}")
-            titulo = pg.locator("#hito .k").text_content() or ""
-            if not titulo.startswith(f"Hito {n} de"):
-                fallos.append(f"hito {n}: the panel shows {titulo!r}")
+            estados = pg.locator(".track .hito").evaluate_all(
+                "els => els.map(e => e.dataset.state)"
+            )
+            previstos = [
+                "done"
+                if k < n
+                else "current"
+                if k == n
+                else "open"
+                if f"practica/proyecto/hito{k}.py" in enlazados
+                else "locked"
+                for k in range(1, HITOS + 1)
+            ]
+            if estados != previstos:
+                fallos.append(f"hito {n}: track {estados}, expected {previstos}")
             if errores:
                 fallos.append(f"hito {n}: {errores}")
             ctx.close()

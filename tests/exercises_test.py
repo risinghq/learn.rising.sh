@@ -1253,7 +1253,7 @@ def test_server_grades_the_solution_and_a_wrong_answer(server: str) -> None:
 def test_server_serves_the_site_and_rejects_bad_requests(server: str) -> None:
     import urllib.request
 
-    assert b"<title>" in urllib.request.urlopen(server + "/index.html").read()
+    assert b"<title>" in urllib.request.urlopen(server + "/qiskit/lesson.html").read()
     assert post(server, {"exercise": "../x", "code": ""})[0] == 400
     assert (
         post(server, {"exercise": "p1-quickstart/ghz", "code": ""}, content_type="text/plain")[0]

@@ -228,9 +228,10 @@ async function anonymous(
 ): Promise<Tab> {
   const tab = await newTab(browser, site, control);
   const { page, requests } = tab;
-  await page.goto(`${site}/qiskit/index.html`);
-  await page.locator("#parts .part").first().waitFor();
-  await page.locator("#hito .chk").click();
+  await page.goto(`${site}/qiskit/`);
+  // The account button appears once the page is interactive.
+  await page.locator(".acct > button").first().waitFor();
+  await page.getByRole("button", { name: "Marcar como hecho" }).click();
   await page.goto(`${site}/privacidad.html`);
   const panel = await openPanel(page, site, LESSON, 1);
   await write(page, panel, FAILING);
@@ -335,17 +336,19 @@ async function main(): Promise<void> {
       site,
       control,
     );
-    await two.goto(`${site}/qiskit/index.html`);
+    await two.goto(`${site}/qiskit/`);
     await signIn(two);
-    await two.locator("#parts .part").first().waitFor();
-    const progress = await two.locator("#prog").innerText();
+    await two.waitForFunction(() =>
+      document.querySelector(".meter .num")?.textContent?.startsWith("1 de"),
+    );
+    const progress = await two.locator(".meter .num").innerText();
     check(
-      progress.startsWith("1/"),
-      `other browser: the front page counts the lesson as done (${progress})`,
+      progress.startsWith("1 de"),
+      `other browser: the course page counts the lesson as done (${progress})`,
     );
     check(
-      (await two.locator("#track .hito.done").count()) === 1,
-      "other browser: the front page ticks the milestone",
+      (await two.locator(".track .hito[data-state=done]").count()) === 1,
+      "other browser: the course page ticks the milestone",
     );
     let panel = await openPanel(two, site, LESSON, 1);
     check(

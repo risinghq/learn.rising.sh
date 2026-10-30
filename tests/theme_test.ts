@@ -1,9 +1,10 @@
 // Shared theme, with Playwright on site/ served by Bun:
 //     bun tests/theme_test.ts [--shots FOLDER] [--table]
-// Loads the front page and three lessons in each mode at 1366x768 and 390x844.
-// Requires a clean console, no `#scene > .blk` outside `#stage`, one brand and
-// fonts, the mode stored once, WCAG AA contrast and parallel lesson.json
-// requests. --shots saves screenshots; --table prints the contrasts as Markdown.
+// Loads the four shell pages and three lessons in each mode at 1366x768 and
+// 390x844. Requires a clean console, no `#scene > .blk` outside `#stage`, one
+// brand and font family per part of the site, the mode stored once, WCAG AA
+// contrast and parallel lesson.json requests. --shots saves screenshots;
+// --table prints the contrasts as Markdown.
 import { mkdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -21,6 +22,18 @@ const SIZES: Record<string, [number, number]> = {
   "390x844": [390, 844],
 };
 const LESSONS = ["p1-quickstart", "p3-target", "p6-panorama"];
+const SHELL: [string, string][] = [
+  ["catalogo", "/"],
+  ["privacidad", "/privacidad.html"],
+  ["qiskit", "/qiskit/"],
+  ["fisica", "/computational-physics/"],
+];
+// The shell draws its own button; the player pages get theme.js's.
+const THEME_BUTTON = '[data-theme-ctl] button, button[aria-label^="Tema"]';
+const buttonText = (page: Page): Promise<string> =>
+  page
+    .locator(THEME_BUTTON)
+    .evaluate((b) => b.getAttribute("aria-label") ?? b.textContent ?? "");
 
 const TEXT = [
   "ink",
@@ -39,7 +52,8 @@ const GRAPHICS = ["axis", "wire", "edge"];
 const LESSON_JSON_DELAY_MS = 400;
 
 type Rgb = [number, number, number];
-type Brand = [string, string, string];
+/** The brand text and font on a page that has a brand, and the body font. */
+type Brand = [string | null, string | null, string];
 
 function linear(c: number): number {
   const unit = c / 255;
@@ -107,8 +121,9 @@ async function newPage(
 ): Promise<{ context: BrowserContext; page: Page; errors: string[] }> {
   const context = await newContext(browser, {
     viewport: { width: size[0], height: size[1] },
+    serviceWorkers: "block",
   });
-  const storage = { "qiskit:theme": mode, ...extraStorage };
+  const storage = { "rising:theme": mode, ...extraStorage };
   await context.addInitScript(
     `for (const [k, v] of Object.entries(${JSON.stringify(storage)})) localStorage.setItem(k, v);`,
   );
@@ -138,35 +153,38 @@ async function visit(
   shots: string | undefined,
   lastBeats: Record<string, number>,
 ): Promise<void> {
-  const brands = new Map<string, Brand>();
-  const catalogs = new Map<string, Brand>();
+  const shell = new Map<string, Brand[]>();
+  const player = new Map<string, Brand[]>();
   for (const mode of MODES) {
     for (const [sizeName, size] of Object.entries(SIZES)) {
       const label = `${mode}/${sizeName}`;
-      const pages: [string, string][] = [
-        ["catalogo", `${base}/`],
-        ["index", `${base}/qiskit/index.html`],
-      ];
+      const pages: [string, string, boolean][] = SHELL.map(([name, path]) => [
+        name,
+        `${base}${path}`,
+        true,
+      ]);
       for (const id of LESSONS) {
         pages.push(
-          [`${id}-b0`, `${base}/qiskit/lesson.html?l=${id}&beat=0`],
+          [`${id}-b0`, `${base}/qiskit/lesson.html?l=${id}&beat=0`, false],
           [
             `${id}-bN`,
             `${base}/qiskit/lesson.html?l=${id}&beat=${lastBeats[id]}`,
+            false,
           ],
         );
       }
-      for (const [name, url] of pages) {
+      for (const [name, url, inShell] of pages) {
         const { context, page, errors } = await newPage(browser, size, mode);
         await page.goto(url);
-        await page.waitForSelector("[data-theme-ctl] button");
-        await page.waitForTimeout(name === "index" ? 1500 : 900);
+        await page.waitForSelector(THEME_BUTTON);
+        if (inShell) await page.waitForLoadState("networkidle");
+        else await page.waitForTimeout(900);
         report.check(!errors.length, `${label} ${name}: ${errors}`);
         const attr = await page.evaluate<string | undefined>(
           "document.documentElement.dataset.theme",
         );
         report.check(attr === mode, `${label} ${name}: data-theme ${attr}`);
-        if (name !== "index" && name !== "catalogo") {
+        if (!inShell) {
           const outside = await outsideStage(page);
           report.check(
             !outside.length,
@@ -174,14 +192,26 @@ async function visit(
           );
         }
         const brand = await page.evaluate<Brand>(
-          "[document.querySelector('.brand').textContent.trim(), getComputedStyle(document.querySelector('.brand')).fontFamily," +
-            " getComputedStyle(document.body).fontFamily]",
+          "(() => { const b = document.querySelector('.brand');" +
+            " return [b && b.textContent.trim(), b && getComputedStyle(b).fontFamily," +
+            " getComputedStyle(document.body).fontFamily]; })()",
         );
-        if (name === "catalogo") {
-          catalogs.set(`${mode}|${sizeName}`, brand);
-        } else {
-          const key = `${mode}|${sizeName}|${name.startsWith("index")}`;
-          if (!brands.has(key)) brands.set(key, brand);
+        const group = inShell ? shell : player;
+        const key = `${mode}|${sizeName}`;
+        group.set(key, [...(group.get(key) ?? []), brand]);
+        if (inShell) {
+          const sans = await page.evaluate<boolean>(
+            "[...document.fonts].some(f => f.family.replaceAll('\"', '') === 'Inter' && f.status === 'loaded')",
+          );
+          report.check(sans, `${label} ${name}: the shell font did not load`);
+          const small = await page.evaluate<number>(
+            "[...document.querySelectorAll('a, button, summary, input')]" +
+              ".filter(e => { const r = e.getBoundingClientRect(); return r.width && r.height && !e.closest('p, .help, footer') && (r.height < 47.5 || r.width < 47.5) && getComputedStyle(e).display !== 'inline'; }).length",
+          );
+          report.check(
+            small === 0,
+            `${label} ${name}: ${small} controls under 48 px`,
+          );
         }
         if (shots) {
           const dir = join(shots, mode);
@@ -192,30 +222,29 @@ async function visit(
       }
     }
   }
-  for (const [key, value] of catalogs) {
-    const course = brands.get(`${key}|true`);
-    if (!course) throw new Error(`no front page was visited for ${key}`);
-    report.check(
-      value[0] === "Rising",
-      `catalog brand ${JSON.stringify(value[0])}`,
-    );
-    report.check(
-      value[1] === course[1] && value[2] === course[2],
-      `the catalog fonts differ from the course fonts: ${value.slice(1)} / ${course.slice(1)}`,
-    );
+  for (const [key, brands] of shell) {
+    for (const brand of brands) {
+      report.check(
+        brand[0] === null || brand[0] === "Rising",
+        `shell brand ${JSON.stringify(brand[0])}`,
+      );
+      report.check(
+        brand[2] === brands[0][2] && (brand[1] ?? brand[2]) === brand[2],
+        `${key}: the shell pages differ in font: ${brand.slice(1)} / ${brands[0][2]}`,
+      );
+    }
   }
-  for (const [key, value] of brands) {
-    const [mode, sizeName, isIndex] = key.split("|");
-    const other = brands.get(`${mode}|${sizeName}|${isIndex === "false"}`);
-    if (!other) throw new Error(`no counterpart was visited for ${key}`);
-    report.check(
-      value[0] === "Qubit a qubit",
-      `brand ${JSON.stringify(value[0])}`,
-    );
-    report.check(
-      value[1] === other[1],
-      `the brand font differs between pages: ${value[1]} / ${other[1]}`,
-    );
+  for (const [key, brands] of player) {
+    for (const brand of brands) {
+      report.check(
+        brand[0] === "Qubit a qubit",
+        `brand ${JSON.stringify(brand[0])}`,
+      );
+      report.check(
+        brand[1] === brands[0][1] && brand[2] === brands[0][2],
+        `${key}: the lesson pages differ in font: ${brand.slice(1)} / ${brands[0].slice(1)}`,
+      );
+    }
   }
 }
 
@@ -227,8 +256,8 @@ async function contrasts(
   const table = new Map<string, number>();
   for (const mode of MODES) {
     const { context, page } = await newPage(browser, [1366, 768], mode);
-    await page.goto(`${base}/qiskit/index.html`);
-    await page.waitForSelector("[data-theme-ctl] button");
+    await page.goto(`${base}/`);
+    await page.waitForSelector(THEME_BUTTON);
     const names = [
       ...new Set([...TEXT, ...SURFACES, ...GRAPHICS, "acc-ink", "acc"]),
     ].toSorted();
@@ -287,23 +316,25 @@ async function modeStoredOnce(
   const context = await newContext(browser, {
     viewport: { width: 1366, height: 768 },
     colorScheme: "light",
+    serviceWorkers: "block",
   });
   const page = await context.newPage();
   const theme = (): Promise<string | undefined> =>
     page.evaluate<string | undefined>("document.documentElement.dataset.theme");
   const background = (): Promise<string> =>
     page.evaluate<string>("getComputedStyle(document.body).backgroundColor");
-  await page.goto(`${base}/qiskit/index.html`);
-  await page.waitForSelector("[data-theme-ctl] button");
+  await page.goto(`${base}/qiskit/`);
+  await page.waitForSelector(THEME_BUTTON);
+  await page.waitForLoadState("networkidle");
   report.check(
     (await theme()) === undefined,
     "with no stored mode the page sets data-theme instead of following the system",
   );
   const before = await background();
-  await page.click("[data-theme-ctl] button");
+  await page.click(THEME_BUTTON);
   report.check(
     (await page.evaluate<string | null>(
-      "localStorage.getItem('qiskit:theme')",
+      "localStorage.getItem('rising:theme')",
     )) === "dark",
     "the mode button did not store the dark mode",
   );
@@ -311,22 +342,26 @@ async function modeStoredOnce(
     (await background()) !== before,
     "the background did not change with the mode",
   );
+  report.check(
+    (await buttonText(page)) === "Tema claro",
+    "the shell button does not offer the other mode",
+  );
   await page.goto(`${base}/qiskit/lesson.html?l=p1-quickstart&beat=0`);
-  await page.waitForSelector("[data-theme-ctl] button");
+  await page.waitForSelector(THEME_BUTTON);
   report.check(
     (await theme()) === "dark",
     "the player did not read the stored mode",
   );
   report.check(
-    (await page.innerText("[data-theme-ctl] button")) === "Tema claro",
+    (await buttonText(page)) === "Tema claro",
     "the player button does not offer the other mode",
   );
-  await page.click("[data-theme-ctl] button");
-  await page.goto(`${base}/qiskit/index.html`);
-  await page.waitForSelector("[data-theme-ctl] button");
+  await page.click(THEME_BUTTON);
+  await page.goto(`${base}/computational-physics/`);
+  await page.waitForSelector(THEME_BUTTON);
   report.check(
     (await theme()) === "light",
-    "the front page did not read the mode chosen in the player",
+    "the course page did not read the mode chosen in the player",
   );
   await context.close();
 }
@@ -351,8 +386,8 @@ async function reviewInParallel(
     { "qiskit:done": done },
   );
   const start = performance.now();
-  await page.goto(`${base}/qiskit/index.html`);
-  await page.waitForSelector("#repaso .rq", { timeout: 15000 });
+  await page.goto(`${base}/qiskit/`);
+  await page.waitForSelector(".review .rq", { timeout: 15000 });
   const seconds = (performance.now() - start) / 1000;
   const lessons = (JSON.parse(done) as string[]).length;
   const delay = LESSON_JSON_DELAY_MS / 1000;

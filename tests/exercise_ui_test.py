@@ -433,7 +433,7 @@ def theme(browser: Browser, base: str) -> None:
                  const c = getComputedStyle(d).backgroundColor; d.remove(); return c; }"""
     seen: dict[str, str] = {}
     for mode in ("light", "dark"):
-        page.add_init_script(f"localStorage.setItem('qiskit:theme', '{mode}')")
+        page.add_init_script(f"localStorage.setItem('rising:theme', '{mode}')")
         panel = open_panel(page, base, "p1-quickstart", 1)
         seen[mode] = panel.locator(".cm-editor").evaluate(paint)
         check(

@@ -108,102 +108,123 @@ async function same<T>(what: string, got: T, expected: T): Promise<void> {
   }
 }
 
+const METER = ".meter .num";
+
 async function openHome(page: Page, base: string): Promise<void> {
   await page.goto(`${base}/qiskit/`);
-  await see(
-    "progress line",
-    text(page.locator("#prog")),
-    /lecciones completadas/,
-  );
+  await see("progress line", text(page.locator(METER)), /lecciones$/);
 }
+
+// Every row of the map, read from the DOM: the lesson, its state and the unit's count.
+const readMap = (page: Page) =>
+  page.locator(".unit").evaluateAll((units) =>
+    units.map((unit) => ({
+      count: unit.querySelector(".count")?.textContent,
+      rows: [...unit.querySelectorAll("ol.nodes > li")].map((li) => [
+        new URL(
+          li.querySelector<HTMLAnchorElement>("a")!.href,
+        ).searchParams.get("l"),
+        li.querySelector(".node")?.getAttribute("data-state"),
+      ]),
+    })),
+  );
 
 async function checkProgress(page: Page): Promise<void> {
   const total = lessons.length;
   await see(
     "progress line",
-    text(page.locator("#prog")),
-    `${done.size}/${total} lecciones completadas`,
+    text(page.locator(METER)),
+    `${done.size} de ${total} lecciones`,
   );
   await same(
     "progress bar",
     await page
-      .locator("#bar")
+      .locator(".meter progress")
       .evaluate((bar: HTMLProgressElement) => [bar.value, bar.max]),
     [done.size, total],
   );
-  const shown = await page.locator("#parts .part").evaluateAll((cards) =>
-    cards.map((card) => ({
-      badge: card.querySelector(".n")?.textContent,
-      rows: [...card.querySelectorAll<HTMLAnchorElement>("a")].map((a) => [
-        new URL(a.href).searchParams.get("l"),
-        a.classList.contains("done"),
-        a.querySelector(".m")?.textContent,
-      ]),
-    })),
+  // Every lesson of the walkthrough is finished once, today, for 10 XP.
+  const stats = page.locator(".stats li");
+  const days = done.size ? 1 : 0;
+  await see(
+    "streak",
+    async () => (await stats.nth(0).textContent()) ?? "",
+    `Racha: ${days} ${days === 1 ? "día" : "días"}`,
   );
+  await see(
+    "xp",
+    async () => (await stats.nth(1).textContent()) ?? "",
+    `${done.size * 10} XP hoy`,
+  );
+  const upcoming = lessons.find((l) => !done.has(l.id));
   const expected = course.parts.map((part) => ({
-    badge: `${part.lessons.filter((l) => done.has(l.id)).length}/${part.lessons.length}`,
+    count: `${part.lessons.filter((l) => done.has(l.id)).length}/${part.lessons.length}`,
     rows: part.lessons.map((l) => [
       l.id,
-      done.has(l.id),
-      done.has(l.id) ? "Hecha" : `${l.minutes} min`,
+      done.has(l.id) ? "done" : l === upcoming ? "current" : "locked",
     ]),
   }));
-  await same("parts and lessons", shown, expected);
+  await same("units and lessons", await readMap(page), expected);
 }
 
 async function checkNext(page: Page): Promise<void> {
-  const card = page.locator("#next");
+  const card = page.locator(".practice");
   const doneInOrder = lessons.filter((l) => done.has(l.id));
   const queue = doneInOrder
     .flatMap((l) => courseMissions(l).map((m) => ({ l, m })))
     .slice(missionsMarked);
   if (queue.length) {
     const { l, m } = queue[0];
+    await see("practice title", text(card.locator("h2")), "Práctica pendiente");
     await see(
-      "next card",
-      text(card.locator(".k")),
-      "Tu turno: misión pendiente",
-    );
-    await see(
-      "next card title",
-      text(card.locator(".t")),
+      "practice lesson",
+      text(card.locator("p b")),
       `${l.section} ${l.title}`,
     );
     await see(
-      "next card detail",
-      text(card.locator(".s")),
+      "practice detail",
+      text(card.locator("p.muted")),
       new RegExp(
         `^${m.tasks === 1 ? "1 misión" : `${m.tasks} misiones`} en el cuaderno`,
       ),
     );
     await see(
-      "next card command",
+      "practice command",
       text(card.locator("code")),
       `uv run marimo edit ${m.notebook}`,
     );
+  } else {
+    await same("no practice card", await card.count(), 0);
+  }
+  const target = lessons.find((l) => !done.has(l.id));
+  if (!target) {
+    await see(
+      "course complete",
+      text(page.locator(".complete")),
+      "Completaste el curso. Repasa cuando quieras.",
+    );
+    await same(
+      "no current node",
+      await page.locator("[data-current]").count(),
+      0,
+    );
     return;
   }
-  const target = lessons.find((l) => !done.has(l.id)) ?? lessons[0];
+  const node = page.locator("a[data-current]");
   await see(
-    "next card",
-    text(card.locator(".k")),
-    done.size ? "Continúa donde lo dejaste" : "Empieza aquí",
-  );
-  await see(
-    "next card title",
-    text(card.locator(".t")),
+    "current node",
+    text(node.locator(".title")),
     `${target.section} ${target.title}`,
   );
   await see(
-    "next card button",
-    text(card.locator("a.go")),
-    `${done.size ? "Continuar" : "Empezar"} la lección, ${target.minutes} min`,
+    "current node button",
+    text(node.locator(".go")),
+    `${done.size ? "Continuar" : "Empezar"} · ${target.minutes} min`,
   );
   await same(
-    "next card link",
-    await card.locator("a.go").getAttribute("href"),
-    `lesson.html?l=${target.id}`,
+    "current node link",
+    await node.getAttribute("href"),
+    `/qiskit/lesson.html?l=${target.id}`,
   );
 }
 
@@ -212,31 +233,31 @@ async function checkReview(page: Page): Promise<void> {
     .filter((l) => done.has(l.id))
     .reduce((n, l) => n + reviewable(l.id), 0);
   const pending = pool - reviewsAnswered;
+  const review = page.locator(".review");
   if (!done.size) {
-    await see(
-      "review",
-      text(page.locator("#repaso")),
-      /^Cuando completes tu primera lección/,
+    await same(
+      "review sections before the first lesson",
+      await review.count(),
+      0,
     );
     return;
   }
   if (!pending) {
     await see(
       "review",
-      text(page.locator("#repaso")),
+      text(review.locator("p")),
       "Nada que repasar hoy. Vuelve mañana.",
     );
-    await see("review count", text(page.locator("#rnote")), "");
     return;
   }
   await see(
     "review count",
-    text(page.locator("#rnote")),
+    text(review.locator("p.muted")),
     `${Math.min(3, pending)} de ${pending} pendientes`,
   );
   await same(
     "review questions",
-    await page.locator("#repaso .rq").count(),
+    await page.locator(".review .rq").count(),
     Math.min(3, pending),
   );
 }
@@ -328,37 +349,30 @@ async function finishLesson(page: Page, id: string): Promise<void> {
 }
 
 async function markNextMission(page: Page): Promise<void> {
-  await Promise.all([
-    page.waitForEvent("load"),
-    page.locator("#next .chk").click(),
-  ]);
+  await page.locator(".practice .btn", { hasText: "Ya la hice" }).click();
   missionsMarked += 1;
-  await see("next card", text(page.locator("#next .k")), /\S/);
+  await checkNext(page);
 }
 
 async function answerReview(page: Page, count: number): Promise<void> {
   for (let k = 0; k < count; k++) {
-    const card = page.locator("#repaso .rq").first();
+    const card = page.locator(".review .rq").first();
     // Each answer schedules the first review for one day later.
-    const numeric = card.locator(".num input");
+    const numeric = card.locator(".num-answer input");
     if (await numeric.count()) {
       await numeric.fill("0");
-      await card.locator(".num button").click();
+      await card.locator(".num-answer button").click();
     } else {
       await card.locator(".opts button").first().click();
     }
     await see(
       "review feedback",
       text(card.locator(".fb .when")),
-      "Próximo repaso en 1 día(s).",
+      "Próximo repaso en 1 día.",
     );
     await page.reload();
     reviewsAnswered += 1;
-    await see(
-      "progress line",
-      text(page.locator("#prog")),
-      /lecciones completadas/,
-    );
+    await see("progress line", text(page.locator(METER)), /lecciones$/);
     await checkReview(page);
   }
 }
@@ -370,6 +384,7 @@ async function main(): Promise<void> {
   });
   const context = await newContext(browser, {
     viewport: { width: 1280, height: 900 },
+    serviceWorkers: "block",
   });
   const page = await context.newPage();
   const errors: string[] = [];
@@ -385,13 +400,13 @@ async function main(): Promise<void> {
   const [q1, q2] = choiceBeats(first.id);
 
   try {
-    await step("a new learner sees an empty home page", async () => {
+    await step("a new learner sees an empty path page", async () => {
       await openHome(page, base);
       await checkHome(page);
     });
 
-    await step("start the first lesson from the home page", async () => {
-      await page.locator("#next a.go").click();
+    await step("start the first lesson from the path page", async () => {
+      await page.locator("a[data-current]").click();
       await see(
         "lesson title",
         text(page.locator("#start-title")),
@@ -467,14 +482,10 @@ async function main(): Promise<void> {
     });
 
     await step(
-      "home shows one lesson done and the pending mission",
+      "the path shows one lesson done and the pending mission",
       async () => {
         await page.locator("#end a.cta", { hasText: "Índice" }).click();
-        await see(
-          "progress line",
-          text(page.locator("#prog")),
-          /lecciones completadas/,
-        );
+        await see("progress line", text(page.locator(METER)), /lecciones$/);
         await checkHome(page);
       },
     );
@@ -494,36 +505,38 @@ async function main(): Promise<void> {
     await step("mark the first project milestone", async () => {
       await see(
         "milestone",
-        text(page.locator("#hito .k")),
+        text(page.locator(".hcur p").first()),
         "Hito 1 de 10, parte 1",
       );
-      await page.locator("#hito .chk").click();
+      await page
+        .locator(".hcur .btn", { hasText: "Marcar como hecho" })
+        .click();
       await see(
         "milestone",
-        text(page.locator("#hito .k")),
+        text(page.locator(".hcur p").first()),
         "Hito 2 de 10, parte 2",
       );
       await same(
         "milestones done",
-        await page.locator("#track .hito.done").count(),
+        await page.locator(".track .hito[data-state=done]").count(),
         1,
       );
       await page.reload();
       await see(
         "milestone after reload",
-        text(page.locator("#hito .k")),
+        text(page.locator(".hcur p").first()),
         "Hito 2 de 10, parte 2",
       );
       await same(
         "milestones done after reload",
-        await page.locator("#track .hito.done").count(),
+        await page.locator(".track .hito[data-state=done]").count(),
         1,
       );
       await checkHome(page);
     });
 
     await step("leave the second lesson half way and come back", async () => {
-      await page.locator("#next a.go").click();
+      await page.locator("a[data-current]").click();
       await see(
         "lesson title",
         text(page.locator("#start-title")),
@@ -533,7 +546,7 @@ async function main(): Promise<void> {
       for (let n = 2; n <= 7; n++) await next(page, n, secondLength);
       await openHome(page, base);
       await checkHome(page);
-      await page.locator("#next a.go").click();
+      await page.locator("a[data-current]").click();
       await see(
         "resume button",
         text(page.locator("#resume")),
@@ -564,21 +577,14 @@ async function main(): Promise<void> {
       await finishLesson(page, second.id);
     });
 
-    await step("home shows two lessons done and both reviews", async () => {
+    await step("the path shows two lessons done and both reviews", async () => {
       await page.locator("#end a.cta", { hasText: "Índice" }).click();
-      await see(
-        "progress line",
-        text(page.locator("#prog")),
-        /lecciones completadas/,
-      );
+      await see("progress line", text(page.locator(METER)), /lecciones$/);
       await checkHome(page);
     });
 
     await step("finish every other lesson in order", async () => {
-      await page
-        .locator("#parts a", { hasText: lessons[2].title })
-        .first()
-        .click();
+      await page.locator("a[data-current]").click();
       for (const [k, lesson] of lessons.slice(2).entries()) {
         const total = lessonOf(lesson.id).beats.length;
         await see(
@@ -596,18 +602,14 @@ async function main(): Promise<void> {
       }
     });
 
-    await step("home shows the whole course done", async () => {
+    await step("the path shows the whole course done", async () => {
       await page.locator("#end a.cta", { hasText: "Índice" }).click();
-      await see(
-        "progress line",
-        text(page.locator("#prog")),
-        /lecciones completadas/,
-      );
+      await see("progress line", text(page.locator(METER)), /lecciones$/);
       await checkHome(page);
       await same(
         "bar full",
         await page
-          .locator("#bar")
+          .locator(".meter progress")
           .evaluate((b: HTMLProgressElement) => b.value === b.max),
         true,
       );
