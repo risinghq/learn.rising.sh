@@ -1,32 +1,28 @@
 # Design
 
-The catalog (`site/index.html`), the course home pages
-(`site/<course>/index.html`), the privacy page and the player
-(`site/<course>/lesson.html`) share one theme. The catalog brand is "Rising" and
-each course has its own brand, which is the name in its pages. This document
-lists the tokens, how they are used and the measures that fix legibility.
-
-The direction is that of a printed syllabus: one reading column, a bookish
-serif, thin rules instead of cards and a single violet accent. The ink and the
-surface come from the same hue as the accent.
+The shell (the catalog, the path page of each course and the privacy page) and
+the player (`site/<course>/lesson.html`) share one set of tokens. The shell is
+the app a learner opens every day: a sans face, large touch targets and one
+action per screen. Its brand is "Rising". The player keeps the reading look of a
+lesson, in a serif, under its own brand, "Qubit a qubit". This document lists
+the tokens, how they are used and the measures that fix legibility.
 
 ## Files
 
-| File                    | Contents                                                |
-| ----------------------- | ------------------------------------------------------- |
-| `site/theme.css`        | Tokens, the top bar, the buttons and `<progress>`.      |
-| `site/theme.ts`         | Sets the mode before paint and builds the theme button. |
-| `site/catalog.css`      | Catalog styles.                                         |
-| `site/course.css`       | Styles of the course home pages and the privacy page.   |
-| `site/qiskit/index.css` | What only the Qiskit home page shows.                   |
-| `site/player/app.css`   | Player styles.                                          |
-| `tests/theme_test.ts`   | Browser test: contrast, pages, saved mode.              |
+| File                       | Contents                                                          |
+| -------------------------- | ----------------------------------------------------------------- |
+| `site/theme.css`           | Tokens, the top bar, the buttons and `<progress>`.                |
+| `site/theme.ts`            | Sets the mode before paint and builds the theme button.           |
+| `app/src/styles/app.css`   | The shell: sets the sans face and the 48 px controls.             |
+| `app/src/styles/fonts.css` | Inter, self-hosted from the `@fontsource-variable/inter` package. |
+| `site/player/app.css`      | Player styles.                                                    |
+| `tests/theme_test.ts`      | Browser test: contrast, pages, saved mode.                        |
 
-Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`. The
-course pages link them as `../theme.css` and `../theme.js`. `theme.js` is the
-result of bundling `theme.ts` with `mise run generate:scripts`; Git does not
-version it. Every page has a link to skip to the content and a single
-`<main id="main">`.
+Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`.
+`theme.js` is the result of bundling `theme.ts` with
+`mise run generate:scripts`; Git does not version it. The shell sheets are
+bundled into `site/assets/` by `mise run generate:app`. Every page has a link to
+skip to the content and a single `<main id="main">`.
 
 ## Mode
 
@@ -34,15 +30,15 @@ The reader picks light or dark and the choice is saved in `localStorage`:
 
 | Key            | Values          | Not saved              |
 | -------------- | --------------- | ---------------------- |
-| `qiskit:theme` | `light`, `dark` | The system preference. |
+| `rising:theme` | `light`, `dark` | The system preference. |
 
 With a saved value, `theme.ts` copies it to `data-theme` on `<html>` before the
 browser paints. Without it, `<html>` has no `data-theme` and
-`color-scheme: light dark` makes every `light-dark()` follow the system. Every
-`[data-theme-ctl]` element gets a button that offers the other mode. Its text
-comes from the page's `lang` attribute: English in the catalog and Spanish in
-the course. When the mode changes, `theme.ts` fires the `themechange` event on
-`window`; `engine.ts` uses it to redraw the canvases.
+`color-scheme: light dark` makes every `light-dark()` follow the system. The
+shell draws its own theme button in the header, and the player gets one from
+every `[data-theme-ctl]` element. Its text comes from the page's `lang`
+attribute, Spanish in every page. When the mode changes, `theme.ts` fires the
+`themechange` event on `window`; `engine.ts` uses it to redraw the canvases.
 
 ## Color
 
@@ -97,18 +93,25 @@ their own.
 
 ## Type and space
 
-- One text family, Newsreader, and one code family, JetBrains Mono. The pages
-  load them from `site/vendor/fonts.css`, as variable fonts with only the
-  `latin` and `latin-ext` ranges. Formulas use the KaTeX fonts.
+- The shell sets `--font` to Inter, a sans face, with the system sans as
+  fallback, and `--mono` to the system monospace. Inter comes from the
+  `@fontsource-variable/inter` package, as one variable file for the `latin`
+  range and one for `latin-ext`, copied to `site/assets/` by the build. The
+  player keeps `--font` at Newsreader, a serif, and `--mono` at JetBrains Mono,
+  both from `site/vendor/fonts.css`. Formulas use the KaTeX fonts.
 - Eight sizes, from `--t-xs` (12 px) to `--t-4xl` (48 px), in `rem`, so the
-  browser's text size setting still applies. Two weights: 400 and 600.
+  browser's text size setting still applies. Two weights: 400 and 600. The shell
+  uses four sizes: `--t-sm` for details, `--t-md` for text, `--t-lg` for titles
+  of a card or a unit and `--t-2xl` for the page title.
 - Nine steps of space, `--s1` (4 px) to `--s24` (96 px), and three radii: `--r1`
   4 px, `--r2` 8 px and `--r3` 16 px.
 - The player stage is 1280×720 and scales by `transform`, so its sizes are
   design pixels and not `rem`.
-- Counters (`.meta`, `.pr .n`, the lesson list, `.stepno`, `.score`) set
-  `font-variant-numeric: tabular-nums`, so the digits do not shift as the value
-  changes.
+- Counters (the streak and the XP of the header, `.num`, `.stepno`, `.score`)
+  set `font-variant-numeric: tabular-nums`, so the digits do not shift as the
+  value changes.
+- Every control in the shell is at least 48 px high and wide (`--tap`), the skip
+  link and the icon buttons included.
 
 ## Motion and states
 
@@ -141,8 +144,20 @@ Every duration and curve is a token in `theme.css`:
 
 ## Reading
 
-- The home page and the privacy page are one `46rem` column, with rules between
-  sections. There are no cards or badges.
+- The shell is one `40rem` column under a sticky header. The header holds the
+  way back (a back arrow on a course, the brand elsewhere), the streak and the
+  XP of today, the account button and the theme button.
+- The path page opens on the title, the progress of the course and the pending
+  practice. Then come the units. Each unit is a `<details>`, open for the unit
+  with the current lesson, and its lessons are nodes on a vertical line: a check
+  for a lesson done, a lock for one locked and a lit, larger node with a play
+  icon for the current lesson. The current node is a link that starts the next
+  lesson in one tap. A locked node explains that it opens after the lesson
+  before it and offers "Abrir de todos modos". The outcome line, the review and
+  the project track follow the map.
+- The catalog is one card per course. Each card has a button that opens the next
+  lesson of its course. Only one is filled: the one of the course the learner
+  was in last, or else the first course not finished.
 - The lesson is the stage, the subtitle and the controls. The subtitle is
   `42rem` wide and four lines of fixed height, so the text does not move the
   stage.
@@ -152,8 +167,9 @@ Every duration and curve is a token in `theme.css`:
 
 ## Progress
 
-- On the home page, each part has a `<progress>` with its completed lessons and
-  the course has an overall one. The style is in `theme.css`.
+- On the path page and the catalog, a course shows a `<progress>` with its
+  completed lessons and the text "N de M lecciones". Each unit shows its count,
+  such as "2/5". The style of `<progress>` is in `theme.css`.
 - In the player, `#steps` is an `<input type="range">` with a label, "Paso N de
   M" and ", con pregunta" if the step has a question. Dragging it jumps to that
   step. Its fill follows `--p`, which `engine.ts` sets.
@@ -172,10 +188,13 @@ Every duration and curve is a token in `theme.css`:
 - Axes, wires and the border of a control carry meaning and reach 3:1 on the
   five surfaces. Grids and rules are decoration and are not measured.
 - Every button has an `:active` state, and only one per screen is filled with
-  `--acc`. The step that checks an exercise is that button; the one that moves
-  on is not filled.
-- The brand is `<a class="brand">Qubit a qubit</a>` in the course and
-  `<a class="brand">Rising</a>` in the catalog, styled by `theme.css`.
+  `--acc`. On the catalog it is the continue button of one course, on the path
+  page the lit node, and in the player the step that checks an exercise; the one
+  that moves on is not filled.
+- The brand is `<a class="brand">Qubit a qubit</a>` in the player and
+  `<a class="brand">Rising</a>` in the shell, styled by `theme.css`.
+- The icons are from one set, Lucide, drawn with one stroke width. They are
+  `aria-hidden`, and the control that holds one has a text or a label.
 
 ## Contrast
 
@@ -209,7 +228,9 @@ mise run install
 bun tests/theme_test.ts --table
 ```
 
-The same test loads the catalog, the course home page and three lessons, each at
-its first and last step, in both modes and at 1366x768 and 390x844. It requires
-that the console logs no errors and that no `#scene > .blk` falls outside
-`#stage`. `--shots FOLDER` saves a screenshot of each load.
+The same test loads the four shell pages (the catalog, the privacy page and the
+path page of each course) and three lessons, each lesson at its first and last
+step, in both modes and at 1366x768 and 390x844. It requires that the console
+logs no errors, that no `#scene > .blk` falls outside `#stage`, that Inter loads
+in the shell and that no control in the shell is under 48 px. `--shots FOLDER`
+saves a screenshot of each load.

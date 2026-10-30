@@ -18,10 +18,12 @@ its domain. No secret goes in the repository or in a file you push to git.
 - A Google account and a GitHub account, to register the OAuth clients.
 
 From the repository root, install the dependencies. `mise run install` installs
-those of the editor and of the Worker, which brings the `cf` CLI. During the
-deploy, `mise run deploy` copies KaTeX and the fonts from the editor to
-`site/vendor/` and bundles the scripts of `site/` and `editor/src/` into
-JavaScript (`mise run generate:scripts`). The next steps run in `runner/worker`.
+those of the editor, of the shell (`app/`) and of the Worker, which brings the
+`cf` CLI. During the deploy, `mise run deploy` copies KaTeX and the fonts from
+the editor to `site/vendor/`, bundles the scripts of `site/` and `editor/src/`
+into JavaScript (`mise run generate:scripts`) and builds the shell: the catalog,
+the path pages, the privacy page and the service worker, prerendered into
+`site/` (`mise run generate:app`). The next steps run in `runner/worker`.
 
 ```sh
 mise run install
@@ -180,10 +182,10 @@ curl -sI https://<host>/auth/github | grep -i '^location'
 ```
 
 `/health` answers 200 and `/api/me` answers `{"signedIn":false}`. `/` is the
-catalog (`<title>Rising`) and `/qiskit/` and `/computational-physics/` the
-course home pages. The last two print an address on `accounts.google.com` and on
-`github.com` with `redirect_uri=https://<host>/auth/<provider>/callback`. That
-address must be the one you registered in steps 4 and 5, letter for letter.
+catalog (`<title>Rising`) and `/qiskit/` and `/computational-physics/` the path
+pages of the courses. The last two print an address on `accounts.google.com` and
+on `github.com` with `redirect_uri=https://<host>/auth/<provider>/callback`.
+That address must be the one you registered in steps 4 and 5, letter for letter.
 
 Open any lesson page with an exercise on `<host>` and click **Ejecutar**. The
 browser gets the Turnstile token, repeats the `POST /run` with that token and

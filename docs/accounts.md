@@ -98,15 +98,18 @@ if the page sends it), the hints and the checks, whether it passed and `at`, the
 Unix milliseconds of the last edit. `passed` is the server's record, never the
 page's: it becomes true when `/run` with `mode: "check"` returns a passing
 result for this user and exercise ([Data stored](#data-stored)). `kv` holds the
-`localStorage` keys that follow one of these shapes:
+`localStorage` keys that follow one of these shapes. `<course>` is the slug of
+the course, 1 to 40 characters from `a-z`, `0-9` and `-`:
 
-| Key                                     | Value              | When merging two values                                                  |
-| --------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
-| `qiskit:heard:<lesson>`, `qiskit:hitos` | list of integers   | the union                                                                |
-| `qiskit:misiones`                       | list of strings    | the union                                                                |
-| `qiskit:pos:<lesson>`                   | integer            | the larger                                                               |
-| `qiskit:predict:<lesson>:<id>`          | integer            | the one already there: a bet does not change                             |
-| `qiskit:repaso`                         | `{id: {box, due}}` | per question, the higher box and, with equal boxes, the earlier due date |
+| Key                                         | Value              | When merging two values                                                  |
+| ------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
+| `<course>:heard:<lesson>`, `<course>:hitos` | list of integers   | the union                                                                |
+| `<course>:misiones`                         | list of strings    | the union                                                                |
+| `<course>:pos:<lesson>`                     | integer            | the larger                                                               |
+| `<course>:predict:<lesson>:<id>`            | integer            | the one already there: a bet does not change                             |
+| `<course>:repaso`                           | `{id: {box, due}}` | per question, the higher box and, with equal boxes, the earlier due date |
+
+The keys under `rising:` (the mode, the speed, the XP) stay in the browser.
 
 `POST /api/merge` and `PUT /api/progress` receive the same body (`done`,
 `exercises` and `kv`, all optional) and merge it with what is stored:
@@ -277,12 +280,12 @@ the friendship id of `GET /api/friends`, and `null` for the caller.
 ## On the site
 
 [`site/account.ts`](../site/account.ts) is the client. It puts the _Entrar_ menu
-in the header of the course home pages, the lessons and
-[`privacidad.html`](../site/privacidad.html), the page that says what is stored,
-for how long and how to delete it.
+in the header of the catalog, the path pages, the lessons and the privacy page
+(`/privacidad.html`), which says what is stored, for how long and how to delete
+it.
 
 - Without an account, the page makes no request except `/run`. What it looks at
-  to know is the `qiskit:cuenta` mark in `localStorage`.
+  to know is the `rising:cuenta` mark in `localStorage`.
 - _Entrar con Google_ and _Entrar con GitHub_ go to `/auth/<provider>` with
   `return` equal to the current page plus `#cuenta`. On return, that `#cuenta`
   makes the page leave the mark and merge the progress.
@@ -291,15 +294,18 @@ for how long and how to delete it.
   if the Worker does not respond, the page continues with the local data. The
   first time you sign in, that same call merges what was already in the browser
   with the account's data.
+- On the first load of a browser that has progress from before each course had
+  its own keys, the page moves it to the course before the first sync
+  ([architecture.md](architecture.md#progress-in-the-browser)).
 - Each change is sent afterwards, in `PUT /api/progress`, 1.5 seconds after the
   last one and always when the page is closed or hidden. Without a network, the
   change stays in `localStorage` and the next load merges it.
-- Each `qiskit:exercise:<id>` carries `at`, the time of the last edit of the
+- Each `<course>:exercise:<id>` carries `at`, the time of the last edit of the
   code. It changes only when the code changes, so the most recent copy wins when
   merging.
 - The synced data are the finished lessons, the code, hints and checks of each
   exercise and the `kv` keys of the table. The text of the reflections
-  (`qiskit:reflect`) does not leave the browser. A value that the Worker would
+  (`<course>:reflect`) does not leave the browser. A value that the Worker would
   reject (a code of more than 20 000 bytes, for example) is left out of the
   body, because it would reject the whole body.
 - _Cerrar sesión_ calls `POST /auth/logout` and _Borrar mi cuenta_, after a

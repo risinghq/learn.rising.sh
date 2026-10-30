@@ -256,7 +256,8 @@ response) has its own message.
   the next step by itself when the narration ends; the **Continuar** button does
   it.
 - The code, the number of hints and checks and whether it was solved are saved
-  in `localStorage`, under `qiskit:exercise:<exercise>`.
+  in `localStorage`, under `<course>:exercise:<lesson>/<exercise>`, with the
+  slug of the course.
 
 ### Where the code runs
 

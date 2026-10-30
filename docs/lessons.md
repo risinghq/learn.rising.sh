@@ -84,15 +84,22 @@ the Qiskit `plan.py` until `build.py qiskit` passes.
 The platform code does not change.
 
 1. Create `lessons_src/<slug>/` with a `plan.py` and at least one `parte*.py`.
-2. Create `site/<slug>/` with a copy of the `index.html` and `lesson.html` of an
-   existing course. They link the shared theme, account menu and player, and
-   call the platform routes by their absolute path (`/api/me`, `/run`).
-3. Add an entry to `site/courses.json` with `slug` (the folder name), `title`,
-   `summary` and `language`. `language` is the name of the course language that
-   the catalog shows on the card, such as `"Spanish"`. The catalog counts the
-   lessons from `site/<slug>/course.json`, which `build.py` writes.
+2. Create `site/<slug>/` with a copy of the `lesson.html` of an existing course.
+   It links the shared theme, account menu and player, and calls the platform
+   routes by their absolute path (`/api/me`, `/run`).
+3. Add an entry to `site/courses.json` with `slug` (the folder name), `title`
+   and `outcome`, the sentence that tells the learner what they will be able to
+   do. `source` (`label`, `url`, `license`) and `note` are optional. The catalog
+   and the path page count the lessons and draw the units from
+   `site/<slug>/course.json`, which `build.py` writes.
 4. Add the course to `generate:lessons` and `build:lessons` in `mise.toml`, then
    run `uv run python lessons_src/build.py <slug>`.
+5. Run `mise run generate:app`. It prerenders the catalog card and
+   `site/<slug>/index.html`, the path page, and adds the course's `course.json`
+   to the offline cache.
+
+A course that has a project adds `site/<slug>/project.json`
+([the project](#the-spin-chain-project)).
 
 ## Charts
 
@@ -133,7 +140,7 @@ Each lesson leads the learner to act and to reflect, not only to watch:
    the Qiskit course, a mission ([`Mission`](#missions-and-notebooks)) with the
    lesson's notebook.
 4. **Reflect.** Open questions (`reflect`). The text is saved in the browser
-   (`qiskit:reflect`) and shows when the learner returns.
+   (`<course>:reflect`) and shows when the learner returns.
 5. **Recap.** The summary of the lesson.
 
 ## Missions and notebooks
@@ -167,13 +174,14 @@ One experiment grows part by part in the Qiskit course: the magnetization of an
 Ising spin chain after a sudden change of the field. There is one milestone per
 part, in `practica/proyecto/hito<N>.py` (N from 1 to 10), and a shared module,
 `practica/proyecto/ising.py`. The titles and descriptions of the milestones are
-in `HITOS`, in `site/qiskit/index.html`, which shows them on the course home
-page with their state (saved in `qiskit:hitos`). The milestones that run on a
-real QPU ask for an IBM Quantum account.
+in `site/qiskit/project.json` (`title`, `tagline` and `milestones`, each with
+`n`, `part`, `title`, `desc` and `notebook`). The path page of the course shows
+them as a track with the state of each milestone, saved in `qiskit:hitos`. The
+milestones that run on a real QPU ask for an IBM Quantum account.
 
 ## Spaced review
 
-The Qiskit course home page proposes each day 3 questions from the completed
+The path page of every course proposes each day 3 questions from the completed
 lessons (the `choice` and `numeric` ones), spaced 1, 3, 7 and 21 days. A
 question that is missed comes back the next day. The state is in
-`qiskit:repaso`.
+`<course>:repaso`, for example `qiskit:repaso`.
