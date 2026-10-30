@@ -1,0 +1,48 @@
+{
+  "items": [
+    {
+      "kind": "fill",
+      "id": "version",
+      "prompt": "Para saber qué Qiskit tienes instalado, ¿qué atributo del paquete lees?",
+      "code": "import qiskit\n\nprint(qiskit.___)",
+      "options": ["__version__", "version", "__qiskit_version__", "__path__"],
+      "right": 0,
+      "why": "`qiskit.__version__` es una cadena como `2.5.2`. `qiskit.version` es un módulo interno, no el número."
+    },
+    {
+      "kind": "parsons",
+      "id": "version-mayor-menor",
+      "prompt": "Ordena las líneas que imprimen la versión mayor y la menor de Qiskit.",
+      "lines": [
+        "import qiskit",
+        "major, minor = qiskit.__version__.split(\".\")[:2]",
+        "print(major, minor)"
+      ],
+      "distractors": ["import qiskit_ibm_runtime"],
+      "why": "Sin `import qiskit` no hay versión, y sin separar la cadena no hay `major` ni `minor` que imprimir."
+    },
+    {
+      "kind": "bug",
+      "id": "importar-visualizacion",
+      "prompt": "El programa falla al importar. Toca la línea con el error.",
+      "lines": [
+        "from qiskit import QuantumCircuit",
+        "from qiskit.visualisation import circuit_drawer",
+        "qc = QuantumCircuit(1)",
+        "print(circuit_drawer(qc, output=\"text\"))"
+      ],
+      "bug": 1,
+      "fix": "from qiskit.visualization import circuit_drawer",
+      "why": "El módulo se escribe con zeta: `qiskit.visualization`. Es el que instala `qiskit[visualization]`."
+    },
+    {
+      "kind": "fill",
+      "id": "nivel-optimizacion",
+      "prompt": "Con `transpile_optimization_level = 0` el transpilador no simplifica nada. ¿Qué nivel deja las dos Hadamard del circuito?",
+      "code": "from qiskit import QuantumCircuit, transpile\n\nqc = QuantumCircuit(1)\nqc.h(0)\nqc.h(0)\nprint(dict(transpile(qc, optimization_level=___).count_ops()))",
+      "options": ["0", "1", "2", "3"],
+      "right": 0,
+      "why": "El nivel 0 no optimiza. Desde el nivel 1 el transpilador cancela dos Hadamard seguidas."
+    }
+  ]
+}

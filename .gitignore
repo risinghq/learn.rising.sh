@@ -6,6 +6,7 @@ site/course-home.js
 site/player/editor.js
 site/player/engine.js
 site/qiskit/notebooks.js
+site/*/items.json
 shots/
 __pycache__/
 .venv/

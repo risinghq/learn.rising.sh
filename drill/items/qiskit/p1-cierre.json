@@ -1,0 +1,53 @@
+{
+  "items": [
+    {
+      "kind": "parsons",
+      "id": "paso-trotter",
+      "prompt": "Ordena un paso de Trotter del modelo de Ising: primero el acoplo $ZZ$ y después el campo $X$.",
+      "before": "from qiskit import QuantumCircuit",
+      "lines": [
+        "qc = QuantumCircuit(2)",
+        "qc.rzz(0.2, 0, 1)",
+        "for qubit in range(2):",
+        "    qc.rx(0.4, qubit)",
+        "print(qc.draw(output=\"text\"))"
+      ],
+      "distractors": ["qc.rzz(0.2, 1, 0)"],
+      "why": "Un paso aplica `rzz` a la pareja y luego un `rx` a cada qubit. El bucle recorre los qubits y su cuerpo va sangrado."
+    },
+    {
+      "kind": "fill",
+      "id": "observable-bell",
+      "prompt": "En el estado de Bell, ¿qué observable tiene valor esperado $-1$?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorEstimator\nfrom qiskit.quantum_info import SparsePauliOp\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nobs = SparsePauliOp(\"___\")\nprint(StatevectorEstimator().run([(qc, obs)]).result()[0].data.evs.round(3))",
+      "options": ["YY", "XX", "ZZ", "ZI"],
+      "right": 0,
+      "why": "Para $|\\Phi^+\\rangle$, $\\langle XX\\rangle=1$, $\\langle ZZ\\rangle=1$ y $\\langle YY\\rangle=-1$. $\\langle ZI\\rangle$ vale 0."
+    },
+    {
+      "kind": "bug",
+      "id": "qubit-fuera",
+      "prompt": "Un paso de Trotter lanza un error. Toca la línea con el error.",
+      "lines": [
+        "from qiskit import QuantumCircuit",
+        "qc = QuantumCircuit(2)",
+        "qc.rzz(0.2, 0, 1)",
+        "qc.rx(0.4, 0)",
+        "qc.rx(0.4, 2)",
+        "print(dict(qc.count_ops()))"
+      ],
+      "bug": 4,
+      "fix": "qc.rx(0.4, 1)",
+      "why": "Un circuito de dos qubits tiene los qubits 0 y 1. El qubit 2 no existe."
+    },
+    {
+      "kind": "fill",
+      "id": "argumento-shots",
+      "prompt": "Quieres 1024 mediciones del circuito. ¿Con qué argumento de `run` lo pides?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()\ncounts = StatevectorSampler(seed=7).run([qc], ___=1024).result()[0].data.meas.get_counts()\nprint(sum(counts.values()))",
+      "options": ["shots", "shot", "repetitions", "samples"],
+      "right": 0,
+      "why": "El número de repeticiones se llama `shots`. Con otro nombre `run` lanza un `TypeError`."
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "kind": "parsons",
+      "id": "pendulo-leapfrog",
+      "prompt": "Ordena el bucle que avanza el péndulo con leapfrog, con $\\ddot\\theta=-\\sin\\theta$.",
+      "before": "import math\n\ntheta, omega, dt = 1.0, 0.0, 0.001",
+      "lines": [
+        "for _ in range(1000):",
+        "    omega -= 0.5 * dt * math.sin(theta)",
+        "    theta += dt * omega",
+        "    omega -= 0.5 * dt * math.sin(theta)",
+        "print(f\"{theta:.4f}\")"
+      ],
+      "why": "Es el mismo salto de rana del oscilador, con $\\sin\\theta$ en lugar de $x$."
+    },
+    {
+      "kind": "fill",
+      "id": "correccion-periodo",
+      "prompt": "Para amplitudes moderadas, $T/2\\pi\\approx 1+\\theta_0^2/16$. ¿Qué exponente falta?",
+      "code": "theta0 = 1.5\nprint(round(1 + theta0 ** ___ / 16, 4))",
+      "options": ["2", "1", "3", "4"],
+      "right": 0,
+      "why": "La corrección crece con el cuadrado de la amplitud: para 1,5 rad el periodo es un 14 % mayor que $2\\pi$."
+    },
+    {
+      "kind": "bug",
+      "id": "pendulo-fuerza",
+      "prompt": "La aceleración del péndulo es $-\\sin\\theta$. Toca la línea con el error.",
+      "lines": [
+        "import math",
+        "theta, omega, dt = 0.2, 0.0, 0.001",
+        "for _ in range(1000):",
+        "    omega -= dt * math.cos(theta)",
+        "    theta += dt * omega",
+        "print(f\"{theta:.4f}\")"
+      ],
+      "bug": 3,
+      "fix": "    omega -= dt * math.sin(theta)",
+      "why": "La fuerza que devuelve el péndulo a la vertical es proporcional a $\\sin\\theta$. Con el coseno sería máxima en el equilibrio."
+    },
+    {
+      "kind": "fill",
+      "id": "interpolar-cruce",
+      "prompt": "El paso casi nunca cae justo en la vertical, así que se interpola. ¿Qué valor falta en el denominador?",
+      "code": "theta, nuevo, t, dt = 0.002, -0.001, 1.571, 0.001\ncruce = t - dt + dt * theta / (theta - ___)\nprint(round(4 * cruce, 4))",
+      "options": ["nuevo", "theta", "dt", "t"],
+      "right": 0,
+      "why": "La recta entre $\\theta$ y el ángulo nuevo corta el cero a la fracción $\\theta/(\\theta-\\theta_{nuevo})$ del paso."
+    }
+  ]
+}

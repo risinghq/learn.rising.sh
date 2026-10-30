@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["tools", "tests", "vitest.config.ts"]
+  "include": ["tools", "tests", "drill", "vitest.config.ts"]
 }

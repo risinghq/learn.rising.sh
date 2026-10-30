@@ -1,0 +1,53 @@
+{
+  "items": [
+    {
+      "kind": "parsons",
+      "id": "leapfrog-bucle",
+      "prompt": "Ordena el bucle de leapfrog: medio paso de velocidad, un paso de posición y otro medio de velocidad.",
+      "before": "dt = 0.1\nx, v = 1.0, 0.0",
+      "lines": [
+        "for paso in range(200):",
+        "    v -= 0.5 * dt * x",
+        "    x += dt * v",
+        "    v -= 0.5 * dt * x",
+        "print(f\"{0.5 * (x**2 + v**2):.4f}\")"
+      ],
+      "why": "La posición avanza con la velocidad de mitad de paso. La energía se imprime al terminar el bucle."
+    },
+    {
+      "kind": "fill",
+      "id": "euler-paso",
+      "prompt": "Un paso de Euler actualiza la velocidad con la posición vieja. ¿Qué falta en la línea?",
+      "code": "dt = 0.1\nx, v = 1.0, 0.0\nfor paso in range(200):\n    x, v = x + dt * v, v - dt * ___\nprint(f\"E = {0.5 * (x**2 + v**2):.3f}\")",
+      "options": ["x", "v", "dt", "x**2"],
+      "right": 0,
+      "why": "La aceleración del oscilador es $-x$, así que la velocidad cambia en $-x\\,\\Delta t$. La energía final es 3,658."
+    },
+    {
+      "kind": "bug",
+      "id": "leapfrog-signo",
+      "prompt": "Este leapfrog hace crecer la energía. Toca la línea con el error.",
+      "lines": [
+        "dt = 0.1",
+        "x, v = 1.0, 0.0",
+        "for paso in range(200):",
+        "    v -= 0.5 * dt * x",
+        "    x += dt * v",
+        "    v += 0.5 * dt * x",
+        "print(f\"E = {0.5 * (x**2 + v**2):.4f}\")"
+      ],
+      "bug": 5,
+      "fix": "    v -= 0.5 * dt * x",
+      "why": "La aceleración es $-x$ en los dos medios pasos. Con el signo cambiado la velocidad se acelera en vez de frenarse."
+    },
+    {
+      "kind": "fill",
+      "id": "euler-factor",
+      "prompt": "Euler multiplica la energía por $1+\\Delta t^2$ en cada paso. ¿Qué exponente falta?",
+      "code": "dt = 0.1\nfactor = 1 + dt ** ___\nprint(round(factor ** 100, 2))",
+      "options": ["2", "1", "3", "4"],
+      "right": 0,
+      "why": "El factor es $1+\\Delta t^2=1{,}01$. Tras 100 pasos la energía se multiplica por $1{,}01^{100}\\approx 2{,}70$."
+    }
+  ]
+}

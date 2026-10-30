@@ -1,0 +1,59 @@
+{
+  "items": [
+    {
+      "kind": "parsons",
+      "id": "patron-local",
+      "prompt": "Ordena los pasos del patrón: mapear, optimizar, ejecutar y posprocesar.",
+      "before": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorEstimator\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager",
+      "lines": [
+        "qc = QuantumCircuit(2)",
+        "qc.h(0)",
+        "qc.cx(0, 1)",
+        "isa = generate_preset_pass_manager(optimization_level=1, basis_gates=[\"cx\", \"rz\", \"sx\"]).run(qc)",
+        "result = StatevectorEstimator().run([(isa, SparsePauliOp(\"ZZ\"))]).result()",
+        "print(round(float(result[0].data.evs), 3))"
+      ],
+      "distractors": ["qc.measure_all()", "qc.h(1)"],
+      "why": "Mapear crea el circuito, optimizar lo vuelve ISA, ejecutar pide el valor esperado y posprocesar lo muestra."
+    },
+    {
+      "kind": "fill",
+      "id": "primitiva-valor-esperado",
+      "prompt": "Quieres el valor esperado de $ZZ$ en el estado de Bell. ¿Qué primitiva ejecuta el circuito?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorEstimator, StatevectorSampler\nfrom qiskit.quantum_info import SparsePauliOp\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nresult = ___().run([(qc, SparsePauliOp(\"ZZ\"))]).result()\nprint(result[0].data.evs)",
+      "options": [
+        "StatevectorEstimator",
+        "StatevectorSampler",
+        "QuantumCircuit",
+        "SparsePauliOp"
+      ],
+      "right": 0,
+      "why": "`Estimator` devuelve valores esperados de observables. `Sampler` devuelve conteos de bits."
+    },
+    {
+      "kind": "bug",
+      "id": "paso-optimizar",
+      "prompt": "El paso de optimizar falla. Toca la línea con el error.",
+      "lines": [
+        "from qiskit import QuantumCircuit",
+        "from qiskit.transpiler import generate_preset_pass_manager",
+        "qc = QuantumCircuit(1)",
+        "qc.h(0)",
+        "pm = generate_preset_pass_manager(optimization_lvl=1, basis_gates=[\"rz\", \"sx\"])",
+        "print(dict(pm.run(qc).count_ops()))"
+      ],
+      "bug": 4,
+      "fix": "pm = generate_preset_pass_manager(optimization_level=1, basis_gates=[\"rz\", \"sx\"])",
+      "why": "El argumento se llama `optimization_level`. Con otro nombre Python lanza un `TypeError`."
+    },
+    {
+      "kind": "fill",
+      "id": "contar-puertas",
+      "prompt": "Quieres ver cuántas puertas de cada tipo tiene el circuito ISA. ¿Qué método usas?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\n\nqc = QuantumCircuit(1)\nqc.h(0)\nisa = generate_preset_pass_manager(optimization_level=0, basis_gates=[\"rz\", \"sx\"]).run(qc)\nprint(isa.___())",
+      "options": ["count_ops", "depth", "size", "width"],
+      "right": 0,
+      "why": "`count_ops()` devuelve un diccionario con el número de puertas de cada tipo. `depth()` y `size()` devuelven un solo número."
+    }
+  ]
+}

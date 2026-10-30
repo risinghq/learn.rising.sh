@@ -4,3 +4,7 @@ useDefault = true
 [[allowlists]]
 description = "Narration caches hold audio hashes and word timings, and downloaded guides hold example tokens"
 paths = ['''^content/.*\.cache\.json$''', '''^\.cache/''']
+
+[[allowlists]]
+description = "The generated drill bank holds item ids such as p9-c-api:choice-1a2b3c4d, which read as an API key"
+paths = ['''^site/[^/]+/items\.json$''']

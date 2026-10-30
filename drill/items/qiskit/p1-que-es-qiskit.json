@@ -1,0 +1,50 @@
+{
+  "items": [
+    {
+      "kind": "fill",
+      "id": "modulo-observable",
+      "prompt": "Los primitivos reciben observables. ¿De qué módulo del SDK se importa `SparsePauliOp`?",
+      "code": "from qiskit.___ import SparsePauliOp\n\nobs = SparsePauliOp(\"ZZ\")\nprint(obs.num_qubits)",
+      "options": ["quantum_info", "transpiler", "primitives", "circuit"],
+      "right": 0,
+      "why": "`qiskit.quantum_info` guarda estados, operadores y observables. El transpilador adapta circuitos y los primitivos los ejecutan."
+    },
+    {
+      "kind": "fill",
+      "id": "modulo-transpilador",
+      "prompt": "Tu circuito abstracto debe adaptarse a las puertas del chip. ¿De qué módulo viene `generate_preset_pass_manager`?",
+      "code": "from qiskit.___ import generate_preset_pass_manager\n\npm = generate_preset_pass_manager(optimization_level=1, basis_gates=[\"cx\", \"rz\", \"sx\"])\nprint(type(pm).__name__)",
+      "options": ["transpiler", "quantum_info", "primitives", "providers"],
+      "right": 0,
+      "why": "El módulo `qiskit.transpiler` convierte un circuito abstracto en uno que el hardware entiende."
+    },
+    {
+      "kind": "parsons",
+      "id": "circuito-bell",
+      "prompt": "Construye un circuito con una Hadamard y una CNOT, y cuenta sus puertas.",
+      "before": "from qiskit import QuantumCircuit",
+      "lines": [
+        "qc = QuantumCircuit(2)",
+        "qc.h(0)",
+        "qc.cx(0, 1)",
+        "print(dict(qc.count_ops()))"
+      ],
+      "distractors": ["qc.measure_all()"],
+      "why": "Primero el circuito, luego la Hadamard que crea la superposición, después la CNOT que la copia al otro qubit."
+    },
+    {
+      "kind": "bug",
+      "id": "importar-servicio",
+      "prompt": "Quieres hablar con el servicio de cómputo de IBM. Toca la línea que importa mal.",
+      "lines": [
+        "from qiskit import QuantumCircuit",
+        "from qiskit import QiskitRuntimeService",
+        "qc = QuantumCircuit(1)",
+        "print(QiskitRuntimeService.__name__, qc.num_qubits)"
+      ],
+      "bug": 1,
+      "fix": "from qiskit_ibm_runtime import QiskitRuntimeService",
+      "why": "El servicio vive en otro paquete, `qiskit-ibm-runtime`, y se importa como `qiskit_ibm_runtime`."
+    }
+  ]
+}

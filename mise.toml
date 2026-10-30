@@ -102,7 +102,7 @@ depends = ["generate:scripts"]
 run = "bun tests/walkthrough_test.ts"
 
 [tasks."test:tools"]
-description = "Test the dashboard tool against a local D1 database"
+description = "Test the dashboard tool against a local D1 database, and the drill item bank, graders and scheduler"
 wait_for = ["test:py"]
 run = "bunx vitest run"
 
@@ -132,6 +132,10 @@ run = [
   "uv run python lessons_src/build.py computational-physics",
 ]
 
+[tasks."generate:items"]
+description = "Write site/<course>/items.json of every course: the asks of its lessons plus the authored drill items, which git ignores"
+run = "bun drill/build.ts"
+
 [tasks."generate:scripts"]
 description = "Bundle the TypeScript in site/ and editor/src into the JavaScript the pages load, which git ignores"
 run = [
@@ -154,6 +158,10 @@ run = [
   "uv run python lessons_src/build.py qiskit --check",
   "uv run python lessons_src/build.py computational-physics --check",
 ]
+
+[tasks."build:drill"]
+description = "Validate the authored drill items and run the code of each parsons, fill and bug item under Qiskit 2.5 and numpy"
+run = "bun drill/check.ts"
 
 [tasks.build]
 description = "Check that the shipped site files match their sources"

@@ -1,0 +1,54 @@
+{
+  "items": [
+    {
+      "kind": "fill",
+      "id": "puerta-t",
+      "prompt": "¿Qué ángulo hace que la puerta de fase $P(\\theta)$ sea la puerta T?",
+      "code": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit.library import TGate\nfrom qiskit.quantum_info import Operator\n\nqc = QuantumCircuit(1)\nqc.p(___, 0)\nprint(Operator(qc).equiv(Operator(TGate())))",
+      "options": ["np.pi / 4", "np.pi / 2", "np.pi", "np.pi / 8"],
+      "right": 0,
+      "why": "T es una fase de $\\pi/4$ sobre $|1\\rangle$. Con $\\pi/2$ sería S y con $\\pi$ sería Z."
+    },
+    {
+      "kind": "bug",
+      "id": "qasm-cx",
+      "prompt": "El Composer exporta este programa OpenQASM, pero no carga. Toca la línea con el error.",
+      "lang": "qasm",
+      "lines": [
+        "OPENQASM 2.0;",
+        "include \"qelib1.inc\";",
+        "qreg q[2];",
+        "creg c[2];",
+        "h q[0];",
+        "cx q[0];",
+        "measure q -> c;"
+      ],
+      "bug": 5,
+      "fix": "cx q[0], q[1];",
+      "why": "La CNOT actúa sobre dos qubits, control y objetivo. Con un solo argumento QASM no puede leerla."
+    },
+    {
+      "kind": "parsons",
+      "id": "exportar-qasm",
+      "prompt": "Ordena el programa que construye el estado de Bell y lo exporta a OpenQASM 2.",
+      "before": "from qiskit import QuantumCircuit, qasm2",
+      "lines": [
+        "qc = QuantumCircuit(2)",
+        "qc.h(0)",
+        "qc.cx(0, 1)",
+        "print(qasm2.dumps(qc))"
+      ],
+      "distractors": ["qc.measure_all()"],
+      "why": "El circuito se completa primero. `qasm2.dumps` convierte el circuito que ya existe en texto."
+    },
+    {
+      "kind": "fill",
+      "id": "fase-11",
+      "prompt": "Partes de $|{+}{+}\\rangle$. ¿Qué puerta de dos qubits da fase $\\pi$ a la amplitud de $|11\\rangle$?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import Statevector\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.h(1)\nqc.___(0, 1)\nprint(Statevector(qc).data.round(2))",
+      "options": ["cz", "cx", "swap", "ch"],
+      "right": 0,
+      "why": "CZ cambia el signo solo de $|11\\rangle$, que es una fase de $\\pi$. CX y SWAP dejan $|{+}{+}\\rangle$ como está."
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "items": [
+    {
+      "kind": "parsons",
+      "id": "bell-sampler",
+      "prompt": "Ordena el programa que mide el estado de Bell 1024 veces.",
+      "before": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler",
+      "lines": [
+        "qc = QuantumCircuit(2)",
+        "qc.h(0)",
+        "qc.cx(0, 1)",
+        "qc.measure_all()",
+        "result = StatevectorSampler(seed=7).run([qc], shots=1024).result()",
+        "print(result[0].data.meas.get_counts())"
+      ],
+      "distractors": ["qc.h(1)"],
+      "why": "El circuito se construye, se mide y solo entonces se ejecuta. Los conteos se leen al final."
+    },
+    {
+      "kind": "fill",
+      "id": "registro-conteos",
+      "prompt": "`measure_all()` crea un registro clásico. ¿Cómo se llama, para leer sus conteos?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\n\nqc = QuantumCircuit(2)\nqc.h(0)\nqc.cx(0, 1)\nqc.measure_all()\nresult = StatevectorSampler(seed=7).run([qc], shots=1024).result()\nprint(result[0].data.___.get_counts())",
+      "options": ["meas", "counts", "c", "bits"],
+      "right": 0,
+      "why": "`measure_all()` añade un registro llamado `meas`, y `data.meas` da acceso a sus mediciones."
+    },
+    {
+      "kind": "bug",
+      "id": "medir-sin-parentesis",
+      "prompt": "El programa falla al leer los conteos. Toca la línea con el error.",
+      "lines": [
+        "from qiskit import QuantumCircuit",
+        "from qiskit.primitives import StatevectorSampler",
+        "qc = QuantumCircuit(2)",
+        "qc.h(0)",
+        "qc.cx(0, 1)",
+        "qc.measure_all",
+        "result = StatevectorSampler(seed=7).run([qc], shots=1024).result()",
+        "print(result[0].data.meas.get_counts())"
+      ],
+      "bug": 5,
+      "fix": "qc.measure_all()",
+      "why": "Sin paréntesis Python solo nombra el método y no lo llama. El circuito queda sin medir y no existe `meas`."
+    },
+    {
+      "kind": "fill",
+      "id": "ghz-cnot",
+      "prompt": "En el circuito GHZ de tres qubits, el qubit 1 debe pasar su valor al qubit 2. ¿Qué argumentos lleva la segunda CNOT?",
+      "code": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\n\nqc = QuantumCircuit(3)\nqc.h(0)\nqc.cx(0, 1)\nqc.cx(___)\nqc.measure_all()\ncounts = StatevectorSampler(seed=7).run([qc], shots=1024).result()[0].data.meas.get_counts()\nprint(sorted(counts))",
+      "options": ["1, 2", "2, 1", "1, 0", "0, 0"],
+      "right": 0,
+      "why": "El primer argumento es el control y el segundo el objetivo: `cx(1, 2)` copia el qubit 1 al 2 y deja solo `000` y `111`."
+    }
+  ]
+}
