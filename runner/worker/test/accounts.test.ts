@@ -898,6 +898,7 @@ describe("/api", () => {
         "qiskit:pos:intro": 4,
         "qiskit:predict:intro:p1": 2,
         "qiskit:repaso": { a: { box: 2, due: 50 }, b: { box: 1, due: 10 } },
+        "computational-physics:hitos": [1],
       },
     });
     const merged = await put(
@@ -924,6 +925,7 @@ describe("/api", () => {
             b: { box: 1, due: 5 },
             c: { box: 0, due: 1 },
           },
+          "computational-physics:hitos": [2],
         },
       },
       "/api/merge",
@@ -952,6 +954,7 @@ describe("/api", () => {
           b: { box: 1, due: 5 },
           c: { box: 0, due: 1 },
         },
+        "computational-physics:hitos": [1, 2],
       },
     });
     const me = await h.request("GET", "/api/me", { headers: { cookie } });

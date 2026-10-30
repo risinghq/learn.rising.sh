@@ -45,7 +45,7 @@ describe("the site and /run in a single Worker", () => {
     expect(catalog.body).toContain("<title>Rising</title>");
     const course = await h.get("/qiskit/");
     expect(course.status).toBe(200);
-    expect(course.body).toContain("<title>Qubit a qubit</title>");
+    expect(course.body).toContain("<title>Qiskit · Rising</title>");
     expect(h.runnerCalls()).toHaveLength(0);
   });
 
