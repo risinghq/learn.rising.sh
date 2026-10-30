@@ -1,8 +1,8 @@
-# Duo
+# Rising
 
-Duo is a set of courses where you learn by writing and running code. Lessons are
-narrated and animated, with exercises you run on the page, and your progress is
-kept per account.
+Rising is a set of courses where you learn by writing and running code. Lessons
+are narrated and animated, with exercises you run on the page, and your progress
+is kept per account.
 
 There are two courses, both in Spanish: **Qiskit**, on quantum computing, with
 practice notebooks and a project that grows part by part, and **Física

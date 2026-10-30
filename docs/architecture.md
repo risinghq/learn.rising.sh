@@ -1,6 +1,6 @@
 # Architecture
 
-Duo is a static site (`site/`) with a course catalog and a Worker that serves
+Rising is a static site (`site/`) with a course catalog and a Worker that serves
 what the courses share: accounts, progress and code execution. This document
 says what each folder holds and where a request goes.
 
@@ -36,7 +36,7 @@ Each part has its own document:
 
 The root holds the catalog and what the courses share:
 
-- `index.html` and `catalog.css` are the catalog, in English. It reads
+- `index.html` and `catalog.css` are the catalog, in Spanish. It reads
   `courses.json`, which has one entry per course (`slug`, `title`, `summary`,
   `language`), and from each `<slug>/course.json` the number of lessons. It
   draws one card per course with a link to `<slug>/`.

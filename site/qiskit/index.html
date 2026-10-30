@@ -20,7 +20,7 @@
 <header class="top">
   <div class="in">
     <a class="brand" href="index.html">Qubit a qubit</a>
-    <nav aria-label="Principal"><a href="../">Duo</a></nav>
+    <nav aria-label="Principal"><a href="../">Rising</a></nav>
     <span class="sp"></span>
     <div data-account></div>
     <div data-theme-ctl></div>
@@ -29,13 +29,12 @@
 
 <main id="main">
   <section class="intro" aria-labelledby="t-intro">
-    <h1 id="t-intro">Aprende Qiskit haciendo, qubit a qubit</h1>
-    <p class="lead">Lecciones animadas y narradas que recorren todas las guías de IBM Quantum. En cada una predices, practicas en tu cuaderno y reflexionas; a lo largo del curso construyes un experimento real.</p>
+    <h1 id="t-intro">Programa un computador cuántico</h1>
+    <p class="lead">Del primer qubit a tu propio experimento en un procesador de IBM.</p>
     <div class="next" id="next"></div>
     <div class="progress">
       <p id="prog"></p>
       <progress id="bar" max="1" value="0" aria-labelledby="prog"></progress>
-      <p class="facts" id="facts"></p>
     </div>
     <svg class="bloch" viewBox="-170 -170 340 340" id="bloch" aria-hidden="true"></svg>
   </section>
@@ -156,7 +155,8 @@ const DAY = 864e5, GAPS = [1, 3, 7, 21];
 async function renderRepaso(course, doneSet) {
   const box = $('#repaso');
   const lessons = course.parts.flatMap(p => p.lessons).filter(l => doneSet.has(l.id));
-  if (!lessons.length) { box.innerHTML = '<p class="empty">Cuando completes tu primera lección, aquí aparecerán preguntas para repasar en el momento justo, antes de que se olviden.</p>'; $('#rnote').textContent = ''; return; }
+  $('.today').hidden = !lessons.length;
+  if (!lessons.length) return;
   const state = LS.get('qiskit:repaso', {}), now = Date.now(), items = [];
   const loaded = await Promise.all(lessons.map(l =>
     fetch(`lessons/${l.id}/lesson.json`).then(r => r.json()).then(L => ({ l, L }), () => null)));
@@ -214,10 +214,8 @@ async function renderRepaso(course, doneSet) {
   const all = course.parts.flatMap(p => p.lessons);
   // qiskit:done holds the lessons of every course
   const doneSet = new Set(LS.get('qiskit:done', []).filter(id => all.some(l => l.id === id)));
-  const mins = all.reduce((a, l) => a + (l.minutes || 0), 0);
   $('#prog').textContent = `${doneSet.size}/${all.length} lecciones completadas`;
   const bar = $('#bar'); bar.max = all.length; bar.value = doneSet.size;
-  $('#facts').textContent = `${all.length} lecciones y ${(mins / 60).toLocaleString('es', { maximumFractionDigits: 1 })} h de narración.`;
 
   // next step: the pending mission of a finished lesson, or the next lesson
   const misDone = LS.get('qiskit:misiones', []);

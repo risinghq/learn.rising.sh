@@ -64,4 +64,4 @@ function renderParts(root: HTMLElement, parts: HomePart[], done: Set<string>) {
   }
 }
 
-window.QGHome = { renderParts, minutesOf };
+window.QGHome = { renderParts };

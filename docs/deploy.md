@@ -52,7 +52,7 @@ bunx cf d1 create --name qiskit-guides
 ```
 
 Copy the identifier (`uuid`) from the response. The database is called
-`qiskit-guides`, the name the project had before it was Duo; it is the only
+`qiskit-guides`, the name the project had before it was Rising; it is the only
 place that keeps it. It must match `bindings.d1` in `cloudflare.config.ts`, and
 if you choose another name, change both. Apply the schema:
 
@@ -180,8 +180,8 @@ curl -sI https://<host>/auth/github | grep -i '^location'
 ```
 
 `/health` answers 200 and `/api/me` answers `{"signedIn":false}`. `/` is the
-catalog (`<title>Duo`) and `/qiskit/` and `/computational-physics/` the course
-home pages. The last two print an address on `accounts.google.com` and on
+catalog (`<title>Rising`) and `/qiskit/` and `/computational-physics/` the
+course home pages. The last two print an address on `accounts.google.com` and on
 `github.com` with `redirect_uri=https://<host>/auth/<provider>/callback`. That
 address must be the one you registered in steps 4 and 5, letter for letter.
 

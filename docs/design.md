@@ -2,7 +2,7 @@
 
 The catalog (`site/index.html`), the course home pages
 (`site/<course>/index.html`), the privacy page and the player
-(`site/<course>/lesson.html`) share one theme. The catalog brand is "Duo" and
+(`site/<course>/lesson.html`) share one theme. The catalog brand is "Rising" and
 each course has its own brand, which is the name in its pages. This document
 lists the tokens, how they are used and the measures that fix legibility.
 
@@ -106,9 +106,9 @@ their own.
   4 px, `--r2` 8 px and `--r3` 16 px.
 - The player stage is 1280×720 and scales by `transform`, so its sizes are
   design pixels and not `rem`.
-- Counters (`.meta`, `.facts`, `.pr .n`, the lesson list, `.stepno`, `.score`)
-  set `font-variant-numeric: tabular-nums`, so the digits do not shift as the
-  value changes.
+- Counters (`.meta`, `.pr .n`, the lesson list, `.stepno`, `.score`) set
+  `font-variant-numeric: tabular-nums`, so the digits do not shift as the value
+  changes.
 
 ## Motion and states
 
@@ -175,7 +175,7 @@ Every duration and curve is a token in `theme.css`:
   `--acc`. The step that checks an exercise is that button; the one that moves
   on is not filled.
 - The brand is `<a class="brand">Qubit a qubit</a>` in the course and
-  `<a class="brand">Duo</a>` in the catalog, styled by `theme.css`.
+  `<a class="brand">Rising</a>` in the catalog, styled by `theme.css`.
 
 ## Contrast
 

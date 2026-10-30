@@ -42,7 +42,7 @@ describe("the site and /run in a single Worker", () => {
     const catalog = await h.get("/");
     expect(catalog.status).toBe(200);
     expect(catalog.headers.get("content-type")).toContain("text/html");
-    expect(catalog.body).toContain("<title>Duo</title>");
+    expect(catalog.body).toContain("<title>Rising</title>");
     const course = await h.get("/qiskit/");
     expect(course.status).toBe(200);
     expect(course.body).toContain("<title>Qubit a qubit</title>");

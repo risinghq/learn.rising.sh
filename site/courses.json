@@ -1,14 +1,14 @@
 [
   {
     "slug": "qiskit",
-    "title": "Qiskit en español",
-    "summary": "Narrated, animated lessons that cover the IBM Quantum guides, with code exercises you run on the page.",
-    "language": "Spanish"
+    "title": "Qiskit",
+    "summary": "Programa circuitos cuánticos y ejecútalos en un procesador real de IBM.",
+    "language": "Español"
   },
   {
     "slug": "computational-physics",
     "title": "Física computacional",
-    "summary": "Narrated, animated lessons that teach numerical methods by simulating oscillators, pendulums and planets, with code exercises you run on the page.",
-    "language": "Spanish"
+    "summary": "Simula péndulos, osciladores y órbitas con Python.",
+    "language": "Español"
   }
 ]

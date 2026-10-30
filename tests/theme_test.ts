@@ -196,7 +196,7 @@ async function visit(
     const course = brands.get(`${key}|true`);
     if (!course) throw new Error(`no front page was visited for ${key}`);
     report.check(
-      value[0] === "Duo",
+      value[0] === "Rising",
       `catalog brand ${JSON.stringify(value[0])}`,
     );
     report.check(

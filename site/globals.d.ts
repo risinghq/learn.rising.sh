@@ -31,6 +31,4 @@ declare var QGHome: {
     }[],
     done: Set<string>,
   ) => void;
-  /** The minutes of narration of the lessons. */
-  minutesOf: (lessons: { minutes?: number }[]) => number;
 };
