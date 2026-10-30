@@ -1,17 +1,33 @@
 // Optional account to carry progress to another browser (docs/accounts.md).
-// Without an account it makes no account requests. With the qiskit:cuenta mark, it
+// Without an account it makes no account requests. With the rising:cuenta mark, it
 // merges the progress before painting and sends the changes the Worker accepts.
-// The reflections (qiskit:reflect) never leave the browser.
-const FLAG = "qiskit:cuenta";
+// The reflections (<course>:reflect) never leave the browser.
+import {
+  courseKey,
+  lessonOwners,
+  migrate,
+  migratePreferences,
+  PREF,
+  read as readKey,
+  readJson,
+  write as writeKey,
+} from "./progress.ts";
+
+const FLAG = PREF.account;
 const RETURN_HASH = "#cuenta";
 const SYNC_TIMEOUT_MS = 4000;
 const PUSH_DELAY_MS = 1500;
 const MAX_CODE_BYTES = 20000;
 
 const LESSON = /^[a-z0-9][a-z0-9-]{0,59}$/;
-const EXERCISE = /^qiskit:exercise:([a-z0-9-]{1,40}\/[a-z0-9-]{1,40})$/;
-const KV =
-  /^qiskit:(?:pos:[a-z0-9-]{1,60}|predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}|hitos|misiones|repaso)$/;
+const COURSE = "[a-z0-9-]{1,40}";
+const DONE = new RegExp(`^(${COURSE}):done$`);
+const EXERCISE = new RegExp(
+  `^${COURSE}:exercise:([a-z0-9-]{1,40}/[a-z0-9-]{1,40})$`,
+);
+const KV = new RegExp(
+  `^${COURSE}:(?:pos:[a-z0-9-]{1,60}|heard:[a-z0-9-]{1,60}|predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}|hitos|misiones|repaso)$`,
+);
 
 // The body of POST /api/merge and PUT /api/progress, and the merge response.
 interface ExerciseBody {
@@ -27,18 +43,8 @@ interface Progress {
   kv: Record<string, unknown>;
 }
 
-const read = (key: string) => {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-};
-const write = (key: string, value: string) => {
-  try {
-    localStorage.setItem(key, value);
-  } catch {}
-};
+const read = readKey;
+const write = writeKey;
 const parse = (raw: string | null): unknown => {
   try {
     return JSON.parse(raw as string);
@@ -87,10 +93,12 @@ function collect(keys: Iterable<string>): Progress {
     const value = parse(read(key));
     if (value === undefined) continue;
     const exercise = EXERCISE.exec(key);
-    if (key === "qiskit:done") {
+    if (DONE.test(key)) {
       if (Array.isArray(value))
-        body.done = value.filter(
-          (id): id is string => typeof id === "string" && LESSON.test(id),
+        body.done.push(
+          ...value.filter(
+            (id): id is string => typeof id === "string" && LESSON.test(id),
+          ),
         );
     } else if (exercise) {
       const item = exerciseBody(value);
@@ -113,15 +121,27 @@ const allKeys = () => {
   return keys;
 };
 
-// The response includes what was sent and replaces the local values.
-function adopt(progress: Progress) {
-  const done = new Set([
-    ...((parse(read("qiskit:done")) as string[] | null) || []),
-    ...progress.done,
-  ]);
-  write("qiskit:done", JSON.stringify([...done]));
+// The response includes what was sent and replaces the local values. Each lesson's done state
+// and exercises go to the course that owns the lesson.
+async function adopt(progress: Progress) {
+  const owner =
+    progress.done.length || Object.keys(progress.exercises).length
+      ? await lessonOwners()
+      : new Map<string, string>();
+  const byCourse = new Map<string, Set<string>>();
+  for (const lesson of progress.done) {
+    const course = owner.get(lesson);
+    if (course === undefined) continue;
+    const key = courseKey(course, "done");
+    if (!byCourse.has(key))
+      byCourse.set(key, new Set(readJson<string[]>(key, [])));
+    byCourse.get(key)!.add(lesson);
+  }
+  for (const [key, done] of byCourse) write(key, JSON.stringify([...done]));
   for (const [id, item] of Object.entries(progress.exercises)) {
-    const key = `qiskit:exercise:${id}`;
+    const course = owner.get(id.split("/")[0]);
+    if (course === undefined) continue;
+    const key = courseKey(course, `exercise:${id}`);
     const local = (parse(read(key)) as Partial<ExerciseBody> | null) || {};
     write(
       key,
@@ -162,7 +182,7 @@ async function sync() {
     if (lapsed(resp)) return;
     if (!resp.ok) throw new Error(String(resp.status));
     if (read(FLAG) === null) write(FLAG, "1");
-    adopt(((await resp.json()) as { progress: Progress }).progress);
+    await adopt(((await resp.json()) as { progress: Progress }).progress);
     update({ signedIn: true, message: "" });
   } catch {
     update({
@@ -198,7 +218,7 @@ function flush({ unloading = false }: { unloading?: boolean } = {}) {
 function changed(key: string) {
   if (
     !state.signedIn ||
-    !(key === "qiskit:done" || EXERCISE.test(key) || KV.test(key))
+    !(DONE.test(key) || EXERCISE.test(key) || KV.test(key))
   )
     return;
   dirty.add(key);
@@ -360,6 +380,19 @@ addEventListener("DOMContentLoaded", () =>
 const returning = location.hash === RETURN_HASH;
 if (returning)
   history.replaceState(null, "", location.pathname + location.search);
-const ready = state.signedIn || returning ? sync() : Promise.resolve();
+// Migrate legacy keys before syncing so each value is sent from its course namespace once.
+migratePreferences();
+const migrated = (async () => {
+  if (readKey("rising:migrated") !== null) return;
+  try {
+    const owner = await lessonOwners();
+    const courses: Record<string, string[]> = {};
+    for (const [lesson, course] of owner) (courses[course] ??= []).push(lesson);
+    migrate(courses);
+  } catch {}
+})();
+const ready = migrated.then(() =>
+  state.signedIn || returning ? sync() : undefined,
+);
 
-window.QGAccount = { ready, changed };
+window.QGAccount = { ready, changed, mount };

@@ -1,6 +1,9 @@
 // Loaded in <head> to set data-theme before the first paint. Without a stored value, the system picks the mode.
-const MODE = "qiskit:theme";
+import { migratePreferences, PREF } from "./progress.ts";
+
+const MODE = PREF.theme;
 const root = document.documentElement;
+migratePreferences();
 
 interface Texts {
   toDark: string;

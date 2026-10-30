@@ -5,11 +5,15 @@
 // The first request of a session may need Turnstile and repeat the request with the token.
 
 // The browser stores the code, the hints seen and the solved state in
-// qiskit:exercise:<id>. `at` records the last edit of the code.
+// <course>:exercise:<id>. `at` records the last edit of the code.
 // With an account, account.ts also sends that data to the server.
 import type { Editor } from "../../editor/src/index.ts";
 import { BLOCKS, LEVELS } from "./blocks.ts";
 import type { BlockObject } from "./lesson.ts";
+import { courseKey, courseOf } from "../progress.ts";
+
+const exerciseKey = (id: string) =>
+  courseKey(courseOf(location.pathname), `exercise:${id}`);
 
 interface Turnstile {
   render: (
@@ -29,7 +33,7 @@ declare global {
   }
 }
 
-/** What the browser stores under qiskit:exercise:<id>. */
+/** What the browser stores under <course>:exercise:<lesson>/<name>. */
 interface Saved {
   code?: string;
   hints?: number;
@@ -123,16 +127,13 @@ const turnstileToken = async (
 const progress = {
   get(id: string): Saved {
     try {
-      return (
-        JSON.parse(localStorage.getItem(`qiskit:exercise:${id}`) ?? "null") ||
-        {}
-      );
+      return JSON.parse(localStorage.getItem(exerciseKey(id)) ?? "null") || {};
     } catch {
       return {};
     }
   },
   set(id: string, patch: Saved) {
-    const key = `qiskit:exercise:${id}`;
+    const key = exerciseKey(id);
     try {
       localStorage.setItem(
         key,

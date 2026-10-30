@@ -10,6 +10,14 @@
 // Review mode: lesson.html?l=<id>&beat=N shows the final state of beat N without audio.
 import { blockFor } from "./blocks.ts";
 import "./exercise.ts";
+import {
+  completeLesson,
+  courseKey,
+  courseOf,
+  migrateLesson,
+  PREF,
+  write,
+} from "../progress.ts";
 import type {
   Action,
   Api,
@@ -45,6 +53,11 @@ const $ = <E extends Element = HTMLElement>(
 const NS = "http://www.w3.org/2000/svg";
 const qs = new URLSearchParams(location.search);
 const LID = qs.get("l");
+const COURSE = courseOf(location.pathname);
+if (LID) {
+  migrateLesson(COURSE, LID);
+  write(PREF.last, COURSE);
+}
 const REVIEW = qs.has("beat");
 const BASE = `lessons/${LID}/`;
 // The colors are CSS variables (they change with the light/dark theme).
@@ -1193,17 +1206,18 @@ const atTime = (a: Action, marks: Record<string, number>) => {
 const store = {
   get<V>(k: string, d: V): V {
     try {
-      const v = localStorage.getItem(`qiskit:${k}:${LID}`);
+      const v = localStorage.getItem(courseKey(COURSE, `${k}:${LID}`));
       return v == null ? d : JSON.parse(v);
     } catch {
       return d;
     }
   },
   set(k: string, v: unknown) {
+    const key = courseKey(COURSE, `${k}:${LID}`);
     try {
-      localStorage.setItem(`qiskit:${k}:${LID}`, JSON.stringify(v));
+      localStorage.setItem(key, JSON.stringify(v));
     } catch {}
-    QGAccount.changed(`qiskit:${k}:${LID}`);
+    QGAccount.changed(key);
   },
 };
 function paintSteps() {
@@ -1468,7 +1482,7 @@ function showAsk(beat: Beat, a: Ask) {
     // Bet: there is no correct answer yet; the next step reveals the result.
     asked--;
     $(".qlabel", askEl).textContent = a.label || "Tu predicción";
-    const key = `qiskit:predict:${LID}:${beat.id}`;
+    const key = courseKey(COURSE, `predict:${LID}:${beat.id}`);
     const box = el("div", "opts", askEl);
     askEl.insertBefore(box, fb);
     a.options.forEach((opt, k) => {
@@ -1491,7 +1505,7 @@ function showAsk(beat: Beat, a: Ask) {
     // Open questions: saved in the browser and restored on return.
     asked--;
     $(".qlabel", askEl).textContent = a.label || "Reflexiona";
-    const key = `qiskit:reflect:${LID}:${beat.id}`;
+    const key = courseKey(COURSE, `reflect:${LID}:${beat.id}`);
     let saved: string[] = [];
     try {
       saved = JSON.parse(localStorage.getItem(key) || "[]");
@@ -1537,14 +1551,8 @@ function showAsk(beat: Beat, a: Ask) {
 function finish() {
   token++;
   nar.pause();
-  try {
-    const done = new Set<string | null>(
-      JSON.parse(localStorage.getItem("qiskit:done") || "[]"),
-    );
-    done.add(LID);
-    localStorage.setItem("qiskit:done", JSON.stringify([...done]));
-  } catch {}
-  QGAccount.changed("qiskit:done");
+  if (LID) completeLesson(COURSE, LID);
+  QGAccount.changed(courseKey(COURSE, "done"));
   $("#end-title").textContent = L.title;
   $("#end-score").textContent = asked
     ? `Preguntas acertadas al primer intento: ${firstTry} de ${asked}.`
@@ -1641,11 +1649,11 @@ async function init() {
   speed.addEventListener("change", () => {
     nar.playbackRate = +speed.value;
     try {
-      localStorage.setItem("qiskit:speed", speed.value);
+      localStorage.setItem(PREF.speed, speed.value);
     } catch {}
   });
   try {
-    const sp = localStorage.getItem("qiskit:speed");
+    const sp = localStorage.getItem(PREF.speed);
     if (sp) speed.value = sp;
   } catch {}
   $("#cc").addEventListener("click", () => {

@@ -1,8 +1,10 @@
+import { PREF } from "../progress.ts";
+
 export const SFX = (() => {
   let ctx: AudioContext | null = null,
     muted = false;
   try {
-    muted = localStorage.getItem("qiskit:mute") === "1";
+    muted = localStorage.getItem(PREF.mute) === "1";
   } catch {}
   const ac = () =>
     ctx ||
@@ -65,7 +67,7 @@ export const SFX = (() => {
     toggle() {
       muted = !muted;
       try {
-        localStorage.setItem("qiskit:mute", muted ? "1" : "0");
+        localStorage.setItem(PREF.mute, muted ? "1" : "0");
       } catch {}
       return muted;
     },
