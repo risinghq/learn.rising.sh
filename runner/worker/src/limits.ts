@@ -24,6 +24,9 @@ export interface Env {
   SIGNED_IN_IP_FACTOR: string;
   ATTEMPT_RETENTION_DAYS: string;
   ACCOUNT_RETENTION_DAYS: string;
+  XP_PER_DAY: string;
+  XP_PER_EVENT: string;
+  MAX_FRIENDS: string;
   DB: D1Database;
   // Secrets of the OAuth clients. A provider without them answers 503.
   GOOGLE_CLIENT_ID?: string;
@@ -46,7 +49,10 @@ type NumericVar =
   | "AUTH_SESSION_DAYS"
   | "SIGNED_IN_IP_FACTOR"
   | "ATTEMPT_RETENTION_DAYS"
-  | "ACCOUNT_RETENTION_DAYS";
+  | "ACCOUNT_RETENTION_DAYS"
+  | "XP_PER_DAY"
+  | "XP_PER_EVENT"
+  | "MAX_FRIENDS";
 
 export interface Limits {
   perMinute: number;
@@ -73,6 +79,9 @@ export interface Limits {
   signedInIpFactor: number;
   attemptRetentionMs: number;
   accountRetentionMs: number;
+  xpPerDay: number;
+  xpPerEvent: number;
+  maxFriends: number;
 }
 
 const NANO = 1e9;
@@ -140,5 +149,8 @@ export function loadLimits(env: Env): Limits {
     signedInIpFactor: positive(env, "SIGNED_IN_IP_FACTOR", true),
     attemptRetentionMs: positive(env, "ATTEMPT_RETENTION_DAYS", false) * DAY_MS,
     accountRetentionMs: positive(env, "ACCOUNT_RETENTION_DAYS", false) * DAY_MS,
+    xpPerDay: positive(env, "XP_PER_DAY", true),
+    xpPerEvent: positive(env, "XP_PER_EVENT", true),
+    maxFriends: positive(env, "MAX_FRIENDS", true),
   };
 }

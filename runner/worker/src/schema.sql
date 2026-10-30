@@ -11,7 +11,10 @@ CREATE TABLE users (
   seen_day    INTEGER NOT NULL,
   -- Rises with each progress write. A write counts only if the version is
   -- still the one it read (see mergeProgress).
-  progress_version INTEGER NOT NULL DEFAULT 0
+  progress_version INTEGER NOT NULL DEFAULT 0,
+  -- IANA name that the page sends with its XP. It sets the day of a streak and
+  -- the start of the week on the board.
+  time_zone   TEXT NOT NULL DEFAULT 'UTC'
 );
 
 CREATE TABLE identities (
@@ -71,3 +74,52 @@ CREATE TABLE attempts (
 CREATE INDEX attempts_exercise ON attempts (exercise, at);
 CREATE INDEX attempts_user ON attempts (user_id);
 CREATE INDEX attempts_at ON attempts (at);
+
+-- A row records granted XP. `utc_day` enforces the daily cap and uniqueness.
+-- The daily purge deletes rows older than two weeks: the weekly board and the
+-- once-per-day rule read nothing older.
+CREATE TABLE xp_events (
+  id        INTEGER PRIMARY KEY,
+  user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  at        INTEGER NOT NULL,
+  utc_day   INTEGER NOT NULL,
+  source    TEXT NOT NULL CHECK (source IN ('drill', 'exercise', 'lesson', 'cli')),
+  ref       TEXT NOT NULL,
+  amount    INTEGER NOT NULL CHECK (amount > 0)
+);
+
+CREATE UNIQUE INDEX xp_ref_day ON xp_events (user_id, utc_day, source, ref);
+CREATE INDEX xp_at ON xp_events (user_id, at);
+
+-- The streak of a user folded day by day, so a read never replays history.
+-- `run` is the days in the current run, `freezes` the freezes held and
+-- `last_day` the last local day with XP.
+CREATE TABLE streaks (
+  user_id  TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  run      INTEGER NOT NULL,
+  longest  INTEGER NOT NULL,
+  freezes  INTEGER NOT NULL,
+  last_day INTEGER NOT NULL
+) WITHOUT ROWID;
+
+-- Each friendship has one row per side. An owner sees only the row's id.
+CREATE TABLE friendships (
+  id        INTEGER PRIMARY KEY,
+  user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  friend_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  since     INTEGER NOT NULL,
+  UNIQUE (user_id, friend_id),
+  CHECK (user_id <> friend_id)
+);
+
+CREATE INDEX friendships_friend ON friendships (friend_id);
+
+-- Store only the invite hash. `used_at` records the request that spends it.
+CREATE TABLE friend_invites (
+  code_hash  TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at INTEGER NOT NULL,
+  used_at    INTEGER
+) WITHOUT ROWID;
+
+CREATE INDEX friend_invites_user ON friend_invites (user_id);

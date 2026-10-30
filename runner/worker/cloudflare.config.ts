@@ -72,6 +72,9 @@ export default defineConfig({
       SIGNED_IN_IP_FACTOR: bindings.text("4"),
       ATTEMPT_RETENTION_DAYS: bindings.text("180"),
       ACCOUNT_RETENTION_DAYS: bindings.text("730"),
+      XP_PER_DAY: bindings.text("300"),
+      XP_PER_EVENT: bindings.text("50"),
+      MAX_FRIENDS: bindings.text("50"),
       // The Turnstile widget secret is not written here: it is created in the account.
       TURNSTILE_SECRET: bindings.secret(),
       // The site key is public and is copied from the Turnstile widget.

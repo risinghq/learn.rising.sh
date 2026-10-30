@@ -28,7 +28,7 @@ const MAX_KV_KEYS = 2000;
 const MAX_KV_BYTES = 64_000;
 const MAX_ITEMS = 1000;
 
-const LESSON = /^[a-z0-9][a-z0-9-]{0,59}$/;
+export const LESSON = /^[a-z0-9][a-z0-9-]{0,59}$/;
 
 const isInt = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
