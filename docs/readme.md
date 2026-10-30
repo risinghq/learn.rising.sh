@@ -11,3 +11,5 @@
 6. [accounts.md](accounts.md): sign-in, progress and the data stored.
 7. [protection.md](protection.md): the per-IP limits, the budget and Turnstile.
 8. [deploy.md](deploy.md): publish your own copy on Cloudflare.
+9. [drills.md](drills.md): the items of the casual mode, how to write one and
+   how a session is chosen.
