@@ -2,9 +2,10 @@ import { unixSeconds } from "./account.ts";
 import { EXERCISE } from "./contract.ts";
 
 // A learner's progress, in the shape the page sends and receives. The keys
-// of `kv` are those of localStorage; `done` is `qiskit:done` and `exercises` are the
-// `qiskit:exercise:<id>`. What is not here (preferences, `reflect`) never leaves the
-// browser.
+// of `kv` are those of localStorage, `<course>:<name>`; `done` joins every
+// `<course>:done` and `exercises` are the `<course>:exercise:<id>`. A lesson id is
+// unique across courses, so neither needs the course. What is not here (preferences,
+// `reflect`) never leaves the browser.
 export interface ExerciseState {
   // Only a learner who allows it sends their code.
   code?: string | null;
@@ -66,17 +67,17 @@ const isBox = (value: unknown) =>
 
 const FAMILIES: Family[] = [
   {
-    key: /^qiskit:heard:[a-z0-9-]{1,60}$/,
+    key: /^[a-z0-9-]{1,40}:heard:[a-z0-9-]{1,60}$/,
     valid: (value) => list(value, isInt),
     merge: union,
   },
   {
-    key: /^qiskit:hitos$/,
+    key: /^[a-z0-9-]{1,40}:hitos$/,
     valid: (value) => list(value, isInt),
     merge: union,
   },
   {
-    key: /^qiskit:misiones$/,
+    key: /^[a-z0-9-]{1,40}:misiones$/,
     valid: (value) =>
       list(
         value,
@@ -86,18 +87,18 @@ const FAMILIES: Family[] = [
     merge: union,
   },
   {
-    key: /^qiskit:pos:[a-z0-9-]{1,60}$/,
+    key: /^[a-z0-9-]{1,40}:pos:[a-z0-9-]{1,60}$/,
     valid: isInt,
     merge: (stored, incoming) => Math.max(stored as number, incoming as number),
   },
   {
     // A bet is not changed: the first one saved is the one that counts.
-    key: /^qiskit:predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}$/,
+    key: /^[a-z0-9-]{1,40}:predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}$/,
     valid: isInt,
     merge: (stored) => stored,
   },
   {
-    key: /^qiskit:repaso$/,
+    key: /^[a-z0-9-]{1,40}:repaso$/,
     valid: (value) =>
       isRecord(value) &&
       Object.keys(value).length <= MAX_ITEMS &&
