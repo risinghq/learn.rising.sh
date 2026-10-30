@@ -16,6 +16,13 @@ password.
 | `POST /api/merge`                  | Merges the browser's progress with the account's.                              |
 | `PUT /api/progress`                | Saves progress changes. Answers 204.                                           |
 | `DELETE /api/me`                   | Deletes the account and everything of theirs.                                  |
+| `POST /api/xp`                     | Records XP for a drill, exercise, lesson or CLI task.                          |
+| `GET /api/streak`                  | The streak: `{current, longest, today}`.                                       |
+| `POST /api/friends/invite`         | Returns a single-use code to share.                                            |
+| `POST /api/friends/accept`         | Spends a code and makes a mutual friendship.                                   |
+| `GET /api/friends`                 | Lists friends with their streak and XP this week.                              |
+| `DELETE /api/friends/:id`          | Removes a friend for both sides. Answers 204.                                  |
+| `GET /api/board`                   | The weekly board of the user and their friends.                                |
 
 Error responses carry `{"error": "...", "reason": "..."}`. The methods that
 change data (`POST`, `PUT`, `DELETE`) require the `Origin` header of the same
@@ -140,6 +147,133 @@ merges again. After 10 attempts it answers 503 `busy` with `Retry-After`.
 identities, sessions, progress and attempts. It answers `{"deleted": true}` and
 clears the cookie.
 
+## XP
+
+`POST /api/xp` records XP. The body is JSON with these fields and no others:
+
+| Field    | Value                                                                               |
+| -------- | ----------------------------------------------------------------------------------- |
+| `source` | `drill`, `exercise`, `lesson` or `cli`.                                             |
+| `ref`    | The item id. An exercise is `lesson/exercise`; a lesson is its slug.                |
+| `amount` | An integer from 1 to `XP_PER_EVENT`.                                                |
+| `tz`     | Optional. The learner's IANA time zone, such as `America/Lima`. Stored on the user. |
+
+```json
+{ "source": "drill", "ref": "repaso:p1:3", "amount": 5, "tz": "America/Lima" }
+```
+
+```json
+{ "granted": 5, "total": 35, "cap": 300, "reason": null }
+```
+
+`granted` is the XP stored, `total` the XP of the UTC day so far and `reason`
+says why `granted` is less than `amount`:
+
+- `ref_today`: that `source` and `ref` already earned XP in this UTC day. It
+  grants 0 whatever `amount` is.
+- `daily_cap`: the day has reached `XP_PER_DAY`. When only part of `amount`
+  fits, the part is granted and `reason` is `null`.
+
+Both answer 200, so a client can resend an event safely. A request with no
+granted XP stores no row. An `exercise` with no passing check recorded by the
+server for this user answers 403 `not_passed`. It is the same record as `passed`
+in [Progress](#progress): the page and `PUT /api/progress` cannot set it. A body
+that does not follow the table answers 400 `bad_request`.
+
+`amount` is what the client says it earned. The Worker bounds it with
+`XP_PER_EVENT`, `XP_PER_DAY` and the once-per-day rule, and verifies only
+`exercise`. The values are in [protection.md](protection.md#xp-and-friends).
+
+## Streaks
+
+A day counts when the user earns at least 1 XP on it. The day is the local day
+in the user's time zone when the XP was recorded; the zone is the last `tz` sent
+(UTC until one is). The streak keeps the days already counted, so changing the
+zone does not move past days. A day before the last counted one adds nothing.
+
+`GET /api/streak` answers:
+
+```json
+{ "current": 8, "longest": 12, "today": true }
+```
+
+`current` is the run of days ending today, or yesterday if today has no XP yet.
+`today` says whether today has XP. `longest` is the best run ever.
+
+Freezes cover missed days. One is earned for every 7 days of a streak and at
+most 2 are held. Each missed day between two days with XP spends one. When there
+are fewer freezes than missed days the streak ends and the freezes are gone. A
+gap that is still open, such as yesterday, counts as covered in `current` if a
+freeze is held, and the freeze is spent only when XP arrives. The `streaks` row
+of each user holds the run, the longest run, the freezes held and the last day.
+Each stored XP event folds its day into that row in the same batch, so a read
+never scans XP history.
+
+## Friends
+
+`POST /api/friends/invite` answers a code like `K7M2P-9XQ4T` and when it
+expires, in Unix milliseconds:
+
+```json
+{ "code": "K7M2P-9XQ4T", "expiresAt": 1761500000000 }
+```
+
+The code is single-use and expires 7 days after it is issued. A user may hold 5
+unused codes; the sixth answers 429 `too_many_invites`. The database stores the
+hash of the code.
+
+`POST /api/friends/accept` with `{"code": "K7M2P-9XQ4T"}` spends the code and
+makes the friendship mutual. The friendship, both friend limits and the spent
+code are one batch, so simultaneous requests cannot pass a limit or spend a code
+twice. Case, the dash and spaces do not matter. It answers `{"id": 41}`, the id
+of the friendship for the caller. It refuses with:
+
+| Status | `reason`          | When                                             |
+| ------ | ----------------- | ------------------------------------------------ |
+| 400    | `bad_request`     | The body has no `code` of 10 letters and digits. |
+| 400    | `own_code`        | The code is the caller's.                        |
+| 404    | `invite_unknown`  | No such code.                                    |
+| 410    | `invite_used`     | Someone already spent it.                        |
+| 410    | `invite_expired`  | It is past its 7 days.                           |
+| 409    | `already_friends` | They are friends already.                        |
+| 409    | `friend_limit`    | Either side has `MAX_FRIENDS` friends.           |
+
+A refusal leaves the code unspent. The daily cleanup deletes expired codes, and
+then they answer `invite_unknown`.
+
+`GET /api/friends` lists the friends of the caller:
+
+```json
+{ "friends": [{ "id": 41, "streak": 3, "today": true, "xp": 120 }] }
+```
+
+`id` is the caller's id for that friendship; each side of a friendship has its
+own, and `DELETE /api/friends/41` removes both sides. An id that is not the
+caller's answers 404. `streak` is the friend's current streak and `today`
+whether they have XP on their own current day. `xp` is their XP in the caller's
+ISO week. A friend's list entry has no email, no provider identifier and no
+account id, and the account stores no name.
+
+## Weekly board
+
+`GET /api/board` ranks the caller and their friends by XP in the current ISO
+week. The week runs from Monday 00:00 to the next Monday 00:00 in the caller's
+time zone, for everybody on the board.
+
+```json
+{
+  "weekStart": "2026-10-19",
+  "entries": [
+    { "rank": 1, "you": false, "id": 41, "xp": 120 },
+    { "rank": 2, "you": true, "id": null, "xp": 85 }
+  ]
+}
+```
+
+Entries are sorted by `xp`, highest first. Equal `xp` share the lowest rank; the
+caller comes first among them, then friends in the order they were made. `id` is
+the friendship id of `GET /api/friends`, and `null` for the caller.
+
 ## On the site
 
 [`site/account.ts`](../site/account.ts) is the client. It puts the _Entrar_ menu
@@ -185,15 +319,19 @@ schema change is to delete the database and create it again
 ([deploy.md](deploy.md#2-create-the-database)). Everything hangs from `users`
 with `ON DELETE CASCADE`.
 
-| Table            | What it stores                                                                    |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `users`          | A random id, the sign-up day, the day of the last visit and the progress version. |
-| `identities`     | Provider and provider identifier of each user.                                    |
-| `sessions`       | The SHA-256 hash of the `qg_auth` token and its expiry. Never the token.          |
-| `lesson_done`    | The finished lessons and when.                                                    |
-| `exercise_state` | The code, hints, checks and whether it passed, per exercise.                      |
-| `kv`             | The `localStorage` keys of the table above.                                       |
-| `attempts`       | One row per run, with or without an account.                                      |
+| Table            | What it stores                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| `users`          | A random id, the sign-up day, the day of the last visit, the progress version and the time zone. |
+| `identities`     | Provider and provider identifier of each user.                                                   |
+| `sessions`       | The SHA-256 hash of the `qg_auth` token and its expiry. Never the token.                         |
+| `lesson_done`    | The finished lessons and when.                                                                   |
+| `exercise_state` | The code, hints, checks and whether it passed, per exercise.                                     |
+| `kv`             | The `localStorage` keys of the table above.                                                      |
+| `attempts`       | One row per run, with or without an account.                                                     |
+| `xp_events`      | One row per XP granted: source, ref, amount and the UTC day. Deleted after 14 days.              |
+| `streaks`        | One row per user: the run, the longest run, the freezes held and the last local day with XP.     |
+| `friendships`    | Two rows per friendship, one for each side, each with its own id.                                |
+| `friend_invites` | The hash of each invite code, its expiry and when it was spent.                                  |
 
 A visit is a request with a session to `/run` or `/api`, or the OAuth return. It
 raises `seen_day` at most once a day.
@@ -224,7 +362,9 @@ progress write.
 | `ACCOUNT_RETENTION_DAYS` | 730   | The accounts without a visit in that many days (24 months). |
 
 A daily cron (`17 3 * * *`, UTC) calls the Worker's `scheduled` handler, which
-deletes in a single batch the expired attempts, the expired sessions and the
+deletes in a single batch the expired attempts, the XP events older than 14 days
+(the weekly board and the once-per-day rule read nothing older; streaks live in
+their own table), the expired sessions, the expired friend invites and the
 inactive accounts, in that order. Deleting an account takes everything of theirs
 with it.
 

@@ -228,6 +228,33 @@ that need no account, and the Worker tests use them:
 | `2x0000000000000000000000000000000AA` | secret | Always fails.                                                     |
 | `3x0000000000000000000000000000000AA` | secret | Answers that the token was already used.                          |
 
+## XP and friends
+
+XP feeds the weekly board, so a script that posts XP would win it. The routes of
+[accounts.md](accounts.md#xp) sit behind the same session and per-user limit as
+the rest of `/api` (`RATE_PER_MINUTE` and `RATE_PER_DAY` per user), and these
+caps bound what a user can earn and hold:
+
+| Variable       | Value | Meaning                                              |
+| -------------- | ----- | ---------------------------------------------------- |
+| `XP_PER_DAY`   | 300   | XP a user earns in a UTC day, across all sources.    |
+| `XP_PER_EVENT` | 50    | The largest `amount` one `POST /api/xp` may ask for. |
+| `MAX_FRIENDS`  | 50    | Friends an account holds, checked on both sides.     |
+
+- Past `XP_PER_DAY` the route answers 200 with `granted` 0 and
+  `reason: "daily_cap"`, and the day's remaining XP is granted in part when an
+  event does not fit.
+- A `source` and `ref` earn XP once per UTC day. The cap and this rule count the
+  UTC day, not the learner's, so changing the time zone does not open a second
+  day of XP.
+- `MAX_FRIENDS` bounds the rows the friends list and the board read for every
+  request.
+- A user holds 5 unused invite codes at a time. This number is not a variable.
+
+An `exercise` earns XP only after the server recorded a passing `/run` check for
+that user. `amount` for the other sources is the client's claim, bounded by
+these caps.
+
 ## What the container receives and what is logged
 
 The container receives the body of the request and `Content-Type`. It does not
