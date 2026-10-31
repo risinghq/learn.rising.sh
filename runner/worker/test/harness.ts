@@ -31,6 +31,7 @@ export const VARS = {
   SESSION_HOURS: "8",
   AUTH_PER_MINUTE: "1000",
   AUTH_SESSION_DAYS: "30",
+  CLI_TOKEN_DAYS: "90",
   SIGNED_IN_IP_FACTOR: "4",
   ATTEMPT_RETENTION_DAYS: "180",
   ACCOUNT_RETENTION_DAYS: "730",
@@ -86,6 +87,8 @@ export interface Harness {
       ip?: string;
       headers?: Record<string, string>;
       body?: unknown;
+      // Sent as an HTML form (application/x-www-form-urlencoded).
+      form?: Record<string, string>;
       // The host of the URL. Defaults to runner.test.
       host?: string;
     },
@@ -220,7 +223,13 @@ export async function start(options: Options = {}): Promise<Harness> {
     request: async (
       method,
       pathname,
-      { ip = "198.51.100.7", headers = {}, body, host = "runner.test" } = {},
+      {
+        ip = "198.51.100.7",
+        headers = {},
+        body,
+        form,
+        host = "runner.test",
+      } = {},
     ) =>
       reply(
         await mf.dispatchFetch(`http://${host}${pathname}`, {
@@ -228,12 +237,18 @@ export async function start(options: Options = {}): Promise<Harness> {
           redirect: "manual",
           headers: {
             "cf-connecting-ip": ip,
-            ...(body === undefined
-              ? {}
-              : { "content-type": "application/json" }),
+            ...(body !== undefined
+              ? { "content-type": "application/json" }
+              : form === undefined
+                ? {}
+                : { "content-type": "application/x-www-form-urlencoded" }),
             ...headers,
           },
-          ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+          ...(body === undefined
+            ? form === undefined
+              ? {}
+              : { body: new URLSearchParams(form).toString() }
+            : { body: JSON.stringify(body) }),
         }),
       ),
     post: async (body, { ip = "198.51.100.7", headers = {}, raw } = {}) =>
