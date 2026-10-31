@@ -12,7 +12,7 @@ qc = QuantumCircuit(2)
 qc.append(UnitaryGate(q), range(2))
 qc.swap(0, 1)
 
-grado = 0.95   # ✏️ 1.0 es exacto; un valor menor permite aproximar
+grado = 0.98  # ✏️ 1.0 es exacto; un valor menor permite aproximar
 
 pm = generate_preset_pass_manager(3, backend=backend, approximation_degree=grado, seed_transpiler=12345)
 print("ecr:", pm.run(qc).count_ops().get("ecr", 0))
