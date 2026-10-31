@@ -1,4 +1,11 @@
-import { ArrowRight, Check, ChevronDown, Lock, Play } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Dumbbell,
+  Lock,
+  Play,
+} from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { courseKey } from "@site/progress.ts";
@@ -17,7 +24,6 @@ import { save, useDone, useJson, useReady } from "../store.ts";
 import { Command, NotebookHelp } from "./Command.tsx";
 import { Layout } from "./Layout.tsx";
 import { ProjectTrack } from "./ProjectTrack.tsx";
-import { Review } from "./Review.tsx";
 
 const NO_NOTEBOOKS: string[] = [];
 
@@ -56,6 +62,19 @@ function Practice({
         Ya la hice
       </button>
       <NotebookHelp />
+    </section>
+  );
+}
+
+function ReviewCard({ slug }: { slug: string }) {
+  return (
+    <section className="card review" aria-labelledby="t-repaso">
+      <h2 id="t-repaso">Repaso de hoy</h2>
+      <p className="muted num">3 min</p>
+      <a className="btn" href={`/${slug}/repaso/`}>
+        <Dumbbell aria-hidden="true" />
+        Repasar
+      </a>
     </section>
   );
 }
@@ -237,6 +256,7 @@ export function CoursePath({ page }: { page: CoursePage }) {
     <Layout
       back
       stats
+      drill={finished > 0 ? course.slug : undefined}
       footer={course.source || course.note ? footer : undefined}
     >
       <div className="page" ref={root}>
@@ -270,7 +290,7 @@ export function CoursePath({ page }: { page: CoursePage }) {
           </p>
         )}
         <p className="outcome">{course.outcome}</p>
-        <Review slug={course.slug} lessons={lessons} done={done} />
+        {finished > 0 ? <ReviewCard slug={course.slug} /> : null}
         {project ? (
           <ProjectTrack slug={course.slug} project={project} parts={parts} />
         ) : null}

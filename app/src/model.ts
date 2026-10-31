@@ -68,4 +68,10 @@ export interface PrivacyPage {
   kind: "privacy";
 }
 
-export type Page = CatalogPage | CoursePage | PrivacyPage;
+/** The drill session of a course, played at `/<slug>/repaso/`. */
+export interface SessionPage {
+  kind: "session";
+  course: Course;
+}
+
+export type Page = CatalogPage | CoursePage | PrivacyPage | SessionPage;

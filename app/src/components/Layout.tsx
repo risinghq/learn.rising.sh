@@ -37,15 +37,27 @@ function AccountSlot() {
   return <div className="acct-slot" ref={host} />;
 }
 
-function Stats() {
+function Stats({ drill }: { drill?: string }) {
   const { streak, today } = useXp();
+  const flame = (
+    <>
+      <Flame aria-hidden="true" />
+      <span className="sr">Racha: </span>
+      {streak}
+      <span className="sr"> {streak === 1 ? "día" : "días"}</span>
+    </>
+  );
   return (
     <ul className="stats" aria-label="Tu racha">
       <li className="stat" data-active={streak > 0}>
-        <Flame aria-hidden="true" />
-        <span className="sr">Racha: </span>
-        {streak}
-        <span className="sr"> {streak === 1 ? "día" : "días"}</span>
+        {drill ? (
+          <a href={`/${drill}/repaso/`}>
+            {flame}
+            <span className="sr">. Empezar un repaso</span>
+          </a>
+        ) : (
+          flame
+        )}
       </li>
       <li className="stat">
         <Zap aria-hidden="true" />
@@ -58,6 +70,8 @@ function Stats() {
 interface LayoutProps {
   back?: boolean;
   stats?: boolean;
+  /** The course whose review session the streak opens. */
+  drill?: string;
   privacy?: boolean;
   footer?: ReactNode;
   children: ReactNode;
@@ -66,6 +80,7 @@ interface LayoutProps {
 export function Layout({
   back,
   stats,
+  drill,
   privacy = true,
   footer,
   children,
@@ -89,7 +104,7 @@ export function Layout({
             )}
           </div>
           <span className="sp" />
-          {stats ? <Stats /> : null}
+          {stats ? <Stats drill={drill} /> : null}
           <AccountSlot />
           <ThemeToggle />
         </div>

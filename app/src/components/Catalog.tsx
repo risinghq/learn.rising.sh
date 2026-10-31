@@ -76,8 +76,11 @@ export function Catalog({ page }: { page: CatalogPage }) {
   const done = useDoneByCourse(page.courses.map((e) => e.course.slug));
   const last = useLastCourse();
   const primary = primaryOf(page.courses, done, last);
+  const drill = page.courses.find(
+    (e) => e.course.slug === (last ?? primary) && done[e.course.slug]?.size,
+  )?.course.slug;
   return (
-    <Layout stats>
+    <Layout stats drill={drill}>
       <div className="page">
         <h1>Tus cursos</h1>
         <ul className="courses">

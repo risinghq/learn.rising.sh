@@ -29,6 +29,11 @@ export function metaOf(page: Page): Meta {
         title: `${page.course.title} · Rising`,
         description: page.course.outcome,
       };
+    case "session":
+      return {
+        title: `Repaso de ${page.course.title} · Rising`,
+        description: `Un repaso corto de ${page.course.title}, con ejercicios que respondes con un toque.`,
+      };
     case "privacy":
       return {
         title: "Privacidad · Rising",

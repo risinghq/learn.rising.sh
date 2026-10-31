@@ -2,7 +2,14 @@
 // first client render see nothing stored and the pages then repaint with what the browser holds.
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
-import { courseKey, PREF, read, write, xpSummary } from "@site/progress.ts";
+import {
+  addXp,
+  courseKey,
+  PREF,
+  read,
+  write,
+  xpSummary,
+} from "@site/progress.ts";
 
 const listeners = new Set<() => void>();
 
@@ -43,6 +50,12 @@ export function useJson<T>(key: string, fallback: T): T {
 export function save(key: string, value: unknown) {
   write(key, JSON.stringify(value));
   QGAccount.changed(key);
+  notify();
+}
+
+/** Adds to today's XP, which stays in this browser, and repaints the streak. */
+export function awardXp(amount: number) {
+  addXp(amount);
   notify();
 }
 
