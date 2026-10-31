@@ -47,7 +47,7 @@ const choice = z
 const numeric = z.strictObject({
   ...base,
   kind: z.literal("numeric"),
-  answer: z.number().finite(),
+  answer: z.number().finite().min(0, "a numeric answer is not negative"),
   tol: z.number().finite().min(0).optional(),
   why: text.optional(),
   unit: text.optional(),

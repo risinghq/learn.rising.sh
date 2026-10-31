@@ -131,6 +131,11 @@ describe("parseAuthored", () => {
       "items[0].options",
     ],
     ["a right index past the options", { ...good, right: 3 }, "items[0].right"],
+    [
+      "a negative numeric answer",
+      { kind: "numeric", id: "n", prompt: "p", answer: -3 },
+      "items[0].answer",
+    ],
     ["an id with spaces", { ...good, id: "Fill One" }, "items[0].id"],
     ["a missing id", { ...good, id: undefined }, "items[0].id"],
     ["a lesson set by hand", { ...good, lesson: "p1-x" }, "items[0].lesson"],
