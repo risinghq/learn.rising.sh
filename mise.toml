@@ -178,7 +178,7 @@ run = [
 ]
 
 [tasks."build:drill"]
-description = "Validate the authored drill items and run the code of each parsons, fill and bug item under Qiskit 2.5 and numpy"
+description = "Validate the authored drill items and run the code of each parsons, fill and bug item under Qiskit 2.6 and numpy"
 run = "bun drill/check.ts"
 
 [tasks.build]

@@ -94,7 +94,7 @@ misspelt key is an error too.
 ### The code is run
 
 `mise run build:drill` runs the code of every authored item with the Qiskit and
-numpy of the project environment, and checks Qiskit is 2.5. It fails if:
+numpy of the project environment, and checks Qiskit is 2.6. It fails if:
 
 - the correct code of a `parsons`, `fill` or `bug` item does not run;
 - swapping two neighbouring lines of a `parsons` item still runs with the same

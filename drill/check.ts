@@ -17,8 +17,8 @@ const runner: Runner = (programs: Program[]): Outcome[] => {
     qiskit: string;
     results: Outcome[];
   };
-  if (!reply.qiskit.startsWith("2.5."))
-    throw new Error(`Qiskit ${reply.qiskit}, not 2.5`);
+  if (!reply.qiskit.startsWith("2.6."))
+    throw new Error(`Qiskit ${reply.qiskit}, not 2.6`);
   return reply.results;
 };
 

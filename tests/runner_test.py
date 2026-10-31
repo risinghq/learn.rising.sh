@@ -140,7 +140,7 @@ def test_image_has_qiskit_aer_and_runtime(runner: local.Container) -> None:
         "from qiskit_aer import AerSimulator\nprint(qiskit.__version__)",
     )
     assert out["passed"], out
-    assert out["stdout"].strip() == "2.5.2"
+    assert out["stdout"].strip() == "2.6.1"
 
 
 @pytest.mark.parametrize("exercise", EXERCISE_IDS)
