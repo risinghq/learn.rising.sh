@@ -9,6 +9,7 @@ site/*/items.json
 site/index.html
 site/privacidad.html
 site/*/index.html
+site/*/repaso/
 site/assets/
 site/sw.js
 app/dist/

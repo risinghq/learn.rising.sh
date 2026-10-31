@@ -32,6 +32,10 @@ async function readPages(): Promise<
         throw new Error(
           `courses.json: ${course.slug} needs a title and an outcome`,
         );
+      if (!(await exists(join(site, course.slug, "items.json"))))
+        throw new Error(
+          `${course.slug}/items.json is missing: run mise run generate:items`,
+        );
       const projectFile = join(site, course.slug, "project.json");
       const [{ parts }, project] = await Promise.all([
         json<{ parts: Part[] }>(join(site, course.slug, "course.json")),
@@ -71,11 +75,18 @@ async function readPages(): Promise<
       file: "privacidad.html",
       page: { kind: "privacy" },
     },
-    ...pages.map((page) => ({
-      route: `/${page.course.slug}/`,
-      file: `${page.course.slug}/index.html`,
-      page,
-    })),
+    ...pages.flatMap((page) => [
+      {
+        route: `/${page.course.slug}/`,
+        file: `${page.course.slug}/index.html`,
+        page,
+      },
+      {
+        route: `/${page.course.slug}/repaso/`,
+        file: `${page.course.slug}/repaso/index.html`,
+        page: { kind: "session" as const, course: page.course },
+      },
+    ]),
   ];
 }
 
@@ -134,7 +145,10 @@ const rendered = pages.map(({ route, file, page }) => {
     );
   hash.update(html);
   precache.add(route);
-  if (page.kind === "course") precache.add(`/${page.course.slug}/course.json`);
+  if (page.kind === "course") {
+    precache.add(`/${page.course.slug}/course.json`);
+    precache.add(`/${page.course.slug}/items.json`);
+  }
   return { file: join(site, file), html };
 });
 await Promise.all(

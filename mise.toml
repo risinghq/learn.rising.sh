@@ -88,7 +88,7 @@ run = [
 ]
 
 [tasks."test:ui"]
-description = "Drive the exercise editor, the project panel, the shell, the theme and the optional account in a browser, and hold the shell to its script budget"
+description = "Drive the exercise editor, the project panel, the shell, the drill session, the theme and the optional account in a browser, and hold the shell to its script budget"
 depends = ["generate:scripts", "generate:app"]
 wait_for = ["test:py"]
 run = [
@@ -97,6 +97,7 @@ run = [
   "bun tests/account_ui_test.ts",
   "bun tests/theme_test.ts",
   "bun tests/shell_test.ts",
+  "bun tests/session_test.ts",
   "bun tests/budget_test.ts",
 ]
 
@@ -150,6 +151,7 @@ run = [
 
 [tasks."generate:app"]
 description = "Build the React shell in app/ and write its prerendered pages, assets and service worker into site/, which git ignores"
+depends = ["generate:items"]
 dir = "app"
 run = "node scripts/build.ts"
 
@@ -183,8 +185,8 @@ depends = ["generate:scripts", "generate:app"]
 run = "uv run python tools/serve.py"
 
 [tasks.deploy]
-description = "Copy KaTeX into site/vendor, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
-depends = ["generate:vendor", "generate:scripts", "generate:app"]
+description = "Copy KaTeX into site/vendor, write the drill items, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
+depends = ["generate:vendor", "generate:items", "generate:scripts", "generate:app"]
 dir = "runner/worker"
 run = "bunx cf deploy"
 
