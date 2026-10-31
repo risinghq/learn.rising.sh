@@ -54,16 +54,11 @@ function lessonOf(id: string): Lesson {
   }
   return lesson;
 }
-const reviewable = (id: string) =>
-  lessonOf(id).beats.filter(
-    (b) => b.ask && ["choice", "numeric"].includes(b.ask.kind),
-  ).length;
 const courseMissions = (lesson: CourseLesson) =>
   (lesson.missions ?? []).filter((m) => !m.notebook.includes("proyecto/"));
 
 const done = new Set<string>();
 let missionsMarked = 0;
-let reviewsAnswered = 0;
 
 let stepNo = 0;
 async function step(name: string, run: () => Promise<void>): Promise<void> {
@@ -149,7 +144,7 @@ async function checkProgress(page: Page): Promise<void> {
   await see(
     "streak",
     async () => (await stats.nth(0).textContent()) ?? "",
-    `Racha: ${days} ${days === 1 ? "día" : "días"}`,
+    `Racha: ${days} ${days === 1 ? "día" : "días"}${days ? ". Empezar un repaso" : ""}`,
   );
   await see(
     "xp",
@@ -229,36 +224,15 @@ async function checkNext(page: Page): Promise<void> {
 }
 
 async function checkReview(page: Page): Promise<void> {
-  const pool = lessons
-    .filter((l) => done.has(l.id))
-    .reduce((n, l) => n + reviewable(l.id), 0);
-  const pending = pool - reviewsAnswered;
   const review = page.locator(".review");
   if (!done.size) {
-    await same(
-      "review sections before the first lesson",
-      await review.count(),
-      0,
-    );
+    await same("review cards before the first lesson", await review.count(), 0);
     return;
   }
-  if (!pending) {
-    await see(
-      "review",
-      text(review.locator("p")),
-      "Nada que repasar hoy. Vuelve mañana.",
-    );
-    return;
-  }
-  await see(
-    "review count",
-    text(review.locator("p.muted")),
-    `${Math.min(3, pending)} de ${pending} pendientes`,
-  );
   await same(
-    "review questions",
-    await page.locator(".review .rq").count(),
-    Math.min(3, pending),
+    "the review card opens the session",
+    await review.locator("a.btn").getAttribute("href"),
+    "/qiskit/repaso/",
   );
 }
 
@@ -352,29 +326,6 @@ async function markNextMission(page: Page): Promise<void> {
   await page.locator(".practice .btn", { hasText: "Ya la hice" }).click();
   missionsMarked += 1;
   await checkNext(page);
-}
-
-async function answerReview(page: Page, count: number): Promise<void> {
-  for (let k = 0; k < count; k++) {
-    const card = page.locator(".review .rq").first();
-    // Each answer schedules the first review for one day later.
-    const numeric = card.locator(".num-answer input");
-    if (await numeric.count()) {
-      await numeric.fill("0");
-      await card.locator(".num-answer button").click();
-    } else {
-      await card.locator(".opts button").first().click();
-    }
-    await see(
-      "review feedback",
-      text(card.locator(".fb .when")),
-      "Próximo repaso en 1 día.",
-    );
-    await page.reload();
-    reviewsAnswered += 1;
-    await see("progress line", text(page.locator(METER)), /lecciones$/);
-    await checkReview(page);
-  }
 }
 
 async function main(): Promise<void> {
@@ -490,13 +441,6 @@ async function main(): Promise<void> {
       },
     );
 
-    await step("answer the review questions of the lesson", async () => {
-      await answerReview(page, 1);
-      await checkHome(page);
-      await answerReview(page, reviewable(first.id) - 1);
-      await checkHome(page);
-    });
-
     await step("mark the mission and see the next lesson", async () => {
       await markNextMission(page);
       await checkHome(page);
@@ -577,11 +521,14 @@ async function main(): Promise<void> {
       await finishLesson(page, second.id);
     });
 
-    await step("the path shows two lessons done and both reviews", async () => {
-      await page.locator("#end a.cta", { hasText: "Índice" }).click();
-      await see("progress line", text(page.locator(METER)), /lecciones$/);
-      await checkHome(page);
-    });
+    await step(
+      "the path shows two lessons done and the review card",
+      async () => {
+        await page.locator("#end a.cta", { hasText: "Índice" }).click();
+        await see("progress line", text(page.locator(METER)), /lecciones$/);
+        await checkHome(page);
+      },
+    );
 
     await step("finish every other lesson in order", async () => {
       await page.locator("a[data-current]").click();

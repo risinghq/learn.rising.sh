@@ -1,6 +1,7 @@
 // Optional account in a browser with a local Worker and a fake provider:
 //     bun tests/account_ui_test.ts
-// Checks the sync between two browsers, that deleting the account keeps the
+// Checks the sync between two browsers, that a review log in an old shape does not
+// break it, that deleting the account keeps the
 // local copy, and that without an account the page makes only its own `/run`
 // request. Skips with a reason when Node or the Worker dependencies are missing.
 import { spawn } from "node:child_process";
@@ -290,6 +291,42 @@ async function anonymous(
   return tab;
 }
 
+// A browser that used the inline review keeps `{id: {box, due}}` in <course>:repaso. The account
+// rejects that shape, so the page must drop it before the merge or the whole sync fails.
+async function staleReview(
+  browser: Browser,
+  site: string,
+  control: string,
+): Promise<void> {
+  const { page, errors } = await newTab(browser, site, control);
+  await page.addInitScript(() => {
+    if (sessionStorage.getItem("seeded")) return;
+    sessionStorage.setItem("seeded", "1");
+    localStorage.setItem(
+      "qiskit:repaso",
+      JSON.stringify({ "p1-quickstart-q1": { box: 2, due: 1761800000000 } }),
+    );
+  });
+  const merged = page.waitForResponse((r) => r.url().endsWith("/api/merge"));
+  await page.goto(`${site}/qiskit/`);
+  await signIn(page);
+  const status = (await merged).status();
+  check(status === 200, `stale review: the merge succeeds (${status})`);
+  check(
+    (await stored(page, "qiskit:repaso")) === null,
+    "stale review: the boxes of the old review are gone",
+  );
+  check(
+    (await page.getByText("No se pudo sincronizar").count()) === 0,
+    "stale review: the page reports no sync failure",
+  );
+  check(
+    !errors.length,
+    `stale review: no page errors ${JSON.stringify(errors)}`,
+  );
+  await page.context().close();
+}
+
 async function main(): Promise<void> {
   if (
     !Bun.which("node") ||
@@ -371,6 +408,8 @@ async function main(): Promise<void> {
       (await editorText(panel)) === unblank(REWRITTEN),
       "on load: the most recent code of the account wins",
     );
+
+    await staleReview(browser, site, control);
 
     await menu(one, "Cuenta ✓");
     await menu(one, "Borrar mi cuenta");

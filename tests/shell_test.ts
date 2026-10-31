@@ -217,6 +217,9 @@ async function offline(browser: Browser, base: string): Promise<void> {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
   });
+  await context.addInitScript(
+    `localStorage.setItem("qiskit:done", ${JSON.stringify(JSON.stringify(qiskit.slice(0, 2).map((l) => l.id)))})`,
+  );
   const page = await context.newPage();
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -234,6 +237,10 @@ async function offline(browser: Browser, base: string): Promise<void> {
     "course.json of qiskit is not cached",
   );
   check(cached.includes("/courses.json"), "courses.json is not cached");
+  check(
+    cached.includes("/qiskit/items.json") && cached.includes("/qiskit/repaso/"),
+    "the drill items or the session page are not cached",
+  );
   check(
     cached.includes("/fonts/inter-latin-wght-normal.woff2") &&
       cached.includes("/fonts/inter-latin-ext-wght-normal.woff2"),
@@ -255,6 +262,9 @@ async function offline(browser: Browser, base: string): Promise<void> {
     await page.goto(`${base}${path}`);
     same(`${path} offline`, await page.locator("h1").innerText(), heading);
   }
+  // The session plays from the cache: its chunk, the scheduler and the items.
+  await page.goto(`${base}/qiskit/repaso/`);
+  await page.locator(".drill .prompt").waitFor();
   same("page errors", errors, []);
   await context.close();
 }

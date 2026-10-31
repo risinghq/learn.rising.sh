@@ -11,7 +11,12 @@ const BUDGET = 100 * 1024;
 const courses = JSON.parse(
   readFileSync(join(SITE, "courses.json"), "utf8"),
 ) as { slug: string }[];
-const PAGES = ["/", "/privacidad.html", ...courses.map((c) => `/${c.slug}/`)];
+// The session's own chunk loads by import() after the page, so it is not part of the budget.
+const PAGES = [
+  "/",
+  "/privacidad.html",
+  ...courses.flatMap((c) => [`/${c.slug}/`, `/${c.slug}/repaso/`]),
+];
 
 const failures: string[] = [];
 for (const route of PAGES) {

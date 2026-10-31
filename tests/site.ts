@@ -7,15 +7,12 @@ export interface SiteServer {
   stop: () => Promise<void>;
 }
 
-export function serveSite(lessonJsonDelayMs = 0): SiteServer {
+export function serveSite(): SiteServer {
   const server = Bun.serve({
     hostname: "127.0.0.1",
     port: 0,
     async fetch(request) {
       const { pathname } = new URL(request.url);
-      if (lessonJsonDelayMs && pathname.endsWith("/lesson.json")) {
-        await Bun.sleep(lessonJsonDelayMs);
-      }
       const path = resolve(
         SITE,
         `.${decodeURIComponent(pathname)}${pathname.endsWith("/") ? "index.html" : ""}`,

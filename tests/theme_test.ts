@@ -49,7 +49,6 @@ const TEXT = [
 ];
 const SURFACES = ["bg", "bg2", "bg3", "card", "stage"];
 const GRAPHICS = ["axis", "wire", "edge"];
-const LESSON_JSON_DELAY_MS = 400;
 
 type Rgb = [number, number, number];
 /** The brand text and font on a page that has a brand, and the body font. */
@@ -366,45 +365,11 @@ async function modeStoredOnce(
   await context.close();
 }
 
-async function reviewInParallel(
-  report: Report,
-  browser: Browser,
-  base: string,
-): Promise<number> {
-  const done = JSON.stringify([
-    "p1-quickstart",
-    "p1-instalar",
-    "p1-composer",
-    "p1-patrones",
-    "p3-target",
-    "p6-panorama",
-  ]);
-  const { context, page, errors } = await newPage(
-    browser,
-    [1366, 768],
-    "dark",
-    { "qiskit:done": done },
-  );
-  const start = performance.now();
-  await page.goto(`${base}/qiskit/`);
-  await page.waitForSelector(".review .rq", { timeout: 15000 });
-  const seconds = (performance.now() - start) / 1000;
-  const lessons = (JSON.parse(done) as string[]).length;
-  const delay = LESSON_JSON_DELAY_MS / 1000;
-  report.check(
-    seconds < delay * (lessons - 1),
-    `the review took ${seconds.toFixed(2)} s with ${lessons} lessons of ${delay} s: it requests in series`,
-  );
-  report.check(!errors.length, `review: ${errors}`);
-  await context.close();
-  return seconds;
-}
-
 async function main(): Promise<void> {
   const { values } = parseArgs({
     options: { shots: { type: "string" }, table: { type: "boolean" } },
   });
-  const { stop, base } = serveSite(LESSON_JSON_DELAY_MS);
+  const { stop, base } = serveSite();
   const lastBeats = Object.fromEntries(
     LESSONS.map((id) => {
       const lesson = JSON.parse(
@@ -422,15 +387,11 @@ async function main(): Promise<void> {
   });
   const table = await contrasts(report, browser, base);
   await modeStoredOnce(report, browser, base);
-  const seconds = await reviewInParallel(report, browser, base);
   await visit(report, browser, base, values.shots, lastBeats);
   await browser.close();
   await stop();
   verify();
   if (values.table) printTable(table);
-  console.log(
-    `review with 6 lessons of ${LESSON_JSON_DELAY_MS / 1000} s each: ${seconds.toFixed(2)} s`,
-  );
   console.log(`${report.checks} checks, ${report.failures.length} failures`);
   for (const failure of report.failures) console.log("FAIL", failure);
   process.exit(report.failures.length ? 1 : 0);
