@@ -255,6 +255,21 @@ An `exercise` earns XP only after the server recorded a passing `/run` check for
 that user. `amount` for the other sources is the client's claim, bounded by
 these caps.
 
+## CLI tokens
+
+| Variable         | Value | Meaning                                       |
+| ---------------- | ----- | --------------------------------------------- |
+| `CLI_TOKEN_DAYS` | 90    | How long a token from `rising login` is good. |
+
+The token of [`rising`](cli.md) is checked on every `/api` request, with the
+per-user limit and without the `Origin` check, which only a browser can satisfy.
+The CLI's XP is what it says it earned: `XP_PER_EVENT`, `XP_PER_DAY` and the
+once-per-day rule above are the only bound, and there is no anti-cheat.
+
+The device flow has no variable. `POST /auth/device/token` skips the per-IP
+`AUTH_PER_MINUTE` count and answers 429 `slow_down` to a poll sooner than 5
+seconds after the last one. A login code lives 10 minutes.
+
 ## What the container receives and what is logged
 
 The container receives the body of the request and `Content-Type`. It does not

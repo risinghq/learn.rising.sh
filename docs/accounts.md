@@ -11,12 +11,17 @@ password.
 | ---------------------------------- | ------------------------------------------------------------------------------ |
 | `GET /auth/google`, `/auth/github` | Redirects to the provider. `?return=/path` says where to return (default `/`). |
 | `GET /auth/<provider>/callback`    | The return from the provider. Opens the session and redirects to `return`.     |
-| `POST /auth/logout`                | Closes the session. Answers 204.                                               |
+| `POST /auth/logout`                | Closes the session. Answers 204. With a `Bearer` token, revokes that token.    |
+| `GET /auth/device`                 | The page where a learner approves a CLI code. `?code=` fills it in.            |
+| `POST /auth/device/code`           | Starts the [CLI login](#command-line): returns a device code and a user code.  |
+| `POST /auth/device/token`          | The CLI polls it with the device code until the learner decides.               |
+| `POST /auth/device/approve`        | The page's form: approves or denies a user code. Needs a session.              |
 | `GET /api/me`                      | Who signed in and their progress.                                              |
 | `POST /api/merge`                  | Merges the browser's progress with the account's.                              |
 | `PUT /api/progress`                | Saves progress changes. Answers 204.                                           |
 | `DELETE /api/me`                   | Deletes the account and everything of theirs.                                  |
 | `POST /api/xp`                     | Records XP for a drill, exercise, lesson or CLI task.                          |
+| `GET /api/xp`                      | The XP of the UTC day so far: `{total, cap}`.                                  |
 | `GET /api/streak`                  | The streak: `{current, longest, today}`.                                       |
 | `POST /api/friends/invite`         | Returns a single-use code to share.                                            |
 | `POST /api/friends/accept`         | Spends a code and makes a mutual friendship.                                   |
@@ -30,9 +35,15 @@ origin and answer 403 `bad_origin` if not. Without a session, all of `/api`
 except `GET /api/me` answers 401 `signed_out`. A route that does not exist
 answers 404 `not_found`, and a wrong method, 405 `method` with `Allow`.
 
+A request that carries `Authorization: Bearer <token>` is not a browser's: it is
+exempt from the `Origin` check, and the token alone signs it in. Only a token
+that [`rising login`](#command-line) issued works there; a missing, expired or
+revoked one answers 401 `token_invalid`, and the cookie is not tried instead.
+
 Each `/auth` endpoint counts against a per-IP limit, `AUTH_PER_MINUTE` (10) per
-minute and `RATE_PER_DAY` per day, and answers 429 `rate_auth` when exceeded.
-Each `/api` request with a session counts against the per-user limit of
+minute and `RATE_PER_DAY` per day, and answers 429 `rate_auth` when exceeded,
+except `POST /auth/device/token`, which its own interval bounds. Each `/api`
+request with a session or a token counts against the per-user limit of
 [protection.md](protection.md#per-ip-limit).
 
 ## Sign-in
@@ -68,6 +79,35 @@ A provider and an identifier are an identity. Neither two providers nor two
 accounts of the same provider merge: each new identity is a new user. The
 `redirect_uri` is built from the origin of the request; what to register with
 each provider is in [deploy.md](deploy.md#4-create-the-google-client).
+
+## Command line
+
+[`rising`](cli.md) signs in with the device flow of RFC 8628, in
+[`src/device.ts`](../runner/worker/src/device.ts). The Worker serves the
+approval page itself, in Spanish, because it needs the session cookie.
+
+1. `POST /auth/device/code` returns `deviceCode` (a random 256-bit secret),
+   `userCode` (eight characters shown as `ABCD-EFGH`), `verificationUri`,
+   `verificationUriComplete`, `expiresIn` (600 seconds) and `interval` (5).
+2. The learner opens `verificationUriComplete`, signs in with Google or GitHub
+   if the browser has no session, and presses «Aprobar» or «Rechazar». The form
+   posts to `POST /auth/device/approve`, which needs the session cookie and the
+   `Origin` check. It answers 404 for an unknown code, 410 for an expired one,
+   409 for one already decided and 401 without a session.
+3. The CLI posts `{"deviceCode": "..."}` to `POST /auth/device/token` every
+   `interval` seconds. Until the learner decides it answers 400
+   `authorization_pending`. A poll sooner than `interval` answers 429
+   `slow_down` with `Retry-After`. A denial answers 403 `access_denied`. An
+   unknown or spent code answers 400 `invalid_code`, and an expired one 400
+   `expired_code`. An approval answers 200 with `{token, expiresAt}` once: the
+   code is spent and a second poll gets `invalid_code`.
+
+The token is `rs_` and 43 random characters. It is a row of `sessions` with
+`kind` `cli`, so it is stored only as a SHA-256 hash, expires after
+`CLI_TOKEN_DAYS` ([protection.md](protection.md#cli-tokens)) and is deleted with
+the account. A `web` session cookie is not accepted as a token, nor the other
+way round. `POST /auth/logout` with the `Bearer` header deletes the row and
+answers 204, also when the token was already gone.
 
 ## Progress
 
@@ -182,6 +222,10 @@ granted XP stores no row. An `exercise` with no passing check recorded by the
 server for this user answers 403 `not_passed`. It is the same record as `passed`
 in [Progress](#progress): the page and `PUT /api/progress` cannot set it. A body
 that does not follow the table answers 400 `bad_request`.
+
+For `drill` and `cli` the `ref` is any id of letters, digits and `_ . : -`, up
+to 100 characters, so the CLI sends `lesson:exercise`. `GET /api/xp` answers
+`{"total": 35, "cap": 300}`: the XP of the UTC day so far and `XP_PER_DAY`.
 
 `amount` is what the client says it earned. The Worker bounds it with
 `XP_PER_EVENT`, `XP_PER_DAY` and the once-per-day rule, and verifies only
@@ -329,7 +373,8 @@ with `ON DELETE CASCADE`.
 | ---------------- | ------------------------------------------------------------------------------------------------ |
 | `users`          | A random id, the sign-up day, the day of the last visit, the progress version and the time zone. |
 | `identities`     | Provider and provider identifier of each user.                                                   |
-| `sessions`       | The SHA-256 hash of the `qg_auth` token and its expiry. Never the token.                         |
+| `sessions`       | The SHA-256 hash of a `qg_auth` or CLI token, its expiry and its `kind`. Never the token.        |
+| `device_codes`   | The hashes of a pending CLI login's two codes, its expiry, its last poll and the decision.       |
 | `lesson_done`    | The finished lessons and when.                                                                   |
 | `exercise_state` | The code, hints, checks and whether it passed, per exercise.                                     |
 | `kv`             | The `localStorage` keys of the table above.                                                      |
@@ -370,9 +415,9 @@ progress write.
 A daily cron (`17 3 * * *`, UTC) calls the Worker's `scheduled` handler, which
 deletes in a single batch the expired attempts, the XP events older than 14 days
 (the weekly board and the once-per-day rule read nothing older; streaks live in
-their own table), the expired sessions, the expired friend invites and the
-inactive accounts, in that order. Deleting an account takes everything of theirs
-with it.
+their own table), the expired sessions (of both kinds), the expired CLI login
+codes, the expired friend invites and the inactive accounts, in that order.
+Deleting an account takes everything of theirs with it.
 
 ## Where learners get stuck
 

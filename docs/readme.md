@@ -13,3 +13,4 @@
 8. [deploy.md](deploy.md): publish your own copy on Cloudflare.
 9. [drills.md](drills.md): the items of the casual mode, how to write one and
    how a session is chosen.
+10. [cli.md](cli.md): the `rising` command for laptop sessions.
