@@ -13,7 +13,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@site": path("../site"),
-      "@fonts": path("node_modules/@fontsource-variable/inter/files"),
     },
   },
   build: {

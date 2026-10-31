@@ -15,7 +15,7 @@ document says what each folder holds and where a request goes.
 | `exercises/`   | The code exercises: starter code, solution and cases of each.                                       |
 | `qgcheck/`     | The exercise grader: runs a learner's code and returns the result of each case.                     |
 | `runner/`      | The runner image (`server.py`, `sandbox.py`) and the Worker (`worker/`).                            |
-| `editor/`      | The package that bundles `site/player/editor.js` and copies KaTeX and the fonts to `site/vendor/`.  |
+| `editor/`      | The package that bundles `site/player/editor.js` and copies KaTeX to `site/vendor/`.                |
 | `content/`     | The speech synthesis cache.                                                                         |
 | `tools/`       | Helper programs: original guides, narration, checks, local server, dashboard and browser tools.     |
 | `tests/`       | Browser tests, exercise tests, runner tests and dashboard tests.                                    |
@@ -83,11 +83,11 @@ The root holds the shell and what the courses share:
 - `account.ts` is the account menu ([accounts.md](accounts.md#on-the-site)).
 - `manifest.webmanifest` and `icons/` make the site installable. `sw.js` is the
   service worker.
-- `vendor/` is KaTeX and the two fonts, copied from `editor/node_modules` by
-  `editor/vendor.ts`. Git ignores it; `mise run install` and `mise run deploy`
-  generate it. No page requests anything from another site except the Turnstile
-  script, which `exercise.ts` downloads from Cloudflare when the runner requires
-  it.
+- `fonts/` is Inter, the one face of every page.
+- `vendor/` is KaTeX, copied from `editor/node_modules` by `editor/vendor.ts`.
+  Git ignores it; `mise run install` and `mise run deploy` generate it. No page
+  requests anything from another site except the Turnstile script, which
+  `exercise.ts` downloads from Cloudflare when the runner requires it.
 - The page scripts are written in TypeScript. `mise run generate:scripts`
   bundles them with `bun build` into `theme.js`, `account.js`,
   `player/engine.js`, `player/editor.js` and `qiskit/notebooks.js`, which the

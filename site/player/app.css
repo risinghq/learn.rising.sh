@@ -1395,9 +1395,11 @@ div#stage.work .mhow {
   .btns {
     justify-content: space-between;
   }
+  /* At --t-md the four labels in Inter overflow a 390 px screen. */
   .cbtn {
     flex: 1;
     padding: 0 var(--s2);
+    font-size: var(--t-sm);
   }
   #back5,
   #fwd5 {

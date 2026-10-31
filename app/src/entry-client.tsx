@@ -3,7 +3,6 @@ import { hydrateRoot } from "react-dom/client";
 
 import { App } from "./App.tsx";
 import type { Page } from "./model.ts";
-import "./styles/fonts.css";
 import "./styles/app.css";
 
 // The build writes the page's data beside the markup it rendered from it.

@@ -303,10 +303,9 @@ mise run generate:scripts
 The same command bundles the page scripts. `mise run typecheck:ts` checks the
 types of the editor.
 
-### Update KaTeX and the fonts
+### Update KaTeX
 
-`site/vendor/` holds KaTeX and the Newsreader and JetBrains Mono fonts, copied
-from the npm packages `katex` and `@fontsource-variable/*` of
+`site/vendor/` holds KaTeX, copied from the npm package `katex` of
 `editor/package.json`. Git ignores it: `mise run install` generates it with
 `editor/vendor.ts`. To change a version:
 

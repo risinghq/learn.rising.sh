@@ -154,7 +154,7 @@ dir = "app"
 run = "node scripts/build.ts"
 
 [tasks."generate:vendor"]
-description = "Copy KaTeX and the fonts from editor/node_modules into site/vendor, which git ignores"
+description = "Copy KaTeX from editor/node_modules into site/vendor, which git ignores"
 dir = "editor"
 run = "node vendor.ts ../site/vendor"
 
@@ -183,7 +183,7 @@ depends = ["generate:scripts", "generate:app"]
 run = "uv run python tools/serve.py"
 
 [tasks.deploy]
-description = "Copy KaTeX and the fonts into site/vendor, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
+description = "Copy KaTeX into site/vendor, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
 depends = ["generate:vendor", "generate:scripts", "generate:app"]
 dir = "runner/worker"
 run = "bunx cf deploy"

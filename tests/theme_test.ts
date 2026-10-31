@@ -2,7 +2,7 @@
 //     bun tests/theme_test.ts [--shots FOLDER] [--table]
 // Loads the four shell pages and three lessons in each mode at 1366x768 and
 // 390x844. Requires a clean console, no `#scene > .blk` outside `#stage`, one
-// brand and font family per part of the site, the mode stored once, WCAG AA
+// brand per part of the site, one font family on every page, the mode stored once, WCAG AA
 // contrast and parallel lesson.json requests. --shots saves screenshots;
 // --table prints the contrasts as Markdown.
 import { mkdirSync, readFileSync } from "node:fs";
@@ -199,11 +199,11 @@ async function visit(
         const group = inShell ? shell : player;
         const key = `${mode}|${sizeName}`;
         group.set(key, [...(group.get(key) ?? []), brand]);
+        const inter = await page.evaluate<boolean>(
+          "document.fonts.ready.then(fs => [...fs].some(f => f.family.replaceAll('\"', '') === 'Inter' && f.status === 'loaded'))",
+        );
+        report.check(inter, `${label} ${name}: Inter did not load`);
         if (inShell) {
-          const sans = await page.evaluate<boolean>(
-            "[...document.fonts].some(f => f.family.replaceAll('\"', '') === 'Inter' && f.status === 'loaded')",
-          );
-          report.check(sans, `${label} ${name}: the shell font did not load`);
           const small = await page.evaluate<number>(
             "[...document.querySelectorAll('a, button, summary, input')]" +
               ".filter(e => { const r = e.getBoundingClientRect(); return r.width && r.height && !e.closest('p, .help, footer') && (r.height < 47.5 || r.width < 47.5) && getComputedStyle(e).display !== 'inline'; }).length",
@@ -241,8 +241,8 @@ async function visit(
         `brand ${JSON.stringify(brand[0])}`,
       );
       report.check(
-        brand[1] === brands[0][1] && brand[2] === brands[0][2],
-        `${key}: the lesson pages differ in font: ${brand.slice(1)} / ${brands[0].slice(1)}`,
+        brand[1] === brand[2] && brand[2] === shell.get(key)?.[0][2],
+        `${key}: a lesson page differs in font from the shell: ${brand.slice(1)} / ${shell.get(key)?.[0][2]}`,
       );
     }
   }

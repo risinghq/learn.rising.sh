@@ -6,15 +6,7 @@ import { chromium } from "playwright";
 
 const root = join(import.meta.dirname, "..", "..");
 const font = await readFile(
-  join(
-    root,
-    "app",
-    "node_modules",
-    "@fontsource-variable",
-    "inter",
-    "files",
-    "inter-latin-wght-normal.woff2",
-  ),
+  join(root, "site", "fonts", "inter-latin-wght-normal.woff2"),
 );
 
 // The sRGB of --a9 and --acc-ink in the light theme. `glyph` is the letter's share of the icon.

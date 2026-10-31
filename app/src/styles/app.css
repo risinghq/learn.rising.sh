@@ -1,9 +1,7 @@
 /* The shell: the catalog, the path of a course and the privacy page. It reads the tokens and the chrome of
-   /theme.css, which loads first, and sets them in a sans face with 48 px controls. */
+   /theme.css, which loads first and sets the type of every page, and adds 48 px controls. */
 
 :root {
-  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
   --tap: 3rem;
   --dot: 3.5rem;
   --dot-current: 4.5rem;

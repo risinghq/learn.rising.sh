@@ -103,12 +103,8 @@ const { render } = (await import(
   render: (page: Page) => string;
 };
 const assets = await readdir(join(dist, "assets"));
-const fonts = assets.filter((f) =>
-  /^inter-latin(?:-ext)?-wght-normal-.*\.woff2$/.test(f),
-);
-const mainFont = fonts.find((f) => f.startsWith("inter-latin-wght"));
-if (!mainFont)
-  throw new Error("the Inter latin font is missing from the build");
+// theme.css declares the face; the shell only preloads its main range.
+const mainFont = "/fonts/inter-latin-wght-normal.woff2";
 
 const pages = await readPages();
 const precache = new Set<string>([
@@ -118,9 +114,9 @@ const precache = new Set<string>([
   "/courses.json",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
-  ...assets
-    .filter((f) => !f.endsWith(".woff2") || fonts.includes(f))
-    .map((f) => `/assets/${f}`),
+  mainFont,
+  "/fonts/inter-latin-ext-wght-normal.woff2",
+  ...assets.map((f) => `/assets/${f}`),
 ]);
 const hash = createHash("sha256");
 
@@ -131,7 +127,7 @@ const rendered = pages.map(({ route, file, page }) => {
   // `<` in the data would end the script element early.
   const data = JSON.stringify(page).replaceAll("<", "\\u003c");
   const html = template
-    .replace(slot, headTags(page, `/assets/${mainFont}`))
+    .replace(slot, headTags(page, mainFont))
     .replace(
       outlet,
       `<div id="root">${render(page)}</div>\n    <script id="page-data" type="application/json">${data}</script>`,

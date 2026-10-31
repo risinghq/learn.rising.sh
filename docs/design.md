@@ -9,14 +9,14 @@ the tokens, how they are used and the measures that fix legibility.
 
 ## Files
 
-| File                       | Contents                                                          |
-| -------------------------- | ----------------------------------------------------------------- |
-| `site/theme.css`           | Tokens, the top bar, the buttons and `<progress>`.                |
-| `site/theme.ts`            | Sets the mode before paint and builds the theme button.           |
-| `app/src/styles/app.css`   | The shell: sets the sans face and the 48 px controls.             |
-| `app/src/styles/fonts.css` | Inter, self-hosted from the `@fontsource-variable/inter` package. |
-| `site/player/app.css`      | Player styles.                                                    |
-| `tests/theme_test.ts`      | Browser test: contrast, pages, saved mode.                        |
+| File                     | Contents                                                        |
+| ------------------------ | --------------------------------------------------------------- |
+| `site/theme.css`         | Tokens, the Inter face, the top bar, the buttons, `<progress>`. |
+| `site/fonts/`            | Inter, self-hosted: one variable file per Latin range.          |
+| `site/theme.ts`          | Sets the mode before paint and builds the theme button.         |
+| `app/src/styles/app.css` | The shell: the 48 px controls.                                  |
+| `site/player/app.css`    | Player styles.                                                  |
+| `tests/theme_test.ts`    | Browser test: contrast, pages, saved mode.                      |
 
 Each page loads `theme.css` before its own sheet and `theme.js` in `<head>`.
 `theme.js` is the result of bundling `theme.ts` with
@@ -69,7 +69,7 @@ The component sheets read roles, not steps:
 | `--focus`                                                               | Focus ring.                                                                                                                     |
 | `--blue`, `--teal`, `--violet`, `--green`                               | Named colors of the player.                                                                                                     |
 | `--gold`                                                                | Emphasis and question labels.                                                                                                   |
-| `--font`, `--mono`                                                      | Newsreader for text and titles; JetBrains Mono for code.                                                                        |
+| `--font`, `--mono`                                                      | Inter for text and titles; the system monospace for code.                                                                       |
 
 ### Named colors
 
@@ -93,12 +93,12 @@ their own.
 
 ## Type and space
 
-- The shell sets `--font` to Inter, a sans face, with the system sans as
-  fallback, and `--mono` to the system monospace. Inter comes from the
-  `@fontsource-variable/inter` package, as one variable file for the `latin`
-  range and one for `latin-ext`, copied to `site/assets/` by the build. The
-  player keeps `--font` at Newsreader, a serif, and `--mono` at JetBrains Mono,
-  both from `site/vendor/fonts.css`. Formulas use the KaTeX fonts.
+- Every page, shell and player, uses one face. `theme.css` sets `--font` to
+  Inter with the system sans as fallback, and `--mono` to the system monospace.
+  Inter is committed in `site/fonts/` from Fontsource 5.3.0, as one variable
+  file for the `latin` range and one for `latin-ext`. A page does not set its
+  own `--font`; `tests/theme_test.ts` fails if two pages render different faces.
+  Formulas use the KaTeX fonts.
 - Eight sizes, from `--t-xs` (12 px) to `--t-4xl` (48 px), in `rem`, so the
   browser's text size setting still applies. Two weights: 400 and 600. The shell
   uses four sizes: `--t-sm` for details, `--t-md` for text, `--t-lg` for titles
