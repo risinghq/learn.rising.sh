@@ -4,22 +4,21 @@
 // break it, that deleting the account keeps the
 // local copy, and that without an account the page makes only its own `/run`
 // request. Skips with a reason when Node or the Worker dependencies are missing.
-import { spawn } from "node:child_process";
-import type { ChildProcess } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { isDeepStrictEqual } from "node:util";
 
 import { chromium } from "playwright";
-import type {
-  Browser,
-  BrowserContextOptions,
-  Locator,
-  Page,
-  Route,
-} from "playwright";
+import type { Browser, BrowserContextOptions, Locator, Page } from "playwright";
 
-import { newContext, verify } from "./offline.ts";
+import { verify } from "./offline.ts";
+import {
+  call,
+  newTab as openTab,
+  startWorker,
+  stopWorker,
+  type Tab,
+} from "./worker.ts";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const WORKER = join(ROOT, "runner", "worker");
@@ -33,20 +32,8 @@ const FAILING = "# FALLA\nprint('primer intento')\n";
 const REWRITTEN = "# FALLA\nprint('desde el otro navegador')\n";
 const SUBJECT = "424242";
 
-// Replaces the Turnstile widget and hands over a test token.
-const FAKE_TURNSTILE = `window.turnstile = {
-  render(slot, o) { slot.dataset.sitekey = o.sitekey; setTimeout(() => o.callback('XXXX.DUMMY.TOKEN.XXXX'), 20); return 'w1'; },
-  remove() { window.turnstileRemoved = (window.turnstileRemoved || 0) + 1; },
-};`;
-
 const failures: string[] = [];
 
-type Requests = [method: string, path: string][];
-interface Tab {
-  page: Page;
-  errors: string[];
-  requests: Requests;
-}
 interface ExerciseRecord {
   code: string;
   checks: number;
@@ -58,42 +45,6 @@ type Rows = Record<string, number>;
 function check(ok: boolean, message: string): void {
   if (!ok) failures.push(message);
   console.log(ok ? "✓" : "✗", message);
-}
-
-async function call<T>(url: string, body?: Record<string, string>): Promise<T> {
-  const response = await fetch(url, {
-    method: body === undefined ? "GET" : "POST",
-    headers: { "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-    signal: AbortSignal.timeout(30_000),
-  });
-  if (!response.ok) throw new Error(`${url} answered ${response.status}`);
-  return (await response.json()) as T;
-}
-
-async function startWorker(): Promise<{
-  process: ChildProcess;
-  urls: { site: string; control: string };
-}> {
-  const child = spawn("node", ["test/serve.ts"], {
-    cwd: WORKER,
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  let errors = "";
-  child.stderr.on("data", (chunk: Buffer) => (errors += chunk));
-  const line = await new Promise<string>((done) => {
-    let text = "";
-    child.stdout.on("data", (chunk: Buffer) => {
-      text += chunk;
-      if (text.includes("\n")) done(text.split("\n")[0]);
-    });
-    child.on("close", () => done(""));
-  });
-  if (!line) {
-    child.kill();
-    throw new Error(`the local Worker did not start: ${errors}`);
-  }
-  return { process: child, urls: JSON.parse(line) };
 }
 
 function lastBeat(lesson: string): number {
@@ -156,51 +107,11 @@ async function waitResult(panel: Locator, timeout = 40_000): Promise<void> {
 }
 
 // A new browser: the Turnstile widget and the provider screen are fake.
-async function newTab(
+const newTab = (
   browser: Browser,
   site: string,
   control: string,
-): Promise<Tab> {
-  const context = await newContext(browser, DESKTOP);
-  await context.route(
-    "https://challenges.cloudflare.com/turnstile/v0/api.js*",
-    (route) =>
-      route.fulfill({ contentType: "text/javascript", body: FAKE_TURNSTILE }),
-  );
-
-  // The Worker redirects to the provider. The browser does not follow that
-  // redirect through route, so this handler answers for the provider: the
-  // learner approves and returns to the redirect address with the code.
-  const provider = async (route: Route): Promise<void> => {
-    const response = await route.fetch({ maxRedirects: 0 });
-    const authorize = response.headers()["location"];
-    const { code } = await call<{ code: string }>(`${control}/consent`, {
-      authorizeUrl: authorize,
-      subject: SUBJECT,
-    });
-    const query = new URL(authorize).searchParams;
-    const back = new URLSearchParams({ code, state: query.get("state") ?? "" });
-    await route.fulfill({
-      response,
-      headers: {
-        ...response.headers(),
-        location: `${query.get("redirect_uri")}?${back}`,
-      },
-    });
-  };
-  await context.route(/\/auth\/github\?/, provider);
-
-  const page = await context.newPage();
-  const errors: string[] = [];
-  const requests: Requests = [];
-  page.on("pageerror", (e) => errors.push(String(e)));
-  page.on("request", (r) => {
-    if (r.url().startsWith(site)) {
-      requests.push([r.method(), r.url().slice(site.length)]);
-    }
-  });
-  return { page, errors, requests };
-}
+): Promise<Tab> => openTab(browser, site, control, SUBJECT, DESKTOP);
 
 async function stored<T>(page: Page, key: string): Promise<T | null> {
   const text = await page.evaluate<string | null, string>(
@@ -449,9 +360,7 @@ async function main(): Promise<void> {
     }
     await browser.close();
   } finally {
-    const exited = new Promise((done) => worker.once("exit", done));
-    worker.kill("SIGTERM");
-    await exited;
+    await stopWorker(worker);
   }
   verify();
   console.log(failures.length ? `\n${failures.length} failures` : "\nall good");

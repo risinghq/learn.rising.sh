@@ -286,15 +286,29 @@ async function signedIn(browser: Browser, base: string): Promise<void> {
   const { context, page, errors } = await visitor(
     browser,
     { width: 390, height: 844 },
-    { ...seed, "rising:cuenta": "1" },
+    { ...seed, "rising:cuenta": "learner" },
   );
   await context.route("**/api/merge", (route) =>
-    route.fulfill({ json: { progress: { done: [], exercises: {}, kv: {} } } }),
+    route.fulfill({
+      json: {
+        progress: { done: [], exercises: {}, kv: {} },
+        account: "learner",
+      },
+    }),
   );
   const posts: Record<string, unknown>[] = [];
   let connected = false;
+  await context.route("**/api/streak", (route) =>
+    connected
+      ? route.fulfill({ json: { current: 1, longest: 1, today: true } })
+      : route.abort(),
+  );
   const xp = async (route: Route) => {
     if (!connected) return route.abort();
+    if (route.request().method() === "GET")
+      return route.fulfill({
+        json: { total: EXPECTED_XP, cap: 300, today: EXPECTED_XP },
+      });
     posts.push(route.request().postDataJSON() as Record<string, unknown>);
     return route.fulfill({ json: { granted: EXPECTED_XP } });
   };
@@ -308,20 +322,27 @@ async function signedIn(browser: Browser, base: string): Promise<void> {
     0,
   );
   const queue = () =>
-    page.evaluate(() => JSON.parse(localStorage.getItem("rising:xpq") ?? "[]"));
-  await page.waitForFunction(() => localStorage.getItem("rising:xpq"));
-  const waiting = (await queue()) as { ref: string; amount: number }[];
+    page.evaluate(() =>
+      JSON.parse(localStorage.getItem("rising:xpq:learner") ?? "[]"),
+    );
+  await page.waitForFunction(() => localStorage.getItem("rising:xpq:learner"));
+  const waiting = (await queue()) as {
+    ref: string;
+    amount: number;
+    earnedAt: number;
+  }[];
   same("offline: one post waits", waiting.length, 1);
   same("offline: it carries the XP", waiting[0]?.amount, EXPECTED_XP);
 
   connected = true;
   await page.evaluate(() => dispatchEvent(new Event("online")));
-  await page.waitForFunction(() => !localStorage.getItem("rising:xpq"));
+  await page.waitForFunction(() => !localStorage.getItem("rising:xpq:learner"));
   same("online: the post is sent once", posts.length, 1);
   same("online: it is a drill post", posts[0], {
     source: "drill",
     ref: waiting[0]?.ref,
     amount: EXPECTED_XP,
+    earnedAt: waiting[0]?.earnedAt,
     tz: posts[0]?.tz,
   });
   same(

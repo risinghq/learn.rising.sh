@@ -88,13 +88,14 @@ run = [
 ]
 
 [tasks."test:ui"]
-description = "Drive the exercise editor, the project panel, the shell, the drill session, the theme and the optional account in a browser, and hold the shell to its script budget"
+description = "Drive the exercise editor, the project panel, the shell, the drill session, the theme, the optional account and the friends board in a browser, and hold the shell to its script budget"
 depends = ["generate:scripts", "generate:app"]
 wait_for = ["test:py"]
 run = [
   "uv run python tests/exercise_ui_test.py",
   "uv run python tests/proyecto_test.py",
   "bun tests/account_ui_test.ts",
+  "bun tests/friends_test.ts",
   "bun tests/theme_test.ts",
   "bun tests/shell_test.ts",
   "bun tests/session_test.ts",
