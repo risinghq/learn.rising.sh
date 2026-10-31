@@ -8,8 +8,14 @@ declare var QGAccount: {
   changed: (key: string) => void;
   /** Fills `host` with the account button and its menu, for pages that render their own markup. */
   mount: (host: HTMLElement) => void;
-  /** Sends the XP of a drill session to the account, now or when the connection returns. `ref` is unique per session. */
-  xp: (ref: string, amount: number) => void;
+  /** Sends an award to the account, now or when the connection returns. `ref` is unique per source and day. */
+  xp: (
+    source: "drill" | "lesson" | "exercise",
+    ref: string,
+    amount: number,
+  ) => void;
+  /** Calls the account's API. A 401 closes the sign-in before the response comes back. */
+  request: (method: string, path: string, body?: unknown) => Promise<Response>;
   /** The address that starts the sign-in with `provider` and returns to this page. */
   signInHref: (provider: "google" | "github") => string;
 };

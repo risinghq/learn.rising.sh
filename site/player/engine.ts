@@ -17,6 +17,7 @@ import {
   migrateLesson,
   PREF,
   write,
+  XP_PER_LESSON,
 } from "../progress.ts";
 import type {
   Action,
@@ -1551,7 +1552,8 @@ function showAsk(beat: Beat, a: Ask) {
 function finish() {
   token++;
   nar.pause();
-  if (LID) completeLesson(COURSE, LID);
+  if (LID && completeLesson(COURSE, LID))
+    QGAccount.xp("lesson", LID, XP_PER_LESSON);
   QGAccount.changed(courseKey(COURSE, "done"));
   $("#end-title").textContent = L.title;
   $("#end-score").textContent = asked

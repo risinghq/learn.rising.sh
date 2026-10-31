@@ -16,9 +16,16 @@ export const PREF = {
   xp: "rising:xp",
   /** The course whose lesson the learner opened last. */
   last: "rising:last",
-  /** The XP of finished drill sessions that the account has not received yet. */
-  xpQueue: "rising:xpq",
+  /** Set once an account has signed in on this device and the XP earned before went to its queue. */
+  xpSeeded: "rising:xpsent",
+  /** The streak and the XP of today as the account last reported them. */
+  tally: "rising:tally",
+  /** The labels of the friends, which the account does not store. */
+  friends: "rising:amigos",
 } as const;
+
+/** Raised on `window` when the queue or the tally of the account changes. */
+export const ACCOUNT_EVENT = "rising:account";
 
 /** The keys of a lesson, which end with its id (and a step for `predict` and `reflect`). */
 const LESSON_KEY =
@@ -26,6 +33,7 @@ const LESSON_KEY =
 const EXERCISE_KEY = /^exercise:([a-z0-9][a-z0-9-]{0,59})\/[a-z0-9-]{1,40}$/;
 
 export const XP_PER_LESSON = 10;
+export const XP_PER_EXERCISE = 5;
 const XP_DAYS = 400;
 const DAY_MS = 864e5;
 
@@ -77,6 +85,7 @@ export const courseKey = (course: string, name: string) => `${course}:${name}`;
 
 /** Moves legacy `qiskit:` keys to the course that owns each lesson. */
 export function migratePreferences() {
+  migrateXpQueue();
   for (const [name, key] of [
     ["theme", PREF.theme],
     ["speed", PREF.speed],
@@ -253,25 +262,126 @@ export function compactReviews(log: Review[]): Review[] {
   return kept.slice(0, MAX_REVIEWS).toReversed();
 }
 
-/** The XP of one session, which the account receives once the connection allows. */
+/** Where an award comes from. The Worker accepts these sources from the site. */
+export type XpSource = "drill" | "lesson" | "exercise";
+const SOURCES: ReadonlySet<string> = new Set(["drill", "lesson", "exercise"]);
+
+/**
+ * XP the account has not received. `ref` is unique per source and day. `earnedAt` is when the
+ * learner earned it, in Unix milliseconds, and every resend carries the same value. A post saved
+ * without one reads as 0, so it never counts as today's.
+ */
 export interface XpPost {
+  source: XpSource;
   ref: string;
   amount: number;
+  earnedAt: number;
 }
 
-export const readXpQueue = (): XpPost[] => {
-  const queue = readJson<unknown>(PREF.xpQueue, []);
-  return Array.isArray(queue)
-    ? queue.filter(
-        (post): post is XpPost =>
-          typeof post?.ref === "string" && Number.isInteger(post.amount),
-      )
-    : [];
-};
-export const writeXpQueue = (queue: XpPost[]) =>
+export const samePost = (a: XpPost, b: XpPost) =>
+  a.source === b.source && a.ref === b.ref;
+
+// Each owner has its own queue under `rising:xpq:<owner>`: an account id, or `anon` for XP earned
+// before any sign-in. The bare `rising:xpq` is the single queue of an earlier version.
+const XPQ = "rising:xpq";
+export const xpQueueKey = (owner: string | null) => `${XPQ}:${owner ?? "anon"}`;
+
+/** The posts of one queue. Anything stored in another shape is ignored. */
+function queued(raw: unknown, source?: XpSource): XpPost[] {
+  if (!Array.isArray(raw)) return [];
+  const posts: XpPost[] = [];
+  for (const post of raw) {
+    const from = post?.source ?? source;
+    if (
+      !SOURCES.has(from) ||
+      typeof post?.ref !== "string" ||
+      !Number.isInteger(post.amount)
+    )
+      continue;
+    posts.push({
+      source: from,
+      ref: post.ref,
+      amount: post.amount,
+      earnedAt: Number.isInteger(post.earnedAt) ? post.earnedAt : 0,
+    });
+  }
+  return posts;
+}
+
+export const readXpQueue = (owner: string | null): XpPost[] =>
+  queued(readJson<unknown>(xpQueueKey(owner), []));
+
+export const writeXpQueue = (owner: string | null, queue: XpPost[]) =>
   queue.length
-    ? write(PREF.xpQueue, JSON.stringify(queue))
-    : remove(PREF.xpQueue);
+    ? write(xpQueueKey(owner), JSON.stringify(queue))
+    : remove(xpQueueKey(owner));
+
+/** Adds posts to a queue, except those it already holds. */
+export function appendXpQueue(owner: string | null, posts: XpPost[]) {
+  const queue = readXpQueue(owner);
+  for (const post of posts)
+    if (!queue.some((held) => samePost(held, post))) queue.push(post);
+  writeXpQueue(owner, queue);
+}
+
+/** Sign-in: the XP earned before any account joins the queue of the account, the only move between queues. */
+export function claimAnonymousXp(account: string) {
+  appendXpQueue(account, readXpQueue(null));
+  writeXpQueue(null, []);
+}
+
+/**
+ * Moves the single queue of an earlier version into the anonymous one, unless an account has
+ * signed in on this device, when its posts may belong to that account and are dropped.
+ */
+function migrateXpQueue() {
+  const legacy = readJson<unknown>(XPQ, undefined);
+  if (legacy === undefined) return;
+  remove(XPQ);
+  const signedIn = read(PREF.account) !== null || read(PREF.xpSeeded) !== null;
+  if (!signedIn) appendXpQueue(null, queued(legacy, "drill"));
+}
+
+/** What the account last said about the learner's streak and today's XP. */
+export interface Tally {
+  streak: number;
+  earned: boolean;
+  xp: number;
+  day: string;
+}
+
+export const readTally = (): Tally | null => {
+  const tally = readJson<Partial<Tally> | null>(PREF.tally, null);
+  return typeof tally?.streak === "number" &&
+    typeof tally.xp === "number" &&
+    typeof tally.earned === "boolean" &&
+    typeof tally.day === "string"
+    ? (tally as Tally)
+    : null;
+};
+
+/**
+ * The streak and today's XP to show. A learner with an account sees the account's numbers plus
+ * what is still queued from today; without one, the local log.
+ */
+export function standing(now = new Date()) {
+  const local = xpSummary(readXp(), now);
+  const account = read(PREF.account);
+  const tally = account === null ? null : readTally();
+  if (!tally) return local;
+  const today = dayOf(now);
+  // A queued post is today's only when it was earned today: an earlier day is the account's past,
+  // and a post without a date never counts.
+  const pending = readXpQueue(account)
+    .filter((post) => dayOf(new Date(post.earnedAt)) === today)
+    .reduce((sum, post) => sum + post.amount, 0);
+  const current = tally.day === today;
+  const earned = current && tally.earned;
+  return {
+    today: (current ? tally.xp : 0) + pending,
+    streak: tally.streak + (!earned && pending > 0 ? 1 : 0),
+  };
+}
 
 interface CourseIndex {
   parts: { lessons: { id: string }[] }[];

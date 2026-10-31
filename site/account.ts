@@ -3,7 +3,11 @@
 // merges the progress before painting and sends the changes the Worker accepts.
 // The reflections (<course>:reflect) never leave the browser.
 import {
+  ACCOUNT_EVENT,
   courseKey,
+  dayOf,
+  appendXpQueue,
+  claimAnonymousXp,
   discardStaleReviews,
   lessonOwners,
   migrate,
@@ -11,12 +15,17 @@ import {
   PREF,
   read as readKey,
   readJson,
+  readXp,
   readXpQueue,
+  samePost,
+  type XpPost,
+  type XpSource,
   write as writeKey,
   writeXpQueue,
 } from "./progress.ts";
 
 const FLAG = PREF.account;
+const XP_PER_POST = 50;
 const RETURN_HASH = "#cuenta";
 const SYNC_TIMEOUT_MS = 4000;
 const PUSH_DELAY_MS = 1500;
@@ -64,11 +73,14 @@ const update = (patch: Partial<typeof state>) => {
   Object.assign(state, patch);
   listeners.forEach((f) => f());
 };
+// The XP queue of the account stays under its own key, for its next sign-in.
 const forget = () => {
   try {
     localStorage.removeItem(FLAG);
+    localStorage.removeItem(PREF.tally);
   } catch {}
   update({ signedIn: false });
+  dispatchEvent(new Event(ACCOUNT_EVENT));
 };
 
 function exerciseBody(raw: unknown): ExerciseBody | null {
@@ -184,8 +196,12 @@ async function sync() {
     });
     if (lapsed(resp)) return;
     if (!resp.ok) throw new Error(String(resp.status));
-    if (read(FLAG) === null) write(FLAG, "1");
-    await adopt(((await resp.json()) as { progress: Progress }).progress);
+    const reply = (await resp.json()) as {
+      progress: Progress;
+      account: string;
+    };
+    write(FLAG, reply.account);
+    await adopt(reply.progress);
     update({ signedIn: true, message: "" });
   } catch {
     update({
@@ -233,41 +249,116 @@ addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") flush({ unloading: true });
 });
 
+const announce = () => dispatchEvent(new Event(ACCOUNT_EVENT));
+
+// The streak and the XP of today, as the account counts them, for the header.
+async function refreshTally(): Promise<void> {
+  if (!state.signedIn) return;
+  try {
+    const [streakReply, xpReply] = await Promise.all([
+      api("GET", "/api/streak"),
+      api("GET", "/api/xp"),
+    ]);
+    if (lapsed(streakReply) || lapsed(xpReply)) return;
+    if (!streakReply.ok || !xpReply.ok) return;
+    const now = (await streakReply.json()) as {
+      current: number;
+      today: boolean;
+    };
+    const day = (await xpReply.json()) as { today: number };
+    write(
+      PREF.tally,
+      JSON.stringify({
+        streak: now.current,
+        earned: now.today,
+        xp: day.today,
+        day: dayOf(new Date()),
+      }),
+    );
+    announce();
+  } catch {}
+}
+
 // A refusal other than 401, 429 or a server error cannot succeed on a second try, so the post is dropped.
 let sending = false;
 async function drainXp(): Promise<void> {
-  const head = readXpQueue()[0];
-  if (!head || !state.signedIn) return;
-  const { ref, amount } = head;
+  const owner = read(FLAG);
+  if (!state.signedIn || owner === null) return;
+  const head = readXpQueue(owner)[0];
+  if (!head) return;
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   let resp: Response;
   try {
-    resp = await api("POST", "/api/xp", { source: "drill", ref, amount, tz });
+    resp = await api("POST", "/api/xp", { ...head, tz });
   } catch {
     return;
   }
   if (lapsed(resp) || resp.status === 429 || resp.status >= 500) return;
-  writeXpQueue(readXpQueue().filter((post) => post.ref !== ref));
+  writeXpQueue(
+    owner,
+    readXpQueue(owner).filter((post) => !samePost(post, head)),
+  );
   return drainXp();
 }
-async function sendXp() {
-  if (sending) return;
+// A call that arrives while a send runs (the connection returning, for one) asks for another pass,
+// because the running one may have read the queue before the connection came back.
+let again = false;
+async function sendXp(): Promise<void> {
+  if (sending) {
+    again = true;
+    return;
+  }
   sending = true;
   try {
     await drainXp();
   } finally {
     sending = false;
   }
+  if (again) {
+    again = false;
+    return sendXp();
+  }
+  await refreshTally();
 }
-// Queues the XP of a drill session and sends it now, or when the connection returns. Without an
-// account there is nothing to send.
-function xp(ref: string, amount: number) {
-  if (!state.signedIn) return;
-  writeXpQueue([
-    ...readXpQueue().filter((post) => post.ref !== ref),
-    { ref, amount },
+
+// Queues XP in the queue of the signed-in account and sends it now, or when the connection returns.
+// Without an account there is nothing to send. A resend is safe: the account takes one award per
+// source and ref each day, the day being the one in `earnedAt`, which the queue keeps, so a resend
+// after midnight is the same award.
+function xp(source: XpSource, ref: string, amount: number) {
+  const owner = read(FLAG);
+  if (!state.signedIn || owner === null) return;
+  const queue = readXpQueue(owner);
+  const post = { source, ref, amount, earnedAt: Date.now() };
+  const queued = queue.find((p) => samePost(p, post));
+  writeXpQueue(owner, [
+    ...queue.filter((p) => p !== queued),
+    { ...post, earnedAt: queued?.earnedAt ?? post.earnedAt },
   ]);
+  announce();
   void sendXp();
+}
+
+// The first time an account signs in on this device, the XP the browser already holds for today
+// joins the queue of XP earned before any account. The log keeps days, not moments, so earlier days
+// cannot be dated and are not sent.
+function seedXp() {
+  if (read(PREF.xpSeeded) !== null) return;
+  write(PREF.xpSeeded, "1");
+  const day = dayOf(new Date());
+  let rest = readXp()[day] ?? 0;
+  const chunks: XpPost[] = [];
+  for (let k = 0; rest > 0; k++) {
+    const amount = Math.min(rest, XP_PER_POST);
+    chunks.push({
+      source: "drill",
+      ref: `local:${day}:${k}`,
+      amount,
+      earnedAt: Date.now(),
+    });
+    rest -= amount;
+  }
+  appendXpQueue(null, chunks);
 }
 addEventListener("online", () => void sendXp());
 
@@ -281,6 +372,7 @@ const signIn = (provider: string) => {
 async function signOut() {
   flush();
   await pushing;
+  await sendXp();
   try {
     const resp = await api("POST", "/auth/logout");
     if (!resp.ok) throw new Error(String(resp.status));
@@ -440,6 +532,21 @@ const ready = migrated.then(() =>
   state.signedIn || returning ? sync() : undefined,
 );
 
-void ready.then(sendXp);
+void ready.then(() => {
+  const owner = read(FLAG);
+  if (state.signedIn && owner !== null) {
+    seedXp();
+    claimAnonymousXp(owner);
+  }
+  return sendXp();
+});
 
-window.QGAccount = { ready, changed, mount, xp, signInHref };
+// A request to the account for the pages that show it. A 401 ends the sign-in here, so every page
+// sees the same state.
+async function request(method: string, path: string, body?: unknown) {
+  const resp = await api(method, path, body);
+  lapsed(resp);
+  return resp;
+}
+
+window.QGAccount = { ready, changed, mount, xp, request, signInHref };

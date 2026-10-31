@@ -10,7 +10,7 @@
 import type { Editor } from "../../editor/src/index.ts";
 import { BLOCKS, LEVELS } from "./blocks.ts";
 import type { BlockObject } from "./lesson.ts";
-import { courseKey, courseOf } from "../progress.ts";
+import { addXp, courseKey, courseOf, XP_PER_EXERCISE } from "../progress.ts";
 
 const exerciseKey = (id: string) =>
   courseKey(courseOf(location.pathname), `exercise:${id}`);
@@ -323,11 +323,16 @@ BLOCKS.exercise = (box, s, A) => {
     if (mode === "run" && !res.error)
       text("xlabel", "Comprobar prueba tu código con los casos del ejercicio.");
     if (mode === "check") {
+      const first = res.passed && !progress.get(s.exercise).passed;
       progress.set(s.exercise, {
         checks: (progress.get(s.exercise).checks || 0) + 1,
         ...(res.passed ? { passed: true } : {}),
       });
       if (res.passed) solved.hidden = false;
+      if (first) {
+        addXp(XP_PER_EXERCISE);
+        QGAccount.xp("exercise", s.exercise, XP_PER_EXERCISE);
+      }
     }
   }
   const fail = (msg: string) => {
