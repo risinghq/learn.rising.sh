@@ -123,7 +123,7 @@ describe("device flow", () => {
     const today = await h.request("GET", "/api/xp", {
       headers: bearer(token),
     });
-    expect(today.body).toEqual({ total: 10, cap: 300 });
+    expect(today.body).toEqual({ total: 10, cap: 300, today: 10 });
   });
 
   it("stores only hashes of both codes and of the token", async () => {

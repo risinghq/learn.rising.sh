@@ -6,6 +6,7 @@ import { build } from "esbuild";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
 
 import { WORKER_FIRST } from "../src/routes.ts";
+import { REMINDER_CRON } from "../src/schedule.ts";
 import { CLIENTS, FakeProvider } from "./provider.ts";
 
 // Test secrets that Cloudflare documents for Turnstile.
@@ -14,6 +15,15 @@ export const FAIL_SECRET = "2x0000000000000000000000000000000AA";
 export const SPENT_SECRET = "3x0000000000000000000000000000000AA";
 
 export const HOME_HOST = "edu.example.test";
+
+// The fake push service. An endpoint whose path starts with /gone answers 410.
+export const PUSH_HOST = "push.example.test";
+
+export interface PushCall {
+  endpoint: string;
+  headers: Record<string, string>;
+  bytes: number;
+}
 
 export const VARS = {
   TURNSTILE_SECRET: PASS_SECRET,
@@ -38,6 +48,7 @@ export const VARS = {
   XP_PER_DAY: "300",
   XP_PER_EVENT: "50",
   MAX_FRIENDS: "50",
+  PUSH_HOSTS: PUSH_HOST,
   GOOGLE_CLIENT_ID: CLIENTS.google.id,
   GOOGLE_CLIENT_SECRET: CLIENTS.google.secret,
   GITHUB_CLIENT_ID: CLIENTS.github.id,
@@ -106,6 +117,8 @@ export interface Harness {
   // HTTP origin of the Worker, for a browser.
   origin(): Promise<string>;
   purge(at?: Date): Promise<void>;
+  remind(at: Date): Promise<void>;
+  pushes: PushCall[];
   // Lines the Worker wrote to Workers Logs.
   workerLogs(): string[];
   runnerCalls(): { path: string; headers: string[]; instance: string }[];
@@ -140,6 +153,10 @@ export interface Options {
   vars?: Partial<typeof VARS> & {
     FAKE_SETTLE_FAILS?: string;
     FAKE_CLOCK?: string;
+    // The secrets that switch the streak reminder on.
+    VAPID_PUBLIC_KEY?: string;
+    VAPID_PRIVATE_KEY?: string;
+    VAPID_SUBJECT?: string;
   };
   // Without this the Worker calls the real Turnstile service.
   siteverify?: "fake" | "down" | "real";
@@ -158,6 +175,7 @@ export async function start(options: Options = {}): Promise<Harness> {
   const logs: string[] = [];
   const siteverify: Siteverify = { calls: [] };
   const provider = new FakeProvider();
+  const pushes: PushCall[] = [];
   const verify = fakeSiteverify(
     siteverify,
     (options.siteverify ?? "fake") === "down",
@@ -186,10 +204,22 @@ export async function start(options: Options = {}): Promise<Harness> {
       ...(mode === "real"
         ? {}
         : {
-            outboundService: (request: Request) =>
-              provider.owns(new URL(request.url))
+            outboundService: async (request: Request) => {
+              const url = new URL(request.url);
+              if (url.hostname === PUSH_HOST) {
+                pushes.push({
+                  endpoint: request.url,
+                  headers: Object.fromEntries(request.headers),
+                  bytes: (await request.arrayBuffer()).byteLength,
+                });
+                return new Response(null, {
+                  status: url.pathname.startsWith("/gone") ? 410 : 201,
+                });
+              }
+              return provider.owns(url)
                 ? provider.handle(request)
-                : verify(request),
+                : verify(request);
+            },
           }),
       handleStructuredLogs: (log: { message: string }) =>
         logs.push(log.message),
@@ -215,10 +245,16 @@ export async function start(options: Options = {}): Promise<Harness> {
   return {
     siteverify,
     provider,
+    pushes,
     db,
     origin: async () => (await mf.ready).origin,
     purge: async (at = new Date()) => {
       await (await mf.getWorker()).scheduled({ scheduledTime: at });
+    },
+    remind: async (at) => {
+      await (
+        await mf.getWorker()
+      ).scheduled({ scheduledTime: at, cron: REMINDER_CRON });
     },
     request: async (
       method,

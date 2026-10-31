@@ -1158,6 +1158,7 @@ describe("passed follows the server's record", () => {
       expect(reply.status).toBe(route === "/api/merge" ? 200 : 204);
       if (route === "/api/merge") {
         expect(reply.body.progress.exercises["intro/uno"].passed).toBe(false);
+        expect(reply.body.account).toEqual(expect.any(String));
       }
       expect(await passedOf(h, cookie!)).toEqual({ "intro/uno": false });
     },
