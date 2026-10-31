@@ -3768,7 +3768,31 @@
      "cases": [
       "amplitud pequeña, 0.1 rad: casi 2π",
       "amplitud de 1 rad: el péndulo ya es más lento que 2π"
-     ]
+     ],
+     "runs": "browser",
+     "check": "from qgcheck import learner, visible\n\n\n@visible(\"amplitud pequeña, 0.1 rad: casi 2π\")\ndef test_small_amplitude():\n    got = learner.periodo(0.1)\n    assert abs(got - 6.2871) < 0.01, f\"Con theta0 = 0.1, `periodo` devuelve {got!r}.\"\n\n\n@visible(\"amplitud de 1 rad: el péndulo ya es más lento que 2π\")\ndef test_one_radian():\n    got = learner.periodo(1.0)\n    assert abs(got - 6.7000) < 0.01, f\"Con theta0 = 1.0, `periodo` devuelve {got!r}.\"\n\n\ndef test_large_amplitude():\n    got = learner.periodo(2.0)\n    assert abs(got - 8.3498) < 0.01, f\"Con theta0 = 2.0, `periodo` devuelve {got!r}.\"\n\n\ndef test_near_the_top():\n    got = learner.periodo(3.0)\n    assert abs(got - 16.1555) < 0.01, f\"Con theta0 = 3.0, `periodo` devuelve {got!r}.\"\n\n\ndef test_coarse_step():\n    got = learner.periodo(1.0, dt=0.01)\n    assert abs(got - 6.7000) < 0.05, f\"Con theta0 = 1.0 y dt = 0.01, `periodo` devuelve {got!r}.\"\n"
+    },
+    {
+     "type": "exercise",
+     "exercise": "f1-pendulo/periodo-roto",
+     "prompt": "Esta `periodo(theta0, dt=0.001)` mide el periodo del péndulo, pero da casi 2π con cualquier amplitud: con `theta0 = 1` tendría que dar 6.70. Encuentra el error y corrígelo.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "El periodo no cambia con la amplitud: algo en la integración se parece al péndulo de ángulos pequeños.",
+      "Mira las dos líneas que actualizan `omega`: ¿qué aceleración usan?",
+      "La aceleración del péndulo es `-sin(theta)`, no `-theta`. Cámbiala en las dos líneas."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "import math\n\n\ndef periodo(theta0, dt=0.001):\n    theta, omega, t = theta0, 0.0, 0.0\n    while True:\n        omega -= 0.5 * dt * theta\n        nuevo = theta + dt * omega\n        omega -= 0.5 * dt * nuevo\n        t += dt\n        if nuevo <= 0:\n            cruce = t - dt + dt * theta / (theta - nuevo)\n            return 4 * cruce\n        theta = nuevo\n\n\nprint(periodo(0.5))",
+     "cases": [
+      "amplitud pequeña, 0.1 rad: casi 2π",
+      "amplitud de 1 rad: el péndulo ya es más lento que 2π"
+     ],
+     "runs": "browser",
+     "check": "from qgcheck import learner, visible\n\n\n@visible(\"amplitud pequeña, 0.1 rad: casi 2π\")\ndef test_small_amplitude():\n    got = learner.periodo(0.1)\n    assert abs(got - 6.2871) < 0.01, f\"Con theta0 = 0.1, `periodo` devuelve {got!r}.\"\n\n\n@visible(\"amplitud de 1 rad: el péndulo ya es más lento que 2π\")\ndef test_one_radian():\n    got = learner.periodo(1.0)\n    assert abs(got - 6.7000) < 0.01, f\"Con theta0 = 1.0, `periodo` devuelve {got!r}.\"\n\n\ndef test_large_amplitude():\n    got = learner.periodo(2.0)\n    assert abs(got - 8.3498) < 0.01, f\"Con theta0 = 2.0, `periodo` devuelve {got!r}.\"\n\n\ndef test_near_the_top():\n    got = learner.periodo(3.0)\n    assert abs(got - 16.1555) < 0.01, f\"Con theta0 = 3.0, `periodo` devuelve {got!r}.\"\n"
     }
    ],
    "actions": [
@@ -3776,6 +3800,12 @@
      "do": "show",
      "id": "e1",
      "at": "n1"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "n1",
+     "t": 1
     }
    ]
   },

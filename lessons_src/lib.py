@@ -184,13 +184,18 @@ def Exercise(
     level: int,
     needs: str = "qiskit",
     hints: Iterable[str] = (),
+    kind: str = "write",
     **k: Any,
 ) -> Block:
-    """Declara un ejercicio y valida sus opciones antes de publicarlo."""
+    """Declara un ejercicio y valida sus opciones antes de publicarlo.
+
+    `kind="fix"` es un ejercicio que parte de código roto en vez de un esqueleto vacío."""
     if level not in (1, 2, 3):
         raise ValueError(f"{path}: level debe ser 1, 2 o 3, no {level!r}")
     if needs not in ("python", "qiskit", "aer"):
         raise ValueError(f"{path}: needs debe ser 'python', 'qiskit' o 'aer', no {needs!r}")
+    if kind not in ("write", "fix"):
+        raise ValueError(f"{path}: kind debe ser 'write' o 'fix', no {kind!r}")
     return dict(
         type="exercise",
         exercise=path,
@@ -198,6 +203,7 @@ def Exercise(
         level=level,
         needs=needs,
         hints=list(hints),
+        **({"kind": kind} if kind == "fix" else {}),
         **k,
     )
 

@@ -858,6 +858,26 @@
       "el circuito tiene n qubits y los mide",
       "n = 2, 3 y 4"
      ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-quickstart/bell-roto",
+     "prompt": "Este circuito debería preparar $\\tfrac{1}{\\sqrt2}(|00\\rangle+|11\\rangle)$, pero los qubits no salen siempre iguales. Encuentra el error y corrígelo.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Mira los conteos: el qubit 1 siempre da `0`, así que nunca se entera de lo que le pasa al qubit 0.",
+      "La CNOT copia el valor del qubit de control en el qubit objetivo. ¿Cuál de los dos es la superposición?",
+      "En `cx(control, objetivo)` el primer argumento es el control. El control tiene que ser el qubit 0."
+     ],
+     "kind": "fix",
+     "id": "e4",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(1, 0)\nbell.measure_all()\n\nresultado = StatevectorSampler(seed=7).run([bell], shots=1024).result()\nprint(resultado[0].data.meas.get_counts())",
+     "cases": [
+      "los qubits salen siempre iguales",
+      "el estado es (|00⟩ + |11⟩)/√2"
+     ]
     }
    ],
    "actions": [
@@ -876,6 +896,11 @@
      "do": "show",
      "id": "e3",
      "at": "n3"
+    },
+    {
+     "do": "show",
+     "id": "e4",
+     "at": "check"
     }
    ]
   },

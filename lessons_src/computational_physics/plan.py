@@ -6,6 +6,9 @@ The titles and descriptions are course text, so they are in Spanish.
 
 from typing import Any
 
+# The exercises run and are graded in the learner's browser (docs/exercises.md).
+RUNS = "browser"
+
 PARTS: list[dict[str, Any]] = [
     dict(
         n=1,

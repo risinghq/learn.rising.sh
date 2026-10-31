@@ -529,6 +529,26 @@
       "preparar(5, 4) deja la amplitud en el índice 5",
       "los 16 valores de k con n = 4"
      ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p2-orden-bits/preparar-roto",
+     "prompt": "Esta `preparar(k, n)` debería dejar toda la amplitud en el índice `k`, pero con `preparar(5, 4)` la deja en otro. Encuentra el error y corrígelo.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Imprime las probabilidades de `preparar(5, 4)` y busca el índice con probabilidad 1: no es el 5.",
+      "`format(k, '04b')` escribe el bit más significativo primero, pero el qubit 0 es el menos significativo.",
+      "El bucle recorre los bits de izquierda a derecha y numera los qubits en ese orden. Recórrelos al revés."
+     ],
+     "kind": "fix",
+     "id": "e4",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import Statevector\n\n\ndef preparar(k, n):\n    qc = QuantumCircuit(n)\n    bits = format(k, f\"0{n}b\")\n    for qubit, bit in enumerate(bits):\n        if bit == \"1\":\n            qc.x(qubit)\n    return qc\n\n\nprint(Statevector(preparar(5, 4)).probabilities().round(2))",
+     "cases": [
+      "preparar(5, 4) deja la amplitud en el índice 5",
+      "preparar(1, 3) deja la amplitud en el índice 1"
+     ]
     }
    ],
    "actions": [
@@ -546,6 +566,12 @@
      "do": "show",
      "id": "e3",
      "at": "n3"
+    },
+    {
+     "do": "show",
+     "id": "e4",
+     "at": "n3",
+     "t": 1
     }
    ]
   },

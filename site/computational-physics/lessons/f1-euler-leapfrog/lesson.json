@@ -3979,7 +3979,31 @@
      "cases": [
       "un paso desde x = 1, v = 0 con dt = 0.1",
       "cero pasos deja el estado como estaba"
-     ]
+     ],
+     "runs": "browser",
+     "check": "import numpy as np\n\nfrom qgcheck import learner, visible\n\n\ndef close(got, want, tol=1e-9):\n    return np.allclose(got, want, rtol=0, atol=tol)\n\n\n@visible(\"un paso desde x = 1, v = 0 con dt = 0.1\")\ndef test_one_step():\n    got = learner.leapfrog(1.0, 0.0, 0.1, 1)\n    assert close(got, (0.995, -0.09975)), (\n        f\"Con x = 1.0, v = 0.0, dt = 0.1 y pasos = 1, `leapfrog` devuelve {got!r}.\")\n\n\n@visible(\"cero pasos deja el estado como estaba\")\ndef test_no_steps():\n    got = learner.leapfrog(0.3, -0.7, 0.1, 0)\n    assert close(got, (0.3, -0.7)), (\n        f\"Con x = 0.3, v = -0.7, dt = 0.1 y pasos = 0, `leapfrog` devuelve {got!r}.\")\n\n\ndef test_ten_steps():\n    got = learner.leapfrog(1.0, 0.0, 0.1, 10)\n    assert close(got, (0.5399512509335086, -0.8406435124348495)), (\n        f\"Con x = 1.0, v = 0.0, dt = 0.1 y pasos = 10, `leapfrog` devuelve {got!r}.\")\n\n\ndef test_starts_with_speed():\n    got = learner.leapfrog(0.0, 1.0, 0.05, 40)\n    assert close(got, (0.9094949470256556, -0.416336317772622)), (\n        f\"Con x = 0.0, v = 1.0, dt = 0.05 y pasos = 40, `leapfrog` devuelve {got!r}.\")\n\n\ndef test_energy_after_many_steps():\n    got = learner.leapfrog(1.0, 0.0, 0.1, 10000)\n    energia = 0.5 * (got[0] ** 2 + got[1] ** 2)\n    assert abs(energia - 0.5) < 0.005, (\n        f\"Con x = 1.0, v = 0.0, dt = 0.1 y pasos = 10000, `leapfrog` devuelve {got!r}.\")\n"
+    },
+    {
+     "type": "exercise",
+     "exercise": "f1-euler-leapfrog/euler-roto",
+     "prompt": "Este `euler` debería ser el método de Euler explícito para el oscilador de aceleración `-x`, pero su energía no crece como debe: con `dt = 0.1` y 100 pasos desde `x = 1`, `v = 0` tendría que pasar de 0.5 a 1.3524. Encuentra el error y corrígelo.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "Compara la actualización con la fórmula de Euler: las dos magnitudes nuevas salen de las dos viejas.",
+      "Después de `x += dt * v`, la `x` ya no es la de partida. ¿Qué `x` usa la línea siguiente?",
+      "Euler explícito calcula `v` con la `x` del inicio del paso: guárdala antes de moverla, o actualiza las dos a la vez con una asignación en tupla."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "def euler(x, v, dt, pasos):\n    for _ in range(pasos):\n        x += dt * v\n        v -= dt * x\n    return x, v\n\n\nprint(euler(1.0, 0.0, 0.1, 100))",
+     "cases": [
+      "un paso desde x = 1, v = 1 con dt = 0.1",
+      "la energía crece en cada paso: tras 100 pasos pasa de 0.5 a 1.3524"
+     ],
+     "runs": "browser",
+     "check": "import numpy as np\n\nfrom qgcheck import learner, visible\n\n\ndef close(got, want, tol=1e-9):\n    return np.allclose(got, want, rtol=0, atol=tol)\n\n\ndef energia(estado):\n    return 0.5 * (estado[0] ** 2 + estado[1] ** 2)\n\n\n@visible(\"un paso desde x = 1, v = 1 con dt = 0.1\")\ndef test_one_step():\n    got = learner.euler(1.0, 1.0, 0.1, 1)\n    assert close(got, (1.1, 0.9)), (\n        f\"Con x = 1.0, v = 1.0, dt = 0.1 y pasos = 1, `euler` devuelve {got!r}.\")\n\n\n@visible(\"la energía crece en cada paso: tras 100 pasos pasa de 0.5 a 1.3524\")\ndef test_energy_grows():\n    got = learner.euler(1.0, 0.0, 0.1, 100)\n    assert abs(energia(got) - 1.3524069) < 1e-5, (\n        f\"Con x = 1.0, v = 0.0, dt = 0.1 y pasos = 100, `euler` devuelve {got!r}.\")\n\n\ndef test_ten_steps():\n    got = learner.euler(1.0, 0.0, 0.1, 10)\n    assert close(got, (0.5707904498999999, -0.8825080100000001)), (\n        f\"Con x = 1.0, v = 0.0, dt = 0.1 y pasos = 10, `euler` devuelve {got!r}.\")\n\n\ndef test_energy_with_a_small_step():\n    got = learner.euler(1.0, 0.0, 0.01, 1000)\n    assert abs(energia(got) - 0.5525827) < 1e-5, (\n        f\"Con x = 1.0, v = 0.0, dt = 0.01 y pasos = 1000, `euler` devuelve {got!r}.\")\n"
     }
    ],
    "actions": [
@@ -3987,6 +4011,12 @@
      "do": "show",
      "id": "e1",
      "at": "n1"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "n1",
+     "t": 1
     }
    ]
   },

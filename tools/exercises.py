@@ -9,10 +9,13 @@ For each exercise it checks that:
      needs="qiskit", it passes without qiskit_aer. With needs="aer", it does not pass
      without it.
   4. Each `@hint(n)` in check.py names a hint that the exercise has in its lesson.
+  5. A `kind="fix"` exercise starts from broken code, not an empty starter: starter.py keeps no
+     `✏️` placeholder, is close to solution.py, and fails a case the learner sees.
 
 `needs` is read from site/<course>/lessons/*/lesson.json, so run lessons_src/build.py first.
 """
 
+import difflib
 import io
 import json
 import sys
@@ -29,6 +32,8 @@ from qgcheck import grade, spec  # noqa: E402
 SITE = ROOT / "site"
 # The modules an exercise must not need, by the `needs` it declares.
 WITHOUT = {"python": ("qiskit", "qiskit_aer"), "qiskit": ("qiskit_aer",)}
+# How much of solution.py a broken starter keeps. Below it the learner writes code, not fixes it.
+FIX_SIMILARITY = 0.8
 
 
 def published() -> dict[str, dict[str, Any]]:
@@ -57,7 +62,23 @@ def failures(result: dict[str, Any]) -> str:
     )
 
 
-def problems(eid: str, needs: str, hints: int | None = None) -> list[str]:
+def fix_problems(broken: str, solution: str, starter: dict[str, Any]) -> list[str]:
+    """Return what makes a starter a poor bug to find: a placeholder, a rewrite, a hidden failure."""
+    found: list[str] = []
+    if "✏️" in broken:
+        found.append("starter.py has a ✏️ placeholder: a fix-it starter is code to repair")
+    ratio = difflib.SequenceMatcher(None, broken, solution).ratio()
+    if ratio < FIX_SIMILARITY:
+        found.append(
+            f"starter.py keeps {ratio:.0%} of solution.py; a fix-it starter keeps "
+            f"{FIX_SIMILARITY:.0%} or more, so the learner fixes it instead of rewriting it"
+        )
+    if not any(t["visible"] and not t["passed"] for t in starter["tests"]):
+        found.append("starter.py fails no case the learner sees: the bug has to show")
+    return found
+
+
+def problems(eid: str, needs: str, hints: int | None = None, kind: str = "write") -> list[str]:
     """Return the exercise's problems and validate its hint references."""
     d = spec.folder(eid)
     if missing := spec.missing_files(eid):
@@ -72,11 +93,14 @@ def problems(eid: str, needs: str, hints: int | None = None) -> list[str]:
     solved = grade(eid, solution)
     if not solved["passed"]:
         found.append(f"solution.py does not pass: {failures(solved)}")
-    starter = grade(eid, (d / "starter.py").read_text(encoding="utf-8"))
+    broken = (d / "starter.py").read_text(encoding="utf-8")
+    starter = grade(eid, broken)
     if starter["error"]:
         found.append(f"starter.py fails to run: {starter['error']}")
     elif starter["passed"]:
         found.append("starter.py already passes every case")
+    elif kind == "fix":
+        found.extend(fix_problems(broken, solution, starter))
     if solved["passed"]:
         if needs in WITHOUT:
             without = grade(eid, solution, block=WITHOUT[needs])
@@ -95,7 +119,8 @@ def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8")
     needs = declared()
-    hints = {eid: len(blk["hints"]) for eid, blk in published().items()}
+    blocks = published()
+    hints = {eid: len(blk["hints"]) for eid, blk in blocks.items()}
     ids = sys.argv[1:] or sorted(set(needs) | set(spec.all_ids()))
     bad = 0
     for eid in ids:
@@ -104,7 +129,9 @@ def main() -> None:
             bad += 1
             continue
         try:
-            found = problems(eid, needs[eid], hints.get(eid))
+            found = problems(
+                eid, needs[eid], hints.get(eid), blocks.get(eid, {}).get("kind", "write")
+            )
         except ValueError as exc:
             found = [str(exc)]
         for line in found:

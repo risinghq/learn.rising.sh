@@ -14,6 +14,11 @@ The section numbering (1.1, 1.2, …) comes from the order of plan.PARTS; the fi
 each step's label is replaced by that section. Every lesson in the plan must have its module, and
 every lesson in a module must be in the plan. A lesson id belongs to one course: the browser and
 the account store progress by lesson id.
+
+plan.py may set RUNS = "browser" for a course whose exercises run and are graded in the learner's
+browser on Pyodide, with no call to the runner. The default is "server". Such an exercise carries
+its check.py in lesson.json, so the page grades with the same cases the server would, and it may
+need only numpy, scipy and matplotlib (needs="python") and no `@inside` function.
 """
 
 import importlib
@@ -32,6 +37,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT))
 
 from qgcheck import spec  # noqa: E402
+from qgcheck.source import uses_inside  # noqa: E402
 
 SITE = ROOT / "site"
 
@@ -73,8 +79,9 @@ def walk(blocks: Iterable[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         yield from walk(x for x in children if isinstance(x, dict))
 
 
-def publish_exercises(lesson: dict[str, Any], seen: set[str]) -> None:
-    """Add the starter code and the visible cases to each exercise."""
+def publish_exercises(lesson: dict[str, Any], seen: set[str], runs: str) -> None:
+    """Add the starter code and the visible cases to each exercise, and in a browser course the
+    whole check.py: the hidden cases of that course are readable by the learner."""
     for b in lesson["beats"]:
         for blk in walk(b["scene"]):
             if blk.get("type") != "exercise":
@@ -97,6 +104,17 @@ def publish_exercises(lesson: dict[str, Any], seen: set[str]) -> None:
                 blk.update(spec.public(eid))
                 if not blk["cases"]:
                     ERRORS.append(f"{where} has no @visible case in check.py")
+                if runs == "browser":
+                    publish_browser(blk, where)
+
+
+def publish_browser(blk: dict[str, Any], where: str) -> None:
+    text = (spec.folder(blk["exercise"]) / "check.py").read_text(encoding="utf-8")
+    if blk["needs"] != "python":
+        ERRORS.append(f'{where}: the browser has no {blk["needs"]}, only needs="python"')
+    if uses_inside(text):
+        ERRORS.append(f"{where}: check.py uses @inside, which needs the server's second process")
+    blk.update(runs="browser", check=text)
 
 
 def check(lesson: dict[str, Any]) -> None:
@@ -137,7 +155,11 @@ def main(course: str) -> None:
     if not (source / "plan.py").is_file():
         raise SystemExit(f"no course {course!r}: missing {source.relative_to(ROOT)}/plan.py")
     sys.path.insert(0, str(source))
-    parts: list[dict[str, Any]] = importlib.import_module("plan").PARTS
+    plan = importlib.import_module("plan")
+    parts: list[dict[str, Any]] = plan.PARTS
+    runs: str = getattr(plan, "RUNS", "server")
+    if runs not in ("server", "browser"):
+        raise SystemExit(f"{course}: RUNS must be 'server' or 'browser', not {runs!r}")
     hooks: ModuleType | None = (
         importlib.import_module("hooks") if (source / "hooks.py").is_file() else None
     )
@@ -167,7 +189,7 @@ def main(course: str) -> None:
             if hooks:
                 les["practice"] = [*les["practice"], *hooks.references(rest[0] if rest else [])]
             check(les)
-            publish_exercises(les, exercises)
+            publish_exercises(les, exercises, runs)
             ordered.append(les)
             tf = out / "lessons" / lid / "timings.json"
             beat_ids = {b["id"] for b in les["beats"]}
