@@ -16,6 +16,7 @@ import json
 import os
 import re
 import resource
+import subprocess
 import sys
 import tempfile
 import textwrap
@@ -28,12 +29,14 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path[:0] = [str(ROOT), str(ROOT / "lessons_src")]
+sys.path[:0] = [str(ROOT), str(ROOT / "lessons_src"), str(ROOT / "runner")]
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 import build  # noqa: E402
+import sizing  # noqa: E402
 
 from qgcheck import grade, learner, spec  # noqa: E402
+from qgcheck.runner import TIMEOUT, job_env  # noqa: E402
 
 
 def load_tool(name: str, filename: str) -> types.ModuleType:
@@ -475,33 +478,96 @@ MUTANTS = [
 ]
 
 
-# The runner gives a job 10 s with 1/4 of a vCPU, about 4 times the time of one core, so a job
-# that goes over 2.5 s of CPU does not fit. A solution may use 60% of it: the rest absorbs a
-# slower host, so a correct answer is never reported as failed because the runner was busy.
-# The measure assumes compiled bytecode in the environment, as `mise run install` leaves it.
-CPU_BUDGET_S = 2.5
-CPU_LIMIT_S = 0.6 * CPU_BUDGET_S
+# The `basic` runner instance gives each job 1/4 of a vCPU for TIMEOUT seconds.
+# Keep 40% of that budget as margin for host variability.
+# This measure assumes the compiled bytecode installed by `mise run install`.
+CPU_BUDGET_S = TIMEOUT * float(sizing.TYPES["basic"][0])
+CPU_SHARE = 0.6
+
+# Scale the limit by the current slowdown of a fixed reference job under the graded-job environment.
+# Hardware instruction counters require `perf_event_paranoid <= 2` or root, unavailable in WSL and CI.
+REFERENCE_JOB = """
+import numpy as np
+from qiskit import QuantumCircuit
+from qiskit.quantum_info import Statevector
+qc = QuantumCircuit(8)
+qc.h(0)
+for i in range(7):
+    qc.cx(i, i + 1)
+for i in range(8):
+    qc.rz(0.3 * i, i)
+for _ in range(20):
+    Statevector(qc).probabilities()
+a = np.random.default_rng(1).random((300, 300))
+for _ in range(5):
+    (a @ a).sum()
+"""
+# CPU seconds for REFERENCE_JOB, run with the environment of a graded job (two BLAS threads), on
+# the quiet-host calibration baseline: the smallest of 180 runs on an Intel Core Ultra 7 265K
+# with 20 cores. A faster host gets a proportionally tighter limit, while a slower or busier host
+# gets a looser limit.
+QUIET_REFERENCE_CPU_S = 0.32
+
+
+def children_cpu() -> float:
+    usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+    return usage.ru_utime + usage.ru_stime
+
+
+def slowdown() -> float:
+    """How many times slower than idle this host runs the reference job, set up like a graded job."""
+    with tempfile.TemporaryDirectory(prefix="qg-ref-") as work:
+        before = children_cpu()
+        subprocess.run(
+            [sys.executable, "-P", "-c", REFERENCE_JOB],
+            check=True,
+            cwd=work,
+            env=job_env(work, os.environ.get("PATH", "")),
+            stdin=subprocess.DEVNULL,
+        )
+        return (children_cpu() - before) / QUIET_REFERENCE_CPU_S
+
+
+def solution_cpu(exercise_id: str, code: str) -> float:
+    before = children_cpu()
+    result = grade(exercise_id, code, timeout=60)
+    cpu = children_cpu() - before
+    assert result["passed"], result
+    assert result["tests"] and all(t["passed"] and t["message"] is None for t in result["tests"])
+    return cpu
+
+
+def cpu_limit(slower: float) -> float:
+    return CPU_SHARE * CPU_BUDGET_S * slower
+
+
+@functools.cache
+def first_slowdown() -> float:
+    return slowdown()
+
+
+def measure_against_limit(exercise_id: str, code: str) -> tuple[float, float]:
+    """The CPU of a solution and the limit it is judged by.
+
+    A quiet host costs one solution run, against the slowdown measured once for the session. A
+    solution that goes over that limit is measured again after a fresh calibration, so a loaded
+    host judges it by the load of that moment, and the second pair decides.
+    """
+    cpu = solution_cpu(exercise_id, code)
+    limit = cpu_limit(first_slowdown())
+    if cpu > limit:
+        limit = cpu_limit(slowdown())
+        cpu = solution_cpu(exercise_id, code)
+    return cpu, limit
 
 
 @pytest.mark.parametrize("exercise_id", REAL)
 def test_solution_passes_within_the_cpu_budget(exercise_id: str) -> None:
-    runs = []
-    # Host load can inflate CPU time, so the smallest of up to three runs is the useful measure.
-    for _ in range(3):
-        before = resource.getrusage(resource.RUSAGE_CHILDREN)
-        result = grade(exercise_id, read(exercise_id, "solution.py"), timeout=60)
-        after = resource.getrusage(resource.RUSAGE_CHILDREN)
-        assert result["passed"], result
-        assert result["tests"] and all(
-            t["passed"] and t["message"] is None for t in result["tests"]
-        )
-        runs.append(after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime)
-        if runs[-1] <= CPU_LIMIT_S:
-            break
-    cpu = min(runs)
-    assert cpu <= CPU_LIMIT_S, (
-        f"The solution used {cpu:.2f} s of CPU; the limit is {CPU_LIMIT_S:.1f} s,"
-        f" 60% of the {CPU_BUDGET_S} s the runner allows."
+    cpu, limit = measure_against_limit(exercise_id, read(exercise_id, "solution.py"))
+    assert cpu <= limit, (
+        f"The solution used {cpu:.2f} s of CPU; the limit is {limit:.2f} s: {CPU_SHARE:.0%} of "
+        f"the {CPU_BUDGET_S} s the runner allows, scaled by how much slower this host runs the "
+        "reference job now than when idle."
     )
 
 
