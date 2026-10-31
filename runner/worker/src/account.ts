@@ -52,22 +52,23 @@ export async function openSession(
 export const clearedCookie = () =>
   `${COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`;
 
-// The user id of the `qg_auth` cookie, or null if there is no live session.
-// It marks the day of the visit: the purge deletes accounts with no visits.
-export async function sessionUser(
+// Returns the user id of a live token of `kind`, or null. Web tokens come from
+// `qg_auth`; CLI tokens come from an `Authorization: Bearer` header.
+// A successful lookup marks the user's visit day for account retention.
+async function tokenUser(
   db: D1Database,
-  cookieHeader: string | null,
+  token: string | undefined,
+  kind: "web" | "cli",
   now: number,
 ): Promise<string | null> {
-  const token = getCookie(cookieHeader, COOKIE);
   if (!token || token.length > MAX_TOKEN_CHARS) return null;
   const row = await db
     .prepare(
       `SELECT s.user_id AS id, u.seen_day AS seen
        FROM sessions s JOIN users u ON u.id = s.user_id
-       WHERE s.token_hash = ?1 AND s.expires_at > ?2`,
+       WHERE s.token_hash = ?1 AND s.kind = ?2 AND s.expires_at > ?3`,
     )
-    .bind(await sha256(token), unixSeconds(now))
+    .bind(await sha256(token), kind, unixSeconds(now))
     .first<{ id: string; seen: number }>();
   if (!row) return null;
   const day = Math.floor(now / DAY_MS);
@@ -79,6 +80,39 @@ export async function sessionUser(
       .run();
   }
   return row.id;
+}
+
+// The user of the `qg_auth` cookie, or null if there is no live session.
+export const sessionUser = (
+  db: D1Database,
+  cookieHeader: string | null,
+  now: number,
+) => tokenUser(db, getCookie(cookieHeader, COOKIE), "web", now);
+
+// Returns the bearer token, or `undefined` when the request has no Authorization
+// header. An Authorization header with another format returns an unmatched token.
+export function bearerToken(request: Request): string | undefined {
+  const header = request.headers.get("authorization");
+  if (header === null) return undefined;
+  return /^Bearer ([A-Za-z0-9_-]+)$/.exec(header)?.[1] ?? "";
+}
+
+export const bearerUser = (db: D1Database, token: string, now: number) =>
+  tokenUser(db, token, "cli", now);
+
+// CLI tokens are random, and only their hashes are stored. The `rs_` prefix lets
+// secret scanners recognize a leaked token.
+export const newCliToken = () => `rs_${randomToken(32)}`;
+
+export async function revokeCliToken(
+  db: D1Database,
+  token: string,
+): Promise<void> {
+  if (!token || token.length > MAX_TOKEN_CHARS) return;
+  await db
+    .prepare("DELETE FROM sessions WHERE token_hash = ?1 AND kind = 'cli'")
+    .bind(await sha256(token))
+    .run();
 }
 
 // Whether the user signed in with a GitHub account whose numeric id is in `ids`.
@@ -107,7 +141,7 @@ export async function closeSession(
   const token = getCookie(cookieHeader, COOKIE);
   if (!token || token.length > MAX_TOKEN_CHARS) return;
   await db
-    .prepare("DELETE FROM sessions WHERE token_hash = ?1")
+    .prepare("DELETE FROM sessions WHERE token_hash = ?1 AND kind = 'web'")
     .bind(await sha256(token))
     .run();
 }

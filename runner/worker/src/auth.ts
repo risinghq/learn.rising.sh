@@ -2,13 +2,16 @@ import {
   DAY_MS,
   type Provider,
   base64url,
+  bearerToken,
   fromBase64url,
   clearedCookie,
   closeSession,
   openSession,
   randomToken,
+  revokeCliToken,
   userForIdentity,
 } from "./account.ts";
+import { deviceRoute } from "./device.ts";
 import { fail, redirect, sameOrigin } from "./http.ts";
 import type { Env, Limits } from "./limits.ts";
 import type { RateLimiter } from "./meters.ts";
@@ -291,48 +294,58 @@ export async function handleAuth(
   limiters: DurableObjectNamespace<RateLimiter>,
   now: number,
 ): Promise<Response> {
-  // /auth/logout, /auth/<proveedor> y /auth/<proveedor>/callback.
   const [, name = "", extra, tail] = new URL(request.url).pathname
     .split("/")
     .filter(Boolean);
   let route: "logout" | "start" | "callback" | null = null;
+  const device =
+    name === "device" && tail === undefined ? deviceRoute(extra) : undefined;
   if (tail === undefined) {
     if (name === "logout" && extra === undefined) route = "logout";
     else if (isProvider(name) && extra === undefined) route = "start";
     else if (isProvider(name) && extra === "callback") route = "callback";
   }
-  if (!route) return fail(404, "not_found", "No existe.");
-  const method = route === "logout" ? "POST" : "GET";
+  if (!route && !device) return fail(404, "not_found", "No existe.");
+  const method = device ? device.method : route === "logout" ? "POST" : "GET";
   if (request.method !== method) {
     const response = fail(405, "method", `Usa ${method}.`);
     response.headers.set("Allow", method);
     return response;
   }
 
-  const ip = request.headers.get("cf-connecting-ip") ?? "";
-  const verdict = await take(
-    limiters,
-    env.TURNSTILE_SECRET,
-    "auth",
-    ip,
-    now,
-    limits.authPerMinute,
-    limits.perDay,
-  );
-  if (!verdict.ok) {
-    const response = fail(
-      429,
-      "rate_auth",
-      "Demasiados intentos de inicio de sesión. Espera un minuto.",
+  if (!device || device.counted) {
+    const ip = request.headers.get("cf-connecting-ip") ?? "";
+    const verdict = await take(
+      limiters,
+      env.TURNSTILE_SECRET,
+      "auth",
+      ip,
+      now,
+      limits.authPerMinute,
+      limits.perDay,
     );
-    response.headers.set("Retry-After", String(verdict.retryAfter));
-    return response;
+    if (!verdict.ok) {
+      const response = fail(
+        429,
+        "rate_auth",
+        "Demasiados intentos de inicio de sesión. Espera un minuto.",
+      );
+      response.headers.set("Retry-After", String(verdict.retryAfter));
+      return response;
+    }
   }
 
+  if (device) return device.handle({ request, env, limits, now });
   if (route === "logout") {
-    if (!sameOrigin(request))
-      return fail(403, "bad_origin", "Origen no permitido.");
-    await closeSession(env.DB, request.headers.get("cookie"));
+    // Bearer logout does not use the browser's origin check and revokes its token.
+    const bearer = bearerToken(request);
+    if (bearer !== undefined) {
+      await revokeCliToken(env.DB, bearer);
+    } else {
+      if (!sameOrigin(request))
+        return fail(403, "bad_origin", "Origen no permitido.");
+      await closeSession(env.DB, request.headers.get("cookie"));
+    }
     return new Response(null, {
       status: 204,
       headers: { "Set-Cookie": clearedCookie(), "Cache-Control": "no-store" },

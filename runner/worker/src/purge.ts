@@ -24,6 +24,9 @@ export async function purge(
       .prepare("DELETE FROM sessions WHERE expires_at < ?1")
       .bind(unixSeconds(now)),
     db
+      .prepare("DELETE FROM device_codes WHERE expires_at < ?1")
+      .bind(unixSeconds(now)),
+    db
       .prepare("DELETE FROM friend_invites WHERE expires_at < ?1")
       .bind(unixSeconds(now)),
     db

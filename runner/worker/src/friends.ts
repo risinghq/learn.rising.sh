@@ -10,21 +10,23 @@ const MAX_OPEN_INVITES = 5;
 const ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const CODE_CHARS = 10;
 
-function newCode(): string {
+// A code of `length` characters from ALPHABET with a dash in the middle.
+export function newCode(length = CODE_CHARS): string {
   const chars: string[] = [];
   // Reject the incomplete range so each alphabet character is equally likely.
   const limit = 256 - (256 % ALPHABET.length);
-  while (chars.length < CODE_CHARS) {
-    for (const byte of crypto.getRandomValues(new Uint8Array(CODE_CHARS))) {
-      if (byte < limit && chars.length < CODE_CHARS)
+  while (chars.length < length) {
+    for (const byte of crypto.getRandomValues(new Uint8Array(length))) {
+      if (byte < limit && chars.length < length)
         chars.push(ALPHABET[byte % ALPHABET.length]);
     }
   }
-  return `${chars.slice(0, 5).join("")}-${chars.slice(5).join("")}`;
+  const half = length / 2;
+  return `${chars.slice(0, half).join("")}-${chars.slice(half).join("")}`;
 }
 
 // Removes separators and case from a user-entered code.
-const normalized = (code: string) =>
+export const normalized = (code: string) =>
   code.replaceAll(/[\s-]/g, "").toUpperCase();
 
 export async function postInvite({

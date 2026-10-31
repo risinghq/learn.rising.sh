@@ -21,6 +21,7 @@ export interface Env {
   SESSION_HOURS: string;
   AUTH_PER_MINUTE: string;
   AUTH_SESSION_DAYS: string;
+  CLI_TOKEN_DAYS: string;
   SIGNED_IN_IP_FACTOR: string;
   ATTEMPT_RETENTION_DAYS: string;
   ACCOUNT_RETENTION_DAYS: string;
@@ -47,6 +48,7 @@ type NumericVar =
   | "SESSION_HOURS"
   | "AUTH_PER_MINUTE"
   | "AUTH_SESSION_DAYS"
+  | "CLI_TOKEN_DAYS"
   | "SIGNED_IN_IP_FACTOR"
   | "ATTEMPT_RETENTION_DAYS"
   | "ACCOUNT_RETENTION_DAYS"
@@ -75,6 +77,7 @@ export interface Limits {
   // Requests per minute and per IP to /auth/*.
   authPerMinute: number;
   authSessionMs: number;
+  cliTokenMs: number;
   // The per-IP cap for a signed-in user is this multiple of the anonymous one.
   signedInIpFactor: number;
   attemptRetentionMs: number;
@@ -146,6 +149,7 @@ export function loadLimits(env: Env): Limits {
     sessionMs: positive(env, "SESSION_HOURS", false) * 3_600_000,
     authPerMinute: positive(env, "AUTH_PER_MINUTE", true),
     authSessionMs: positive(env, "AUTH_SESSION_DAYS", false) * DAY_MS,
+    cliTokenMs: positive(env, "CLI_TOKEN_DAYS", false) * DAY_MS,
     signedInIpFactor: positive(env, "SIGNED_IN_IP_FACTOR", true),
     attemptRetentionMs: positive(env, "ATTEMPT_RETENTION_DAYS", false) * DAY_MS,
     accountRetentionMs: positive(env, "ACCOUNT_RETENTION_DAYS", false) * DAY_MS,

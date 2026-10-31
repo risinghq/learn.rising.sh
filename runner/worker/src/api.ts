@@ -1,4 +1,9 @@
-import { clearedCookie, sessionUser } from "./account.ts";
+import {
+  bearerToken,
+  bearerUser,
+  clearedCookie,
+  sessionUser,
+} from "./account.ts";
 import { deleteFriend, getFriends, postAccept, postInvite } from "./friends.ts";
 import { type ApiContext, fail, readJson, reply, sameOrigin } from "./http.ts";
 import type { Env, Limits } from "./limits.ts";
@@ -12,7 +17,7 @@ import {
   readProgress,
 } from "./progress.ts";
 import { take } from "./throttle.ts";
-import { getBoard, getStreak, postXp } from "./xp.ts";
+import { getBoard, getStreak, getXp, postXp } from "./xp.ts";
 
 // D1 accepts 2 MB per bound value and the statement forwards the body with another
 // level of escapes; this cap leaves margin.
@@ -100,6 +105,7 @@ const ROUTES: Route[] = [
     path: /^\/api\/progress$/,
     handle: (context) => writeProgress(context, false),
   },
+  { method: "GET", path: /^\/api\/xp$/, handle: getXp },
   { method: "POST", path: /^\/api\/xp$/, handle: postXp },
   { method: "GET", path: /^\/api\/streak$/, handle: getStreak },
   { method: "POST", path: /^\/api\/friends\/invite$/, handle: postInvite },
@@ -130,14 +136,26 @@ export async function handleApi(
     response.headers.set("Allow", allowed);
     return response;
   }
-  if (route.method !== "GET" && !sameOrigin(request))
-    return fail(403, "bad_origin", "Origen no permitido.");
-
-  const userId = await sessionUser(env.DB, request.headers.get("cookie"), now);
-  if (!userId) {
-    if (route.method === "GET" && pathname === "/api/me")
-      return reply({ signedIn: false });
-    return fail(401, "signed_out", "Inicia sesión para guardar tu progreso.");
+  // Bearer authentication bypasses the browser origin check and ignores cookies.
+  const bearer = bearerToken(request);
+  let userId: string | null;
+  if (bearer === undefined) {
+    if (route.method !== "GET" && !sameOrigin(request))
+      return fail(403, "bad_origin", "Origen no permitido.");
+    userId = await sessionUser(env.DB, request.headers.get("cookie"), now);
+    if (!userId) {
+      if (route.method === "GET" && pathname === "/api/me")
+        return reply({ signedIn: false });
+      return fail(401, "signed_out", "Inicia sesión para guardar tu progreso.");
+    }
+  } else {
+    userId = await bearerUser(env.DB, bearer, now);
+    if (!userId)
+      return fail(
+        401,
+        "token_invalid",
+        "El token venció o se revocó. Ejecuta `rising login`.",
+      );
   }
   const verdict = await take(
     limiters,

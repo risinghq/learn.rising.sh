@@ -24,10 +24,13 @@ CREATE TABLE identities (
   PRIMARY KEY (provider, subject)
 ) WITHOUT ROWID;
 
+-- `kind` separates web tokens in the `qg_auth` cookie from CLI tokens in an
+-- `Authorization: Bearer` header. Each transport accepts only its own kind.
 CREATE TABLE sessions (
   token_hash TEXT PRIMARY KEY,
   user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  expires_at INTEGER NOT NULL
+  expires_at INTEGER NOT NULL,
+  kind       TEXT NOT NULL DEFAULT 'web' CHECK (kind IN ('web', 'cli'))
 ) WITHOUT ROWID;
 
 CREATE TABLE lesson_done (
@@ -123,3 +126,15 @@ CREATE TABLE friend_invites (
 ) WITHOUT ROWID;
 
 CREATE INDEX friend_invites_user ON friend_invites (user_id);
+
+-- A device-flow login in progress. The database stores hashes of both codes.
+-- `decision` is NULL until the learner answers, and collection deletes the row.
+-- `polled_at` is in milliseconds.
+CREATE TABLE device_codes (
+  device_hash TEXT PRIMARY KEY,
+  user_hash   TEXT NOT NULL UNIQUE,
+  expires_at  INTEGER NOT NULL,
+  polled_at   INTEGER NOT NULL DEFAULT 0,
+  user_id     TEXT REFERENCES users(id) ON DELETE CASCADE,
+  decision    TEXT CHECK (decision IN ('approved', 'denied'))
+) WITHOUT ROWID;

@@ -141,12 +141,7 @@ export async function postXp({
   ]);
   const granted = inserted.results[0]?.amount ?? null;
 
-  const total = await db
-    .prepare(
-      "SELECT COALESCE(SUM(amount), 0) AS total FROM xp_events WHERE user_id = ?1 AND utc_day = ?2",
-    )
-    .bind(userId, utcDay)
-    .first<number>("total");
+  const total = await dayTotal(db, userId, utcDay);
   let reason: "ref_today" | "daily_cap" | null = null;
   if (granted === null) {
     const seen = await db
@@ -159,9 +154,36 @@ export async function postXp({
   }
   return reply({
     granted: granted ?? 0,
-    total: total ?? 0,
+    total,
     cap: limits.xpPerDay,
     reason,
+  });
+}
+
+async function dayTotal(
+  db: D1Database,
+  userId: string,
+  utcDay: number,
+): Promise<number> {
+  return (
+    (await db
+      .prepare(
+        "SELECT COALESCE(SUM(amount), 0) AS total FROM xp_events WHERE user_id = ?1 AND utc_day = ?2",
+      )
+      .bind(userId, utcDay)
+      .first<number>("total")) ?? 0
+  );
+}
+
+export async function getXp({
+  env,
+  limits,
+  userId,
+  now,
+}: ApiContext): Promise<Response> {
+  return reply({
+    total: await dayTotal(env.DB, userId, Math.floor(now / DAY_MS)),
+    cap: limits.xpPerDay,
   });
 }
 

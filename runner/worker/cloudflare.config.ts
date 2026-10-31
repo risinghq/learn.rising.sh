@@ -69,6 +69,7 @@ export default defineConfig({
       GITHUB_CLIENT_SECRET: bindings.secret(),
       AUTH_PER_MINUTE: bindings.text("10"),
       AUTH_SESSION_DAYS: bindings.text("30"),
+      CLI_TOKEN_DAYS: bindings.text("90"),
       SIGNED_IN_IP_FACTOR: bindings.text("4"),
       ATTEMPT_RETENTION_DAYS: bindings.text("180"),
       ACCOUNT_RETENTION_DAYS: bindings.text("730"),
