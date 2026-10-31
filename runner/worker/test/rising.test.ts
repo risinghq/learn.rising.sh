@@ -161,6 +161,58 @@ describe("POST /api/xp", () => {
     expect((await xp(h, ada, "drill", "q1", 10)).body.granted).toBe(10);
   });
 
+  it("keeps the day an award was earned, so a resend after midnight is not a second award", async () => {
+    const h = await worker({ vars: { FAKE_CLOCK: CLOCK } });
+    const ada = await user(h, "ada");
+    const earnedAt = Date.parse(CLOCK);
+    const post = { earnedAt, tz: "UTC" };
+
+    expect((await xp(h, ada, "drill", "q1", 10, post)).body.granted).toBe(10);
+    const before = (await call(h, ada, "GET", "/api/board")).body.entries;
+
+    // The reply was lost and the queue resends after UTC midnight.
+    await h.advance(13 * HOUR);
+    const again = await xp(h, ada, "drill", "q1", 10, post);
+    expect(again.body.granted).toBe(0);
+    expect(again.body.reason).toBe("ref_today");
+    expect((await call(h, ada, "GET", "/api/board")).body.entries).toEqual(
+      before,
+    );
+    expect(
+      (await h.db.prepare("SELECT COUNT(*) AS n FROM xp_events").first<{
+        n: number;
+      }>())!.n,
+    ).toBe(1);
+    // The streak counted the day of the award once.
+    expect((await streak(h, ada)).current).toBe(1);
+  });
+
+  it("dates an award by earnedAt only inside the last 48 hours", async () => {
+    const h = await worker({ vars: { FAKE_CLOCK: CLOCK } });
+    const ada = await user(h, "ada");
+    const now = Date.parse(CLOCK);
+    const rows = () =>
+      h.db
+        .prepare("SELECT ref, at, utc_day FROM xp_events ORDER BY ref")
+        .all<{ ref: string; at: number; utc_day: number }>();
+
+    await xp(h, ada, "drill", "recent", 5, { earnedAt: now - DAY });
+    await xp(h, ada, "drill", "ancient", 5, { earnedAt: now - 10 * DAY });
+    await xp(h, ada, "drill", "future", 5, { earnedAt: now + DAY });
+    await xp(h, ada, "drill", "absent", 5);
+
+    const day = Math.floor(now / DAY);
+    expect((await rows()).results).toEqual([
+      { ref: "absent", at: now / 1000, utc_day: day },
+      { ref: "ancient", at: now / 1000, utc_day: day },
+      { ref: "future", at: now / 1000, utc_day: day },
+      { ref: "recent", at: (now - DAY) / 1000, utc_day: day - 1 },
+    ]);
+    expect(
+      (await xp(h, ada, "drill", "bad", 5, { earnedAt: "yesterday" })).status,
+    ).toBe(400);
+  });
+
   it("refuses exercise XP until the server recorded a passing check for this user", async () => {
     const h = await worker({ vars: { FAKE_CLOCK: CLOCK } });
     const ada = await user(h, "ada");

@@ -47,12 +47,23 @@ export function logRun(entry: Entry): void {
   );
 }
 
-export type Where = "settle" | "stop" | "attempt" | "auth" | "api" | "purge";
+export type Where =
+  | "settle"
+  | "stop"
+  | "attempt"
+  | "auth"
+  | "api"
+  | "purge"
+  | "push";
 
 // `where` names the step that failed when the request carries on. `auth`,
-// `api` and `purge` are not steps of /run: they are their own event.
+// `api`, `purge` and `push` are not steps of /run: they are their own event.
 export function logFailure(error: unknown, where?: Where): void {
-  const own = where === "auth" || where === "api" || where === "purge";
+  const own =
+    where === "auth" ||
+    where === "api" ||
+    where === "purge" ||
+    where === "push";
   console.error(
     JSON.stringify({
       event: own ? where : "run",

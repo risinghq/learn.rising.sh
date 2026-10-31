@@ -31,16 +31,21 @@ interface Award {
   ref: string;
   amount: number;
   zone: string | null;
+  /** When the XP was earned, in Unix milliseconds, if the client says. */
+  earnedAt: number | null;
 }
+
+// A client may date an award up to this far back, so a post queued offline keeps its day.
+const EARNED_WINDOW_MS = 2 * DAY_MS;
 
 // Parses an award or returns its validation error.
 function parseAward(body: unknown, limits: Limits): Award | string {
   if (!isRecord(body)) return "El cuerpo debe ser un objeto JSON.";
   const unknown = Object.keys(body).find(
-    (key) => !["source", "ref", "amount", "tz"].includes(key),
+    (key) => !["source", "ref", "amount", "tz", "earnedAt"].includes(key),
   );
   if (unknown) return `Campo desconocido: ${unknown.slice(0, 40)}.`;
-  const { source, ref, amount, tz } = body;
+  const { source, ref, amount, tz, earnedAt } = body;
   if (!SOURCES.includes(source as Source))
     return `source debe ser uno de: ${SOURCES.join(", ")}.`;
   if (typeof ref !== "string" || !REF[source as Source].test(ref))
@@ -57,7 +62,18 @@ function parseAward(body: unknown, limits: Limits): Award | string {
     zone = typeof tz === "string" ? canonicalZone(tz) : null;
     if (!zone) return "tz debe ser un nombre de zona horaria IANA.";
   }
-  return { source: source as Source, ref, amount, zone };
+  if (
+    earnedAt !== undefined &&
+    (typeof earnedAt !== "number" || !Number.isSafeInteger(earnedAt))
+  )
+    return "earnedAt debe ser un entero en milisegundos.";
+  return {
+    source: source as Source,
+    ref,
+    amount,
+    zone,
+    earnedAt: earnedAt ?? null,
+  };
 }
 
 async function zoneOf(db: D1Database, userId: string): Promise<string | null> {
@@ -108,7 +124,16 @@ export async function postXp({
       );
   }
 
-  const utcDay = Math.floor(now / DAY_MS);
+  // The award belongs to the day it was earned, not the day it arrived, so a
+  // resend that crosses midnight lands on the same day and is refused as a
+  // repeat. A date outside the window, or none, is the arrival.
+  const earned =
+    award.earnedAt !== null &&
+    award.earnedAt <= now &&
+    award.earnedAt >= now - EARNED_WINDOW_MS
+      ? award.earnedAt
+      : now;
+  const utcDay = Math.floor(earned / DAY_MS);
   // One statement stores the XP, so the cap and the once-per-day rule hold
   // when requests race: it inserts only the XP that still fits and only for a
   // new ref. The batch folds the day into the streak only if it stored XP.
@@ -130,14 +155,14 @@ export async function postXp({
       )
       .bind(
         userId,
-        unixSeconds(now),
+        unixSeconds(earned),
         utcDay,
         source,
         ref,
         amount,
         limits.xpPerDay,
       ),
-    db.prepare(FOLD_DAY).bind(userId, localDay(now, zone)),
+    db.prepare(FOLD_DAY).bind(userId, localDay(earned, zone)),
   ]);
   const granted = inserted.results[0]?.amount ?? null;
 
@@ -181,9 +206,26 @@ export async function getXp({
   userId,
   now,
 }: ApiContext): Promise<Response> {
+  const db = env.DB;
+  // `today` is the learner's own day, the one the streak counts. `total` is the
+  // UTC day, the one the cap counts.
+  const zone = (await zoneOf(db, userId)) ?? "UTC";
+  const day = localDay(now, zone);
+  const today = await db
+    .prepare(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM xp_events
+       WHERE user_id = ?1 AND at >= ?2 AND at < ?3`,
+    )
+    .bind(
+      userId,
+      unixSeconds(startOfDay(day, zone)),
+      unixSeconds(startOfDay(day + 1, zone)),
+    )
+    .first<number>("total");
   return reply({
-    total: await dayTotal(env.DB, userId, Math.floor(now / DAY_MS)),
+    total: await dayTotal(db, userId, Math.floor(now / DAY_MS)),
     cap: limits.xpPerDay,
+    today: today ?? 0,
   });
 }
 

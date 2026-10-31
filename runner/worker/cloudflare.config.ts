@@ -10,6 +10,7 @@ import {
 
 import * as entrypoint from "./src/index.ts" with { type: "cf-worker" };
 import { WORKER_FIRST } from "./src/routes.ts";
+import { PURGE_CRON, REMINDER_CRON } from "./src/schedule.ts";
 
 // The Python and uv versions of the image are those of mise.toml.
 const miseVersion = (tool: string) =>
@@ -56,7 +57,12 @@ export default defineConfig({
     // site/ (wrangler.config.ts) is served from this same Worker.
     // Only the routes of WORKER_FIRST invoke it.
     assets: { runWorkerFirst: WORKER_FIRST },
-    triggers: [triggers.scheduled({ schedule: "17 3 * * *" })],
+    // The daily purge, and the hourly sweep that sends the streak reminder to
+    // whoever is at REMINDER_HOUR (src/push.ts) in their own time zone.
+    triggers: [
+      triggers.scheduled({ schedule: PURGE_CRON }),
+      triggers.scheduled({ schedule: REMINDER_CRON }),
+    ],
     env: {
       ASSETS: bindings.assets(),
       // Accounts, progress and attempts (src/schema.sql).
@@ -67,6 +73,13 @@ export default defineConfig({
       GOOGLE_CLIENT_SECRET: bindings.secret(),
       GITHUB_CLIENT_ID: bindings.secret(),
       GITHUB_CLIENT_SECRET: bindings.secret(),
+      // Web Push for the streak reminder. docs/deploy.md creates the key pair.
+      VAPID_PUBLIC_KEY: bindings.secret(),
+      VAPID_PRIVATE_KEY: bindings.secret(),
+      VAPID_SUBJECT: bindings.secret(),
+      PUSH_HOSTS: bindings.text(
+        "googleapis.com,push.services.mozilla.com,push.apple.com,notify.windows.com",
+      ),
       AUTH_PER_MINUTE: bindings.text("10"),
       AUTH_SESSION_DAYS: bindings.text("30"),
       CLI_TOKEN_DAYS: bindings.text("90"),

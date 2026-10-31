@@ -16,6 +16,8 @@ import {
   type Who,
 } from "./meters.ts";
 import { purge } from "./purge.ts";
+import { sendReminders } from "./push.ts";
+import { REMINDER_CRON } from "./schedule.ts";
 import { hasSession, issueSession, verifyTurnstile } from "./session.ts";
 import { take } from "./throttle.ts";
 
@@ -514,8 +516,17 @@ export default {
     }
   },
 
-  // The daily cron of cloudflare.config.ts.
+  // The two crons of cloudflare.config.ts: the hourly reminder and the daily purge.
   async scheduled(controller: ScheduledController, env: Env): Promise<void> {
+    if (controller.cron === REMINDER_CRON) {
+      try {
+        await sendReminders(env, controller.scheduledTime);
+      } catch (error) {
+        logFailure(error, "push");
+        throw error;
+      }
+      return;
+    }
     try {
       await purge(env.DB, loadLimits(env), controller.scheduledTime);
     } catch (error) {

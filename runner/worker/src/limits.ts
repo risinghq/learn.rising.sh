@@ -34,6 +34,16 @@ export interface Env {
   GOOGLE_CLIENT_SECRET?: string;
   GITHUB_CLIENT_ID?: string;
   GITHUB_CLIENT_SECRET?: string;
+  // The streak reminder's Web Push identity: a P-256 key pair as base64url (the
+  // public key is the uncompressed point) and the contact (`mailto:` or
+  // `https:`) that push services may use. Without them `/api/push` answers 503
+  // and the cron sends nothing.
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  VAPID_SUBJECT?: string;
+  // Hosts of the push services a browser may register, separated by commas.
+  // A subdomain of one is accepted.
+  PUSH_HOSTS: string;
 }
 
 type NumericVar =

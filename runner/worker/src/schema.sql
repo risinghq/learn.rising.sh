@@ -14,7 +14,9 @@ CREATE TABLE users (
   progress_version INTEGER NOT NULL DEFAULT 0,
   -- IANA name that the page sends with its XP. It sets the day of a streak and
   -- the start of the week on the board.
-  time_zone   TEXT NOT NULL DEFAULT 'UTC'
+  time_zone   TEXT NOT NULL DEFAULT 'UTC',
+  -- The last local day (in `time_zone`) on which the streak reminder went out.
+  reminded_day INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE identities (
@@ -126,6 +128,18 @@ CREATE TABLE friend_invites (
 ) WITHOUT ROWID;
 
 CREATE INDEX friend_invites_user ON friend_invites (user_id);
+
+-- A browser that accepted streak reminders. One endpoint belongs to one user:
+-- subscribing again from another account moves it.
+CREATE TABLE push_subscriptions (
+  endpoint   TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  p256dh     TEXT NOT NULL,
+  auth       TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+) WITHOUT ROWID;
+
+CREATE INDEX push_subscriptions_user ON push_subscriptions (user_id);
 
 -- A device-flow login in progress. The database stores hashes of both codes.
 -- `decision` is NULL until the learner answers, and collection deletes the row.

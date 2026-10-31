@@ -16,6 +16,7 @@ import {
   parseProgress,
   readProgress,
 } from "./progress.ts";
+import { deletePush, getPushKey, postPush } from "./push.ts";
 import { take } from "./throttle.ts";
 import { getBoard, getStreak, getXp, postXp } from "./xp.ts";
 
@@ -61,7 +62,7 @@ async function writeProgress(
   try {
     const merged = await mergeProgress(env.DB, userId, incoming, now);
     return merge
-      ? reply({ progress: merged })
+      ? reply({ progress: merged, account: userId })
       : new Response(null, { status: 204 });
   } catch (error) {
     if (error instanceof TooMuch)
@@ -117,6 +118,9 @@ const ROUTES: Route[] = [
     handle: deleteFriend,
   },
   { method: "GET", path: /^\/api\/board$/, handle: getBoard },
+  { method: "GET", path: /^\/api\/push$/, handle: getPushKey },
+  { method: "POST", path: /^\/api\/push$/, handle: postPush },
+  { method: "DELETE", path: /^\/api\/push$/, handle: deletePush },
 ];
 
 export async function handleApi(

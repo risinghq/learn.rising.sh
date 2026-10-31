@@ -54,6 +54,10 @@ function wallClock(ms: number, zone: string): number {
 export const localDay = (ms: number, zone: string) =>
   Math.floor(wallClock(ms, zone) / DAY_MS);
 
+// The hour of the wall clock in `zone`, 0 to 23.
+export const localHour = (ms: number, zone: string) =>
+  Math.floor((wallClock(ms, zone) % DAY_MS) / 3_600_000);
+
 // Returns the instant at which `day` starts in `zone`. Two corrections suffice
 // because the offset changes at most once around midnight.
 export function startOfDay(day: number, zone: string): number {
