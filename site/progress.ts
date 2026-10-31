@@ -16,6 +16,8 @@ export const PREF = {
   xp: "rising:xp",
   /** The course whose lesson the learner opened last. */
   last: "rising:last",
+  /** The XP of finished drill sessions that the account has not received yet. */
+  xpQueue: "rising:xpq",
 } as const;
 
 /** The keys of a lesson, which end with its id (and a step for `predict` and `reflect`). */
@@ -182,6 +184,94 @@ export function xpSummary(log: XpLog, now = new Date()) {
   }
   return { today, streak };
 }
+
+/** One recorded answer to a drill item. `at` is in Unix milliseconds. */
+export interface Review {
+  item: string;
+  at: number;
+  correct: boolean;
+}
+
+export const reviewKey = (course: string) => courseKey(course, "repaso");
+
+const MAX_REVIEWS = 800;
+const REVIEWS_PER_ITEM = 4;
+
+const isReview = (value: unknown): value is Review => {
+  const r = value as Review | null;
+  return (
+    typeof r === "object" &&
+    r !== null &&
+    typeof r.item === "string" &&
+    Number.isSafeInteger(r.at) &&
+    typeof r.correct === "boolean"
+  );
+};
+
+/**
+ * The answers in a stored review log, or undefined when the value has another shape, such as the
+ * boxes an earlier version kept there.
+ */
+export const reviewsOf = (value: unknown): Review[] | undefined =>
+  Array.isArray(value)
+    ? value
+        .filter(isReview)
+        .map(({ item, at, correct }) => ({ item, at, correct }))
+    : undefined;
+
+/** The answers a learner gave in a course. Anything stored in another shape is ignored. */
+export const readReviews = (course: string): Review[] =>
+  reviewsOf(readJson<unknown>(reviewKey(course), [])) ?? [];
+
+/**
+ * Removes a review log in the shape of an earlier version, the Leitner boxes `{id: {box, due}}`.
+ * They do not map onto the answers, and the account rejects a body that carries them.
+ */
+export function discardStaleReviews() {
+  for (const key of storedKeys()) {
+    if (
+      key.endsWith(":repaso") &&
+      reviewsOf(readJson<unknown>(key, [])) === undefined
+    )
+      remove(key);
+  }
+}
+
+/**
+ * Keeps the last answers of each item and the latest overall, so the log stays under the size the
+ * account accepts. The scheduler replays what is left.
+ */
+export function compactReviews(log: Review[]): Review[] {
+  const seen = new Map<string, number>();
+  const kept: Review[] = [];
+  for (const review of log.toSorted((a, b) => b.at - a.at)) {
+    const count = seen.get(review.item) ?? 0;
+    if (count >= REVIEWS_PER_ITEM) continue;
+    seen.set(review.item, count + 1);
+    kept.push(review);
+  }
+  return kept.slice(0, MAX_REVIEWS).toReversed();
+}
+
+/** The XP of one session, which the account receives once the connection allows. */
+export interface XpPost {
+  ref: string;
+  amount: number;
+}
+
+export const readXpQueue = (): XpPost[] => {
+  const queue = readJson<unknown>(PREF.xpQueue, []);
+  return Array.isArray(queue)
+    ? queue.filter(
+        (post): post is XpPost =>
+          typeof post?.ref === "string" && Number.isInteger(post.amount),
+      )
+    : [];
+};
+export const writeXpQueue = (queue: XpPost[]) =>
+  queue.length
+    ? write(PREF.xpQueue, JSON.stringify(queue))
+    : remove(PREF.xpQueue);
 
 interface CourseIndex {
   parts: { lessons: { id: string }[] }[];

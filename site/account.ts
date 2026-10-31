@@ -4,13 +4,16 @@
 // The reflections (<course>:reflect) never leave the browser.
 import {
   courseKey,
+  discardStaleReviews,
   lessonOwners,
   migrate,
   migratePreferences,
   PREF,
   read as readKey,
   readJson,
+  readXpQueue,
   write as writeKey,
+  writeXpQueue,
 } from "./progress.ts";
 
 const FLAG = PREF.account;
@@ -230,9 +233,50 @@ addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") flush({ unloading: true });
 });
 
-const signIn = (provider: string) => {
+// A refusal other than 401, 429 or a server error cannot succeed on a second try, so the post is dropped.
+let sending = false;
+async function drainXp(): Promise<void> {
+  const head = readXpQueue()[0];
+  if (!head || !state.signedIn) return;
+  const { ref, amount } = head;
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let resp: Response;
+  try {
+    resp = await api("POST", "/api/xp", { source: "drill", ref, amount, tz });
+  } catch {
+    return;
+  }
+  if (lapsed(resp) || resp.status === 429 || resp.status >= 500) return;
+  writeXpQueue(readXpQueue().filter((post) => post.ref !== ref));
+  return drainXp();
+}
+async function sendXp() {
+  if (sending) return;
+  sending = true;
+  try {
+    await drainXp();
+  } finally {
+    sending = false;
+  }
+}
+// Queues the XP of a drill session and sends it now, or when the connection returns. Without an
+// account there is nothing to send.
+function xp(ref: string, amount: number) {
+  if (!state.signedIn) return;
+  writeXpQueue([
+    ...readXpQueue().filter((post) => post.ref !== ref),
+    { ref, amount },
+  ]);
+  void sendXp();
+}
+addEventListener("online", () => void sendXp());
+
+const signInHref = (provider: string) => {
   const back = location.pathname + location.search + RETURN_HASH;
-  location.href = `/auth/${provider}?return=${encodeURIComponent(back)}`;
+  return `/auth/${provider}?return=${encodeURIComponent(back)}`;
+};
+const signIn = (provider: string) => {
+  location.href = signInHref(provider);
 };
 async function signOut() {
   flush();
@@ -382,6 +426,7 @@ if (returning)
   history.replaceState(null, "", location.pathname + location.search);
 // Migrate legacy keys before syncing so each value is sent from its course namespace once.
 migratePreferences();
+discardStaleReviews();
 const migrated = (async () => {
   if (readKey("rising:migrated") !== null) return;
   try {
@@ -395,4 +440,6 @@ const ready = migrated.then(() =>
   state.signedIn || returning ? sync() : undefined,
 );
 
-window.QGAccount = { ready, changed, mount };
+void ready.then(sendXp);
+
+window.QGAccount = { ready, changed, mount, xp, signInHref };
