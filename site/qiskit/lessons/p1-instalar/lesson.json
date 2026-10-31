@@ -175,7 +175,7 @@
     "1.3",
     "Comprobar la instalación"
    ],
-   "say": "Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto cinco. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco.",
+   "say": "Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto seis. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco.",
    "scene": [
     {
      "type": "code",
@@ -185,7 +185,7 @@
     },
     {
      "type": "code",
-     "src": "2.5.2",
+     "src": "2.6.1",
      "lang": "out",
      "id": "o",
      "hidden": true,

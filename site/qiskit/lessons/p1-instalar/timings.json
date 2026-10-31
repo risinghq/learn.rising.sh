@@ -96,10 +96,10 @@
   ]
  },
  "version": {
-  "dur": 22.488,
+  "dur": 22.56,
   "marks": {
    "out": 5.958,
-   "sim": 9.766
+   "sim": 9.836
   },
   "cues": [
    [
@@ -108,14 +108,14 @@
    ],
    [
     5.958,
-    "Este curso usa Qiskit dos punto cinco."
+    "Este curso usa Qiskit dos punto seis."
    ],
    [
-    9.766,
+    9.836,
     "Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste."
    ],
    [
-    16.191,
+    16.262,
     "Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco."
    ]
   ]

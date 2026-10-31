@@ -891,10 +891,10 @@ $ pip install -U qiskit qiskit-ibm-runtime""",
         beat(
             "version",
             ("", "Comprobar la instalación"),
-            """Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto cinco. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco.""",
+            """Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto seis. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco.""",
             [
                 Code("import qiskit\nprint(qiskit.__version__)", id="c"),
-                Out("2.5.2", id="o", hidden=True, check=True),
+                Out("2.6.1", id="o", hidden=True, check=True),
                 Box(
                     "idea",
                     "Listo para simular",
