@@ -1,0 +1,34 @@
+[project]
+name = "qgcheck"
+version = "0.1.0"
+description = "Grade a learner's Python against the cases of an exercise, in a separate process"
+requires-python = ">=3.15"
+dependencies = ["numpy"]
+
+# What the exercises of the courses import.
+[project.optional-dependencies]
+courses = [
+  "qiskit>=2.5.2,<2.6",
+  "qiskit-aer~=0.18.0",
+  "qiskit-ibm-runtime>=0.50",
+  "qiskit-addon-obp>=0.3.0",
+  "qiskit-addon-utils~=0.4.0",
+  "matplotlib",
+  "pylatexenc",
+  "scipy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# This folder is the package: the wheel stores its files under `qgcheck/`.
+[tool.hatch.build.targets.wheel]
+include = ["*.py"]
+exclude = ["/dist"]
+
+[tool.hatch.build.targets.wheel.sources]
+"" = "qgcheck"
+
+[tool.hatch.build.targets.sdist]
+include = ["*.py", "pyproject.toml"]
