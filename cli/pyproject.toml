@@ -1,0 +1,28 @@
+[project]
+name = "rising"
+version = "0.1.0"
+description = "Write Rising exercises in your editor, grade them on your machine and earn XP"
+requires-python = ">=3.15"
+dependencies = ["platformdirs", "qgcheck[courses]"]
+
+[project.scripts]
+rising = "rising.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rising"]
+
+# Adds the check.py of every exercise to the package (hatch_build.py).
+[tool.hatch.build.hooks.custom]
+
+[tool.uv.sources]
+qgcheck = { path = "../qgcheck" }
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B", "I", "UP", "SIM", "RUF"]
