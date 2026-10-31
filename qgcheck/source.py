@@ -95,3 +95,13 @@ def describe(exc: BaseException, source: str) -> str:
         text = lines[n - 1].strip() if n <= len(lines) else ""
         return f"{msg} (línea {n}: {text})"
     return msg
+
+
+def stopped(killed: str, wall_s: float, mem_mb: int, scratch_mb: int, out_bytes: int) -> str:
+    return {
+        "time": f"Tu código tardó más de {wall_s:g} s y se detuvo.",
+        "memory": f"Tu código usó más de {mem_mb} MB de memoria y se detuvo.",
+        "disk": f"Tu código escribió más de {scratch_mb} MB y se detuvo.",
+        "output": f"Tu código imprimió más de {out_bytes // 1024} KiB y se detuvo.",
+        "scan": "El corredor no pudo vigilar la memoria ni el disco de tu código y lo detuvo. Inténtalo de nuevo.",
+    }[killed]

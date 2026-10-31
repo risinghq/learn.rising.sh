@@ -32,7 +32,15 @@ from collections import Counter
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from qgcheck.runner import grade as grade
+
+def grade(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    """Grade a learner's code in a separate process: see `qgcheck.runner.grade`.
+
+    The runner is imported when called, so the browser, which has no processes, can import this module.
+    """
+    from qgcheck.runner import grade as run
+
+    return run(*args, **kwargs)
 
 
 class Names(Protocol):

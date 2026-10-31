@@ -49,14 +49,18 @@ def load_module(check_path: Path) -> ModuleType:
     return module
 
 
-def load_cases(check_path: Path) -> list[tuple[Callable[..., Any], str | None]]:
-    """[(function, visible name or None)] of each test_* in check.py, in definition order."""
-    module = load_module(check_path)
+def cases_of(module: ModuleType) -> list[tuple[Callable[..., Any], str | None]]:
+    """[(function, visible name or None)] of each test_* in a check module, in definition order."""
     return [
         (fn, getattr(fn, "qg_visible", None))
         for name, fn in vars(module).items()
         if name.startswith("test_") and callable(fn)
     ]
+
+
+def load_cases(check_path: Path) -> list[tuple[Callable[..., Any], str | None]]:
+    """The cases of the check.py at `check_path`."""
+    return cases_of(load_module(check_path))
 
 
 def public(exercise_id: str) -> dict[str, Any]:

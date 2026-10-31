@@ -17,7 +17,8 @@ from typing import Any
 import sandbox
 
 from qgcheck import spec
-from qgcheck.runner import MAX_CODE, job_argv, result, stopped
+from qgcheck.runner import MAX_CODE, job_argv, result
+from qgcheck.source import stopped
 
 PORT = int(os.environ.get("PORT", "8080"))
 # A control character takes 6 bytes escaped in JSON; the rest is the envelope.
