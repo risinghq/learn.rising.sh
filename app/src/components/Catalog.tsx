@@ -93,6 +93,9 @@ export function Catalog({ page }: { page: CatalogPage }) {
             />
           ))}
         </ul>
+        <p>
+          <a href="/amigos/">Amigos y tablero de la semana</a>
+        </p>
       </div>
     </Layout>
   );

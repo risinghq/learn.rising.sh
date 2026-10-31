@@ -13,6 +13,7 @@ import { grade, type Answer } from "../../../drill/grade.ts";
 import type { Bank, Item, ItemKind } from "../../../drill/item.ts";
 import { planSession } from "../../../drill/schedule.ts";
 import { awardXp, save, useReady, useStored, useXp } from "../store.ts";
+import { Reminder } from "../components/Reminder.tsx";
 import { Bug } from "./Bug.tsx";
 import { Choice } from "./Choice.tsx";
 import { Feedback } from "./Feedback.tsx";
@@ -88,7 +89,9 @@ function Done({ slug, run }: { slug: string; run: Run }) {
             </a>
           </div>
         </section>
-      ) : null}
+      ) : (
+        <Reminder quiet />
+      )}
       <a className="btn primary" href={`/${slug}/`}>
         Volver al camino
       </a>
@@ -115,7 +118,7 @@ function Play({ slug, items }: { slug: string; items: Item[] }) {
     );
     if (run.xp > 0) {
       awardXp(run.xp);
-      QGAccount.xp(`${slug}:${started.current}`, run.xp);
+      QGAccount.xp("drill", `${slug}:${started.current}`, run.xp);
     }
   }, [over, run, slug]);
 

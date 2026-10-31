@@ -70,6 +70,7 @@ async function readPages(): Promise<
         })),
       },
     },
+    { route: "/amigos/", file: "amigos/index.html", page: { kind: "friends" } },
     {
       route: "/privacidad.html",
       file: "privacidad.html",

@@ -74,4 +74,13 @@ export interface SessionPage {
   course: Course;
 }
 
-export type Page = CatalogPage | CoursePage | PrivacyPage | SessionPage;
+export interface FriendsPage {
+  kind: "friends";
+}
+
+export type Page =
+  | CatalogPage
+  | CoursePage
+  | FriendsPage
+  | PrivacyPage
+  | SessionPage;

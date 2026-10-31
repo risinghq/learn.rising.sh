@@ -90,3 +90,30 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(request));
   }
 });
+
+self.addEventListener("push", (event) => {
+  let note = {};
+  try {
+    note = event.data?.json() ?? {};
+  } catch {}
+  event.waitUntil(
+    self.registration.showNotification(note.title ?? "Rising", {
+      body: note.body,
+      icon: "/icons/icon-192.png",
+      tag: "racha",
+      data: { url: note.url },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url ?? "/", location.origin);
+  const url = target.origin === location.origin ? target.href : location.origin;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window" }).then((windows) => {
+      const open = windows.find((client) => client.url === url);
+      return open ? open.focus() : self.clients.openWindow(url);
+    }),
+  );
+});

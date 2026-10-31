@@ -55,6 +55,28 @@ export function Privacy() {
             apuestas, el repaso espaciado y los hitos y misiones que marcaste.
           </li>
           <li>
+            Tu XP: cada vez que ganas XP se guarda el momento, de dónde viene y
+            cuánto fue, y se borra a los 14 días. Con eso sale tu racha: el
+            último día con XP, la racha más larga y los días de gracia que te
+            quedan. También guardamos tu zona horaria, para saber qué día es
+            para ti.
+          </li>
+          <li>
+            Tus amigos, si invitas a alguien o aceptas una invitación. Cada uno
+            ve de ti tu racha, si practicaste hoy y tu XP de la semana; no ve tu
+            nombre, porque no lo tenemos. Quitar a un amigo lo borra para los
+            dos.
+          </li>
+          <li>
+            Si activas el aviso de racha, la dirección que tu navegador nos da
+            para enviarte notificaciones y sus claves de cifrado. Las usamos
+            solo para el aviso, que sale una vez al día y solo si tienes racha y
+            aún no ganaste XP ese día. El servicio de notificaciones de tu
+            navegador (Google, Mozilla o Apple) ve que recibes un aviso de este
+            sitio, pero no su contenido. Puedes quitarlo desde la página Amigos
+            o en los ajustes de tu navegador.
+          </li>
+          <li>
             Una sesión: una cookie <code>qg_auth</code> que solo sirve para
             saber que eres tú. En el servidor guardamos únicamente una huella
             del valor de la cookie.

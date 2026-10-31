@@ -37,7 +37,7 @@ function AccountSlot() {
   return <div className="acct-slot" ref={host} />;
 }
 
-function Stats({ drill }: { drill?: string }) {
+function Stats({ drill, here }: { drill?: string; here?: boolean }) {
   const { streak, today } = useXp();
   const flame = (
     <>
@@ -60,8 +60,14 @@ function Stats({ drill }: { drill?: string }) {
         )}
       </li>
       <li className="stat">
-        <Zap aria-hidden="true" />
-        {today} XP<span className="sr"> hoy</span>
+        <a
+          href="/amigos/"
+          aria-label={`${today} XP hoy. Ver amigos y tablero`}
+          aria-current={here ? "page" : undefined}
+        >
+          <Zap aria-hidden="true" />
+          {today} XP<span className="sr"> hoy</span>
+        </a>
       </li>
     </ul>
   );
@@ -73,6 +79,8 @@ interface LayoutProps {
   /** The course whose review session the streak opens. */
   drill?: string;
   privacy?: boolean;
+  /** Marks the friends page as current in the XP link. */
+  here?: boolean;
   footer?: ReactNode;
   children: ReactNode;
 }
@@ -82,6 +90,7 @@ export function Layout({
   stats,
   drill,
   privacy = true,
+  here,
   footer,
   children,
 }: LayoutProps) {
@@ -104,7 +113,7 @@ export function Layout({
             )}
           </div>
           <span className="sp" />
-          {stats ? <Stats drill={drill} /> : null}
+          {stats ? <Stats drill={drill} here={here} /> : null}
           <AccountSlot />
           <ThemeToggle />
         </div>

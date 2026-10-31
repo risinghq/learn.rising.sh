@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import {
+  ACCOUNT_EVENT,
   addXp,
   courseKey,
   PREF,
   read,
+  standing,
+  xpQueueKey,
   write,
-  xpSummary,
 } from "@site/progress.ts";
 
 const listeners = new Set<() => void>();
@@ -21,9 +23,11 @@ export const notify = () => {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   addEventListener("storage", listener);
+  addEventListener(ACCOUNT_EVENT, listener);
   return () => {
     listeners.delete(listener);
     removeEventListener("storage", listener);
+    removeEventListener(ACCOUNT_EVENT, listener);
   };
 }
 
@@ -39,6 +43,10 @@ function parse<T>(raw: string | null, fallback: T): T {
     return fallback;
   }
 }
+
+/** The XP the signed-in account has not sent, as stored. It changes when the queue or the account does. */
+export const useOutbox = (): string | null =>
+  useStored(xpQueueKey(useStored(PREF.account)));
 
 /** The JSON stored under `key`. The fallback must be a constant, so the value only changes with the storage. */
 export function useJson<T>(key: string, fallback: T): T {
@@ -68,12 +76,23 @@ export function useDone(course: string): ReadonlySet<string> {
 
 export const useLastCourse = () => useStored(PREF.last);
 
+const NO_XP = { today: 0, streak: 0 };
+
+/** Shows the account's totals when signed in and the browser's totals otherwise. */
 export function useXp() {
-  const raw = useStored(PREF.xp);
-  return useMemo(() => {
-    const log = parse<Record<string, number>>(raw, {});
-    return xpSummary(typeof log === "object" && log !== null ? log : {});
-  }, [raw]);
+  const key = useSyncExternalStore(
+    subscribe,
+    () =>
+      JSON.stringify([
+        read(PREF.xp),
+        read(PREF.account),
+        read(PREF.tally),
+        read(xpQueueKey(read(PREF.account))),
+      ]),
+    nothing,
+  );
+  // The server render and the first client render have no key. Show no totals then.
+  return useMemo(() => (key === null ? NO_XP : standing()), [key]);
 }
 
 /** The lessons done in each of several courses, from one subscription. */

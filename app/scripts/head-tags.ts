@@ -34,6 +34,12 @@ export function metaOf(page: Page): Meta {
         title: `Repaso de ${page.course.title} · Rising`,
         description: `Un repaso corto de ${page.course.title}, con ejercicios que respondes con un toque.`,
       };
+    case "friends":
+      return {
+        title: "Amigos · Rising",
+        description:
+          "Compara tu semana con la de tus amigos y recibe un aviso si tu racha está en juego.",
+      };
     case "privacy":
       return {
         title: "Privacidad · Rising",
