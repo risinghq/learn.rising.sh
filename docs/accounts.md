@@ -257,7 +257,8 @@ The site posts three kinds:
   `<course>:<start of the session>` as `ref`.
 - Finishing a lesson sends a `lesson` post with the lesson slug.
 - The first passing check of an exercise sends an `exercise` post with
-  `lesson/exercise`.
+  `lesson/exercise`. An exercise graded in the browser sends it with the source
+  `browser`, because the server never saw that run.
 
 Each owner has one queue in `localStorage`: `rising:xpq:<account id>` for an
 account, and `rising:xpq:anon` for XP earned before any sign-in. A post is
@@ -426,8 +427,10 @@ in the header of the catalog, the path pages, the lessons and the privacy page
 (`/privacidad.html`), which says what is stored, for how long and how to delete
 it.
 
-- Without an account, the page makes no request except `/run`. What it looks at
-  to know is the `rising:cuenta` mark in `localStorage`.
+- Without an account, the page makes no request to `/api` or `/auth`. What it
+  looks at to know is the `rising:cuenta` mark in `localStorage`. The editor of
+  an exercise that runs in the container asks for the account instead of calling
+  `/run` ([protection.md](protection.md#session)).
 - _Entrar con Google_ and _Entrar con GitHub_ go to `/auth/<provider>` with
   `return` equal to the current page plus `#cuenta`. On return, that `#cuenta`
   makes the page leave the mark and merge the progress.
@@ -488,7 +491,7 @@ hangs from `users` with `ON DELETE CASCADE`.
 | `lesson_done`        | The finished lessons and when.                                                                                                           |
 | `exercise_state`     | The code, hints, checks and whether it passed, per exercise.                                                                             |
 | `kv`                 | The `localStorage` keys of the table above.                                                                                              |
-| `attempts`           | One row per run, with or without an account.                                                                                             |
+| `attempts`           | One row per run.                                                                                                                         |
 | `xp_events`          | One row per XP granted: source, ref, amount and the UTC day. Deleted after 14 days.                                                      |
 | `streaks`            | One row per user: the run, the longest run, the freezes held and the last local day with XP.                                             |
 | `friendships`        | Two rows per friendship, one for each side, each with its own id.                                                                        |
@@ -500,15 +503,14 @@ raises `seen_day` at most once a day.
 
 Each 200 response of `/run` writes a row to `attempts`, from the JSON the
 container returned, which is what grades the code. The row carries the moment,
-the `user_id` (`NULL` without an account), the exercise, the mode, the result
-(`pass`, `fail`, `error` or `timeout`), the names of the cases that failed, the
-name of the Python exception (or `other`, or `killed_memory`, `killed_disk`,
-`killed_output` or `killed_scan`), `ms` and the size of the code in bytes. It
-does not carry the code, `stdout`, the error text or the `message` of a case,
-which could repeat what the learner wrote. A run is recorded only with `mode`
-`run` or `check` and an `exercise` shaped like an exercise id. A failure to
-write the row is logged and the response does not change. A row is not modified
-after it is written.
+the `user_id`, the exercise, the mode, the result (`pass`, `fail`, `error` or
+`timeout`), the names of the cases that failed, the name of the Python exception
+(or `other`, or `killed_memory`, `killed_disk`, `killed_output` or
+`killed_scan`), `ms` and the size of the code in bytes. It does not carry the
+code, `stdout`, the error text or the `message` of a case, which could repeat
+what the learner wrote. A run is recorded only with `mode` `run` or `check` and
+an `exercise` shaped like an exercise id. A failure to write the row is logged
+and the response does not change. A row is not modified after it is written.
 
 The same step sets `exercise_state.passed` to 1, creating the row if needed,
 when the attempt has an account, `mode` `check` and the result `pass`. It is the

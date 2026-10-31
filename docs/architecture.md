@@ -15,7 +15,7 @@ document says what each folder holds and where a request goes.
 | `exercises/`   | The code exercises: starter code, solution and cases of each.                                       |
 | `qgcheck/`     | The exercise grader: runs a learner's code and returns the result of each case.                     |
 | `runner/`      | The runner image (`server.py`, `sandbox.py`) and the Worker (`worker/`).                            |
-| `editor/`      | The package that bundles `site/player/editor.js` and copies KaTeX to `site/vendor/`.                |
+| `editor/`      | The package that bundles `site/player/editor.js` and copies KaTeX and Pyodide to `site/vendor/`.    |
 | `content/`     | The speech synthesis cache.                                                                         |
 | `tools/`       | Helper programs: original guides, narration, checks, local server, dashboard and browser tools.     |
 | `tests/`       | Browser tests, exercise tests, runner tests and dashboard tests.                                    |
@@ -87,16 +87,19 @@ The root holds the shell and what the courses share:
 - `manifest.webmanifest` and `icons/` make the site installable. `sw.js` is the
   service worker.
 - `fonts/` is Inter, the one face of every page.
-- `vendor/` is KaTeX, copied from `editor/node_modules` by `editor/vendor.ts`.
-  Git ignores it; `mise run install` and `mise run deploy` generate it. No page
-  requests anything from another site except the Turnstile script, which
-  `exercise.ts` downloads from Cloudflare when the runner requires it.
+- `vendor/` is KaTeX and Pyodide, copied from `editor/node_modules` by
+  `editor/vendor.ts` and `editor/vendor-pyodide.ts`. Git ignores it;
+  `mise run install` and `mise run deploy` generate it. Only the exercise pages
+  of a [browser course](exercises.md#a-course-that-grades-in-the-browser) load
+  Pyodide. No page requests anything from another site except the Turnstile
+  script, which `exercise.ts` downloads from Cloudflare when the runner requires
+  it.
 - The page scripts are written in TypeScript. `mise run generate:scripts`
   bundles them with `bun build` into `theme.js`, `account.js`,
-  `player/engine.js`, `player/editor.js` and `qiskit/notebooks.js`, which the
-  pages load and Git ignores. The `install`, `serve`, `deploy` and `test:ui`
-  tasks run it. `tsconfig.json` types them and `globals.d.ts` declares what they
-  share through `window`.
+  `player/engine.js`, `player/editor.js`, `player/pyodide-worker.js` and
+  `qiskit/notebooks.js`, which the pages load and Git ignores. The `install`,
+  `serve`, `deploy` and `test:ui` tasks run it. `tsconfig.json` types them and
+  `globals.d.ts` declares what they share through `window`.
 
 `player/` is the lesson player, the same for every course. A lesson page loads
 it with `../player/`:
@@ -195,5 +198,5 @@ before the files:
 | `/health` | The Worker, without touching the container.                                                                             |
 
 On your machine there is no Worker: `tools/serve.py` serves `site/` and answers
-`/run` with `qgcheck`, with no accounts and no limits
-([exercises.md](exercises.md#where-the-code-runs)).
+`/run` with `qgcheck`, with no accounts and no limits (a course that grades in
+the browser needs neither) ([exercises.md](exercises.md#where-the-code-runs)).

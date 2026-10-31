@@ -19,13 +19,13 @@ its domain. No secret goes in the repository or in a file you push to git.
 
 From the repository root, install the dependencies. `mise run install` installs
 those of the editor, of the shell (`app/`) and of the Worker, which brings the
-`cf` CLI. During the deploy, `mise run deploy` copies KaTeX from the editor to
-`site/vendor/`, writes the drill items (`mise run generate:items`), bundles the
-scripts of `site/` and `editor/src/` into JavaScript
-(`mise run generate:scripts`) and builds the shell: the catalog, the path pages,
-the drill sessions, the privacy page and the service worker, prerendered into
-`site/` (`mise run generate:app`, which needs the items). The next steps run in
-`runner/worker`.
+`cf` CLI. During the deploy, `mise run deploy` copies KaTeX and Pyodide (which
+it downloads, about 40 MB) from the editor to `site/vendor/`, writes the drill
+items (`mise run generate:items`), bundles the scripts of `site/` and
+`editor/src/` into JavaScript (`mise run generate:scripts`) and builds the
+shell: the catalog, the path pages, the drill sessions, the privacy page and the
+service worker, prerendered into `site/` (`mise run generate:app`, which needs
+the items). The next steps run in `runner/worker`.
 
 ```sh
 mise run install
@@ -300,6 +300,14 @@ Streak reminder (`users.reminded_day` and `push_subscriptions`):
 
 ```sh
 bunx cf d1 query <uuid> "--sql=ALTER TABLE users ADD COLUMN reminded_day INTEGER NOT NULL DEFAULT 0; CREATE TABLE push_subscriptions (endpoint TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, created_at INTEGER NOT NULL) WITHOUT ROWID; CREATE INDEX push_subscriptions_user ON push_subscriptions (user_id);"
+```
+
+Browser XP (the `browser` source in `xp_events`). SQLite cannot change a CHECK,
+so the table is created again. It holds only the last two weeks of XP, which the
+weekly board and the once-per-day rule read, so that is all it loses:
+
+```sh
+bunx cf d1 query <uuid> "--sql=DROP TABLE xp_events; CREATE TABLE xp_events (id INTEGER PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, at INTEGER NOT NULL, utc_day INTEGER NOT NULL, source TEXT NOT NULL CHECK (source IN ('drill', 'exercise', 'browser', 'lesson', 'cli')), ref TEXT NOT NULL, amount INTEGER NOT NULL CHECK (amount > 0)); CREATE UNIQUE INDEX xp_ref_day ON xp_events (user_id, utc_day, source, ref);"
 ```
 
 Run the statements before the deploy that needs them. The new Worker reads the

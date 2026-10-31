@@ -12,11 +12,11 @@ that way.
 Each exercise is a folder `exercises/<lesson>/<exercise>/`. The name of the
 lesson folder is the `id` of the lesson.
 
-| File          | Contents                                             | Reaches `site/`                 |
-| ------------- | ---------------------------------------------------- | ------------------------------- |
-| `starter.py`  | The code the learner sees when opening the exercise. | Yes                             |
-| `solution.py` | The reference. It must pass every case.              | No                              |
-| `check.py`    | The cases. Each `test_*` function is a case.         | Only the names of visible cases |
+| File          | Contents                                             | Reaches `site/`                                                                                                |
+| ------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `starter.py`  | The code the learner sees when opening the exercise. | Yes                                                                                                            |
+| `solution.py` | The reference. It must pass every case.              | No                                                                                                             |
+| `check.py`    | The cases. Each `test_*` function is a case.         | Only the names of visible cases, or the whole file in a [browser course](#a-course-that-grades-in-the-browser) |
 
 ## Declare it in the lesson
 
@@ -41,6 +41,7 @@ Exercise(
 | `level` | 1 reproduce, 2 modify, 3 create.                                                                                        |
 | `needs` | `"python"` if the code needs no Qiskit, `"qiskit"` if it runs with Qiskit alone, `"aer"` if it also needs `qiskit-aer`. |
 | `hints` | Hints in order, from the vaguest to the most concrete.                                                                  |
+| `kind`  | `"write"` (the default) or `"fix"`: see [Fix it exercises](#fix-it-exercises).                                          |
 
 [`build.py`](../lessons_src/build.py) completes the block with `starter` and
 with `cases`, the list of names of the visible cases, and writes it to
@@ -48,6 +49,18 @@ with `cases`, the list of names of the visible cases, and writes it to
 if the exercise is not in the folder of its lesson, if a file is missing, if no
 case is visible, if two blocks use the same exercise or if a folder of
 `exercises/` appears in no lesson of the course or of another built course.
+
+## Fix it exercises
+
+A `kind="fix"` exercise starts from code that runs and has a bug, not from an
+empty starter. The learner reads it, finds the bug and fixes it. The panel is
+titled «Corrige el error». `starter.py` is the broken program: a copy of
+`solution.py` with one wrong line, and no `✏️` placeholder to fill. A bug that
+shows in the output of a visible case sends the learner to the right place, and
+a hidden case catches the fix that only hides that output. `tools/exercises.py`
+rejects a fix exercise whose starter has a placeholder, differs from the
+solution by more than a fifth of its text, or fails only hidden cases. Each
+course has at least two.
 
 ## Write `check.py`
 
@@ -255,6 +268,9 @@ response) has its own message.
   screen and scrolls, so the editor can be used on a phone. It does not move to
   the next step by itself when the narration ends; the **Continuar** button does
   it.
+- A learner without an account sees the exercise and two sign-in links where the
+  buttons would be, if the exercise runs in the container
+  ([protection.md](protection.md#session)).
 - The code, the number of hints and checks and whether it was solved are saved
   in `localStorage`, under `<course>:exercise:<lesson>/<exercise>`, with the
   slug of the course.
@@ -266,6 +282,9 @@ the result of `grade()`. The route is always `/run`, on the same origin as the
 page: the runner does not answer `OPTIONS` requests or send CORS headers, and
 its session cookie is `SameSite=Strict`. In production a single Worker serves
 both ([runner.md](runner.md#on-cloudflare)).
+
+The runner needs an account session: without one it answers 401 and the editor
+asks the learner to sign in ([protection.md](protection.md#session)).
 
 If the runner answers 403 with `reason` `turnstile_missing`, the page loads the
 Cloudflare Turnstile widget with the site key that response carries, and repeats
@@ -288,6 +307,41 @@ It serves `site/` on `127.0.0.1` (port 8810 by default) and rejects a `POST`
 that is not `application/json` or whose `Host` is not `localhost` or
 `127.0.0.1`, so another website open in your browser cannot run code on your
 machine.
+
+### A course that grades in the browser
+
+A course whose `plan.py` sets `RUNS = "browser"` runs and grades its exercises
+in the learner's browser, with no call to `/run`, so they cost the site nothing
+and need no account. `computational-physics` is one. Its exercises need only
+`needs="python"`, with NumPy, SciPy and Matplotlib, and no `@inside` function:
+`build.py` fails otherwise.
+
+- `build.py` writes `runs: "browser"` and the whole `check.py` into the exercise
+  block of `lesson.json`. **A learner can read the hidden cases of such a course
+  in the page**, with their expected values. `solution.py` still never leaves
+  `exercises/`.
+- [`pyodide-worker.ts`](../site/player/pyodide-worker.ts) runs in a Web Worker.
+  It loads [Pyodide](https://pyodide.org) from `/vendor/pyodide/` on the first
+  run, or when the learner focuses the editor, and grades with
+  [`qgcheck/browser.py`](../qgcheck/browser.py). That module runs the same cases
+  and builds the same messages as the container's job
+  ([`qgcheck/cases.py`](../qgcheck/cases.py)), in one process: its verdict has
+  the shape of `grade()`'s, so `exercise.ts` draws both alike.
+- Only an exercise page of such a course loads Pyodide. The page stops the
+  worker when the code runs for 10 s, and the next run starts another.
+- The service worker keeps `/vendor/pyodide/` in its own cache, named after the
+  Pyodide version and kept across deploys of the shell, so only the first run on
+  a device downloads it. The numpy path is about 9 MB compressed. On a simulated
+  Fast 4G connection the first result takes 13 to 20 s and one from the cache 4
+  to 8 s.
+- A passing check of a browser exercise earns XP with the source `browser`. The
+  server never sees the run, so the page's `passed` does not reach the account.
+
+`mise run generate:vendor` copies the runtime of the npm package `pyodide` of
+`editor/package.json` to `site/vendor/pyodide/`, with the wheels of NumPy, SciPy
+and Matplotlib and the packages they need, downloaded from jsDelivr and checked
+against the hashes of the package's lock. `mise run generate:scripts` bundles
+the worker. Git ignores both.
 
 ### Rebuild the editor
 
@@ -344,6 +398,11 @@ that fails names its input, and tests the grader, what `build.py` publishes and
 the lessons in the browser against `serve.py`, on desktop and on a phone: it
 writes wrong code, corrects it, reloads and checks the panel, the keyboard, the
 hints, the timeout, the errors and the Turnstile check with a test widget.
+[`tests/pyodide_ui_test.py`](../tests/pyodide_ui_test.py) opens the physics
+exercises with every request to `/run` refused, checks that each starter fails
+and each solution passes with the verdict of `grade()`, that a second visit
+grades with the Pyodide files gone from the network, and that a Qiskit exercise
+with no session shows the sign-in links and never calls `/run`.
 `mise run test:ui` runs the browser tests. All of them use
 [`tests/offline.py`](../tests/offline.py) or its TypeScript twin
 [`tests/offline.ts`](../tests/offline.ts): the browser aborts any request that

@@ -1,16 +1,23 @@
 # Worker protection
 
-The Worker checks every `POST /run` before it starts the container. The checks
-run in this order, and the first that fails answers without the container
-receiving anything:
+The container runs only for an account, because it is the one thing the site
+pays for. The Worker checks every `POST /run` before it starts the container.
+The checks run in this order, and the first that fails answers without the
+container receiving anything:
 
-1. The [per-IP limit](#per-ip-limit).
-2. The per-user limit, if the request carries an account session (`qg_auth`)
-   that does not belong to a [maintainer](#maintainers).
-3. The [size](#code-size) of the body and of the code.
-4. The [budget](#budget) of the month and of the day.
-5. [Turnstile](#turnstile), if the request is not from a maintainer and carries
-   no valid Turnstile session.
+1. The [session](#session): a request without an account session (`qg_auth`)
+   answers 401.
+2. The [per-IP limit](#per-ip-limit).
+3. The per-user limit, unless the account belongs to a
+   [maintainer](#maintainers).
+4. The [size](#code-size) of the body and of the code.
+5. The [budget](#budget) of the month and of the day.
+6. [Turnstile](#turnstile), if the account is not a maintainer's and the request
+   carries no valid Turnstile session.
+
+Exercises of a course that grades in the browser (`runs: "browser"` in its
+lesson, see [exercises.md](exercises.md#where-the-code-runs)) never call `/run`,
+so none of these checks applies to them.
 
 A refusal carries `{"error": "...", "reason": "..."}`. The editor shows the text
 of `error` as it is. Every value comes from `env` in
@@ -21,6 +28,17 @@ failed.
 
 `GET /health` is answered by the Worker with 200 without touching a container,
 so that a request without a limit cannot keep an instance awake.
+
+## Session
+
+A `POST /run` with no valid account session answers 401 `signin_required` before
+it counts against any limit and before Turnstile. The learner sees «Para
+ejecutar código en el corredor hay que entrar con una cuenta.» The editor of an
+exercise that runs in the container shows the exercise and the two sign-in links
+in place of its run buttons while the browser holds no session, and it takes a
+401 from `/run` on any host as the signal to do the same. `mise run serve`, the
+local server that grades on the same machine with no accounts, is the one host
+where the editor keeps its buttons until the first 401.
 
 ## Per-IP limit
 
@@ -40,11 +58,11 @@ sees:
 The IP is `CF-Connecting-IP`. Without that header (locally) all requests share
 one counter. A whole class behind one IP shares the limit.
 
-With an account session, the per-IP cap is `SIGNED_IN_IP_FACTOR` times the
-anonymous one (4: 120 per minute and 4000 per day), and what bounds each learner
-is their own cap, with the same values of `RATE_PER_MINUTE` and `RATE_PER_DAY`.
-So a whole class with accounts fits behind one IP, and a single learner spends
-no more than an anonymous one. `/auth` requests use the per-IP limit
+Every `/run` request has a session, so the per-IP cap is `SIGNED_IN_IP_FACTOR`
+times those values (4: 120 per minute and 4000 per day), and what bounds each
+learner is their own cap, with the same values of `RATE_PER_MINUTE` and
+`RATE_PER_DAY`. So a whole class fits behind one IP, and a single learner spends
+no more than the table says. `/auth` requests use the per-IP limit
 `AUTH_PER_MINUTE` ([accounts.md](accounts.md#endpoints)) and `/api` requests
 with a session use the per-user limit.
 
@@ -187,14 +205,14 @@ account.
 
 ## Turnstile
 
-Cloudflare Turnstile is verified on the first run of each session, with an
-account or without one. Only a maintainer skips Turnstile: the request neither
-calls `siteverify` nor receives `qg_session`. A request with no Turnstile
-session and no token receives 403 `turnstile_missing` with the site key in the
-`sitekey` field. With it, `site/player/exercise.ts` loads the widget and repeats
-the request with the token in the `X-Turnstile-Token` header. The Worker checks
-it with `siteverify`, to which it sends only the secret and the token, and if it
-is valid it answers with the `qg_session` cookie besides the result:
+Cloudflare Turnstile is verified on the first run of each session, for a signed
+in learner. Only a maintainer skips Turnstile: the request neither calls
+`siteverify` nor receives `qg_session`. A request with no Turnstile session and
+no token receives 403 `turnstile_missing` with the site key in the `sitekey`
+field. With it, `site/player/exercise.ts` loads the widget and repeats the
+request with the token in the `X-Turnstile-Token` header. The Worker checks it
+with `siteverify`, to which it sends only the secret and the token, and if it is
+valid it answers with the `qg_session` cookie besides the result:
 
 ```text
 qg_session=<expiry>.<mac>; Max-Age=28800; Path=/run; HttpOnly; Secure; SameSite=Strict
@@ -217,9 +235,9 @@ The following runs send it by themselves and do not call Turnstile again.
 
 `TURNSTILE_SECRET` is a Worker secret. The site key is not secret: the Worker
 gives it to the page in the `turnstile_missing` response. With
-`TURNSTILE_SITE_KEY` empty, an anonymous `POST /run` answers 500
-`internal_error` and logs the missing variable. Cloudflare documents test keys
-that need no account, and the Worker tests use them:
+`TURNSTILE_SITE_KEY` empty, a signed-in `POST /run` with no Turnstile session
+answers 500 `internal_error` and logs the missing variable. Cloudflare documents
+test keys that need no account, and the Worker tests use them:
 
 | Key                                   | Type   | Behavior                                                          |
 | ------------------------------------- | ------ | ----------------------------------------------------------------- |
@@ -256,7 +274,8 @@ caps bound what a user can earn and hold:
 
 An `exercise` earns XP only after the server recorded a passing `/run` check for
 that user. `amount` for the other sources is the client's claim, bounded by
-these caps.
+these caps. The `browser` source is the XP of an exercise graded in the browser,
+where the server never sees the run, so it is a claim like `drill`'s.
 
 ## CLI tokens
 
@@ -297,10 +316,10 @@ The Worker writes these logs and no others. All have fixed fields, defined in
    }
    ```
 
-   `outcome` is `ok`, `rate_minute`, `rate_day`, `bad_request`, `too_large`,
-   `budget`, `budget_day`, `turnstile_missing`, `turnstile_failed`,
-   `turnstile_unavailable` or `run_too_long`. `mode` and `exercise` are copied
-   only if they have the shape of a value of the contract.
+   `outcome` is `ok`, `signin_required`, `rate_minute`, `rate_day`,
+   `bad_request`, `too_large`, `budget`, `budget_day`, `turnstile_missing`,
+   `turnstile_failed`, `turnstile_unavailable` or `run_too_long`. `mode` and
+   `exercise` are copied only if they have the shape of a value of the contract.
 
 2. An error line, instead of the one above, when the request fails because of an
    error in the Worker or in the configuration and answers 500 `internal_error`:
