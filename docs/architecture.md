@@ -140,10 +140,13 @@ no course uses `rising:`:
 | `rising:theme`    | `light` or `dark` ([design.md](design.md#mode)).          |
 | `rising:speed`    | The playback speed of the player.                         |
 | `rising:mute`     | Whether the player's sounds are off.                      |
-| `rising:cuenta`   | The mark that this browser has an account.                |
+| `rising:cuenta`   | The id of the account this browser is signed in to.       |
 | `rising:xp`       | XP earned by day, `{"2026-01-31": 20}`.                   |
 | `rising:last`     | The course whose lesson the learner opened last.          |
-| `rising:xpq`      | The XP of drill sessions the account has not received.    |
+| `rising:xpq:<id>` | The XP posts that account has not received, or `anon`.    |
+| `rising:xpsent`   | Set once the XP earned before signing in has been queued. |
+| `rising:tally`    | The account's streak and XP, as the last answers said.    |
+| `rising:amigos`   | The numbers of the friends' labels, `Amigo 1`, `Amigo 2`. |
 | `rising:migrated` | Set once the keys written by earlier versions have moved. |
 
 The first lesson a learner completes earns 10 XP. The streak counts the days in

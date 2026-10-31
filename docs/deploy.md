@@ -65,9 +65,11 @@ bunx cf d1 query <uuid> "--sql=$(cat src/schema.sql)"
 ```
 
 Write `--sql=` attached to the text. The schema starts with `--`, and without
-the `=` the CLI takes it for a flag. There are no migrations: to change the
-schema, delete the database (`bunx cf d1 delete <uuid>`), create another and
-apply the file again.
+the `=` the CLI takes it for a flag.
+
+The file holds the whole schema, for a database that does not exist yet. A
+database that is live is never recreated: it is altered in place, with the
+statements of [Update a live database](#update-a-live-database) below.
 
 ## 3. Create the Turnstile widget
 
@@ -85,7 +87,7 @@ Copy two values from the response:
 - The site key (`sitekey`) is public. Write it in `TURNSTILE_SITE_KEY` in
   `cloudflare.config.ts`.
 - The secret (`secret`) is stored without printing it. You enter it as
-  `TURNSTILE_SECRET` in the temporary file of step 6.
+  `TURNSTILE_SECRET` in the temporary file of step 7.
 
 ## 4. Create the Google client
 
@@ -121,11 +123,35 @@ What the Worker asks of each provider is in [Sign-in](accounts.md#sign-in).
 5. Click **Generate a new client secret** and copy it: it is
    `GITHUB_CLIENT_SECRET`.
 
-## 6. Deploy
+## 6. Create the push keys
 
-The first deploy requires the five secrets. `--secrets-file` reads a `.env` that
-is deleted right after. Enter the Turnstile secret you copied in step 3 without
-showing it in the terminal. The four OAuth values are those of steps 4 and 5.
+The streak reminder is a web push. The Worker signs each push with a VAPID key
+pair, and the browser subscribes with its public half. Make the pair once, on
+your machine, from the repository root:
+
+```sh
+bun -e 'const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign"]);const j=await crypto.subtle.exportKey("jwk",k.privateKey);const b=s=>Buffer.from(s,"base64url");console.log("VAPID_PUBLIC_KEY="+Buffer.concat([Buffer.from([4]),b(j.x),b(j.y)]).toString("base64url"));console.log("VAPID_PRIVATE_KEY="+j.d)'
+```
+
+It prints two lines. The values are `VAPID_PUBLIC_KEY` (87 characters) and
+`VAPID_PRIVATE_KEY` (43 characters). Keep them in a password manager: a new pair
+makes every subscribed browser stop receiving pushes until its learner turns the
+reminder on again.
+
+`VAPID_SUBJECT` is a way for a push service to reach you, as `mailto:<address>`
+or `https://<host>`. Use an address you read.
+
+`PUSH_HOSTS` in `worker.env` of `cloudflare.config.ts` lists the push services a
+browser may register: Google, Mozilla, Apple and Microsoft. The Worker refuses
+any other address, so a learner cannot make it post to a server of their
+choosing. Add a host there only for a push service you trust.
+
+## 7. Deploy
+
+The first deploy requires the eight secrets. `--secrets-file` reads a `.env`
+that is deleted right after. Enter the Turnstile secret you copied in step 3
+without showing it in the terminal. The four OAuth values are those of steps 4
+and 5 and the three push values those of step 6.
 
 ```sh
 mise run deploy --dry-run   # builds the image and the Worker, uploads nothing
@@ -138,18 +164,23 @@ read -rs -p 'GitHub Client secret: ' GITHUB_CLIENT_SECRET
 printf '\n'
 read -rs -p 'Turnstile secret: ' TURNSTILE_SECRET
 printf '\n'
-printf 'GOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\nGITHUB_CLIENT_ID=%s\nGITHUB_CLIENT_SECRET=%s\nTURNSTILE_SECRET=%s\n' \
+read -r -p 'VAPID public key: ' VAPID_PUBLIC_KEY
+read -rs -p 'VAPID private key: ' VAPID_PRIVATE_KEY
+printf '\n'
+read -r -p 'VAPID subject (mailto:<address>): ' VAPID_SUBJECT
+printf 'GOOGLE_CLIENT_ID=%s\nGOOGLE_CLIENT_SECRET=%s\nGITHUB_CLIENT_ID=%s\nGITHUB_CLIENT_SECRET=%s\nTURNSTILE_SECRET=%s\nVAPID_PUBLIC_KEY=%s\nVAPID_PRIVATE_KEY=%s\nVAPID_SUBJECT=%s\n' \
   "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" "$GITHUB_CLIENT_ID" \
-  "$GITHUB_CLIENT_SECRET" "$TURNSTILE_SECRET" > "$TMPDIR/secrets.env"
+  "$GITHUB_CLIENT_SECRET" "$TURNSTILE_SECRET" "$VAPID_PUBLIC_KEY" \
+  "$VAPID_PRIVATE_KEY" "$VAPID_SUBJECT" > "$TMPDIR/secrets.env"
 mise run deploy --secrets-file "$TMPDIR/secrets.env"
 rm "$TMPDIR/secrets.env"
-unset GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET TURNSTILE_SECRET
+unset GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET GITHUB_CLIENT_ID GITHUB_CLIENT_SECRET TURNSTILE_SECRET VAPID_PUBLIC_KEY VAPID_PRIVATE_KEY VAPID_SUBJECT
 ```
 
 This deploys the Worker `<worker>` on `<host>`. To publish a change to the
 lessons or to the Worker, run `mise run deploy` again.
 
-## 7. Rotate a secret
+## 8. Rotate a secret
 
 After the first deploy, rotate a secret with `cf workers secrets update`. This
 command does not replace the first-deploy file. Repeat the command for each name
@@ -166,12 +197,19 @@ read -rs -p 'Value: ' value && bunx cf workers secrets update <NAME> --worker <w
 | `GITHUB_CLIENT_ID`     | The Client ID of step 5.     |
 | `GITHUB_CLIENT_SECRET` | The client secret of step 5. |
 | `TURNSTILE_SECRET`     | The secret of step 3.        |
+| `VAPID_PUBLIC_KEY`     | The public key of step 6.    |
+| `VAPID_PRIVATE_KEY`    | The private key of step 6.   |
+| `VAPID_SUBJECT`        | The contact of step 6.       |
 
 Without `--text` the CLI sends no value. Each command creates a new version of
 the Worker. While a provider's client is missing, `/auth/<provider>` answers 503
-and the other one keeps working.
+and the other one keeps working. Change `VAPID_PUBLIC_KEY` and
+`VAPID_PRIVATE_KEY` together, and expect the subscribed browsers to stop
+receiving pushes ([step 6](#6-create-the-push-keys)). Without the three VAPID
+secrets `/api/push` answers 503 and the cron sends nothing; the rest of the site
+works.
 
-## 8. Check
+## 9. Check
 
 ```sh
 curl -s https://<host>/health
@@ -194,10 +232,24 @@ browser gets the Turnstile token, repeats the `POST /run` with that token and
 must receive 200 with the program output. Then sign in with each provider and
 run an exercise.
 
-The daily cron of [Retention](accounts.md#retention) is declared in
-`cloudflare.config.ts` and deploys with the Worker.
+Check the push key. With a session cookie from a signed-in browser (the
+`qg_auth` cookie from the browser's developer tools):
 
-## 9. Choose the maintainers
+```sh
+curl -s -H 'Cookie: qg_auth=<cookie>' https://<host>/api/push
+```
+
+It answers `{"key":"B...","hour":19}`, and `key` is your `VAPID_PUBLIC_KEY`.
+Then open `https://<host>/amigos/` signed in and choose **Avisarme si olvido mi
+racha**. Pushes reach browsers only on a real device: a push service does not
+deliver to a headless browser.
+
+The two crons are declared in `cloudflare.config.ts` and deploy with the Worker:
+the hourly one sends the reminder and the daily one purges
+([Retention](accounts.md#retention),
+[Streak reminder](accounts.md#streak-reminder)).
+
+## 10. Choose the maintainers
 
 A maintainer runs code without Turnstile or a per-user limit, and spends from
 the whole budget ([protection.md](protection.md#maintainers)). `MAINTAINERS` in
@@ -215,7 +267,7 @@ one is a maintainer) and run `mise run deploy` again. The maintainer signs in
 with GitHub from the site: the Worker compares the list with the id that GitHub
 returns on sign-in.
 
-## 10. Set spend alerts
+## 11. Set spend alerts
 
 The Worker refuses to run when the estimated spend of the month reaches
 `MONTHLY_BUDGET_USD`, but Cloudflare has no spend cap that stops anything. A
@@ -236,6 +288,22 @@ look at **Billable Usage** and at the sum of `cost_nano_usd` in the Worker logs
 
 The 5 USD a month of the Workers Paid plan is not part of that budget: it is a
 fixed fee paid apart from what the Worker spends on Containers.
+
+## Update a live database
+
+A change to the schema is additive, so the live database keeps its data. The
+file `src/schema.sql` always holds the whole schema, and the statements that
+bring a database created earlier up to date are listed here, newest last. Run
+the ones your database lacks, once each, in `runner/worker`.
+
+Streak reminder (`users.reminded_day` and `push_subscriptions`):
+
+```sh
+bunx cf d1 query <uuid> "--sql=ALTER TABLE users ADD COLUMN reminded_day INTEGER NOT NULL DEFAULT 0; CREATE TABLE push_subscriptions (endpoint TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, created_at INTEGER NOT NULL) WITHOUT ROWID; CREATE INDEX push_subscriptions_user ON push_subscriptions (user_id);"
+```
+
+Run the statements before the deploy that needs them. The new Worker reads the
+new column, so a Worker deployed first fails its reminder sweep until they run.
 
 ## Variables
 

@@ -70,7 +70,7 @@ check with `MAX_CODE` in `qgcheck/runner.py`; to change the cap, change both.
 ## Budget
 
 Cloudflare has no spending cap: its budget alerts only send an email
-([deploy.md](deploy.md#10-set-spend-alerts)). So the Worker counts what it
+([deploy.md](deploy.md#11-set-spend-alerts)). So the Worker counts what it
 spends and refuses to run when the estimated spend of the month would reach
 `MONTHLY_BUDGET_USD`. The count is an upper bound of what Cloudflare Containers
 bills. It does not include the 5 USD a month of the Workers Paid plan, which is
@@ -182,7 +182,7 @@ per-user limit and spend from the whole budget. The per-IP limit and the code
 size still apply to them. A Google account is never a maintainer, even if its
 identifier is the same number. A value that is not a list of ids makes the
 Worker answer 500 and log `MAINTAINERS`.
-[deploy.md](deploy.md#9-choose-the-maintainers) says how to see the id of an
+[deploy.md](deploy.md#10-choose-the-maintainers) says how to see the id of an
 account.
 
 ## Turnstile
@@ -250,6 +250,9 @@ caps bound what a user can earn and hold:
 - `MAX_FRIENDS` bounds the rows the friends list and the board read for every
   request.
 - A user holds 5 unused invite codes at a time. This number is not a variable.
+- A user holds 5 push subscriptions. A subscription's address must be `https:`
+  on a host of `PUSH_HOSTS`, so the cron cannot be made to post to a server the
+  learner chose. This number is not a variable.
 
 An `exercise` earns XP only after the server recorded a passing `/run` check for
 that user. `amount` for the other sources is the client's claim, bounded by
