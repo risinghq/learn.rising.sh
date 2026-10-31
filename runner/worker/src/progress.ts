@@ -58,12 +58,22 @@ const union = (stored: unknown, incoming: unknown) =>
         : String(a).localeCompare(String(b)),
   );
 
-const isBox = (value: unknown) =>
+interface Review {
+  item: string;
+  at: number;
+  correct: boolean;
+}
+
+const isReview = (value: unknown): value is Review =>
   isRecord(value) &&
-  isInt(value.box) &&
-  value.box <= 20 &&
-  typeof value.due === "number" &&
-  Number.isFinite(value.due);
+  Object.keys(value).length === 3 &&
+  typeof value.item === "string" &&
+  /^[A-Za-z0-9_.:-]{1,100}$/.test(value.item) &&
+  isInt(value.at) &&
+  typeof value.correct === "boolean";
+
+// The account keeps at most this many answers. The page keeps fewer, so the log fits MAX_KV_BYTES.
+const MAX_REVIEWS = 800;
 
 const FAMILIES: Family[] = [
   {
@@ -99,28 +109,27 @@ const FAMILIES: Family[] = [
   },
   {
     key: /^[a-z0-9-]{1,40}:repaso$/,
-    valid: (value) =>
-      isRecord(value) &&
-      Object.keys(value).length <= MAX_ITEMS &&
-      Object.entries(value).every(
-        ([id, item]) => /^[A-Za-z0-9_.:-]{1,100}$/.test(id) && isBox(item),
-      ),
-    // Per question, the highest box; with the same box, the one that is due sooner.
+    valid: (value) => list(value, isReview),
+    // The union of both logs by item and moment, where a miss beats a right answer given at the same
+    // moment. The latest MAX_REVIEWS stay.
     merge: (stored, incoming) => {
-      const merged = {
-        ...(stored as Record<string, { box: number; due: number }>),
-      };
-      for (const [id, item] of Object.entries(incoming as typeof merged)) {
-        const old = merged[id];
-        if (
-          !old ||
-          item.box > old.box ||
-          (item.box === old.box && item.due < old.due)
-        ) {
-          merged[id] = { box: item.box, due: item.due };
-        }
+      const merged = new Map<string, Review>();
+      for (const review of [
+        ...(Array.isArray(stored) ? (stored as Review[]) : []),
+        ...(incoming as Review[]),
+      ]) {
+        const key = `${review.item}@${review.at}`;
+        const old = merged.get(key);
+        if (!old || (old.correct && !review.correct))
+          merged.set(key, {
+            item: review.item,
+            at: review.at,
+            correct: review.correct,
+          });
       }
-      return merged;
+      return [...merged.values()]
+        .toSorted((a, b) => a.at - b.at || a.item.localeCompare(b.item))
+        .slice(-MAX_REVIEWS);
     },
   },
 ];

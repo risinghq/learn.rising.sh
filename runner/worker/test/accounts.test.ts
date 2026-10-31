@@ -897,7 +897,10 @@ describe("/api", () => {
         "qiskit:hitos": [1, 3],
         "qiskit:pos:intro": 4,
         "qiskit:predict:intro:p1": 2,
-        "qiskit:repaso": { a: { box: 2, due: 50 }, b: { box: 1, due: 10 } },
+        "qiskit:repaso": [
+          { item: "a", at: 50, correct: true },
+          { item: "b", at: 10, correct: true },
+        ],
         "computational-physics:hitos": [1],
       },
     });
@@ -920,11 +923,11 @@ describe("/api", () => {
           "qiskit:hitos": [2, 3],
           "qiskit:pos:intro": 2,
           "qiskit:predict:intro:p1": 9,
-          "qiskit:repaso": {
-            a: { box: 3, due: 90 },
-            b: { box: 1, due: 5 },
-            c: { box: 0, due: 1 },
-          },
+          "qiskit:repaso": [
+            { item: "a", at: 90, correct: true },
+            { item: "b", at: 10, correct: false },
+            { item: "c", at: 1, correct: true },
+          ],
           "computational-physics:hitos": [2],
         },
       },
@@ -949,11 +952,13 @@ describe("/api", () => {
         "qiskit:pos:intro": 4,
         // The first bet is the one that counts.
         "qiskit:predict:intro:p1": 2,
-        "qiskit:repaso": {
-          a: { box: 3, due: 90 },
-          b: { box: 1, due: 5 },
-          c: { box: 0, due: 1 },
-        },
+        // Both logs are kept, oldest first. A miss and a right answer at the same moment count as a miss.
+        "qiskit:repaso": [
+          { item: "c", at: 1, correct: true },
+          { item: "b", at: 10, correct: false },
+          { item: "a", at: 50, correct: true },
+          { item: "a", at: 90, correct: true },
+        ],
         "computational-physics:hitos": [1, 2],
       },
     });
