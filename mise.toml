@@ -89,7 +89,7 @@ run = [
 
 [tasks."test:ui"]
 description = "Drive the exercise editor, the browser-graded exercises, the project panel, the shell, the drill session, the theme, the optional account and the friends board in a browser, and hold the shell to its script budget"
-depends = ["generate:scripts", "generate:app"]
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
 wait_for = ["test:py"]
 run = [
   "uv run python tests/exercise_ui_test.py",
