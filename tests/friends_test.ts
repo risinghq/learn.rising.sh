@@ -128,6 +128,14 @@ const queued = (page: Page, owner: string) =>
     owner,
   );
 
+// The player is a deferred script that fetches the lesson before it binds #go, and it fills
+// #start-meta in the same task as the binding. A click before that does nothing, and the start
+// overlay then blocks every later click.
+async function begin(page: Page) {
+  await page.locator("#start-meta").filter({ hasText: "preguntas" }).waitFor();
+  await page.locator("#go").click();
+}
+
 // Waits until the signed-in account has nothing left to send.
 const emptied = (page: Page) =>
   page.waitForFunction(
@@ -480,7 +488,7 @@ async function main(): Promise<void> {
     // Each account has its own queue. A's unsent XP stays under A's key through sign-out; B signs in
     // on the same browser and sends only B's own and the XP earned before any account.
     await a.page.goto(`${site}/qiskit/lesson.html?l=${LESSON}`);
-    await a.page.locator("#go").click();
+    await begin(a.page);
     await earn(a.page, "left:1", 3);
     const idA = await a.page.evaluate(() =>
       localStorage.getItem("rising:cuenta"),
@@ -534,7 +542,7 @@ async function main(): Promise<void> {
     );
 
     // A signs back in later and A's post is still sent.
-    await a.page.locator("#go").click();
+    await begin(a.page);
     await a.page.getByRole("button", { name: "Cuenta ✓", exact: true }).click();
     await a.page
       .getByRole("button", { name: "Cerrar sesión", exact: true })
