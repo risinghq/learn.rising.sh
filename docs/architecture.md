@@ -41,7 +41,10 @@ prerenders every page into `site/`, where Git ignores the result:
 - `/` is the catalog: one card per course, with its outcome, the progress if the
   learner started and one button that opens the next lesson.
 - `/<slug>/` is the path page of a course: a map of units and lessons, the
-  outcome line, the review and, if the course has one, the project track.
+  outcome line, the review card and, if the course has one, the project track.
+- `/<slug>/repaso/` is the drill session of a course ([drills.md](drills.md)).
+  Its code loads in a chunk of its own, after the page, so the budget below does
+  not count it.
 - `/privacidad.html` says what is stored
   ([accounts.md](accounts.md#on-the-site)).
 
@@ -52,7 +55,7 @@ once hydrated, the page reads `localStorage` and draws the learner's progress.
 
 The routes come from `site/courses.json`, so a new course adds no code to
 `app/`. Every page loads `assets/index-<hash>.js` and the shared `theme.js` and
-`account.js`, 83 KB of gzipped JavaScript in all. `tests/budget_test.ts` fails
+`account.js`, 84 KB of gzipped JavaScript in all. `tests/budget_test.ts` fails
 above 100 KB.
 
 | Path                     | Contents                                                       |
@@ -70,8 +73,8 @@ above 100 KB.
 
 The root holds the shell and what the courses share:
 
-- `index.html`, `privacidad.html`, `<slug>/index.html`, `assets/` and `sw.js`
-  are the output of `app/`.
+- `index.html`, `privacidad.html`, `<slug>/index.html`,
+  `<slug>/repaso/index.html`, `assets/` and `sw.js` are the output of `app/`.
 - `courses.json` has one entry per course: `slug`, `title`, `outcome` (the
   sentence the catalog and the path page show), and optionally `source`
   (`label`, `url`, `license`) and `note`.
@@ -129,7 +132,8 @@ writes the "how to run the notebooks" line that goes with each `marimo` command.
 `progress.ts` defines the keys of `localStorage`. A course writes under its own
 slug: `<slug>:done`, `<slug>:pos:<lesson>`, `<slug>:heard:<lesson>`,
 `<slug>:exercise:<lesson>/<name>`, `<slug>:hitos`, `<slug>:misiones`,
-`<slug>:repaso` and so on. What belongs to no course uses `rising:`:
+`<slug>:repaso` (the answers of the drill sessions) and so on. What belongs to
+no course uses `rising:`:
 
 | Key               | Contents                                                  |
 | ----------------- | --------------------------------------------------------- |
@@ -139,11 +143,13 @@ slug: `<slug>:done`, `<slug>:pos:<lesson>`, `<slug>:heard:<lesson>`,
 | `rising:cuenta`   | The mark that this browser has an account.                |
 | `rising:xp`       | XP earned by day, `{"2026-01-31": 20}`.                   |
 | `rising:last`     | The course whose lesson the learner opened last.          |
+| `rising:xpq`      | The XP of drill sessions the account has not received.    |
 | `rising:migrated` | Set once the keys written by earlier versions have moved. |
 
 The first lesson a learner completes earns 10 XP. The streak counts the days in
 a row with XP, ending today or yesterday, and the header of the path page shows
-it with the XP of today. Both live only in the browser.
+it with the XP of today. Both live only in the browser. A drill session adds its
+XP to the same record.
 
 Earlier versions wrote every course under `qiskit:`. On its first load,
 `account.ts` splits `qiskit:done` and the keys of each lesson between the
@@ -157,9 +163,10 @@ the keys that already exist in place.
 `sw.js` is the service worker. It is installed by the shell pages, and it caches
 the shell pages, `theme.js`, `account.js`, `manifest.webmanifest`, the hashed
 files in `assets/` (the script, the styles and the Inter font), `courses.json`
-and the `course.json` of each course. The pages and the course indexes load from
-the network first or answer from the cache, so a deploy shows at once and the
-app launches with no connection. Hashed files answer from the cache.
+and the `course.json` and `items.json` of each course, with the session page and
+its chunk. The pages and the course indexes load from the network first or
+answer from the cache, so a deploy shows at once and the app launches with no
+connection. Hashed files answer from the cache.
 
 The service worker leaves alone the lesson page, the lesson files with their
 audio, `/run`, `/health`, `/auth/*` and `/api/*`. A lesson needs the network.
@@ -167,7 +174,8 @@ audio, `/run`, `/health`, `/auth/*` and `/api/*`. A lesson needs the network.
 `mise run test:walkthrough` plays one learner through the Qiskit course in a
 browser: it finishes every lesson and reads back the path page after each step.
 `mise run test:ui` runs `tests/shell_test.ts` (the path from the catalog to a
-lesson, the key migration, the streak and the offline launch) and
+lesson, the key migration, the streak and the offline launch),
+`tests/session_test.ts` (a drill session of every kind) and
 `tests/budget_test.ts`. `mise run test` does not run the walkthrough, because it
 takes over a minute beside the other suites.
 

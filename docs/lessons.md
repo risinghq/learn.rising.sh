@@ -181,7 +181,6 @@ milestones that run on a real QPU ask for an IBM Quantum account.
 
 ## Spaced review
 
-The path page of every course proposes each day 3 questions from the completed
-lessons (the `choice` and `numeric` ones), spaced 1, 3, 7 and 21 days. A
-question that is missed comes back the next day. The state is in
-`<course>:repaso`, for example `qiskit:repaso`.
+The path page of a course with a finished lesson has a review card that opens
+the drill session, `/<course>/repaso/` ([drills.md](drills.md#the-session)). The
+answers are in `<course>:repaso`, for example `qiskit:repaso`.

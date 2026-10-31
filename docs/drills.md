@@ -3,8 +3,8 @@
 A drill is a short question the learner answers with a tap, for the casual mode:
 sessions of 10 to 15 items, no audio, no keyboard. The code in
 [`drill/`](../drill) holds the items, grades them and chooses the next session.
-It has no UI. Every function is pure, so the browser runs it with no server
-call.
+Every function is pure, so the browser runs it with no server call. The screen
+that plays a session is in [`app/src/session/`](../app/src/session).
 
 Text the learner sees (prompts, options, feedback) is in Spanish, because the
 courses are.
@@ -135,7 +135,37 @@ grow with each right answer. A miss shortens the interval again.
 
 A `predict` item is asked once, as a new item, and is never reviewed.
 
+## The session
+
+`/<course>/repaso/` plays a session, one item per screen. The path page of a
+course with a finished lesson links to it from its review card, and the streak
+in the header links to the last course the learner worked on. The page loads
+`site/<course>/items.json`, asks `planSession` for the items and grades each tap
+with `grade`.
+
+- Every kind is answered by tap. `numeric` has an on-screen keypad with digits
+  and a comma, so no keyboard opens; the schema rejects a negative `answer`,
+  because the keypad has no minus. `parsons` places a line by tap and reorders
+  by tap or by dragging the grip of a placed line.
+- After each answer the screen says right or wrong, shows the correct answer of
+  a miss and one line of why. A `predict` item says the bet was noted.
+- A missed item comes back once at the end. A second miss adds nothing.
+- The end shows the XP earned, the streak and a button back to the path. A
+  learner with no account also sees "Guarda tu racha", with the sign-in links.
+  That is the only place the screen asks for an account.
+
+XP: 2 for an item right the first time and 1 for a miss answered right at the
+end. The XP goes to the streak record of the browser (`rising:xp`) and, for a
+signed-in learner, to `POST /api/xp` ([accounts.md](accounts.md#xp)).
+
+The first answer to each item goes to the review log, `<course>:repaso`, a list
+of `{item, at, correct}` that the scheduler replays. `site/progress.ts` keeps
+the 4 latest answers of an item and 800 in all. The log and the XP are written
+when the session ends: leaving earlier saves nothing.
+
 ## Tests
 
-`bunx vitest run drill` runs the graders, the extraction, the validation of
-authored items and the scheduler. `mise run test:tools` includes them.
+`bunx vitest run drill app/src/session` runs the graders, the extraction, the
+validation of authored items, the scheduler and the rules of a session.
+`mise run test:tools` includes them. `bun tests/session_test.ts` plays a session
+of every kind in a browser at 390 and 360 px wide.

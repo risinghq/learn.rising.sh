@@ -141,13 +141,16 @@ result for this user and exercise ([Data stored](#data-stored)). `kv` holds the
 `localStorage` keys that follow one of these shapes. `<course>` is the slug of
 the course, 1 to 40 characters from `a-z`, `0-9` and `-`:
 
-| Key                                         | Value              | When merging two values                                                  |
-| ------------------------------------------- | ------------------ | ------------------------------------------------------------------------ |
-| `<course>:heard:<lesson>`, `<course>:hitos` | list of integers   | the union                                                                |
-| `<course>:misiones`                         | list of strings    | the union                                                                |
-| `<course>:pos:<lesson>`                     | integer            | the larger                                                               |
-| `<course>:predict:<lesson>:<id>`            | integer            | the one already there: a bet does not change                             |
-| `<course>:repaso`                           | `{id: {box, due}}` | per question, the higher box and, with equal boxes, the earlier due date |
+| Key                                         | Value                         | When merging two values                                                          |
+| ------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `<course>:heard:<lesson>`, `<course>:hitos` | list of integers              | the union                                                                        |
+| `<course>:misiones`                         | list of strings               | the union                                                                        |
+| `<course>:pos:<lesson>`                     | integer                       | the larger                                                                       |
+| `<course>:predict:<lesson>:<id>`            | integer                       | the one already there: a bet does not change                                     |
+| `<course>:repaso`                           | list of `{item, at, correct}` | the union by `item` and `at`, a miss beating a right answer; the latest 800 stay |
+
+A `<course>:repaso` value in another shape, such as the boxes of the earlier
+review, does not sync: `account.ts` removes it on load.
 
 The keys under `rising:` (the mode, the speed, the XP) stay in the browser.
 
@@ -202,7 +205,12 @@ clears the cookie.
 | `tz`     | Optional. The learner's IANA time zone, such as `America/Lima`. Stored on the user. |
 
 ```json
-{ "source": "drill", "ref": "repaso:p1:3", "amount": 5, "tz": "America/Lima" }
+{
+  "source": "drill",
+  "ref": "qiskit:1761800000000",
+  "amount": 11,
+  "tz": "America/Lima"
+}
 ```
 
 ```json
@@ -230,6 +238,12 @@ to 100 characters, so the CLI sends `lesson:exercise`. `GET /api/xp` answers
 `amount` is what the client says it earned. The Worker bounds it with
 `XP_PER_EVENT`, `XP_PER_DAY` and the once-per-day rule, and verifies only
 `exercise`. The values are in [protection.md](protection.md#xp-and-friends).
+
+A drill session sends one `drill` post when it ends, with
+`<course>:<start of the session>` as `ref`. A signed-in browser queues the post
+in `rising:xpq` and sends it at once, or when the browser comes back online. The
+queue keeps a post until the Worker answers. A 401, a 429 or a server error
+keeps it for the next try, and any other refusal drops it.
 
 ## Streaks
 

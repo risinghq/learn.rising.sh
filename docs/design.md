@@ -153,8 +153,8 @@ Every duration and curve is a token in `theme.css`:
   for a lesson done, a lock for one locked and a lit, larger node with a play
   icon for the current lesson. The current node is a link that starts the next
   lesson in one tap. A locked node explains that it opens after the lesson
-  before it and offers "Abrir de todos modos". The outcome line, the review and
-  the project track follow the map.
+  before it and offers "Abrir de todos modos". The outcome line, the review card
+  and the project track follow the map.
 - The catalog is one card per course. Each card has a button that opens the next
   lesson of its course. Only one is filled: the one of the course the learner
   was in last, or else the first course not finished.

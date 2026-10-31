@@ -20,10 +20,12 @@ its domain. No secret goes in the repository or in a file you push to git.
 From the repository root, install the dependencies. `mise run install` installs
 those of the editor, of the shell (`app/`) and of the Worker, which brings the
 `cf` CLI. During the deploy, `mise run deploy` copies KaTeX from the editor to
-`site/vendor/`, bundles the scripts of `site/` and `editor/src/` into JavaScript
+`site/vendor/`, writes the drill items (`mise run generate:items`), bundles the
+scripts of `site/` and `editor/src/` into JavaScript
 (`mise run generate:scripts`) and builds the shell: the catalog, the path pages,
-the privacy page and the service worker, prerendered into `site/`
-(`mise run generate:app`). The next steps run in `runner/worker`.
+the drill sessions, the privacy page and the service worker, prerendered into
+`site/` (`mise run generate:app`, which needs the items). The next steps run in
+`runner/worker`.
 
 ```sh
 mise run install
