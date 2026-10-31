@@ -235,8 +235,9 @@ async function offline(browser: Browser, base: string): Promise<void> {
   );
   check(cached.includes("/courses.json"), "courses.json is not cached");
   check(
-    cached.some((p) => p.startsWith("/assets/") && p.endsWith(".woff2")),
-    "no font is cached",
+    cached.includes("/fonts/inter-latin-wght-normal.woff2") &&
+      cached.includes("/fonts/inter-latin-ext-wght-normal.woff2"),
+    "the Inter files are not cached",
   );
   check(
     !cached.some(
