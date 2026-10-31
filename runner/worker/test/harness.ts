@@ -8,6 +8,7 @@ import { Miniflare, convertV4MiniflareOptions } from "miniflare";
 import { WORKER_FIRST } from "../src/routes.ts";
 import { REMINDER_CRON } from "../src/schedule.ts";
 import { CLIENTS, FakeProvider } from "./provider.ts";
+import { signIn } from "./signin.ts";
 
 // Test secrets that Cloudflare documents for Turnstile.
 export const PASS_SECRET = "1x0000000000000000000000000000000AA";
@@ -86,10 +87,18 @@ export interface Siteverify {
 }
 
 export interface Harness {
+  // Posts to /run as a signed-in learner of the IP. `anonymous` sends no session.
   post(
     body: unknown,
-    options?: { ip?: string; headers?: Record<string, string>; raw?: string },
+    options?: {
+      ip?: string;
+      headers?: Record<string, string>;
+      raw?: string;
+      anonymous?: boolean;
+    },
   ): Promise<Reply>;
+  // The cookies of the learner `post` signs in for an IP.
+  session(ip?: string): Promise<string>;
   get(pathname: string): Promise<Reply>;
   request(
     method: string,
@@ -201,26 +210,27 @@ export async function start(options: Options = {}): Promise<Harness> {
         Budget: { className: "Budget", useSQLite: true },
       },
       d1Databases: { DB: "test-db" },
-      ...(mode === "real"
-        ? {}
-        : {
-            outboundService: async (request: Request) => {
-              const url = new URL(request.url);
-              if (url.hostname === PUSH_HOST) {
-                pushes.push({
-                  endpoint: request.url,
-                  headers: Object.fromEntries(request.headers),
-                  bytes: (await request.arrayBuffer()).byteLength,
-                });
-                return new Response(null, {
-                  status: url.pathname.startsWith("/gone") ? 410 : 201,
-                });
-              }
-              return provider.owns(url)
-                ? provider.handle(request)
-                : verify(request);
-            },
-          }),
+      outboundService: async (request: Request) => {
+        const url = new URL(request.url);
+        if (url.hostname === PUSH_HOST) {
+          pushes.push({
+            endpoint: request.url,
+            headers: Object.fromEntries(request.headers),
+            bytes: (await request.arrayBuffer()).byteLength,
+          });
+          return new Response(null, {
+            status: url.pathname.startsWith("/gone") ? 410 : 201,
+          });
+        }
+        if (provider.owns(url)) return provider.handle(request);
+        // The "real" mode reaches the real Turnstile service.
+        if (mode !== "real") return verify(request);
+        return fetch(request.url, {
+          method: request.method,
+          headers: request.headers,
+          body: await request.arrayBuffer(),
+        });
+      },
       handleStructuredLogs: (log: { message: string }) =>
         logs.push(log.message),
       logRequests: false,
@@ -242,7 +252,8 @@ export async function start(options: Options = {}): Promise<Harness> {
   };
   const db = await mf.getD1Database("DB");
   for (const statement of SCHEMA) await db.prepare(statement).run();
-  return {
+  const sessions = new Map<string, Promise<string>>();
+  const harness: Harness = {
     siteverify,
     provider,
     pushes,
@@ -287,18 +298,43 @@ export async function start(options: Options = {}): Promise<Harness> {
             : { body: JSON.stringify(body) }),
         }),
       ),
-    post: async (body, { ip = "198.51.100.7", headers = {}, raw } = {}) =>
-      reply(
+    session: (ip = "198.51.100.7") => {
+      // One learner per IP, signed in once, so that a test's per-IP counts stay per learner.
+      let cookie = sessions.get(ip);
+      if (!cookie) {
+        // GitHub subjects are numbers: the next free one names the learner of this IP.
+        const subject = String(7_000_000 + sessions.size);
+        cookie = signIn(harness, "github", subject, "", ip).then(
+          (user) => user.cookie!,
+        );
+        sessions.set(ip, cookie);
+      }
+      return cookie;
+    },
+    post: async (
+      body,
+      { ip = "198.51.100.7", headers = {}, raw, anonymous = false } = {},
+    ) => {
+      // A cookie the test sets (a Turnstile session) joins the learner's session cookie.
+      const own = headers.cookie;
+      const signed =
+        anonymous || own?.includes("qg_auth=")
+          ? undefined
+          : await harness.session(ip);
+      const cookie = [own, signed].filter(Boolean).join("; ");
+      return reply(
         await mf.dispatchFetch("http://runner.test/run", {
           method: "POST",
           headers: {
             "content-type": "application/json",
             "cf-connecting-ip": ip,
             ...headers,
+            ...(cookie ? { cookie } : {}),
           },
           body: raw ?? JSON.stringify(body),
         }),
-      ),
+      );
+    },
     declare: async (method, pathname, length, headers = {}) => {
       const url = await mf.ready;
       return new Promise<number>((resolve, reject) => {
@@ -339,6 +375,7 @@ export async function start(options: Options = {}): Promise<Harness> {
         .map((line) => JSON.parse(line.slice("FAKE_RUNNER_CALL ".length))),
     dispose: () => mf.dispose(),
   };
+  return harness;
 }
 
 // A per-minute limit counts clock windows. If less than `ms` remains before the

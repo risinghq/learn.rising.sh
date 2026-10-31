@@ -295,6 +295,7 @@ describe("code size", () => {
     // Only the header: the 413 arrives without the body having been sent.
     const status = await h.declare("POST", "/run", 6 * limit + 1025, {
       ...verified.headers,
+      cookie: await h.session(),
       "content-type": "application/json",
     });
     expect(status).toBe(413);
@@ -372,7 +373,8 @@ describe("monthly budget", () => {
 
   it("answers 500 with an instance type that does not exist", async () => {
     const h = await worker({ vars: { INSTANCE_TYPE: "gigante" } });
-    const reply = await h.post(run, verified);
+    // The Worker reads its settings before it looks for a session.
+    const reply = await h.post(run, { ...verified, anonymous: true });
     expect(reply.status).toBe(500);
     expect(h.workerLogs().join("\n")).toContain("INSTANCE_TYPE");
   });
@@ -720,7 +722,10 @@ describe("logging", () => {
     const h = await worker({
       vars: { RATE_PER_MINUTE: `not a number ${MARK}` },
     });
-    const reply = await h.post({ code: "print(1)" }, verified);
+    const reply = await h.post(
+      { code: "print(1)" },
+      { ...verified, anonymous: true },
+    );
     expect(reply.status).toBe(500);
     const lines = h.workerLogs().join("\n");
     expect(lines).toContain("ConfigError");

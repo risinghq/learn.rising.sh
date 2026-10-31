@@ -253,6 +253,22 @@ describe("POST /api/xp", () => {
     ).toBe(2);
   });
 
+  it("grants browser XP with no recorded check, once a day per exercise, inside the caps", async () => {
+    const h = await worker({ vars: { FAKE_CLOCK: CLOCK } });
+    const ada = await user(h, "ada");
+    const grant = (ref: string, amount: number) =>
+      xp(h, ada, "browser", ref, amount);
+
+    // The run happened in the page, so no check of the server stands behind it.
+    expect((await grant("f1-pendulo/periodo", 20)).body.granted).toBe(20);
+    expect((await grant("f1-pendulo/periodo", 20)).body.reason).toBe(
+      "ref_today",
+    );
+    expect((await grant("f1-pendulo/periodo-roto", 20)).body.granted).toBe(20);
+    expect((await grant("f1-pendulo/otro", 51)).status).toBe(400);
+    expect((await grant("sin-barra", 5)).status).toBe(400);
+  });
+
   it.each([
     ["an unknown source", { source: "video", ref: "a", amount: 1 }],
     ["no source", { ref: "a", amount: 1 }],

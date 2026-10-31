@@ -2,8 +2,8 @@
 //     bun tests/account_ui_test.ts
 // Checks the sync between two browsers, that a review log in an old shape does not
 // break it, that deleting the account keeps the
-// local copy, and that without an account the page makes only its own `/run`
-// request. Skips with a reason when Node or the Worker dependencies are missing.
+// local copy, and that without an account the runner's refusal swaps the run buttons
+// for the sign-in links. Skips with a reason when Node or the Worker dependencies are missing.
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { isDeepStrictEqual } from "node:util";
@@ -148,10 +148,13 @@ async function anonymous(
   const panel = await openPanel(page, site, LESSON, 1);
   await write(page, panel, FAILING);
   await press(panel, "Comprobar");
-  await waitResult(panel);
+  // The Worker answers 401 and the editor swaps its run buttons for the sign-in links.
+  await panel.locator(".xgate").waitFor();
   check(
-    (await panel.locator(".xstatus.bad").count()) === 1,
-    "anonymous: the check fails",
+    (await panel.locator(".xgate").isVisible()) &&
+      (await panel.getByRole("button", { name: "Comprobar" }).isHidden()) &&
+      (await panel.locator(".xtests li").count()) === 0,
+    "anonymous: the runner refuses and the editor asks for an account",
   );
   await page.goto(
     `${site}/qiskit/lesson.html?l=${LESSON}&beat=${lastBeat(LESSON)}`,
@@ -169,10 +172,10 @@ async function anonymous(
   check(
     record !== null &&
       record.code === FAILING &&
-      record.checks === 1 &&
+      !record.checks &&
       !record.passed &&
       record.at > 0,
-    `anonymous: the exercise stores the code, one failed check and the time (${JSON.stringify(record)})`,
+    `anonymous: the exercise stores the code and the time, with no check (${JSON.stringify(record)})`,
   );
   await page.waitForTimeout(2500);
   const ours = [
@@ -189,7 +192,7 @@ async function anonymous(
   ].toSorted();
   check(
     isDeepStrictEqual(ours, ["POST /run"]),
-    `anonymous: the only own request that is not a file is /run (${JSON.stringify(ours)})`,
+    `anonymous: the only own request that is not a file is the /run the Worker refused (${JSON.stringify(ours)})`,
   );
   check(
     isDeepStrictEqual(await stored(page, "qiskit:hitos"), [1]),
@@ -279,6 +282,19 @@ async function main(): Promise<void> {
       "on sign-in: the local copy is kept",
     );
 
+    // Signed in, the same code runs and its failed check goes to the account.
+    let panel = await openPanel(one, site, LESSON, 1);
+    const checked = one.waitForResponse(
+      (r) => r.url().endsWith("/api/progress") && r.status() === 204,
+    );
+    await press(panel, "Comprobar");
+    await waitResult(panel);
+    await checked;
+    check(
+      (await panel.locator(".xstatus.bad").count()) === 1,
+      "signed in: the check runs and fails",
+    );
+
     const { page: two, errors: twoErrors } = await newTab(
       browser,
       site,
@@ -298,7 +314,7 @@ async function main(): Promise<void> {
       (await two.locator(".track .hito[data-state=done]").count()) === 1,
       "other browser: the course page ticks the milestone",
     );
-    let panel = await openPanel(two, site, LESSON, 1);
+    panel = await openPanel(two, site, LESSON, 1);
     check(
       (await editorText(panel)) === unblank(FAILING),
       "other browser: the editor loads the code from the first one",

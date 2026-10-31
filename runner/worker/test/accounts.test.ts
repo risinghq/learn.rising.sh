@@ -512,19 +512,29 @@ describe("/run with an account", () => {
     expect(h.workerLogs().join("\n")).toContain("MAINTAINERS");
   });
 
-  it("without a session and without a token it still answers 403", async () => {
+  it("without a session it answers 401 and never reaches the container, token or not", async () => {
     const h = await worker();
-    const reply = await h.post(check);
-    expect(reply.status).toBe(403);
+    for (const headers of [{}, { "x-turnstile-token": TOKEN }] as Record<
+      string,
+      string
+    >[]) {
+      const reply = await h.post(check, { anonymous: true, headers });
+      expect(reply.status).toBe(401);
+      expect(reply.body.reason).toBe("signin_required");
+      expect(reply.body.error).toMatch(/cuenta/);
+    }
     expect(h.runnerCalls()).toHaveLength(0);
+    expect(h.siteverify.calls).toHaveLength(0);
   });
 
-  it("a made-up qg_auth cookie does not skip Turnstile", async () => {
+  it("a made-up qg_auth cookie is no session", async () => {
     const h = await worker();
     const reply = await h.post(check, {
-      headers: { cookie: "qg_auth=inventada" },
+      anonymous: true,
+      headers: { cookie: "qg_auth=inventada", "x-turnstile-token": TOKEN },
     });
-    expect(reply.status).toBe(403);
+    expect(reply.status).toBe(401);
+    expect(h.runnerCalls()).toHaveLength(0);
   });
 
   it("each user has their own per-minute limit", async () => {
@@ -563,16 +573,6 @@ describe("/run with an account", () => {
     // Eight runs fit; the ninth from the same IP does not.
     expect(statuses.slice(0, 8)).toEqual(Array(8).fill(200));
     expect(statuses.slice(8)).toEqual([429, 429]);
-  });
-
-  it("the anonymous IP keeps its cap without multiplying", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "2" } });
-    const headers = { "x-turnstile-token": TOKEN };
-    const statuses: number[] = [];
-    for (let i = 0; i < 3; i++)
-      statuses.push((await h.post(check, { headers })).status);
-    expect(statuses).toEqual([200, 200, 429]);
   });
 });
 
@@ -661,17 +661,14 @@ describe("attempts", () => {
     expect(await dump(h)).not.toContain(MARKER);
   });
 
-  it("an anonymous run writes a row with user_id NULL", async () => {
+  it("a run with no session writes no row and creates no user", async () => {
     const h = await worker();
     const reply = await h.post(
       { code: "print(1)", mode: "run", exercise: "intro/uno" },
-      { headers: { "x-turnstile-token": TOKEN } },
+      { anonymous: true, headers: { "x-turnstile-token": TOKEN } },
     );
-    expect(reply.status).toBe(200);
-    const [row, ...rest] = await attempts(h);
-    expect(rest).toHaveLength(0);
-    expect(row.user_id).toBeNull();
-    expect(row.outcome).toBe("pass");
+    expect(reply.status).toBe(401);
+    expect(await attempts(h)).toHaveLength(0);
     expect(await count(h, "users")).toBe(0);
   });
 
@@ -1071,10 +1068,6 @@ describe("/api", () => {
         { headers: signedIn(who.cookie) },
       );
     }
-    await h.post(
-      { code: "print(1)", mode: "run", exercise: "intro/uno" },
-      { headers: { "x-turnstile-token": TOKEN } },
-    );
     // A second session of Ada, to prove it falls too.
     await signIn(h, "google", "ada");
 
@@ -1106,11 +1099,10 @@ describe("/api", () => {
       if (table === "users") continue;
       expect(await count(h, table, `user_id = '${adaId}'`), table).toBe(0);
     }
-    // What belongs to others stays: Bea, the GitHub user and the anonymous attempt.
+    // What belongs to others stays: Bea and the GitHub user.
     expect(await count(h, "users")).toBe(2);
     expect(await count(h, "lesson_done")).toBe(1);
-    expect(await count(h, "attempts", "user_id IS NULL")).toBe(1);
-    expect(await count(h, "attempts")).toBe(2);
+    expect(await count(h, "attempts")).toBe(1);
     // The old cookie is rejected.
     const me = await h.request("GET", "/api/me", {
       headers: { cookie: ada.cookie },
@@ -1201,7 +1193,7 @@ describe("passed follows the server's record", () => {
     await run(h, cookie!, "check", "FALLA");
     await h.post(
       { code: "print(1)", mode: "check", exercise: "intro/uno" },
-      { headers: { "x-turnstile-token": TOKEN } },
+      { anonymous: true, headers: { "x-turnstile-token": TOKEN } },
     );
     expect(await passedOf(h, cookie!)).toEqual({});
     expect(await count(h, "exercise_state", "passed = 1")).toBe(0);

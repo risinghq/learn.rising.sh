@@ -87,6 +87,32 @@ def leapfrog(x, v, dt, pasos):
     return x, v
 """
 
+EULER_WITH_THE_NEW_X = """
+def euler(x, v, dt, pasos):
+    for _ in range(pasos):
+        x += dt * v
+        v -= dt * x
+    return x, v
+"""
+
+BELL_CNOT_REVERSED = """
+from qiskit import QuantumCircuit
+bell = QuantumCircuit(2)
+bell.h(0)
+bell.cx(1, 0)
+bell.measure_all()
+"""
+
+PREPARAR_MOST_SIGNIFICANT_FIRST = """
+from qiskit import QuantumCircuit
+def preparar(k, n):
+    qc = QuantumCircuit(n)
+    for qubit, bit in enumerate(format(k, f"0{n}b")):
+        if bit == "1":
+            qc.x(qubit)
+    return qc
+"""
+
 PERIODO_SMALL_ANGLE = """
 import math
 def periodo(theta0, dt=0.001):
@@ -145,6 +171,14 @@ WRONG = [
     ("p1-quickstart/ghz", GHZ_WITHOUT_MEASURE, "falta `measure_all()`"),
     ("f1-euler-leapfrog/leapfrog", LEAPFROG_EULER, "pasos = 10, `leapfrog` devuelve"),
     ("f1-pendulo/periodo", PERIODO_SMALL_ANGLE, "theta0 = 3.0, `periodo` devuelve 6.28"),
+    ("f1-euler-leapfrog/euler-roto", EULER_WITH_THE_NEW_X, "pasos = 100, `euler` devuelve"),
+    ("f1-pendulo/periodo-roto", PERIODO_SMALL_ANGLE, "theta0 = 3.0, `periodo` devuelve 6.28"),
+    ("p1-quickstart/bell-roto", BELL_CNOT_REVERSED, "Salen ['00', '01']"),
+    (
+        "p2-orden-bits/preparar-roto",
+        PREPARAR_MOST_SIGNIFICANT_FIRST,
+        "Con k = 5 y n = 4 la amplitud está en el índice 10",
+    ),
     ("f1-kepler/orbita", ORBITA_EULER, "pasos = 1000, `orbita` devuelve"),
     (
         "p2-control-clasico/siempre-uno",
@@ -388,6 +422,10 @@ MUTANTS = [
     ("f1-euler-leapfrog/leapfrog", LEAPFROG_EULER),
     ("f1-euler-leapfrog/leapfrog", LEAPFROG_KICK_THEN_DRIFT),
     ("f1-pendulo/periodo", PERIODO_SMALL_ANGLE),
+    ("f1-euler-leapfrog/euler-roto", EULER_WITH_THE_NEW_X),
+    ("f1-pendulo/periodo-roto", PERIODO_SMALL_ANGLE),
+    ("p1-quickstart/bell-roto", BELL_CNOT_REVERSED),
+    ("p2-orden-bits/preparar-roto", PREPARAR_MOST_SIGNIFICANT_FIRST),
     ("f1-kepler/orbita", ORBITA_EULER),
     ("f1-kepler/orbita", ORBITA_KICK_THEN_DRIFT),
     *[
@@ -1138,7 +1176,7 @@ def test_build_publishes_only_public_fields(fixture_dir: Path) -> None:
     les = lesson_with(
         dict(type="box", kind="idea", title="t", body=[exercise_block("leccion/uno")])
     )
-    build.publish_exercises(les, set())
+    build.publish_exercises(les, set(), "server")
     assert build.ERRORS == []
     published = json.dumps(les, ensure_ascii=False)
     assert (
@@ -1157,6 +1195,17 @@ def test_build_publishes_only_public_fields(fixture_dir: Path) -> None:
     assert set(blk) == {"type", "exercise", "prompt", "level", "needs", "hints", "starter", "cases"}
 
 
+def test_browser_course_publishes_the_check_but_never_the_solution(fixture_dir: Path) -> None:
+    write_exercise(fixture_dir, "leccion/uno", solution=f"x = 1  # {SECRET_SOLUTION}\n")
+    block = dict(exercise_block("leccion/uno"), needs="python")
+    les = lesson_with(dict(type="box", kind="idea", title="t", body=[block]))
+    build.publish_exercises(les, set(), "browser")
+    assert build.ERRORS == []
+    blk = les["beats"][0]["scene"][0]["body"][0]
+    assert blk["runs"] == "browser" and "test_hidden" in blk["check"]
+    assert SECRET_SOLUTION not in json.dumps(les, ensure_ascii=False)
+
+
 def test_build_rejects_a_broken_exercise_reference(fixture_dir: Path) -> None:
     write_exercise(fixture_dir, "leccion/uno")
     write_exercise(fixture_dir, "otra/dos")
@@ -1165,7 +1214,7 @@ def test_build_rejects_a_broken_exercise_reference(fixture_dir: Path) -> None:
     )
     seen: set[str] = set()
     for eid in ("leccion/uno", "leccion/uno", "otra/dos", "leccion/falta", "Leccion/Mal"):
-        build.publish_exercises(lesson_with(exercise_block(eid)), seen)
+        build.publish_exercises(lesson_with(exercise_block(eid)), seen, "server")
     text = "\n".join(build.ERRORS)
     assert "leccion/uno has no @visible case" in text
     assert "otra/dos must be in exercises/leccion/" in text
@@ -1209,6 +1258,41 @@ def test_tool_flags_a_starter_that_crashes(fixture_dir: Path) -> None:
         "starter.py fails to run: ZeroDivisionError" in p
         for p in exercises_tool.problems("leccion/uno", "qiskit")
     )
+
+
+FIX_SOLUTION = "a = 1\nb = 2\nx = a + b - 2\n"
+FIX_ONLY_HIDDEN = (
+    "from qgcheck import learner, visible\n\n\n"
+    "@visible('x existe')\n"
+    "def test_shown():\n    assert learner.x is not None, 'falta x'\n\n\n"
+    "def test_hidden():\n    assert learner.x == 1, 'x debería valer 1'\n"
+)
+
+
+@pytest.mark.parametrize(
+    "starter,check,expected",
+    [
+        pytest.param("a = 1\nb = 2\nx = a + b - 3\n", "", None, id="a bug to find"),
+        pytest.param(
+            "a = 1\nb = 2\nx = 0  # ✏️ tu código aquí\n", "", "✏️ placeholder", id="placeholder"
+        ),
+        pytest.param("x = 0\n", "", "keeps", id="empty rewrite"),
+        pytest.param(
+            "a = 1\nb = 2\nx = a + b - 3\n",
+            FIX_ONLY_HIDDEN,
+            "fails no case the learner sees",
+            id="bug only a hidden case sees",
+        ),
+    ],
+)
+def test_tool_judges_a_fix_it_starter(
+    fixture_dir: Path, starter: str, check: str, expected: str | None
+) -> None:
+    write_exercise(fixture_dir, "leccion/uno", solution=FIX_SOLUTION, starter=starter, check=check)
+    found = exercises_tool.problems("leccion/uno", "python", kind="fix")
+    assert found == [] if expected is None else any(expected in p for p in found), found
+    # A write-kind exercise has no such rule.
+    assert exercises_tool.problems("leccion/uno", "python") == []
 
 
 def test_tool_flags_needs_that_does_not_match_the_solution(fixture_dir: Path) -> None:
