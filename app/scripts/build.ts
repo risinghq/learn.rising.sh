@@ -159,8 +159,15 @@ await Promise.all(
   }),
 );
 
+const pyodide = JSON.parse(
+  await readFile(
+    join(app, "..", "editor", "node_modules", "pyodide", "package.json"),
+    "utf8",
+  ),
+) as { version: string };
 const worker = (await readFile(join(app, "scripts", "sw.js"), "utf8"))
   .replace("__VERSION__", hash.digest("hex").slice(0, 12))
+  .replace("__PYODIDE__", pyodide.version)
   .replace('"__PRECACHE__"', JSON.stringify([...precache].toSorted()));
 await writeFile(join(site, "sw.js"), worker);
 

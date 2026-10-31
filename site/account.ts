@@ -549,4 +549,13 @@ async function request(method: string, path: string, body?: unknown) {
   return resp;
 }
 
-window.QGAccount = { ready, changed, mount, xp, request, signInHref };
+window.QGAccount = {
+  ready,
+  changed,
+  mount,
+  xp,
+  request,
+  signInHref,
+  signedIn: () => state.signedIn,
+  lapsed,
+};

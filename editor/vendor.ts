@@ -7,7 +7,7 @@ if (!process.argv[2]) throw new Error("usage: node vendor.ts OUTPUT_DIR");
 const out = resolve(process.argv[2]);
 const modules = join(dirname(fileURLToPath(import.meta.url)), "node_modules");
 
-await rm(out, { recursive: true, force: true });
+await rm(join(out, "katex"), { recursive: true, force: true });
 await mkdir(join(out, "katex", "fonts"), { recursive: true });
 
 // Browsers use woff2 here, so drop the woff and ttf fallbacks from KaTeX's CSS.

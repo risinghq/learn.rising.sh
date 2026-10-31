@@ -18,6 +18,13 @@
       }
     },
     {
+      // Worker.postMessage takes no target origin: the rule is for window.postMessage.
+      "files": ["site/player/pyodide-*.ts"],
+      "rules": {
+        "unicorn/require-post-message-target-origin": "off"
+      }
+    },
+    {
       "files": ["tools/**", "tests/**"],
       "rules": {
         "eslint/no-await-in-loop": "off"

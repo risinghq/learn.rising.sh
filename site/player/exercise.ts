@@ -1,8 +1,11 @@
 // The «exercise» block: a Python editor with Ejecutar, Comprobar, hints and progress (docs/exercises.md).
 //
 // spec: exercise (id) · prompt · level · hints · starter · cases (names of the visible cases)
-// Ejecutar and Comprobar send the code to /run on the same origin as the page.
-// The first request of a session may need Turnstile and repeat the request with the token.
+//       kind ("fix": the starter is broken code) · runs ("browser") · check (its check.py)
+// Ejecutar and Comprobar send the code to /run on the same origin as the page, and only with an
+// account: without one the buttons give way to the sign-in links. The first request of a session may
+// need Turnstile and repeat the request with the token.
+// An exercise that runs in the browser never calls /run: pyodide-runner.ts grades it on Pyodide.
 
 // The browser stores the code, the hints seen and the solved state in
 // <course>:exercise:<id>. `at` records the last edit of the code.
@@ -10,7 +13,14 @@
 import type { Editor } from "../../editor/src/index.ts";
 import { BLOCKS, LEVELS } from "./blocks.ts";
 import type { BlockObject } from "./lesson.ts";
-import { addXp, courseKey, courseOf, XP_PER_EXERCISE } from "../progress.ts";
+import {
+  ACCOUNT_EVENT,
+  addXp,
+  courseKey,
+  courseOf,
+  XP_PER_EXERCISE,
+} from "../progress.ts";
+import * as python from "./pyodide-runner.ts";
 
 const exerciseKey = (id: string) =>
   courseKey(courseOf(location.pathname), `exercise:${id}`);
@@ -45,13 +55,13 @@ interface TestResult {
   name: string;
   visible: boolean;
   passed: boolean;
-  message?: string;
-  hint: number;
+  message?: string | null;
+  hint?: number | null;
 }
 /** The response of POST /run. */
 interface RunReply {
   passed?: boolean;
-  error?: string;
+  error?: string | null;
   stdout?: string;
   ms?: number | null;
   tests?: TestResult[];
@@ -63,11 +73,15 @@ type Mode = "run" | "check";
 const CALL_TIMEOUT_MS = 30000;
 const SLOW_MS = 4000;
 const RUN_URL = "/run";
+// `mise run serve` grades on this machine with no accounts, so it needs no sign-in. A 401 from
+// /run on any host says the runner wants a session, and the page asks for one from then on.
+let sessionRequired = !["localhost", "127.0.0.1"].includes(location.hostname);
 const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘" : "Ctrl";
 const HTTP_ERRORS: Record<number, string> = {
   400: "El corredor no entendió la petición.",
   404: "El corredor no conoce este ejercicio.",
   413: "El código es demasiado largo: el máximo es 20 000 bytes.",
+  401: "Para ejecutar el código hay que entrar con una cuenta.",
   429: "Has ejecutado demasiadas veces seguidas. Espera un momento.",
   503: "El corredor está ocupado. Inténtalo de nuevo en unos segundos.",
 };
@@ -176,7 +190,8 @@ BLOCKS.exercise = (box, s, A) => {
   const saved = progress.get(s.exercise);
 
   const head = A.el("div", "xhead", card);
-  A.el("div", "mtitle", head).textContent = "Ejercicio";
+  A.el("div", "mtitle", head).textContent =
+    s.kind === "fix" ? "Corrige el error" : "Ejercicio";
   A.el("span", "xlevel", head).textContent = LEVELS[s.level] || LEVELS[1];
   const solved = A.el("span", "xsolved", head);
   solved.textContent = "Resuelto";
@@ -214,6 +229,28 @@ BLOCKS.exercise = (box, s, A) => {
     () => send("check"),
     `Ejecuta el código y prueba los casos (${MOD}+Mayús+Intro)`,
   );
+  // Without a session the run buttons give way to the sign-in links.
+  const gate = A.el("div", "xgate", bar);
+  A.el("span", "", gate).textContent =
+    "Para ejecutar este ejercicio entra con una cuenta:";
+  for (const [provider, label] of [
+    ["google", "Google"],
+    ["github", "GitHub"],
+  ] as const) {
+    const link = A.el("a", "abtn xbtn primary", gate);
+    link.href = QGAccount.signInHref(provider);
+    link.textContent = `Entrar con ${label}`;
+  }
+  const needsSession = () =>
+    s.runs !== "browser" && sessionRequired && !QGAccount.signedIn();
+  const refreshGate = () => {
+    const closed = needsSession();
+    gate.hidden = !closed;
+    runBtn.hidden = checkBtn.hidden = closed;
+  };
+  refreshGate();
+  addEventListener(ACCOUNT_EVENT, refreshGate);
+  void QGAccount.ready.then(refreshGate);
   A.el("span", "xspace", bar);
   const hintBtn = hintList.length
     ? btn("Pista", "", () => nextHint(), "Muestra la siguiente pista")
@@ -312,7 +349,7 @@ BLOCKS.exercise = (box, s, A) => {
         A.el("span", "sr", body).textContent = t.passed ? "Pasa: " : "Falla: ";
         A.el("b", "", body).textContent = t.name;
         if (!t.passed && t.message) text("xmsg", t.message, body);
-        const tip = hintList[t.hint - 1];
+        const tip = hintList[(t.hint ?? 0) - 1];
         if (!t.passed && tip) {
           const d = A.el("div", "xhint xcasehint", body);
           A.el("b", "", d).textContent = `Pista ${t.hint}`;
@@ -331,7 +368,12 @@ BLOCKS.exercise = (box, s, A) => {
       if (res.passed) solved.hidden = false;
       if (first) {
         addXp(XP_PER_EXERCISE);
-        QGAccount.xp("exercise", s.exercise, XP_PER_EXERCISE);
+        // The server verifies a pass it graded. A pass the page graded is a different award.
+        QGAccount.xp(
+          s.runs === "browser" ? "browser" : "exercise",
+          s.exercise,
+          XP_PER_EXERCISE,
+        );
       }
     }
   }
@@ -340,12 +382,54 @@ BLOCKS.exercise = (box, s, A) => {
     note("bad", msg);
   };
 
+  // Python in the page: Pyodide loads on the first run, then the code starts and the clock with it.
+  async function sendBrowser(mode: Mode, editor: Editor) {
+    note(
+      "busy",
+      "Preparando Python en tu navegador. La primera vez tarda unos segundos…",
+    );
+    let began = 0;
+    try {
+      const verdict = await python.grade(
+        editor.get(),
+        s.check ?? "",
+        mode,
+        () => {
+          began = performance.now();
+          note("busy", mode === "check" ? "Comprobando…" : "Ejecutando…");
+        },
+      );
+      render(
+        {
+          ...verdict,
+          ms: Math.round(performance.now() - began),
+        },
+        mode,
+      );
+    } catch (e) {
+      if (!(e instanceof python.RunStopped)) throw e;
+      fail(
+        e.why === "time"
+          ? `Tu código tardó más de ${python.RUN_LIMIT_MS / 1000} s y se detuvo.`
+          : "No se pudo cargar Python en tu navegador. Revisa tu conexión e inténtalo de nuevo.",
+      );
+    }
+  }
+
   async function send(mode: Mode) {
-    if (busy || !ed) return;
+    if (busy || !ed || needsSession()) return;
     const editor = ed;
     setBusy(true);
     editor.markError(0);
     out.textContent = "";
+    if (s.runs === "browser") {
+      try {
+        await sendBrowser(mode, editor);
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     note("busy", mode === "check" ? "Comprobando…" : "Ejecutando…");
     const slow = setTimeout(
       () =>
@@ -389,6 +473,8 @@ BLOCKS.exercise = (box, s, A) => {
         );
         body = await resp.json().catch(() => null);
       }
+      if (resp.status === 401) sessionRequired = true;
+      if (QGAccount.lapsed(resp)) refreshGate();
       if (!resp.ok)
         fail(
           HTTP_ERRORS[resp.status] ||
@@ -432,7 +518,16 @@ BLOCKS.exercise = (box, s, A) => {
         onCheck: () => send("check"),
       });
       setBusy(false);
-      note("idle", "Escribe tu código y pulsa Ejecutar o Comprobar.");
+      note(
+        "idle",
+        needsSession()
+          ? "Entra con una cuenta para ejecutar este ejercicio."
+          : "Escribe tu código y pulsa Ejecutar o Comprobar.",
+      );
+      // Pyodide starts loading when the learner reaches the editor, not when the page opens.
+      if (s.runs === "browser")
+        for (const type of ["focusin", "pointerenter"])
+          host.addEventListener(type, python.warm, { once: true });
     });
   return o;
 };

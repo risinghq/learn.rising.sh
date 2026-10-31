@@ -1,5 +1,9 @@
-// The service worker of the shell. scripts/build.ts replaces the two placeholders below.
+// The service worker of the shell. scripts/build.ts replaces the placeholders below.
 const VERSION = "__VERSION__";
+// The Python of the browser-graded courses. It has its own cache, named by the Pyodide version,
+// so a deploy of the shell does not download it again.
+const PYODIDE = "pyodide-__PYODIDE__";
+const PYODIDE_PATH = "/vendor/pyodide/";
 const PRECACHE = "__PRECACHE__";
 
 // Lesson audio, the code runner and the account stay on the network.
@@ -22,7 +26,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== VERSION)
+            .filter((key) => key !== VERSION && key !== PYODIDE)
             .map((key) => caches.delete(key)),
         ),
       )
@@ -59,6 +63,16 @@ async function cacheFirst(request) {
   return (await caches.match(request)) ?? fromNetwork(request);
 }
 
+// Pyodide files are cached when the page first asks for them, and only then.
+async function pyodideFirst(request) {
+  const cache = await caches.open(PYODIDE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response.ok) void cache.put(request, response.clone());
+  return response;
+}
+
 // A course index answers from the cache and refreshes it for the next launch.
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
@@ -81,6 +95,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(networkFirst(request));
   } else if (url.pathname.startsWith("/assets/")) {
     event.respondWith(cacheFirst(request));
+  } else if (url.pathname.startsWith(PYODIDE_PATH)) {
+    event.respondWith(pyodideFirst(request));
   } else if (
     url.pathname.endsWith(".json") &&
     PRECACHE.includes(url.pathname)

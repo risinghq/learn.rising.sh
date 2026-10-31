@@ -263,8 +263,13 @@ export function compactReviews(log: Review[]): Review[] {
 }
 
 /** Where an award comes from. The Worker accepts these sources from the site. */
-export type XpSource = "drill" | "lesson" | "exercise";
-const SOURCES: ReadonlySet<string> = new Set(["drill", "lesson", "exercise"]);
+export type XpSource = "drill" | "lesson" | "exercise" | "browser";
+const SOURCES: ReadonlySet<string> = new Set([
+  "drill",
+  "lesson",
+  "exercise",
+  "browser",
+]);
 
 /**
  * XP the account has not received. `ref` is unique per source and day. `earnedAt` is when the

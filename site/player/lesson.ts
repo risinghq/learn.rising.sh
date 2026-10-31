@@ -267,6 +267,12 @@ export interface ExerciseSpec extends SpecBase {
   starter: string;
   hints?: string[];
   cases?: string[];
+  /** "fix": the starter is broken code to repair, not an empty one to complete. */
+  kind?: "fix";
+  /** "browser": the page grades with Pyodide, using `check`. Without it, /run grades. */
+  runs?: "browser";
+  /** The whole check.py of a browser-graded exercise. */
+  check?: string;
 }
 
 export type Spec =

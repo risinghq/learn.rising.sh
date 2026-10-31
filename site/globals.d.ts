@@ -10,7 +10,7 @@ declare var QGAccount: {
   mount: (host: HTMLElement) => void;
   /** Sends an award to the account, now or when the connection returns. `ref` is unique per source and day. */
   xp: (
-    source: "drill" | "lesson" | "exercise",
+    source: "drill" | "lesson" | "exercise" | "browser",
     ref: string,
     amount: number,
   ) => void;
@@ -18,6 +18,10 @@ declare var QGAccount: {
   request: (method: string, path: string, body?: unknown) => Promise<Response>;
   /** The address that starts the sign-in with `provider` and returns to this page. */
   signInHref: (provider: "google" | "github") => string;
+  /** Whether this browser holds a session of the account. */
+  signedIn: () => boolean;
+  /** Closes the sign-in if `resp` is a 401, and says whether it was. */
+  lapsed: (resp: Response) => boolean;
 };
 /** engine.ts: the narration audio, for the automated tests. */
 declare var QGNarration: HTMLAudioElement;
@@ -25,3 +29,9 @@ declare var QGNarration: HTMLAudioElement;
 declare var notebookHelp: (parent: Element) => HTMLParagraphElement;
 /** theme.ts: switches between the light and the dark theme. */
 declare var toggleTheme: () => void;
+
+/** The Python sources that pyodide-grader.ts bundles as text. */
+declare module "*.py" {
+  const text: string;
+  export default text;
+}

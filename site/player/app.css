@@ -1219,6 +1219,21 @@ div#stage.work .mcmd .abtn {
 .xbar .xspace {
   flex: 1;
 }
+.xbar [hidden] {
+  display: none;
+}
+.xgate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  font-size: var(--t-md);
+}
+.xgate a.xbtn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
 .xbtn {
   height: auto;
   min-height: 2.75rem;

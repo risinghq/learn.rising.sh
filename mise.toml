@@ -88,12 +88,13 @@ run = [
 ]
 
 [tasks."test:ui"]
-description = "Drive the exercise editor, the project panel, the shell, the drill session, the theme, the optional account and the friends board in a browser, and hold the shell to its script budget"
+description = "Drive the exercise editor, the browser-graded exercises, the project panel, the shell, the drill session, the theme, the optional account and the friends board in a browser, and hold the shell to its script budget"
 depends = ["generate:scripts", "generate:app"]
 wait_for = ["test:py"]
 run = [
   "uv run python tests/exercise_ui_test.py",
   "uv run python tests/proyecto_test.py",
+  "uv run --group tools python tests/pyodide_ui_test.py",
   "bun tests/account_ui_test.ts",
   "bun tests/friends_test.ts",
   "bun tests/theme_test.ts",
@@ -148,6 +149,7 @@ description = "Bundle the TypeScript in site/ and editor/src into the JavaScript
 run = [
   "bun build site/theme.ts site/account.ts site/qiskit/notebooks.ts site/player/engine.ts --root site --outdir site --format=iife --target=browser",
   "bun build editor/src/index.ts --outfile site/player/editor.js --format=iife --target=browser --minify",
+  "bun build site/player/pyodide-worker.ts --outfile site/player/pyodide-worker.js --format=esm --target=browser --minify",
 ]
 
 [tasks."generate:app"]
@@ -157,9 +159,12 @@ dir = "app"
 run = "node scripts/build.ts"
 
 [tasks."generate:vendor"]
-description = "Copy KaTeX from editor/node_modules into site/vendor, which git ignores"
+description = "Copy KaTeX and Pyodide into site/vendor, and download the Pyodide wheels the browser-graded courses use, which git ignores"
 dir = "editor"
-run = "node vendor.ts ../site/vendor"
+run = [
+  "node vendor.ts ../site/vendor",
+  "node vendor-pyodide.ts ../site/vendor/pyodide",
+]
 
 [tasks.generate]
 description = "Rewrite every generated file under site/"
@@ -186,7 +191,7 @@ depends = ["generate:scripts", "generate:app"]
 run = "uv run python tools/serve.py"
 
 [tasks.deploy]
-description = "Copy KaTeX into site/vendor, write the drill items, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
+description = "Copy KaTeX and Pyodide into site/vendor, write the drill items, bundle the scripts and build the shell, then run cf deploy in runner/worker with the given arguments"
 depends = ["generate:vendor", "generate:items", "generate:scripts", "generate:app"]
 dir = "runner/worker"
 run = "bunx cf deploy"
