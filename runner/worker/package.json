@@ -7,15 +7,15 @@
     "@cloudflare/containers": "0.3.7"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261021.1",
-    "@types/node": "26.6.5",
-    "cf": "1.0.0-beta.20",
+    "@cloudflare/workers-types": "5.20261031.1",
+    "@types/node": "26.6.6",
+    "cf": "1.0.0-beta.26",
     "esbuild": "0.28.2",
-    "miniflare": "5.20261019.1-beta",
-    "oxfmt": "0.74.0",
-    "oxlint": "1.89.0",
+    "miniflare": "5.20261023.3-beta",
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0",
     "typescript": "7.0.2",
     "vitest": "5.0.5",
-    "wrangler": "4.151.3"
+    "wrangler": "4.156.0"
   }
 }

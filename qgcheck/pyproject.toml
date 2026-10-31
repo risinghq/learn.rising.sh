@@ -8,9 +8,9 @@ dependencies = ["numpy"]
 # What the exercises of the courses import.
 [project.optional-dependencies]
 courses = [
-  "qiskit>=2.5.2,<2.6",
-  "qiskit-aer~=0.18.0",
-  "qiskit-ibm-runtime>=0.50",
+  "qiskit>=2.6.1",
+  "qiskit-aer~=0.18.2",
+  "qiskit-ibm-runtime>=0.51",
   "qiskit-addon-obp>=0.3.0",
   "qiskit-addon-utils~=0.4.0",
   "matplotlib",
