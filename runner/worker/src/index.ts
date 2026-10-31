@@ -222,13 +222,19 @@ async function run(
       request.headers.get("cookie"),
       now,
     );
-    const maintainer =
-      userId !== null &&
-      (await isMaintainer(env.DB, userId, limits.maintainers));
+    // The container runs only for an account: it is the one thing the site pays for.
+    if (userId === null) {
+      throw new Refusal(
+        { outcome: "signin_required", status: 401 },
+        "signin_required",
+        "Para ejecutar código en el corredor hay que entrar con una cuenta.",
+      );
+    }
+    const maintainer = await isMaintainer(env.DB, userId, limits.maintainers);
     const who: Who = maintainer ? "maintainer" : "public";
-    // A signed-in user shares the IP with their class: their per-IP cap is higher and
+    // A signed-in user shares the IP with their class: the IP's cap is higher and
     // what bounds them is their own cap.
-    const ipFactor = userId ? limits.signedInIpFactor : 1;
+    const ipFactor = limits.signedInIpFactor;
     const secret = env.TURNSTILE_SECRET;
     throwIfLimited(
       await take(
@@ -242,7 +248,7 @@ async function run(
       ),
     );
     // A maintainer has no daily cap of their own: the budget bounds them.
-    if (userId && !maintainer) {
+    if (!maintainer) {
       throwIfLimited(
         await take(
           exports.RateLimiter,
@@ -310,8 +316,8 @@ async function run(
     const first = await reserve(0);
 
     let cookie: string | undefined;
-    // A maintainer signs in with GitHub and skips Turnstile. Everyone else,
-    // signed in or not, passes it once per session.
+    // A maintainer signs in with GitHub and skips Turnstile. Everyone else
+    // passes it once per session.
     if (
       !maintainer &&
       !(await hasSession(

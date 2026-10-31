@@ -3,6 +3,7 @@ import { ConfigError } from "./limits.ts";
 
 export type Outcome =
   | "ok"
+  | "signin_required"
   | "rate_minute"
   | "rate_day"
   | "bad_request"

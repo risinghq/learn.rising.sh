@@ -88,7 +88,7 @@ CREATE TABLE xp_events (
   user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   at        INTEGER NOT NULL,
   utc_day   INTEGER NOT NULL,
-  source    TEXT NOT NULL CHECK (source IN ('drill', 'exercise', 'lesson', 'cli')),
+  source    TEXT NOT NULL CHECK (source IN ('drill', 'exercise', 'browser', 'lesson', 'cli')),
   ref       TEXT NOT NULL,
   amount    INTEGER NOT NULL CHECK (amount > 0)
 );

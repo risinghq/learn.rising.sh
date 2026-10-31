@@ -14,7 +14,9 @@ import {
 
 const MAX_BODY_BYTES = 2000;
 
-const SOURCES = ["drill", "exercise", "lesson", "cli"] as const;
+// `exercise` needs the server's recorded pass. `browser` is an exercise the page graded itself, so
+// it has no record to check: it is bounded like `drill`, by the per-event and per-day caps.
+const SOURCES = ["drill", "exercise", "browser", "lesson", "cli"] as const;
 type Source = (typeof SOURCES)[number];
 
 // Drill and CLI references use the same identifier grammar.
@@ -23,6 +25,7 @@ const REF: Record<Source, RegExp> = {
   drill: ITEM,
   cli: ITEM,
   exercise: EXERCISE,
+  browser: EXERCISE,
   lesson: LESSON,
 };
 
