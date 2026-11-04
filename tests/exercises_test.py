@@ -572,6 +572,102 @@ WRONG += [
     ]
 ]
 
+# Part 4: (exercise, text of solution.py, its replacement, text expected in some message).
+WRONG += [
+    (eid, broken(eid, old, new), expected)
+    for eid, old, new, expected in [
+        (
+            "p4-primitivas/dos-vistas",
+            "prediccion = [1, 0, 1]",
+            "prediccion = [1, 1, 1]",
+            "Tu apuesta no coincide con lo que calcula Estimator",
+        ),
+        (
+            "p4-primitivas/backend-sampler",
+            "sampler = BackendSamplerV2(backend=backend)",
+            "sampler = StatevectorSampler(seed=1)",
+            "`sampler` es un StatevectorSampler",
+        ),
+        ("p4-primitivas/z-desde-conteos", ") / total", ") / 1", "`z_desde_conteos` devuelve"),
+        (
+            "p4-pubs/formas",
+            "prediccion = ((5,), (4, 6))",
+            "prediccion = ((5,), (4, 1))",
+            "Tu apuesta no coincide con las formas",
+        ),
+        (
+            "p4-pubs/observables-3x10",
+            '[[SparsePauliOp(p)] for p in ["ZZZ", "XXX", "YYY"]]',
+            'SparsePauliOp(["ZZZ", "XXX", "YYY"])',
+            "tiene la forma (10,)",
+        ),
+        (
+            "p4-pubs/probabilidad-uno",
+            "return (1 - datos",
+            "return (1 + datos",
+            "`probabilidad_uno` devuelve",
+        ),
+        (
+            "p4-simular-exacto/valores-exactos",
+            "prediccion = [4, 2 + 3 ** 0.5, 2]",
+            "prediccion = [4, 4, 4]",
+            "Tu apuesta no coincide con lo que calcula Estimator",
+        ),
+        ("p4-simular-exacto/precision", "precision = 0.005", "precision = 0.5", "Baja `precision`"),
+        (
+            "p4-simular-exacto/cuatro-pubs",
+            "    pubs = [(qubit, None, n) for n in disparos]\n"
+            "    resultado = sampler.run(pubs).result()\n",
+            "    resultado = [sampler.run([(qubit, None, n)]).result()[0] for n in disparos]\n",
+            "llama a `run` 3 veces",
+        ),
+        (
+            "p4-aer-ruido/ideal-vs-ruidoso",
+            "prediccion = 0.93",
+            "prediccion = 0.5",
+            "Tu apuesta está lejos",
+        ),
+        ("p4-aer-ruido/p-a-la-mitad", "p = 0.13", "p = 0.02", "Sube `p`"),
+        (
+            "p4-aer-ruido/error-de-lectura",
+            "[[1 - p01, p01], [p10, 1 - p10]]",
+            "[[1 - p10, p10], [p01, 1 - p01]]",
+            "Preparando |1⟩ lees 0",
+        ),
+        (
+            "p4-estabilizadores/ghz-100",
+            "prediccion = 2",
+            "prediccion = 100",
+            "Tu apuesta no coincide con las cadenas",
+        ),
+        (
+            "p4-estabilizadores/rz-de-clifford",
+            "angulo = np.pi / 2",
+            "angulo = np.pi / 2 + 0.1",
+            "sigue rechazando el circuito",
+        ),
+        ("p4-estabilizadores/a-clifford", "np.rint(", "np.floor(", "`a_clifford` devuelve"),
+        (
+            "p4-local-testing/bell-fake",
+            "prediccion = 4096",
+            "prediccion = 1024",
+            "Tu apuesta no coincide con los disparos",
+        ),
+        (
+            "p4-local-testing/sin-ruido",
+            "backend = AerSimulator()",
+            "backend = FakeManilaV2()",
+            "`backend` es un FakeManilaV2",
+        ),
+        (
+            "p4-local-testing/mitigacion",
+            "measure_mitigation = mitigar",
+            "measure_mitigation = False",
+            "el valor mitigado no es mejor",
+        ),
+    ]
+]
+
 # Wrong code that fails the hidden cases: (exercise, code). The message of each failing hidden
 # case is compared with the reference solution in test_hidden_messages_*.
 MUTANTS = [
@@ -671,6 +767,77 @@ MUTANTS = [
             ),
             ("p4-cierre/tiempo-de-validez", "abs(med - ref) > tol", "abs(med - ref) >= tol"),
             ("p4-cierre/tiempo-de-validez", "abs(med - ref)", "med - ref"),
+            ("p4-primitivas/dos-vistas", '"XX"]', '"YY"]'),
+            (
+                "p4-primitivas/backend-sampler",
+                "sampler = BackendSamplerV2(backend=backend)",
+                "sampler = BackendSamplerV2(backend=GenericBackendV2(3, seed=1))",
+            ),
+            ("p4-primitivas/backend-sampler", "shots=1024", "shots=512"),
+            ("p4-primitivas/z-desde-conteos", "cadena[-1 - k]", "cadena[k]"),
+            ("p4-primitivas/z-desde-conteos", ") / total", ") / 1"),
+            ("p4-pubs/formas", "np.linspace(0, 1, 6)", "np.linspace(0, 1, 7)"),
+            ("p4-pubs/observables-3x10", '["ZZZ", "XXX", "YYY"]', '["XXX", "ZZZ", "YYY"]'),
+            ("p4-pubs/probabilidad-uno", "return (1 - datos", "return (1 + datos"),
+            ("p4-pubs/probabilidad-uno", "[..., None]", "[:, None]"),
+            ("p4-pubs/probabilidad-uno", "np.asarray(angulos)", "np.asarray(angulos).squeeze()"),
+            ("p4-simular-exacto/valores-exactos", "np.pi / 6", "np.pi / 4"),
+            ("p4-simular-exacto/precision", "precision = 0.005", "precision = 0"),
+            ("p4-simular-exacto/precision", "precision = 0.005", "precision = 0.5"),
+            (
+                "p4-simular-exacto/cuatro-pubs",
+                "    pubs = [(qubit, None, n) for n in disparos]\n"
+                "    resultado = sampler.run(pubs).result()\n",
+                "    resultado = [sampler.run([(qubit, None, n)]).result()[0] for n in disparos]\n",
+            ),
+            (
+                "p4-simular-exacto/cuatro-pubs",
+                "(qubit, None, n) for n in disparos]",
+                "(qubit, None, disparos[0]) for n in disparos]",
+            ),
+            ("p4-simular-exacto/cuatro-pubs", "return [abs(", "return [-abs("),
+            (
+                "p4-aer-ruido/ideal-vs-ruidoso",
+                "depolarizing_error(0.02, 2)",
+                "depolarizing_error(0, 2)",
+            ),
+            ("p4-aer-ruido/p-a-la-mitad", "p = 0.13", "p = 0.02"),
+            (
+                "p4-aer-ruido/error-de-lectura",
+                "[[1 - p01, p01], [p10, 1 - p10]]",
+                "[[1 - p10, p10], [p01, 1 - p01]]",
+            ),
+            (
+                "p4-aer-ruido/error-de-lectura",
+                "ruido.add_all_qubit_readout_error(ReadoutError([[1 - p01, p01], [p10, 1 - p10]]))",
+                "ruido.add_readout_error(ReadoutError([[1 - p01, p01], [p10, 1 - p10]]), [0])",
+            ),
+            ("p4-estabilizadores/ghz-100", "ghz100.h(0)\n", ""),
+            ("p4-estabilizadores/rz-de-clifford", "angulo = np.pi / 2", "angulo = np.pi / 4"),
+            ("p4-estabilizadores/rz-de-clifford", "con_rz.rz(angulo, 0)", "con_rz.rz(np.pi, 0)"),
+            ("p4-estabilizadores/rz-de-clifford", "con_rz.h(0)\n", ""),
+            ("p4-estabilizadores/a-clifford", "np.rint(", "np.floor("),
+            (
+                "p4-local-testing/bell-fake",
+                "conteos_fake = sampler_fake.run([isa_bell]).result()[0].data.meas.get_counts()",
+                'conteos_fake = {"00": 2048, "11": 2048}',
+            ),
+            (
+                "p4-local-testing/sin-ruido",
+                "bell_medido.h(0)\n",
+                "bell_medido.x(0)\nbell_medido.h(0)\n",
+            ),
+            ("p4-local-testing/sin-ruido", "run([isa_local])", "run([isa_local], shots=1000)"),
+            (
+                "p4-local-testing/mitigacion",
+                "measure_mitigation = mitigar",
+                "measure_mitigation = True",
+            ),
+            (
+                "p4-local-testing/mitigacion",
+                ").result()[0].data.evs)",
+                ").result()[0].data.evs) + (0.2 if mitigar else 0)",
+            ),
         ]
     ],
     *[
