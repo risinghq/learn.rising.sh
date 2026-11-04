@@ -207,12 +207,11 @@
   ]
  },
  "mision": {
-  "dur": 39.024,
+  "dur": 29.016,
   "marks": {
-   "n1": 10.629,
-   "n2": 15.384,
-   "n3": 22.121,
-   "check": 32.0
+   "n1": 7.643,
+   "n2": 12.398,
+   "n3": 19.135
   },
   "cues": [
    [
@@ -221,23 +220,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo; corre en un procesador falso de cinco qubits, sin cuenta."
+    "Todo corre en un procesador falso de cinco qubits, sin cuenta."
    ],
    [
-    10.629,
+    7.643,
     "Primero reproduces el estado de Bell con sus seis observables."
    ],
    [
-    15.384,
+    12.398,
     "Después subes los disparos hasta que el error estándar de Z Z baje de cuatro milésimas."
    ],
    [
-    22.121,
+    19.135,
     "Y por último escribes una función que mide las correlaciones de un GHZ de dos a cinco qubits, los que caben en el procesador falso."
-   ],
-   [
-    32.0,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
    ]
   ]
  },

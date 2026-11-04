@@ -351,84 +351,42 @@
      "section": "5.1",
      "title": "Cuenta de IBM Cloud, planes y credenciales",
      "summary": "Crear la cuenta y una instancia, guardar y cargar credenciales de forma segura, elegir instancia, los planes de acceso y cómo limitar el gasto.",
-     "minutes": 11,
-     "missions": [
-      {
-       "notebook": "practica/p5-cuenta.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 11
     },
     {
      "id": "p5-hello-world",
      "section": "5.2",
      "title": "Hola mundo en un QPU",
      "summary": "El primer programa en hardware real: un estado de Bell medido con Estimator, y su versión a escala de utilidad con un GHZ de 100 qubits.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p5-hello-world.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p5-opciones",
      "section": "5.3",
      "title": "Primitivas de IBM y sus opciones",
      "summary": "Estimator, Sampler y Executor; el paso a primitivas del lado del cliente; cómo funcionan las opciones; y el modelo de ejecución dirigida.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p5-opciones.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p5-estimator",
      "section": "5.4",
      "title": "Estimator en IBM Quantum",
      "summary": "Usar Estimator en hardware: inicialización, entradas y salidas, cómo calcula los errores, la precedencia de la precisión, sus opciones y ejemplos.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/p5-estimator.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     },
     {
      "id": "p5-sampler",
      "section": "5.5",
      "title": "Sampler en IBM Quantum",
      "summary": "Usar Sampler en hardware: entradas y salidas, intervalos de ejecución, precedencia de los disparos, opciones e incompatibilidades.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p5-sampler.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p5-executor",
      "section": "5.6",
      "title": "Executor",
      "summary": "La primitiva de bajo nivel: programas cuánticos, elementos de circuito y de samplex, broadcasting con ejes intrínsecos y extrínsecos, PEC y cómo migrar desde Sampler.",
-     "minutes": 11,
-     "missions": [
-      {
-       "notebook": "practica/p5-executor.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 11
     },
     {
      "id": "p5-rest",
@@ -437,11 +395,6 @@
      "summary": "Usar IBM Quantum desde cualquier lenguaje: autenticación con tokens portadores, enviar trabajos de Estimator y Sampler con OpenQASM 3, opciones, resultados y sesiones.",
      "minutes": 8,
      "missions": [
-      {
-       "notebook": "practica/p5-rest.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito5.py",
        "title": "Proyecto Ising · Hito V",

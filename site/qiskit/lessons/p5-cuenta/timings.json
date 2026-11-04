@@ -334,12 +334,11 @@
   ]
  },
  "mision": {
-  "dur": 35.184,
+  "dur": 28.2,
   "marks": {
-   "n1": 11.563,
-   "n2": 15.3,
-   "n3": 20.097,
-   "check": 28.165
+   "n1": 7.515,
+   "n2": 13.757,
+   "n3": 20.126
   },
   "cues": [
    [
@@ -348,23 +347,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo; no necesita cuenta, trabaja con un archivo temporal y una clave falsa."
+    "Trabajas con un archivo local y una clave falsa, sin cuenta."
    ],
    [
-    11.563,
-    "Primero guardas una cuenta con save account."
+    7.515,
+    "Primero guardas una cuenta con save account y apuestas cómo queda la clave en el archivo."
    ],
    [
-    15.3,
-    "Después guardas una segunda y la marcas como predeterminada."
+    13.757,
+    "Después arreglas el código que guarda una segunda cuenta para que sea la predeterminada."
    ],
    [
-    20.097,
+    20.126,
     "Y por último escribes una función que calcula cuántos minutos libres te quedan en la ventana móvil de veintiocho días."
-   ],
-   [
-    28.165,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
    ]
   ]
  },

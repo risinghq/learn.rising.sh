@@ -366,46 +366,81 @@
     "5.7",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; prepara los cuerpos de los trabajos y lee resultados, todo en tu equipo, sin enviar nada. [[n1]]Primero armas el cuerpo de un trabajo de Sampler con un circuito en OpenQASM tres. [[n2]]Después corriges la lectura de los disparos en hexadecimal para que los conteos coincidan con get counts. [[n3]]Y por último escribes la función que arma el cuerpo de un trabajo de Estimator, con su observable y sus opciones. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Preparas los cuerpos de los trabajos y lees resultados, todo en tu equipo, sin enviar nada. [[n1]]Primero armas el cuerpo de un trabajo de Sampler con un circuito en OpenQASM tres. [[n2]]Después corriges la lectura de los disparos en hexadecimal para que los conteos coincidan con get counts. [[n3]]Y por último escribes la función que arma el cuerpo de un trabajo de Estimator, con su observable y sus opciones.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-rest.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Arma el cuerpo JSON de un trabajo de Sampler con el circuito en OpenQASM 3."
-      },
-      {
-       "level": 2,
-       "text": "Corrige la decodificación de `samples` para que los conteos coincidan con `get_counts()`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `cuerpo_estimator(isa, observable, opciones)` y comprueba que es JSON válido."
-      }
+     "type": "exercise",
+     "exercise": "p5-rest/cuerpo-sampler",
+     "prompt": "El PUB de un trabajo de Sampler es `[circuito, parámetros, disparos]`. Este circuito no tiene parámetros: cambia `parametros` por el valor que se envía en ese caso. Antes de ejecutar, apuesta en `prediccion` cuál es, como texto: `\"None\"`, `\"{}\"` o `\"[]\"`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "El cuerpo viaja como JSON: imprime `json.dumps` del valor para ver cómo se envía cada candidato.",
+      "El valor que significa «ninguno» en Python se convierte en `null` en JSON.",
+      "Usa `parametros = None` y `prediccion = \"None\"`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import json\n\nimport qiskit.qasm3\nfrom qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2, 2)\nbell.h(0)\nbell.cx(0, 1)\nbell.measure([0, 1], [0, 1])\nisa = pm.run(bell)\n\nqasm = qiskit.qasm3.dumps(isa)\n\n# ✏️ el segundo elemento del PUB son los valores de los parámetros; este circuito no tiene.\n# Apuesta qué valor lleva: None, {} o [].\nparametros = {}\nprediccion = \"{}\"\n\ncuerpo_sampler = {\n    \"program_id\": \"sampler\",\n    \"backend\": \"ibm_fez\",\n    \"params\": {\"pubs\": [[qasm, parametros, 500]]},\n}\nprint(json.dumps(cuerpo_sampler[\"params\"][\"pubs\"][0][1:]))",
+     "cases": [
+      "el PUB es [texto OpenQASM 3, None, 500]",
+      "tu apuesta coincide con `parametros`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/decodificar-samples",
+     "prompt": "Los resultados de Sampler por REST llegan como números hexadecimales, uno por disparo, como `'0x1'`. `decodificar` los convierte a cadenas de bits, pero `'0x1'` sale como `'1'` y debería ser `'01'`. Arréglala para que rellene con ceros hasta `n_bits` y los conteos coincidan con `get_counts()`.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "`format(int(h, 16), \"b\")` escribe el número sin ceros a la izquierda.",
+      "El formato binario acepta un ancho mínimo con relleno de ceros: `\"0\"`, el ancho y `\"b\"`.",
+      "Usa `f\"0{n_bits}b\"` como formato."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2, 2)\nbell.h(0)\nbell.cx(0, 1)\nbell.measure([0, 1], [0, 1])\nisa = pm.run(bell)\n\nsampler = Sampler(mode=backend)\nsampler.options.default_shots = 300\nsampler.options.simulator.seed_simulator = 5\nregistro = sampler.run([isa]).result()[0].data.c\n\n# Lo que devolvería el servicio: un hexadecimal por disparo.\nmuestras = [hex(int(bits, 2)) for bits in registro.get_bitstrings()]\n\n\ndef decodificar(muestras, n_bits):\n    conteos = {}\n    for h in muestras:\n        bits = format(int(h, 16), \"b\")\n        conteos[bits] = conteos.get(bits, 0) + 1\n    return conteos\n\n\nesperados = registro.get_counts()\ndecodificados = decodificar(muestras, 2)\nprint(muestras[:8], \"…\")\nprint(dict(sorted(decodificados.items())))",
+     "cases": [
+      "'0x1' se decodifica como '01'",
+      "los conteos coinciden con `get_counts()`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/cuerpo-estimator",
+     "prompt": "Escribe `cuerpo_estimator(isa, observable, opciones)`: devuelve el diccionario del trabajo con `program_id` (`\"estimator\"`), `backend` (`\"ibm_fez\"`) y `params` con la lista `pubs` de un PUB `[qasm, observable, None]` y las `options`. Dos trampas: el observable pasa por `apply_layout(isa.layout)`, porque el circuito transpilado tiene los cinco qubits del procesador, y en JSON es un diccionario `{cadena de Pauli: coeficiente}` con coeficientes `float`, no complejos.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "El observable de un PUB se envía como un diccionario de cadenas de Pauli a coeficientes; el circuito, como texto OpenQASM 3.",
+      "`observable.apply_layout(isa.layout)` da las cadenas de cinco letras; `.paulis.to_labels()` y `.coeffs.real.tolist()` dan las etiquetas y los números.",
+      "Une etiquetas y coeficientes con `dict(zip(...))` y el circuito con `qiskit.qasm3.dumps(isa)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import qiskit.qasm3\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nisa = pm.run(bell)\n\n\ndef cuerpo_estimator(isa, observable, opciones):\n    return {}   # ✏️ program_id, backend, params con pubs y options\n\n\nopciones_zne = {\"resilience\": {\"zne_mitigation\": True, \"zne\": {\"noise_factors\": [1, 3, 5]}}}\ncuerpo = cuerpo_estimator(isa, SparsePauliOp(\"ZZ\"), opciones_zne)\nprint(cuerpo.get(\"params\", {}).get(\"pubs\", [[None, None]])[0][1:])",
+     "cases": [
+      "el cuerpo de ⟨ZZ⟩ lleva el observable IIIZZ con coeficiente 1.0",
+      "program_id, backend, opciones y circuito están en su sitio"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

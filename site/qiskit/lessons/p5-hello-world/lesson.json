@@ -486,46 +486,78 @@
     "5.2",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre en un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el estado de Bell con sus seis observables. [[n2]]Después subes los disparos hasta que el error estándar de Z Z baje de cuatro milésimas. [[n3]]Y por último escribes una función que mide las correlaciones de un GHZ de dos a cinco qubits, los que caben en el procesador falso. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Todo corre en un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el estado de Bell con sus seis observables. [[n2]]Después subes los disparos hasta que el error estándar de Z Z baje de cuatro milésimas. [[n3]]Y por último escribes una función que mide las correlaciones de un GHZ de dos a cinco qubits, los que caben en el procesador falso.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-hello-world.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta el Bell con seis observables y lee `evs`."
-      },
-      {
-       "level": 2,
-       "text": "Sube `default_shots` hasta que el error estándar de $\\langle ZZ\\rangle$ sea menor que $0{,}004$."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `correlaciones(n)` para $\\langle Z_0Z_i\\rangle$ de un GHZ de 2 a 5 qubits y mira cómo decae con la distancia."
-      }
+     "type": "exercise",
+     "exercise": "p5-hello-world/bell-seis-observables",
+     "prompt": "Ejecuta un PUB con `isa_bell` y los seis observables de `mapeados`, y guarda en `valores` un diccionario `{etiqueta: valor esperado}`. Antes de ejecutar, apuesta en `prediccion` la lista de etiquetas que valdrán casi 1.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Un PUB del Estimator es una tupla `(circuito, observables)` y `run` recibe una lista de PUBs.",
+      "`estimator.run([(isa_bell, mapeados)]).result()[0].data.evs` trae un valor por observable, en el mismo orden.",
+      "Empareja `etiquetas` con `evs` usando `dict(zip(etiquetas, evs))`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\n\netiquetas = [\"IZ\", \"IX\", \"ZI\", \"XI\", \"ZZ\", \"XX\"]\nisa_bell = pm.run(bell)\nmapeados = [SparsePauliOp(e).apply_layout(isa_bell.layout) for e in etiquetas]\n\nestimator = Estimator(mode=backend)\nestimator.options.default_shots = 5000\nestimator.options.simulator.seed_simulator = 7\n\n# ✏️ ejecuta un PUB con isa_bell y los seis observables mapeados, y guarda en `valores`\n# un diccionario etiqueta → valor esperado, redondeado a 2 decimales\nvalores = {}\nprint(valores)\n\n# ✏️ apuesta: ¿qué etiquetas valdrán casi 1? Escríbelas en la lista.\nprediccion = []",
+     "cases": [
+      "`valores` tiene los seis observables",
+      "tu apuesta coincide con lo que mide el Estimator"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-hello-world/mas-disparos",
+     "prompt": "Cambia `disparos` para que `medir_zz` devuelva un error estándar de $\\langle ZZ\\rangle$ menor que $0{,}004$, sin pedir más de 60 000 disparos.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "El error estándar de un promedio baja con la raíz del número de disparos.",
+      "Con 1000 disparos el error ronda 0,012: para dividirlo por 3 necesitas al menos 9 veces más disparos.",
+      "Prueba con 20 000 y ajusta mirando el error que imprime el código."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nisa = pm.run(bell)\nzz = SparsePauliOp(\"ZZ\").apply_layout(isa.layout)\n\n\ndef medir_zz(disparos):\n    \"\"\"Devuelve ⟨ZZ⟩ del Bell y su error estándar con ese número de disparos.\"\"\"\n    estimator = Estimator(mode=backend)\n    estimator.options.default_shots = disparos\n    estimator.options.simulator.seed_simulator = 7\n    datos = estimator.run([(isa, zz)]).result()[0].data\n    return float(datos.evs), float(datos.stds)\n\n\ndisparos = 1000   # ✏️ prueba otros valores\nvalor, error = medir_zz(disparos)\nprint(f\"{disparos} disparos → ⟨ZZ⟩ = {valor:.3f} ± {error:.4f}\")",
+     "cases": [
+      "el error de ⟨ZZ⟩ baja de 0,004"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-hello-world/correlaciones-ghz",
+     "prompt": "Completa `correlaciones(n)`: prepara un GHZ de `n` qubits (H en el qubit 0 y una cadena de CNOT) y devuelve un diccionario `{etiqueta: valor}` con $\\langle Z_0Z_i\\rangle$ para $i=1,\\dots,n-1$. Cada etiqueta tiene `n` letras: una Z en los qubits 0 e `i` y una I en los demás; el qubit 0 es la letra de más a la derecha.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Un GHZ empieza con una H en el qubit 0 y cada CNOT extiende el entrelazamiento al qubit vecino.",
+      "Con `ghz.h(0)` y `ghz.cx(i, i + 1)` para `i` de 0 a `n - 2` obtienes el GHZ.",
+      "Arma cada etiqueta con una lista de `\"I\"` de longitud `n` y pon `\"Z\"` en las posiciones `n - 1` y `n - 1 - i`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\n\ndef correlaciones(n):\n    if not 2 <= n <= backend.num_qubits:\n        raise ValueError(f\"n debe estar entre 2 y {backend.num_qubits}, los qubits de {backend.name}\")\n    ghz = QuantumCircuit(n)\n    # ✏️ H en el qubit 0 y una cadena de CNOT\n    isa = pm.run(ghz)\n    etiquetas = [\"I\" * n]   # ✏️ una etiqueta por cada i = 1…n-1, con Z en los qubits 0 e i\n    ops = [SparsePauliOp(e).apply_layout(isa.layout) for e in etiquetas]\n    estimator = Estimator(mode=backend)\n    estimator.options.default_shots = 4000\n    estimator.options.simulator.seed_simulator = 7\n    evs = estimator.run([(isa, ops)]).result()[0].data.evs\n    return {e: round(float(v), 3) for e, v in zip(etiquetas, evs)}\n\n\nprint(correlaciones(2))",
+     "cases": [
+      "n = 5: cuatro correlaciones cerca de 1"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

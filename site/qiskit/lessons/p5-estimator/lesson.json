@@ -646,46 +646,78 @@
     "5.4",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el barrido de trescientos valores esperados. [[n2]]Después cambias una sola línea para bajar el error estándar de Z Z. [[n3]]Y por último escribes la función que combina los cuatro observables del experimento CHSH en el valor S. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Todo corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el barrido de trescientos valores esperados. [[n2]]Después cambias una sola línea para bajar el error estándar de Z Z. [[n3]]Y por último escribes la función que combina los cuatro observables del experimento CHSH en el valor S.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-estimator.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta un barrido de 100 juegos de parámetros con 3 observables y lee la forma de `evs`."
-      },
-      {
-       "level": 2,
-       "text": "Baja el error estándar de $\\langle ZZ\\rangle$ de $0{,}008$ cambiando una sola línea."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `valor_S(evs)` para CHSH y comprueba que $|S|>2$."
-      }
+     "type": "exercise",
+     "exercise": "p5-estimator/barrido",
+     "prompt": "Ejecuta un único PUB `(isa, mapeados, parametros)`: 3 observables y 100 juegos de parámetros. Guarda sus valores esperados en `evs`. Antes de ejecutar, apuesta en `prediccion` la forma de `evs` como tupla.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Los observables y los parámetros se combinan por difusión (*broadcasting*): el resultado tiene la forma de la difusión de sus dos formas.",
+      "`mapeados` tiene forma (3, 1) y `parametros`, (100, 2): cada juego de parámetros ocupa el último eje y los observables, el primero.",
+      "`estimator.run([(isa, mapeados, parametros)]).result()[0].data.evs` devuelve el arreglo; su forma es (3, 100)."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\na, b = Parameter(\"a\"), Parameter(\"b\")\ncircuito = QuantumCircuit(2)\ncircuito.rx(a, 0)\ncircuito.ry(b, 1)\ncircuito.cx(0, 1)\nisa = pm.run(circuito)\n\n# 100 juegos de valores para (a, b): forma (100, 2)\nparametros = np.vstack([np.linspace(-np.pi, np.pi, 100), np.linspace(-4 * np.pi, 4 * np.pi, 100)]).T\n# 3 observables, cada uno en su propia fila: forma (3, 1)\nobservables = [\n    [SparsePauliOp([\"XX\", \"IY\"], [0.5, 0.5])],\n    [SparsePauliOp(\"XX\")],\n    [SparsePauliOp(\"IY\")],\n]\nmapeados = [[o.apply_layout(isa.layout) for o in fila] for fila in observables]\n\nestimator = Estimator(mode=backend)\nestimator.options.default_shots = 50\nestimator.options.simulator.seed_simulator = 7\n\n# ✏️ ejecuta un PUB (isa, mapeados, parametros) y guarda en `evs` los valores esperados\nevs = np.zeros(0)\nprint(\"forma de evs:\", evs.shape)\n\n# ✏️ apuesta: ¿qué forma tiene `evs`? Escríbela como tupla.\nprediccion = ()",
+     "cases": [
+      "`evs` tiene 3 observables × 100 juegos de parámetros",
+      "tu apuesta coincide con la forma de `evs`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-estimator/precision",
+     "prompt": "Cambia una sola línea para que el error estándar de $\\langle ZZ\\rangle$ (`error_zz`) baje de $0{,}008$ sin pedir más precisión de la necesaria.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Un error estándar menor pide una precisión objetivo menor: el Estimator ajusta los disparos para alcanzarla.",
+      "La precisión se fija en dos sitios: en las opciones y como argumento de `run`; el argumento de `run` manda sobre las opciones.",
+      "Baja el `precision=0.05` de la llamada a `run` a `precision=0.01`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nisa = pm.run(bell)\nzz = SparsePauliOp(\"ZZ\").apply_layout(isa.layout)\n\nestimator = Estimator(mode=backend)\nestimator.options.simulator.seed_simulator = 7\nestimator.options.default_precision = 0.05\n\ndatos = estimator.run([(isa, zz)], precision=0.05).result()[0].data\nerror_zz = float(datos.stds)\nprint(f\"⟨ZZ⟩ = {float(datos.evs):.3f} ± {error_zz:.4f}\")",
+     "cases": [
+      "el error estándar de ⟨ZZ⟩ baja de 0,008"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-estimator/valor-s",
+     "prompt": "Escribe `valor_S(evs)` para CHSH: recibe una matriz con filas $\\langle ZZ\\rangle$, $\\langle ZX\\rangle$, $\\langle XZ\\rangle$, $\\langle XX\\rangle$ y devuelve $S=ZZ-ZX+XZ+XX$ para cada columna. Con `evs_chsh` el máximo de $|S|$ debe pasar de 2, la cota clásica.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Cada columna es un ángulo; las cuatro filas son los cuatro valores esperados de esa columna.",
+      "Combina las filas con sus signos: una suma y una resta de filas, sin bucles.",
+      "Devuelve `evs[0] - evs[1] + evs[2] + evs[3]`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\n# Un Bell con una rotación RY(θ) en el qubit 0, medido con cuatro observables.\ntheta = Parameter(\"θ\")\nchsh = QuantumCircuit(2)\nchsh.h(0)\nchsh.cx(0, 1)\nchsh.ry(theta, 0)\nisa = pm.run(chsh)\n\nangulos = np.linspace(0, 2 * np.pi, 13)\nops = [[SparsePauliOp(p).apply_layout(isa.layout)] for p in [\"ZZ\", \"ZX\", \"XZ\", \"XX\"]]\n\nestimator = Estimator(mode=backend)\nestimator.options.default_shots = 300\nestimator.options.simulator.seed_simulator = 7\n\n# evs tiene forma (4, 13): filas ZZ, ZX, XZ, XX; columnas, los 13 ángulos.\nevs_chsh = estimator.run([(isa, ops, [[t] for t in angulos])]).result()[0].data.evs\n\n\ndef valor_S(evs):\n    return np.zeros(evs.shape[1])   # ✏️ combina las cuatro filas con los signos de S\n\n\nS = np.asarray(valor_S(evs_chsh))\nprint(f\"|S| máximo: {np.abs(S).max():.2f}\")",
+     "cases": [
+      "S = ZZ − ZX + XZ + XX en cada columna"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

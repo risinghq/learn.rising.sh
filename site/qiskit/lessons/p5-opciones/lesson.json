@@ -426,46 +426,80 @@
     "5.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso, sin cuenta. [[n1]]Primero fijas la misma precisión de cuatro formas distintas. [[n2]]Después corriges un error típico: cambiar las opciones del objeto equivocado. [[n3]]Y por último escribes una función que crea un Estimator crudo o protegido, y comparas el valor de Z Z que da cada uno. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Todo corre con un procesador falso, sin cuenta. [[n1]]Primero fijas la misma precisión de cuatro formas distintas. [[n2]]Después corriges un error típico: cambiar las opciones del objeto equivocado. [[n3]]Y por último escribes una función que crea un Estimator crudo o protegido.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-opciones.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Fija `default_precision = 0.02` con clase, diccionario, atributo y `update`."
-      },
-      {
-       "level": 2,
-       "text": "Arregla el código para que cambiar los disparos afecte al `Estimator` ya creado."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `crear_estimator(\"crudo\" | \"protegido\")` y compara su $\\langle ZZ\\rangle$."
-      }
+     "type": "exercise",
+     "exercise": "p5-opciones/cuatro-formas",
+     "prompt": "Fija `default_precision = 0.02` en `por_atributo` asignando un atributo de las opciones y en `por_update` con su método `update`. Antes de ejecutar, apuesta en `prediccion` cuánto vale `default_precision` en `sin_tocar`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Las opciones de un `Estimator` se pueden cambiar después de crearlo, igual que se pasan al crearlo.",
+      "Por atributo: `estimator.options.default_precision = ...`; por método: `estimator.options.update(...)` con argumentos con nombre.",
+      "Para la apuesta, imprime el valor sin tocar nada: el servicio tiene un valor por defecto."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\nfrom qiskit_ibm_runtime.options_models import EstimatorOptions\n\nbackend = FakeManilaV2()\n\npor_clase = Estimator(mode=backend, options=EstimatorOptions(default_precision=0.02))\npor_dict = Estimator(mode=backend, options={\"default_precision\": 0.02})\n\n# ✏️ fija default_precision = 0.02 asignando un atributo de las opciones\npor_atributo = Estimator(mode=backend)\n\n# ✏️ fija default_precision = 0.02 con el método update de las opciones\npor_update = Estimator(mode=backend)\n\nsin_tocar = Estimator(mode=backend)\n\nfor nombre, e in [(\"clase\", por_clase), (\"dict\", por_dict), (\"atributo\", por_atributo), (\"update\", por_update)]:\n    print(nombre, e.options.default_precision)\n\n# ✏️ apuesta: ¿cuánto vale default_precision en `sin_tocar`?\nprediccion = None",
+     "cases": [
+      "las cuatro formas dejan `default_precision` en 0,02",
+      "tu apuesta coincide con el valor por defecto"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-opciones/copia-de-opciones",
+     "prompt": "`est` debe usar 5000 disparos, pero `opts` se copia al crear el `Estimator` y cambiarlo después no tiene efecto. Arregla el código para que `est` use 5000 disparos.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "`Estimator` copia el diccionario de opciones al crearse: el diccionario `opts` ya no está conectado con `est`.",
+      "El cambio tiene que hacerse sobre las opciones del propio `est`.",
+      "Asigna `est.options.default_shots = 5000`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nisa_bell = pm.run(bell)\nzz = SparsePauliOp(\"ZZ\").apply_layout(isa_bell.layout)\n\n\ndef medir_zz(estimator):\n    \"\"\"Devuelve el error estándar de ⟨ZZ⟩ del Bell con el Estimator que recibe.\"\"\"\n    estimator.options.simulator.seed_simulator = 7\n    return float(estimator.run([(isa_bell, zz)]).result()[0].data.stds)\n\n\n# `est` debe usar 5000 disparos.\nopts = {\"default_shots\": 100}\nest = Estimator(mode=backend, options=opts)\nopts[\"default_shots\"] = 5000\n\nerror = medir_zz(est)\nprint(\"default_shots =\", est.options.default_shots, \"· error de ⟨ZZ⟩ =\", round(error, 4))",
+     "cases": [
+      "`est` usa 5000 disparos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-opciones/crear-estimator",
+     "prompt": "Completa `crear_estimator(perfil)`: con `\"crudo\"` sin resiliencia, sin desacoplamiento dinámico y sin twirling; con `\"protegido\"`, desacoplamiento dinámico `XY4` y twirling de puertas y de mediciones. En ambos casos conserva `default_shots = 4000`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Cada técnica tiene su grupo de opciones: `resilience_level`, `dynamical_decoupling` y `twirling`.",
+      "Cada grupo se enciende o apaga con `enable...`; el desacoplamiento también tiene `sequence_type`.",
+      "`twirling` tiene un interruptor para las puertas (`enable_gates`) y otro para las mediciones (`enable_measure`)."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\n\n\ndef crear_estimator(perfil):\n    estimator = Estimator(mode=backend)\n    estimator.options.default_shots = 4000\n    if perfil == \"crudo\":\n        pass   # ✏️ sin mitigación ni supresión\n    else:\n        pass   # ✏️ desacoplamiento XY4 y twirling de puertas y de mediciones\n    return estimator\n\n\nfor perfil in (\"crudo\", \"protegido\"):\n    opciones = crear_estimator(perfil).options\n    print(perfil, opciones.resilience_level, opciones.dynamical_decoupling.enable, opciones.twirling.enable_gates)",
+     "cases": [
+      "el perfil `crudo` no corrige nada",
+      "el perfil `protegido` usa XY4 y twirling de puertas y de mediciones"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

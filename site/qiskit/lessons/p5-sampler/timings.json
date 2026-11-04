@@ -216,12 +216,11 @@
   ]
  },
  "mision": {
-  "dur": 38.616,
+  "dur": 28.632,
   "marks": {
-   "n1": 9.667,
-   "n2": 16.234,
-   "n3": 24.159,
-   "check": 31.604
+   "n1": 6.694,
+   "n2": 13.261,
+   "n3": 21.187
   },
   "cues": [
    [
@@ -230,23 +229,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso, sin cuenta."
+    "Todo corre con un procesador falso, sin cuenta."
    ],
    [
-    9.667,
+    6.694,
     "Primero mides qué fracción de un GHZ de cinco qubits sale con algún bit cambiado."
    ],
    [
-    16.234,
+    13.261,
     "Después corriges el envío de dos PUBs con distinto número de disparos, que la cero punto cincuenta rechaza."
    ],
    [
-    24.159,
+    21.187,
     "Y por último escribes la función que calcula esa fracción y ves cómo crece con el tamaño del GHZ."
-   ],
-   [
-    31.604,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
    ]
   ]
  },

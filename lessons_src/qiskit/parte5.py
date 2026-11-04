@@ -5,6 +5,7 @@ from lib import (
     Box,
     Circ,
     Code,
+    Exercise,
     Flow,
     G,
     Hist,
@@ -375,31 +376,50 @@ print(service.active_instance())""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; no necesita cuenta, trabaja con un archivo temporal y una clave falsa. [[n1]]Primero guardas una cuenta con save account. [[n2]]Después guardas una segunda y la marcas como predeterminada. [[n3]]Y por último escribes una función que calcula cuántos minutos libres te quedan en la ventana móvil de veintiocho días.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Trabajas con un archivo local y una clave falsa, sin cuenta. [[n1]]Primero guardas una cuenta con save account y apuestas cómo queda la clave en el archivo. [[n2]]Después arreglas el código que guarda una segunda cuenta para que sea la predeterminada. [[n3]]Y por último escribes una función que calcula cuántos minutos libres te quedan en la ventana móvil de veintiocho días.""",
             [
-                Mission(
-                    "practica/p5-cuenta.py",
-                    [
-                        (
-                            1,
-                            "Guarda una cuenta con `save_account` en un archivo temporal y lee `saved_accounts()`.",
-                        ),
-                        (2, "Guarda una segunda cuenta, `clase`, y hazla la predeterminada."),
-                        (
-                            3,
-                            "Escribe `minutos_libres(usos, hoy)` para el plan Open: 10 min por ventana móvil de 28 días.",
-                        ),
+                Exercise(
+                    "p5-cuenta/guardar-cuenta",
+                    "Guarda la cuenta `personal` con `QiskitRuntimeService.save_account` en `archivo`, con la clave `CLAVE_FALSA` y la instancia `INSTANCIA`. "
+                    'Antes de leer `guardadas`, apuesta en `prediccion` cómo queda la clave en el archivo: `"cifrada"` o `"texto plano"`.',
+                    level=1,
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "`save_account` escribe la cuenta en un archivo JSON; `saved_accounts` la lee de vuelta.",
+                        "Pasa `filename=archivo`, el nombre de la cuenta en `name`, la clave en `token` y la instancia en `instance`.",
+                        "Abre `archivo` con `Path(archivo).read_text()` y mira si puedes leer la clave.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-cuenta/cuenta-predeterminada",
+                    "El código guarda una segunda cuenta, `clase`, pero la predeterminada sigue siendo `personal`. Arréglalo para que `clase` sea la predeterminada.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "`save_account` tiene un argumento que decide si la cuenta queda como predeterminada.",
+                        "Está en la segunda llamada, la de `clase`: su valor actual la deja como secundaria.",
+                        "Cambia `set_as_default=False` por `set_as_default=True` en esa llamada.",
+                    ],
+                ),
+                Exercise(
+                    "p5-cuenta/minutos-libres",
+                    "Escribe `minutos_libres(usos, hoy, tope=10)` para el plan Open: devuelve cuántos minutos quedan en la ventana móvil de 28 días que termina en `hoy`. "
+                    "Cada uso es un par `(día, minutos)` y cuenta si ocurrió en los últimos 28 días; los usos de días futuros no cuentan.",
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Los minutos libres son el tope menos lo consumido dentro de la ventana.",
+                        "Suma los minutos de los usos con `0 <= hoy - día < 28`.",
+                        "Devuelve `tope - consumido`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -714,31 +734,51 @@ options.dynamical_decoupling.sequence_type = "XY4"''',
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre en un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el estado de Bell con sus seis observables. [[n2]]Después subes los disparos hasta que el error estándar de Z Z baje de cuatro milésimas. [[n3]]Y por último escribes una función que mide las correlaciones de un GHZ de dos a cinco qubits, los que caben en el procesador falso.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Todo corre en un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el estado de Bell con sus seis observables. [[n2]]Después subes los disparos hasta que el error estándar de Z Z baje de cuatro milésimas. [[n3]]Y por último escribes una función que mide las correlaciones de un GHZ de dos a cinco qubits, los que caben en el procesador falso.""",
             [
-                Mission(
-                    "practica/p5-hello-world.py",
-                    [
-                        (1, "Ejecuta el Bell con seis observables y lee `evs`."),
-                        (
-                            2,
-                            r"Sube `default_shots` hasta que el error estándar de $\langle ZZ\rangle$ sea menor que $0{,}004$.",
-                        ),
-                        (
-                            3,
-                            r"Escribe `correlaciones(n)` para $\langle Z_0Z_i\rangle$ de un GHZ de 2 a 5 qubits y mira cómo decae con la distancia.",
-                        ),
+                Exercise(
+                    "p5-hello-world/bell-seis-observables",
+                    "Ejecuta un PUB con `isa_bell` y los seis observables de `mapeados`, y guarda en `valores` un diccionario `{etiqueta: valor esperado}`. "
+                    "Antes de ejecutar, apuesta en `prediccion` la lista de etiquetas que valdrán casi 1.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Un PUB del Estimator es una tupla `(circuito, observables)` y `run` recibe una lista de PUBs.",
+                        "`estimator.run([(isa_bell, mapeados)]).result()[0].data.evs` trae un valor por observable, en el mismo orden.",
+                        "Empareja `etiquetas` con `evs` usando `dict(zip(etiquetas, evs))`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-hello-world/mas-disparos",
+                    r"Cambia `disparos` para que `medir_zz` devuelva un error estándar de $\langle ZZ\rangle$ menor que $0{,}004$, sin pedir más de 60 000 disparos.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "El error estándar de un promedio baja con la raíz del número de disparos.",
+                        "Con 1000 disparos el error ronda 0,012: para dividirlo por 3 necesitas al menos 9 veces más disparos.",
+                        "Prueba con 20 000 y ajusta mirando el error que imprime el código.",
+                    ],
+                ),
+                Exercise(
+                    "p5-hello-world/correlaciones-ghz",
+                    r"Completa `correlaciones(n)`: prepara un GHZ de `n` qubits (H en el qubit 0 y una cadena de CNOT) y devuelve un diccionario `{etiqueta: valor}` con $\langle Z_0Z_i\rangle$ para $i=1,\dots,n-1$. "
+                    "Cada etiqueta tiene `n` letras: una Z en los qubits 0 e `i` y una I en los demás; el qubit 0 es la letra de más a la derecha.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Un GHZ empieza con una H en el qubit 0 y cada CNOT extiende el entrelazamiento al qubit vecino.",
+                        "Con `ghz.h(0)` y `ghz.cx(i, i + 1)` para `i` de 0 a `n - 2` obtienes el GHZ.",
+                        'Arma cada etiqueta con una lista de `"I"` de longitud `n` y pon `"Z"` en las posiciones `n - 1` y `n - 1 - i`.',
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1020,34 +1060,49 @@ opts["resilience_level"] = 2""")
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso, sin cuenta. [[n1]]Primero fijas la misma precisión de cuatro formas distintas. [[n2]]Después corriges un error típico: cambiar las opciones del objeto equivocado. [[n3]]Y por último escribes una función que crea un Estimator crudo o protegido, y comparas el valor de Z Z que da cada uno.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Todo corre con un procesador falso, sin cuenta. [[n1]]Primero fijas la misma precisión de cuatro formas distintas. [[n2]]Después corriges un error típico: cambiar las opciones del objeto equivocado. [[n3]]Y por último escribes una función que crea un Estimator crudo o protegido.""",
             [
-                Mission(
-                    "practica/p5-opciones.py",
-                    [
-                        (
-                            1,
-                            "Fija `default_precision = 0.02` con clase, diccionario, atributo y `update`.",
-                        ),
-                        (
-                            2,
-                            "Arregla el código para que cambiar los disparos afecte al `Estimator` ya creado.",
-                        ),
-                        (
-                            3,
-                            'Escribe `crear_estimator("crudo" | "protegido")` y compara su $\\langle ZZ\\rangle$.',
-                        ),
+                Exercise(
+                    "p5-opciones/cuatro-formas",
+                    "Fija `default_precision = 0.02` en `por_atributo` asignando un atributo de las opciones y en `por_update` con su método `update`. "
+                    "Antes de ejecutar, apuesta en `prediccion` cuánto vale `default_precision` en `sin_tocar`.",
+                    level=1,
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Las opciones de un `Estimator` se pueden cambiar después de crearlo, igual que se pasan al crearlo.",
+                        "Por atributo: `estimator.options.default_precision = ...`; por método: `estimator.options.update(...)` con argumentos con nombre.",
+                        "Para la apuesta, imprime el valor sin tocar nada: el servicio tiene un valor por defecto.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-opciones/copia-de-opciones",
+                    "`est` debe usar 5000 disparos, pero `opts` se copia al crear el `Estimator` y cambiarlo después no tiene efecto. Arregla el código para que `est` use 5000 disparos.",
+                    level=2,
+                    kind="fix",
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "`Estimator` copia el diccionario de opciones al crearse: el diccionario `opts` ya no está conectado con `est`.",
+                        "El cambio tiene que hacerse sobre las opciones del propio `est`.",
+                        "Asigna `est.options.default_shots = 5000`.",
+                    ],
+                ),
+                Exercise(
+                    "p5-opciones/crear-estimator",
+                    'Completa `crear_estimator(perfil)`: con `"crudo"` sin resiliencia, sin desacoplamiento dinámico y sin twirling; con `"protegido"`, desacoplamiento dinámico `XY4` y twirling de puertas y de mediciones. En ambos casos conserva `default_shots = 4000`.',
+                    level=3,
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Cada técnica tiene su grupo de opciones: `resilience_level`, `dynamical_decoupling` y `twirling`.",
+                        "Cada grupo se enciende o apaga con `enable...`; el desacoplamiento también tiene `sequence_type`.",
+                        "`twirling` tiene un interruptor para las puertas (`enable_gates`) y otro para las mediciones (`enable_measure`).",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1431,31 +1486,51 @@ job = estimator.run([(chsh_isa, isa_ops, phases)])                   # evs: (4, 
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el barrido de trescientos valores esperados. [[n2]]Después cambias una sola línea para bajar el error estándar de Z Z. [[n3]]Y por último escribes la función que combina los cuatro observables del experimento CHSH en el valor S.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Todo corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el barrido de trescientos valores esperados. [[n2]]Después cambias una sola línea para bajar el error estándar de Z Z. [[n3]]Y por último escribes la función que combina los cuatro observables del experimento CHSH en el valor S.""",
             [
-                Mission(
-                    "practica/p5-estimator.py",
-                    [
-                        (
-                            1,
-                            "Ejecuta un barrido de 100 juegos de parámetros con 3 observables y lee la forma de `evs`.",
-                        ),
-                        (
-                            2,
-                            r"Baja el error estándar de $\langle ZZ\rangle$ de $0{,}008$ cambiando una sola línea.",
-                        ),
-                        (3, r"Escribe `valor_S(evs)` para CHSH y comprueba que $|S|>2$."),
+                Exercise(
+                    "p5-estimator/barrido",
+                    "Ejecuta un único PUB `(isa, mapeados, parametros)`: 3 observables y 100 juegos de parámetros. Guarda sus valores esperados en `evs`. "
+                    "Antes de ejecutar, apuesta en `prediccion` la forma de `evs` como tupla.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Los observables y los parámetros se combinan por difusión (*broadcasting*): el resultado tiene la forma de la difusión de sus dos formas.",
+                        "`mapeados` tiene forma (3, 1) y `parametros`, (100, 2): cada juego de parámetros ocupa el último eje y los observables, el primero.",
+                        "`estimator.run([(isa, mapeados, parametros)]).result()[0].data.evs` devuelve el arreglo; su forma es (3, 100).",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-estimator/precision",
+                    r"Cambia una sola línea para que el error estándar de $\langle ZZ\rangle$ (`error_zz`) baje de $0{,}008$ sin pedir más precisión de la necesaria.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Un error estándar menor pide una precisión objetivo menor: el Estimator ajusta los disparos para alcanzarla.",
+                        "La precisión se fija en dos sitios: en las opciones y como argumento de `run`; el argumento de `run` manda sobre las opciones.",
+                        "Baja el `precision=0.05` de la llamada a `run` a `precision=0.01`.",
+                    ],
+                ),
+                Exercise(
+                    "p5-estimator/valor-s",
+                    r"Escribe `valor_S(evs)` para CHSH: recibe una matriz con filas $\langle ZZ\rangle$, $\langle ZX\rangle$, $\langle XZ\rangle$, $\langle XX\rangle$ y devuelve $S=ZZ-ZX+XZ+XX$ para cada columna. "
+                    r"Con `evs_chsh` el máximo de $|S|$ debe pasar de 2, la cota clásica.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Cada columna es un ángulo; las cuatro filas son los cuatro valores esperados de esa columna.",
+                        "Combina las filas con sus signos: una suma y una resta de filas, sin bucles.",
+                        "Devuelve `evs[0] - evs[1] + evs[2] + evs[3]`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1781,31 +1856,53 @@ with Batch(backend=backend) as batch:                      # lote
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso, sin cuenta. [[n1]]Primero mides qué fracción de un GHZ de cinco qubits sale con algún bit cambiado. [[n2]]Después corriges el envío de dos PUBs con distinto número de disparos, que la cero punto cincuenta rechaza. [[n3]]Y por último escribes la función que calcula esa fracción y ves cómo crece con el tamaño del GHZ.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Todo corre con un procesador falso, sin cuenta. [[n1]]Primero mides qué fracción de un GHZ de cinco qubits sale con algún bit cambiado. [[n2]]Después corriges el envío de dos PUBs con distinto número de disparos, que la cero punto cincuenta rechaza. [[n3]]Y por último escribes la función que calcula esa fracción y ves cómo crece con el tamaño del GHZ.""",
             [
-                Mission(
-                    "practica/p5-sampler.py",
-                    [
-                        (
-                            1,
-                            "Ejecuta un GHZ de 5 qubits y calcula la fracción de disparos con algún bit cambiado.",
-                        ),
-                        (2, "Reparte dos PUBs con 64 y 128 disparos en dos trabajos."),
-                        (
-                            3,
-                            "Escribe `fraccion_errores(conteos)` y grafícala para GHZ de 2 a 5 qubits.",
-                        ),
+                Exercise(
+                    "p5-sampler/ghz5-ruido",
+                    "Cuenta en `ideales` los disparos que dieron `00000` o `11111`; `fraccion_ruido` es la fracción que no. "
+                    "Antes de mirar el resultado, apuesta en `prediccion` cuál de estas fracciones se acerca más: 0.01, 0.2 o 0.6.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Idealmente un GHZ solo da todo ceros o todo unos; lo demás es ruido.",
+                        "`conteos` es un diccionario `{cadena de bits: veces}`; `get` con 0 por defecto evita errores si una cadena no aparece.",
+                        'Suma `conteos.get("00000", 0)` y `conteos.get("11111", 0)`.',
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-sampler/trabajos-por-disparos",
+                    "Con el `Sampler`, todos los PUBs de un trabajo deben tener el mismo número de disparos, y el código que pide 64 para uno y 128 para otro en el mismo `run` falla. "
+                    "Arréglalo conservando los dos números: un trabajo por cada uno.",
+                    level=2,
+                    kind="fix",
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Un trabajo es una llamada a `run`: los PUBs de la misma llamada comparten disparos.",
+                        "Si cada número de disparos tiene su propia llamada a `run`, ninguna mezcla valores.",
+                        "Recorre `(64, 128)` y llama a `sampler.run([(isa, None, s)])` en cada vuelta.",
+                    ],
+                ),
+                Exercise(
+                    "p5-sampler/fraccion-errores",
+                    "Escribe `fraccion_errores(conteos)`: la fracción de disparos que no es todo ceros ni todo unos. Las cadenas tienen todas la misma longitud. "
+                    "El código la aplica a un GHZ de 2 y uno de 5 qubits: ¿crece el ruido con el tamaño?",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Cuenta los disparos que sí son ideales y réstalos del total, en proporción.",
+                        "Una cadena es ideal si todos sus caracteres son iguales: `len(set(cadena)) == 1`.",
+                        "Devuelve `1 - ideales / total`, con el total como la suma de los valores de `conteos`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -2172,31 +2269,50 @@ program = QuantumProgram(shots=1024, meas_level="both")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero ejecutas un CircuitItem y lees la forma de sus resultados. [[n2]]Después pasas de dos a veinte aleatorizaciones con el parámetro shape. [[n3]]Y por último escribes la función que deshace el twirling de las mediciones con un XOR, y compruebas que el GHZ vuelve a dar solo cero cero cero y uno uno uno.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Todo corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero ejecutas un CircuitItem y lees la forma de sus resultados. [[n2]]Después pasas de dos a veinte aleatorizaciones con el parámetro shape. [[n3]]Y por último escribes la función que deshace el twirling de las mediciones con un XOR, y compruebas que el GHZ vuelve a dar casi solo cero cero cero y uno uno uno.""",
             [
-                Mission(
-                    "practica/p5-executor.py",
-                    [
-                        (1, 'Ejecuta un `CircuitItem` y lee la forma de `result[0]["meas"]`.'),
-                        (
-                            2,
-                            "Cambia `shape` de `(2, 10)` a `(20, 10)` y comprueba la forma de salida.",
-                        ),
-                        (
-                            3,
-                            "Escribe `deshacer(item)` con un XOR y mide la fracción de disparos en `000` o `111`.",
-                        ),
+                Exercise(
+                    "p5-executor/circuit-item",
+                    "El `CircuitItem` necesita 10 configuraciones de los 2 parámetros del circuito: haz que `argumentos` sea una matriz aleatoria de esa forma. "
+                    'Antes de ejecutar, apuesta en `prediccion` la forma de `resultado[0]["meas"]` como tupla: primero los ejes de barrido, luego los disparos y los bits.',
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "La forma de los argumentos de un `CircuitItem` es (configuraciones, parámetros); el resultado conserva las configuraciones.",
+                        "El resultado añade a la derecha los ejes de disparos y de bits medidos: `DISPAROS` y 3.",
+                        "`rng.random((10, 2))` crea los argumentos; la forma de `meas` es (10, 256, 3).",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-executor/aleatorizaciones",
+                    "El `SamplexItem` pide `shape=(2, 10)`: 2 aleatorizaciones de cada una de las 10 configuraciones. Cámbialo para pedir 20 aleatorizaciones.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "El primer eje de `shape` cuenta las aleatorizaciones y el segundo, las configuraciones de parámetros.",
+                        "Deja las 10 configuraciones como están y cambia solo el eje de las aleatorizaciones.",
+                        "Escribe `shape=(20, 10)`.",
+                    ],
+                ),
+                Exercise(
+                    "p5-executor/deshacer",
+                    'Escribe `deshacer(item)`: Executor devuelve los bits tal como salieron, y el twirling de mediciones invirtió algunos al azar y anotó cuáles en `item["measurement_flips.meas"]`. Devuelve las mediciones corregidas, con la misma forma que `item["meas"]`.',
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Un bit invertido se corrige invirtiéndolo otra vez: el XOR con la marca de inversión.",
+                        'Las marcas están en `item["measurement_flips.meas"]` y tienen la forma de `item["meas"]`.',
+                        'Devuelve `item["meas"] ^ item["measurement_flips.meas"]`.',
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -2482,34 +2598,51 @@ requests.delete(f"{base}/sessions/{session_id}/close", headers=headers)""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; prepara los cuerpos de los trabajos y lee resultados, todo en tu equipo, sin enviar nada. [[n1]]Primero armas el cuerpo de un trabajo de Sampler con un circuito en OpenQASM tres. [[n2]]Después corriges la lectura de los disparos en hexadecimal para que los conteos coincidan con get counts. [[n3]]Y por último escribes la función que arma el cuerpo de un trabajo de Estimator, con su observable y sus opciones.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora te toca a ti. Preparas los cuerpos de los trabajos y lees resultados, todo en tu equipo, sin enviar nada. [[n1]]Primero armas el cuerpo de un trabajo de Sampler con un circuito en OpenQASM tres. [[n2]]Después corriges la lectura de los disparos en hexadecimal para que los conteos coincidan con get counts. [[n3]]Y por último escribes la función que arma el cuerpo de un trabajo de Estimator, con su observable y sus opciones.""",
             [
-                Mission(
-                    "practica/p5-rest.py",
-                    [
-                        (
-                            1,
-                            "Arma el cuerpo JSON de un trabajo de Sampler con el circuito en OpenQASM 3.",
-                        ),
-                        (
-                            2,
-                            "Corrige la decodificación de `samples` para que los conteos coincidan con `get_counts()`.",
-                        ),
-                        (
-                            3,
-                            "Escribe `cuerpo_estimator(isa, observable, opciones)` y comprueba que es JSON válido.",
-                        ),
+                Exercise(
+                    "p5-rest/cuerpo-sampler",
+                    "El PUB de un trabajo de Sampler es `[circuito, parámetros, disparos]`. Este circuito no tiene parámetros: cambia `parametros` por el valor que se envía en ese caso. "
+                    'Antes de ejecutar, apuesta en `prediccion` cuál es, como texto: `"None"`, `"{}"` o `"[]"`.',
+                    level=1,
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "El cuerpo viaja como JSON: imprime `json.dumps` del valor para ver cómo se envía cada candidato.",
+                        "El valor que significa «ninguno» en Python se convierte en `null` en JSON.",
+                        'Usa `parametros = None` y `prediccion = "None"`.',
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p5-rest/decodificar-samples",
+                    "Los resultados de Sampler por REST llegan como números hexadecimales, uno por disparo, como `'0x1'`. `decodificar` los convierte a cadenas de bits, pero `'0x1'` sale como `'1'` y debería ser `'01'`. "
+                    "Arréglala para que rellene con ceros hasta `n_bits` y los conteos coincidan con `get_counts()`.",
+                    level=2,
+                    kind="fix",
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        '`format(int(h, 16), "b")` escribe el número sin ceros a la izquierda.',
+                        'El formato binario acepta un ancho mínimo con relleno de ceros: `"0"`, el ancho y `"b"`.',
+                        'Usa `f"0{n_bits}b"` como formato.',
+                    ],
+                ),
+                Exercise(
+                    "p5-rest/cuerpo-estimator",
+                    'Escribe `cuerpo_estimator(isa, observable, opciones)`: devuelve el diccionario del trabajo con `program_id` (`"estimator"`), `backend` (`"ibm_fez"`) y `params` con la lista `pubs` de un PUB `[qasm, observable, None]` y las `options`. '
+                    "Dos trampas: el observable pasa por `apply_layout(isa.layout)`, porque el circuito transpilado tiene los cinco qubits del procesador, y en JSON es un diccionario `{cadena de Pauli: coeficiente}` con coeficientes `float`, no complejos.",
+                    level=3,
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "El observable de un PUB se envía como un diccionario de cadenas de Pauli a coeficientes; el circuito, como texto OpenQASM 3.",
+                        "`observable.apply_layout(isa.layout)` da las cadenas de cinco letras; `.paulis.to_labels()` y `.coeffs.real.tolist()` dan las etiquetas y los números.",
+                        "Une etiquetas y coeficientes con `dict(zip(...))` y el circuito con `qiskit.qasm3.dumps(isa)`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "proyecto",

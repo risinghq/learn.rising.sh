@@ -194,12 +194,11 @@
   ]
  },
  "mision": {
-  "dur": 41.568,
+  "dur": 31.32,
   "marks": {
-   "n1": 12.653,
-   "n2": 19.064,
-   "n3": 26.48,
-   "check": 34.548
+   "n1": 9.426,
+   "n2": 15.837,
+   "n3": 23.253
   },
   "cues": [
    [
@@ -208,23 +207,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo; prepara los cuerpos de los trabajos y lee resultados, todo en tu equipo, sin enviar nada."
+    "Preparas los cuerpos de los trabajos y lees resultados, todo en tu equipo, sin enviar nada."
    ],
    [
-    12.653,
+    9.426,
     "Primero armas el cuerpo de un trabajo de Sampler con un circuito en OpenQASM tres."
    ],
    [
-    19.064,
+    15.837,
     "Después corriges la lectura de los disparos en hexadecimal para que los conteos coincidan con get counts."
    ],
    [
-    26.48,
+    23.253,
     "Y por último escribes la función que arma el cuerpo de un trabajo de Estimator, con su observable y sus opciones."
-   ],
-   [
-    34.548,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
    ]
   ]
  },

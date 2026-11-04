@@ -336,12 +336,11 @@
   ]
  },
  "mision": {
-  "dur": 36.552,
+  "dur": 26.592,
   "marks": {
-   "n1": 10.714,
-   "n2": 15.625,
-   "n3": 21.258,
-   "check": 29.537
+   "n1": 7.756,
+   "n2": 12.667,
+   "n3": 18.3
   },
   "cues": [
    [
@@ -350,23 +349,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso de cinco qubits, sin cuenta."
+    "Todo corre con un procesador falso de cinco qubits, sin cuenta."
    ],
    [
-    10.714,
+    7.756,
     "Primero reproduces el barrido de trescientos valores esperados."
    ],
    [
-    15.625,
+    12.667,
     "Después cambias una sola línea para bajar el error estándar de Z Z."
    ],
    [
-    21.258,
+    18.3,
     "Y por último escribes la función que combina los cuatro observables del experimento CHSH en el valor S."
-   ],
-   [
-    29.537,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
    ]
   ]
  },

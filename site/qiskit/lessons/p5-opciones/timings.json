@@ -226,12 +226,11 @@
   ]
  },
  "mision": {
-  "dur": 36.792,
+  "dur": 23.328,
   "marks": {
-   "n1": 9.667,
-   "n2": 14.436,
-   "n3": 20.48,
-   "check": 29.778
+   "n1": 6.694,
+   "n2": 11.464,
+   "n3": 17.507
   },
   "cues": [
    [
@@ -240,23 +239,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso, sin cuenta."
+    "Todo corre con un procesador falso, sin cuenta."
    ],
    [
-    9.667,
+    6.694,
     "Primero fijas la misma precisión de cuatro formas distintas."
    ],
    [
-    14.436,
+    11.464,
     "Después corriges un error típico: cambiar las opciones del objeto equivocado."
    ],
    [
-    20.48,
-    "Y por último escribes una función que crea un Estimator crudo o protegido, y comparas el valor de Z Z que da cada uno."
-   ],
-   [
-    29.778,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
+    17.507,
+    "Y por último escribes una función que crea un Estimator crudo o protegido."
    ]
   ]
  },

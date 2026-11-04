@@ -490,46 +490,80 @@
     "5.5",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso, sin cuenta. [[n1]]Primero mides qué fracción de un GHZ de cinco qubits sale con algún bit cambiado. [[n2]]Después corriges el envío de dos PUBs con distinto número de disparos, que la cero punto cincuenta rechaza. [[n3]]Y por último escribes la función que calcula esa fracción y ves cómo crece con el tamaño del GHZ. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Todo corre con un procesador falso, sin cuenta. [[n1]]Primero mides qué fracción de un GHZ de cinco qubits sale con algún bit cambiado. [[n2]]Después corriges el envío de dos PUBs con distinto número de disparos, que la cero punto cincuenta rechaza. [[n3]]Y por último escribes la función que calcula esa fracción y ves cómo crece con el tamaño del GHZ.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-sampler.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta un GHZ de 5 qubits y calcula la fracción de disparos con algún bit cambiado."
-      },
-      {
-       "level": 2,
-       "text": "Reparte dos PUBs con 64 y 128 disparos en dos trabajos."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `fraccion_errores(conteos)` y grafícala para GHZ de 2 a 5 qubits."
-      }
+     "type": "exercise",
+     "exercise": "p5-sampler/ghz5-ruido",
+     "prompt": "Cuenta en `ideales` los disparos que dieron `00000` o `11111`; `fraccion_ruido` es la fracción que no. Antes de mirar el resultado, apuesta en `prediccion` cuál de estas fracciones se acerca más: 0.01, 0.2 o 0.6.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Idealmente un GHZ solo da todo ceros o todo unos; lo demás es ruido.",
+      "`conteos` es un diccionario `{cadena de bits: veces}`; `get` con 0 por defecto evita errores si una cadena no aparece.",
+      "Suma `conteos.get(\"00000\", 0)` y `conteos.get(\"11111\", 0)`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nghz = QuantumCircuit(5)\nghz.h(0)\nfor i in range(4):\n    ghz.cx(i, i + 1)\nghz.measure_all()\nisa = pm.run(ghz)\n\nsampler = Sampler(mode=backend)\nsampler.options.default_shots = 4000\nsampler.options.simulator.seed_simulator = 11\nconteos = sampler.run([isa]).result()[0].data.meas.get_counts()\n\n# ✏️ cuenta los disparos que dieron 00000 o 11111\nideales = 0\nfraccion_ruido = 1 - ideales / sum(conteos.values())\nprint(f\"{fraccion_ruido:.1%} de los disparos tiene algún bit cambiado\")\n\n# ✏️ apuesta antes de mirar la línea de arriba: ¿1 %, 20 % o 60 %?\nprediccion = 0.0",
+     "cases": [
+      "`ideales` cuenta los disparos 00000 y 11111",
+      "tu apuesta es la opción más cercana a la fracción medida"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-sampler/trabajos-por-disparos",
+     "prompt": "Con el `Sampler`, todos los PUBs de un trabajo deben tener el mismo número de disparos, y el código que pide 64 para uno y 128 para otro en el mismo `run` falla. Arréglalo conservando los dos números: un trabajo por cada uno.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Un trabajo es una llamada a `run`: los PUBs de la misma llamada comparten disparos.",
+      "Si cada número de disparos tiene su propia llamada a `run`, ninguna mezcla valores.",
+      "Recorre `(64, 128)` y llama a `sampler.run([(isa, None, s)])` en cada vuelta."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nbell.measure_all()\nisa = pm.run(bell)\n\nsampler = Sampler(mode=backend)\nsampler.options.default_shots = 4000\nsampler.options.simulator.seed_simulator = 11\n\ntry:\n    resultado = sampler.run([(isa, None, 64), (isa, None, 128)]).result()\n    disparos = [pub.data.meas.num_shots for pub in resultado]\nexcept Exception as error:\n    disparos = []\n    print(\"Error:\", error)\nprint(disparos)",
+     "cases": [
+      "cada PUB conserva su número de disparos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-sampler/fraccion-errores",
+     "prompt": "Escribe `fraccion_errores(conteos)`: la fracción de disparos que no es todo ceros ni todo unos. Las cadenas tienen todas la misma longitud. El código la aplica a un GHZ de 2 y uno de 5 qubits: ¿crece el ruido con el tamaño?",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Cuenta los disparos que sí son ideales y réstalos del total, en proporción.",
+      "Una cadena es ideal si todos sus caracteres son iguales: `len(set(cadena)) == 1`.",
+      "Devuelve `1 - ideales / total`, con el total como la suma de los valores de `conteos`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nbackend = FakeManilaV2()\npm = generate_preset_pass_manager(backend=backend, optimization_level=1)\n\n\ndef fraccion_errores(conteos):\n    \"\"\"Fracción de disparos que no es todo ceros ni todo unos.\"\"\"\n    return 0.0   # ✏️ disparos que no son todo 0 ni todo 1, entre el total\n\n\ndef ghz_conteos(n):\n    ghz = QuantumCircuit(n)\n    ghz.h(0)\n    for i in range(n - 1):\n        ghz.cx(i, i + 1)\n    ghz.measure_all()\n    sampler = Sampler(mode=backend)\n    sampler.options.default_shots = 4000\n    sampler.options.simulator.seed_simulator = 11\n    return sampler.run([pm.run(ghz)]).result()[0].data.meas.get_counts()\n\n\nerror_2 = fraccion_errores(ghz_conteos(2))\nerror_5 = fraccion_errores(ghz_conteos(5))\nprint(f\"2 qubits: {error_2:.1%}, 5 qubits: {error_5:.1%}\")",
+     "cases": [
+      "{'000': 50, '111': 30, '001': 15, '110': 5} da 0.2",
+      "un conteo limpio da 0"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

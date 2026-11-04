@@ -638,46 +638,79 @@
     "5.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; no necesita cuenta, trabaja con un archivo temporal y una clave falsa. [[n1]]Primero guardas una cuenta con save account. [[n2]]Después guardas una segunda y la marcas como predeterminada. [[n3]]Y por último escribes una función que calcula cuántos minutos libres te quedan en la ventana móvil de veintiocho días. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Trabajas con un archivo local y una clave falsa, sin cuenta. [[n1]]Primero guardas una cuenta con save account y apuestas cómo queda la clave en el archivo. [[n2]]Después arreglas el código que guarda una segunda cuenta para que sea la predeterminada. [[n3]]Y por último escribes una función que calcula cuántos minutos libres te quedan en la ventana móvil de veintiocho días.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-cuenta.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Guarda una cuenta con `save_account` en un archivo temporal y lee `saved_accounts()`."
-      },
-      {
-       "level": 2,
-       "text": "Guarda una segunda cuenta, `clase`, y hazla la predeterminada."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `minutos_libres(usos, hoy)` para el plan Open: 10 min por ventana móvil de 28 días."
-      }
+     "type": "exercise",
+     "exercise": "p5-cuenta/guardar-cuenta",
+     "prompt": "Guarda la cuenta `personal` con `QiskitRuntimeService.save_account` en `archivo`, con la clave `CLAVE_FALSA` y la instancia `INSTANCIA`. Antes de leer `guardadas`, apuesta en `prediccion` cómo queda la clave en el archivo: `\"cifrada\"` o `\"texto plano\"`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "`save_account` escribe la cuenta en un archivo JSON; `saved_accounts` la lee de vuelta.",
+      "Pasa `filename=archivo`, el nombre de la cuenta en `name`, la clave en `token` y la instancia en `instance`.",
+      "Abre `archivo` con `Path(archivo).read_text()` y mira si puedes leer la clave."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from pathlib import Path\n\nfrom qiskit_ibm_runtime import QiskitRuntimeService\n\n# Credenciales de práctica: un archivo en esta carpeta y una clave falsa de 44 caracteres.\narchivo = str(Path.cwd() / \"qiskit-ibm.json\")\nCLAVE_FALSA = \"k\" * 44\nINSTANCIA = \"crn:v1:bluemix:public:quantum-computing:us-east:a/practica:curso::\"\n\n# ✏️ guarda aquí la cuenta \"personal\" con QiskitRuntimeService.save_account\n\nguardadas = QiskitRuntimeService.saved_accounts(filename=archivo)\nprint(sorted(guardadas))\n\n# ✏️ apuesta: ¿la clave queda \"cifrada\" o en \"texto plano\"?\nprediccion = \"\"",
+     "cases": [
+      "la cuenta `personal` queda guardada con su instancia",
+      "tu apuesta coincide con lo que guarda el archivo"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-cuenta/cuenta-predeterminada",
+     "prompt": "El código guarda una segunda cuenta, `clase`, pero la predeterminada sigue siendo `personal`. Arréglalo para que `clase` sea la predeterminada.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "`save_account` tiene un argumento que decide si la cuenta queda como predeterminada.",
+      "Está en la segunda llamada, la de `clase`: su valor actual la deja como secundaria.",
+      "Cambia `set_as_default=False` por `set_as_default=True` en esa llamada."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "import json\nfrom pathlib import Path\n\nfrom qiskit_ibm_runtime import QiskitRuntimeService\n\narchivo = str(Path.cwd() / \"qiskit-ibm.json\")\nCLAVE_FALSA = \"k\" * 44\n\nQiskitRuntimeService.save_account(\n    token=CLAVE_FALSA, name=\"personal\", set_as_default=True, overwrite=True, filename=archivo\n)\n# Esta segunda cuenta debería ser la predeterminada de QiskitRuntimeService().\nQiskitRuntimeService.save_account(\n    token=CLAVE_FALSA, name=\"clase\", set_as_default=False, overwrite=True, filename=archivo\n)\n\ncontenido = json.loads(Path(archivo).read_text())\npredeterminadas = [nombre for nombre, cuenta in contenido.items() if cuenta.get(\"is_default_account\")]\nprint(\"Predeterminadas:\", predeterminadas)",
+     "cases": [
+      "solo `clase` es la predeterminada"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-cuenta/minutos-libres",
+     "prompt": "Escribe `minutos_libres(usos, hoy, tope=10)` para el plan Open: devuelve cuántos minutos quedan en la ventana móvil de 28 días que termina en `hoy`. Cada uso es un par `(día, minutos)` y cuenta si ocurrió en los últimos 28 días; los usos de días futuros no cuentan.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Los minutos libres son el tope menos lo consumido dentro de la ventana.",
+      "Suma los minutos de los usos con `0 <= hoy - día < 28`.",
+      "Devuelve `tope - consumido`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "def minutos_libres(usos, hoy, tope=10):\n    consumido = 0   # ✏️ suma los minutos de los usos dentro de la ventana de 28 días\n    return tope - consumido\n\n\nprint(minutos_libres([(0, 3), (10, 2), (30, 1)], 31))",
+     "cases": [
+      "la ventana móvil de 28 días"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

@@ -663,46 +663,78 @@
     "5.6",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo; corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero ejecutas un CircuitItem y lees la forma de sus resultados. [[n2]]Después pasas de dos a veinte aleatorizaciones con el parámetro shape. [[n3]]Y por último escribes la función que deshace el twirling de las mediciones con un XOR, y compruebas que el GHZ vuelve a dar solo cero cero cero y uno uno uno. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora te toca a ti. Todo corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero ejecutas un CircuitItem y lees la forma de sus resultados. [[n2]]Después pasas de dos a veinte aleatorizaciones con el parámetro shape. [[n3]]Y por último escribes la función que deshace el twirling de las mediciones con un XOR, y compruebas que el GHZ vuelve a dar casi solo cero cero cero y uno uno uno.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p5-executor.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta un `CircuitItem` y lee la forma de `result[0][\"meas\"]`."
-      },
-      {
-       "level": 2,
-       "text": "Cambia `shape` de `(2, 10)` a `(20, 10)` y comprueba la forma de salida."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `deshacer(item)` con un XOR y mide la fracción de disparos en `000` o `111`."
-      }
+     "type": "exercise",
+     "exercise": "p5-executor/circuit-item",
+     "prompt": "El `CircuitItem` necesita 10 configuraciones de los 2 parámetros del circuito: haz que `argumentos` sea una matriz aleatoria de esa forma. Antes de ejecutar, apuesta en `prediccion` la forma de `resultado[0][\"meas\"]` como tupla: primero los ejes de barrido, luego los disparos y los bits.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "La forma de los argumentos de un `CircuitItem` es (configuraciones, parámetros); el resultado conserva las configuraciones.",
+      "El resultado añade a la derecha los ejes de disparos y de bits medidos: `DISPAROS` y 3.",
+      "`rng.random((10, 2))` crea los argumentos; la forma de `meas` es (10, 256, 3)."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit.circuit import Parameter, QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import Executor\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\nfrom qiskit_ibm_runtime.quantum_program import QuantumProgram\nfrom samplomatic import build\nfrom samplomatic.transpiler import generate_boxing_pass_manager\n\nbackend = FakeManilaV2()\nDISPAROS = 256\nrng = np.random.default_rng(3)\n\n# GHZ de 3 qubits con dos parámetros: ideal, solo salen 000 y 111.\ncircuito = QuantumCircuit(3)\ncircuito.h(0)\ncircuito.cx(0, 1)\ncircuito.cx(1, 2)\ncircuito.rz(Parameter(\"theta\"), 0)\ncircuito.rz(Parameter(\"phi\"), 1)\ncircuito.measure_all()\n\npm = generate_preset_pass_manager(backend=backend, optimization_level=0)\n\n# ✏️ 10 configuraciones de los 2 parámetros: una matriz de números aleatorios\nargumentos = rng.random((1, 2))\n\nprograma = QuantumProgram(shots=DISPAROS)\nprograma.append_circuit_item(pm.run(circuito), circuit_arguments=argumentos)\nresultado = Executor(mode=backend).run(programa).result()\nforma = resultado[0][\"meas\"].shape\nprint(\"forma de meas:\", forma)\n\n# ✏️ apuesta: ¿qué forma tiene `forma`? Los ejes de barrido, luego disparos y bits.\nprediccion = ()",
+     "cases": [
+      "`meas` tiene 10 configuraciones × 256 disparos × 3 bits",
+      "tu apuesta coincide con `forma`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-executor/aleatorizaciones",
+     "prompt": "El `SamplexItem` pide `shape=(2, 10)`: 2 aleatorizaciones de cada una de las 10 configuraciones. Cámbialo para pedir 20 aleatorizaciones.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "El primer eje de `shape` cuenta las aleatorizaciones y el segundo, las configuraciones de parámetros.",
+      "Deja las 10 configuraciones como están y cambia solo el eje de las aleatorizaciones.",
+      "Escribe `shape=(20, 10)`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit.circuit import Parameter, QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import Executor\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\nfrom qiskit_ibm_runtime.quantum_program import QuantumProgram\nfrom samplomatic import build\nfrom samplomatic.transpiler import generate_boxing_pass_manager\n\nbackend = FakeManilaV2()\nDISPAROS = 256\nrng = np.random.default_rng(3)\n\n# GHZ de 3 qubits con dos parámetros: ideal, solo salen 000 y 111.\ncircuito = QuantumCircuit(3)\ncircuito.h(0)\ncircuito.cx(0, 1)\ncircuito.cx(1, 2)\ncircuito.rz(Parameter(\"theta\"), 0)\ncircuito.rz(Parameter(\"phi\"), 1)\ncircuito.measure_all()\n\npm = generate_preset_pass_manager(backend=backend, optimization_level=0)\n\npm_cajas = generate_preset_pass_manager(backend=backend, optimization_level=0)\npm_cajas.post_scheduling = generate_boxing_pass_manager(enable_gates=True, enable_measures=True)\nplantilla, samplex = build(pm_cajas.run(circuito))\n\nprograma = QuantumProgram(shots=DISPAROS)\nprograma.append_samplex_item(\n    plantilla,\n    samplex=samplex,\n    samplex_arguments={\"parameter_values\": rng.random((10, 2))},\n    shape=(2, 10),   # ✏️ (aleatorizaciones, configuraciones): pide 20 aleatorizaciones\n)\nitem = Executor(mode=backend).run(programa).result()[0]\nforma_twirl = item[\"meas\"].shape\nprint(\"forma de meas:\", forma_twirl)",
+     "cases": [
+      "`meas` tiene 20 aleatorizaciones × 10 configuraciones × 256 disparos × 3 bits"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-executor/deshacer",
+     "prompt": "Escribe `deshacer(item)`: Executor devuelve los bits tal como salieron, y el twirling de mediciones invirtió algunos al azar y anotó cuáles en `item[\"measurement_flips.meas\"]`. Devuelve las mediciones corregidas, con la misma forma que `item[\"meas\"]`.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Un bit invertido se corrige invirtiéndolo otra vez: el XOR con la marca de inversión.",
+      "Las marcas están en `item[\"measurement_flips.meas\"]` y tienen la forma de `item[\"meas\"]`.",
+      "Devuelve `item[\"meas\"] ^ item[\"measurement_flips.meas\"]`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit.circuit import Parameter, QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import Executor\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\nfrom qiskit_ibm_runtime.quantum_program import QuantumProgram\nfrom samplomatic import build\nfrom samplomatic.transpiler import generate_boxing_pass_manager\n\nbackend = FakeManilaV2()\nDISPAROS = 256\nrng = np.random.default_rng(3)\n\n# GHZ de 3 qubits con dos parámetros: ideal, solo salen 000 y 111.\ncircuito = QuantumCircuit(3)\ncircuito.h(0)\ncircuito.cx(0, 1)\ncircuito.cx(1, 2)\ncircuito.rz(Parameter(\"theta\"), 0)\ncircuito.rz(Parameter(\"phi\"), 1)\ncircuito.measure_all()\n\npm = generate_preset_pass_manager(backend=backend, optimization_level=0)\n\npm_cajas = generate_preset_pass_manager(backend=backend, optimization_level=0)\npm_cajas.post_scheduling = generate_boxing_pass_manager(enable_gates=True, enable_measures=True)\nplantilla, samplex = build(pm_cajas.run(circuito))\n\nprograma = QuantumProgram(shots=DISPAROS)\nprograma.append_samplex_item(\n    plantilla,\n    samplex=samplex,\n    samplex_arguments={\"parameter_values\": rng.random((4, 2))},\n    shape=(2, 4),\n)\nitem = Executor(mode=backend).run(programa).result()[0]\n\n\ndef deshacer(item):\n    return item[\"meas\"]   # ✏️ corrige las inversiones con measurement_flips.meas\n\n\ndef fraccion_ghz(bits):\n    suma = bits.sum(axis=-1)\n    return float(np.mean((suma == 0) | (suma == bits.shape[-1])))\n\n\nprint(f\"antes: {fraccion_ghz(item['meas']):.0%}, después: {fraccion_ghz(deshacer(item)):.0%}\")",
+     "cases": [
+      "aplica el XOR de `measurement_flips.meas` a `meas`"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]
