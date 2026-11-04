@@ -411,6 +411,68 @@ WRONG += [
     ]
 ]
 
+# Part 5: (exercise, file name in tests/mutants/<exercise>/, text expected in some message).
+WRONG += [
+    (eid, mutant(eid, name), expected)
+    for eid, name, expected in [
+        ("p5-cuenta/guardar-cuenta", "sin-predeterminada", "las cuentas predeterminadas son []"),
+        (
+            "p5-cuenta/cuenta-predeterminada",
+            "pisa-personal",
+            "quedan guardadas las cuentas ['clase']",
+        ),
+        ("p5-cuenta/minutos-libres", "tope-fijo", "Con tope = 20 y hoy = 11 devuelve 5"),
+        (
+            "p5-cuenta/minutos-libres",
+            "cuenta-futuro",
+            "Con un uso en el día 40 y hoy = 10 devuelve 3",
+        ),
+        ("p5-hello-world/bell-seis-observables", "todo-uno", "En `valores`, IZ vale 1.0"),
+        ("p5-hello-world/mas-disparos", "demasiados", "Con `disparos` = 100000"),
+        ("p5-hello-world/correlaciones-ghz", "etiquetas-al-reves", "Con n = 5 las etiquetas son"),
+        (
+            "p5-opciones/cuatro-formas",
+            "cambia-disparos",
+            "En `por_update`, `default_shots` vale 1000",
+        ),
+        (
+            "p5-opciones/copia-de-opciones",
+            "copia-sin-efecto",
+            "Un trabajo de `est` ejecuta 100 disparos",
+        ),
+        ("p5-opciones/crear-estimator", "sin-disparos", "`default_shots` vale None"),
+        ("p5-estimator/barrido", "un-observable", "`evs` tiene forma (1, 100)"),
+        ("p5-estimator/precision", "demasiada-precision", "`error_zz` vale 0.0022"),
+        ("p5-estimator/valor-s", "signos-rotos", "Con `evs_chsh`, |S| llega a 0.25"),
+        ("p5-sampler/ghz5-ruido", "sin-ideales", "`fraccion_ruido` vale 1.0"),
+        (
+            "p5-sampler/trabajos-por-disparos",
+            "cambia-el-defecto",
+            "`sampler.run([isa])` usa 128 disparos",
+        ),
+        (
+            "p5-sampler/fraccion-errores",
+            "cuenta-sin-dividir",
+            "Con conteos = {'01': 3, '10': 2} devuelve 5",
+        ),
+        ("p5-sampler/fraccion-errores", "sin-calcular", "`error_2` vale 0.0"),
+        ("p5-executor/circuit-item", "una-configuracion", "`argumentos` tiene forma (1, 2)"),
+        (
+            "p5-executor/aleatorizaciones",
+            "menos-configuraciones",
+            "`forma_twirl` vale (20, 5, 256, 3)",
+        ),
+        ("p5-executor/deshacer", "sin-corregir", "Con `item`, la fracción de disparos 000 o 111"),
+        ("p5-rest/cuerpo-sampler", "lista-vacia", "`parametros` se envía como []"),
+        ("p5-rest/decodificar-samples", "ancho-fijo", "n_bits = 4 devuelve {'00': 1, '101': 2}"),
+        (
+            "p5-rest/cuerpo-estimator",
+            "sin-layout",
+            "Con observable = ZZ y XX el PUB lleva el observable {'ZZ': 0.5, 'XX': -1.0}",
+        ),
+    ]
+]
+
 # Wrong code that fails the hidden cases: (exercise, code). The message of each failing hidden
 # case is compared with the reference solution in test_hidden_messages_*.
 MUTANTS = [
@@ -512,7 +574,11 @@ MUTANTS = [
             ("p4-cierre/tiempo-de-validez", "abs(med - ref)", "med - ref"),
         ]
     ],
-    *[m for eid in sorted(e for e in REAL if e.startswith("p3-")) for m in mutants_of(eid)],
+    *[
+        m
+        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-")))
+        for m in mutants_of(eid)
+    ],
 ]
 
 
