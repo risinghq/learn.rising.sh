@@ -573,46 +573,78 @@
     "4.2",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces los dos barridos de la lección y compruebas sus formas. [[n2]]Después cambias solo la forma de los observables para que evs salga con forma tres por diez. [[n3]]Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para cinco ángulos, posprocesando el BitArray sin diccionarios.",
+   "say": "Ahora te toca a ti. [[n1]]Primero apuestas las formas que tienen los dos barridos de la lección. [[n2]]Después corriges la forma de los observables para que evs salga con forma tres por diez. [[n3]]Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para varios ángulos, posprocesando el BitArray sin diccionarios.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p4-pubs.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Reproduce los barridos `(5,)` y `(4, 6)` y comprueba sus formas."
-      },
-      {
-       "level": 2,
-       "text": "Rearma los observables para que `evs` tenga forma `(3, 10)`."
-      },
-      {
-       "level": 3,
-       "text": "Calcula $P(1)$ de cinco ángulos con `expectation_values` sobre un `BitArray`."
-      }
+     "type": "exercise",
+     "exercise": "p4-pubs/formas",
+     "prompt": "Este código ejecuta los dos barridos de la lección, `uno_a_uno` y `producto`. Apuesta en `prediccion` la forma de cada `evs`, como una pareja de formas, y compruébala después.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Las formas se emparejan por broadcasting, empezando por el último eje.",
+      "Mira la forma de los observables y la de los valores del parámetro en cada PUB; en `producto` uno tiene un eje de tamaño 1 y el otro lo estira.",
+      "Escribe `((forma_de_uno_a_uno), (forma_de_producto))`, con una tupla por barrido."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.primitives import StatevectorEstimator\nfrom qiskit.quantum_info import SparsePauliOp\n\ncirc = QuantumCircuit(3)\ncirc.ry(Parameter(\"a\"), 0)\ncirc.cx(0, 1)\ncirc.cx(1, 2)\nestimator = StatevectorEstimator()\n\nobs_uno_a_uno = [SparsePauliOp(p) for p in [\"III\", \"XXX\", \"YYY\", \"ZZZ\", \"XYZ\"]]\nuno_a_uno = estimator.run([(circ, obs_uno_a_uno, np.linspace(0, 1, 5)[:, None])]).result()[0].data.evs\n\nobs_columna = [[SparsePauliOp(p)] for p in [\"III\", \"XXX\", \"YYY\", \"ZZZ\"]]\nproducto = estimator.run([(circ, obs_columna, np.linspace(0, 1, 6)[None, :, None])]).result()[0].data.evs\n\nprediccion = None   # ✏️ tu apuesta: las formas de uno_a_uno y de producto, como ((...), (...))\n# compruébalo con print(uno_a_uno.shape, producto.shape)",
+     "cases": [
+      "tu apuesta son las formas de uno_a_uno y de producto"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-pubs/observables-3x10",
+     "prompt": "Este código quiere un `evs_barrido` con una fila por observable (`ZZZ`, `XXX`, `YYY`) y una columna por cada uno de los 10 valores de `a`, pero sale con forma `(10,)`. Corrige cómo se arma `observables`.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Un solo `SparsePauliOp` con tres términos es un único observable: tiene forma `()`.",
+      "Necesitas tres observables, con forma `(3, 1)`, para que el broadcasting los cruce con los valores de forma `(10,)`.",
+      "Una lista de listas de un solo elemento, una lista por cada Pauli."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.primitives import StatevectorEstimator\nfrom qiskit.quantum_info import SparsePauliOp\n\ncirc = QuantumCircuit(3)\ncirc.ry(Parameter(\"a\"), 0)\ncirc.cx(0, 1)\ncirc.cx(1, 2)\nestimator = StatevectorEstimator()\n\nvalores = np.linspace(0, np.pi, 10)[:, None]\nobservables = SparsePauliOp.from_list([(\"ZZZ\", 1), (\"XXX\", 1), (\"YYY\", 1)])\n\nevs_barrido = estimator.run([(circ, observables, valores)]).result()[0].data.evs\nprint(evs_barrido.shape)",
+     "cases": [
+      "una fila por observable y una columna por valor"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-pubs/probabilidad-uno",
+     "prompt": "Escribe `probabilidad_uno(angulos, disparos)`: `angulos` es un arreglo de NumPy de cualquier forma y `disparos` es un entero. Devuelve un arreglo con la forma de `angulos` con la probabilidad de medir 1 tras $R_y(\\theta)$ en un qubit, usando **un solo PUB** de `StatevectorSampler` y sin `get_counts`: con `expectation_values(\"Z\")` del `BitArray` y $P(1)=(1-\\langle Z\\rangle)/2$. Ojo: los valores de un parámetro necesitan un último eje de tamaño 1, así que `angulos` de forma `(2, 3)` se entrega como `(2, 3, 1)`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Un solo PUB barre todos los ángulos a la vez: el circuito, los valores del parámetro y los disparos.",
+      "`datos.meas` es un `BitArray` con la forma de los ángulos y tiene el método `expectation_values`.",
+      "Añade el eje del parámetro con `[..., None]` y devuelve `(1 - ...) / 2`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.primitives import StatevectorSampler\n\nbarrido = QuantumCircuit(1)\nbarrido.ry(Parameter(\"t\"), 0)\nbarrido.measure_all()\n\n\ndef probabilidad_uno(angulos, disparos):\n    # ✏️ un solo PUB de StatevectorSampler y expectation_values(\"Z\") sobre datos.meas\n    return np.zeros(np.shape(angulos))\n\n\nprint(probabilidad_uno(np.linspace(0, np.pi, 5), 4000).round(3))",
+     "cases": [
+      "cinco ángulos de 0 a π"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

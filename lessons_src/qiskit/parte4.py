@@ -310,32 +310,49 @@ estimator.options.resilience_level = 2   # IBM: mitigación con una línea""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero ejecutas Estimator y Sampler sobre el estado de Bell y comparas con tu apuesta.
-             [[n2]]Después cambias la implementación de Sampler por BackendSamplerV2, sin tocar el resto del código. [[n3]]Y por último calculas un valor esperado de dos maneras, con Estimator y a partir de los conteos de Sampler, y compruebas que coinciden.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.""",
+            "Ahora te toca a ti. [[n1]]Primero apuestas los tres valores esperados que Estimator da para el estado de Bell, y los comparas con lo que calcula. [[n2]]Después cambias la implementación de Sampler por BackendSamplerV2, sin tocar el resto del código. [[n3]]Y por último escribes la función que calcula un valor esperado a partir de los conteos de Sampler, y compruebas que coincide con el de Estimator.",
             [
-                Mission(
-                    "practica/p4-primitivas.py",
-                    [
-                        (1, "Ejecuta Estimator y Sampler sobre el estado de Bell."),
-                        (
-                            2,
-                            "Cambia `StatevectorSampler` por `BackendSamplerV2` sin tocar el resto.",
-                        ),
-                        (
-                            3,
-                            r"Escribe `z_desde_conteos` y compruébala contra el $\langle Z_0\rangle$ de Estimator.",
-                        ),
+                Exercise(
+                    "p4-primitivas/dos-vistas",
+                    "Este código calcula con Estimator tres valores esperados del estado de Bell y mide el mismo estado con Sampler. Apuesta en `prediccion` una lista con $\\langle ZZ\\rangle$, $\\langle ZI\\rangle$ y $\\langle XX\\rangle$, y compruébala después.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Piensa en lo que ve cada observable: Z mide el valor de un qubit y X, la fase entre las ramas.",
+                        "En el estado de Bell, los dos qubits siempre coinciden; mira qué pasa cuando miras un solo qubit y cuando miras los dos.",
+                        "La lista tiene tres números, en el orden `[ZZ, ZI, XX]`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p4-primitivas/backend-sampler",
+                    "Cambia la línea de `sampler` para que use `BackendSamplerV2` sobre `backend`, sin tocar el resto: `run` recibe lo mismo y devuelve lo mismo. El circuito ya está transpilado para ese backend.",
+                    level=2,
+                    needs="qiskit",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "`BackendSamplerV2` envuelve un backend en la interfaz de las primitivas.",
+                        "Solo cambia la línea que crea `sampler`; la llamada a `run` y el resto del programa se quedan igual.",
+                        "El constructor recibe el backend con el argumento `backend=`.",
+                    ],
+                ),
+                Exercise(
+                    "p4-primitivas/z-desde-conteos",
+                    'Escribe `z_desde_conteos(conteos, k)`: recibe el diccionario de `get_counts()` y el índice de un qubit, y devuelve $\\langle Z_k\\rangle$ como un número entre -1 y 1. Cada disparo con el bit `0` en ese qubit aporta $+1$ y cada disparo con `1` aporta $-1$; el resultado es el promedio sobre todos los disparos. Ojo: el qubit 0 es el carácter de la **derecha** de la cadena. Por ejemplo, con `{"00": 3, "01": 1}` y `k = 0` devuelve 0.5.',
+                    level=3,
+                    needs="qiskit",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Un valor esperado de Z es un promedio: el bit 0 vale $+1$ y el bit 1 vale $-1$.",
+                        "Recorre los pares cadena y cantidad del diccionario, y elige el carácter del qubit `k` contando desde la derecha.",
+                        "Suma cantidad por signo para cada cadena y divide entre el total de disparos, que es la suma de las cantidades.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -693,28 +710,50 @@ qc.measure([0, 1], [0, 1])""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces los dos barridos de la lección y compruebas sus formas.
-             [[n2]]Después cambias solo la forma de los observables para que evs salga con forma tres por diez. [[n3]]Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para cinco ángulos, posprocesando el BitArray sin diccionarios.""",
+            "Ahora te toca a ti. [[n1]]Primero apuestas las formas que tienen los dos barridos de la lección. [[n2]]Después corriges la forma de los observables para que evs salga con forma tres por diez. [[n3]]Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para varios ángulos, posprocesando el BitArray sin diccionarios.",
             [
-                Mission(
-                    "practica/p4-pubs.py",
-                    [
-                        (1, "Reproduce los barridos `(5,)` y `(4, 6)` y comprueba sus formas."),
-                        (2, "Rearma los observables para que `evs` tenga forma `(3, 10)`."),
-                        (
-                            3,
-                            r"Calcula $P(1)$ de cinco ángulos con `expectation_values` sobre un `BitArray`.",
-                        ),
+                Exercise(
+                    "p4-pubs/formas",
+                    "Este código ejecuta los dos barridos de la lección, `uno_a_uno` y `producto`. Apuesta en `prediccion` la forma de cada `evs`, como una pareja de formas, y compruébala después.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Las formas se emparejan por broadcasting, empezando por el último eje.",
+                        "Mira la forma de los observables y la de los valores del parámetro en cada PUB; en `producto` uno tiene un eje de tamaño 1 y el otro lo estira.",
+                        "Escribe `((forma_de_uno_a_uno), (forma_de_producto))`, con una tupla por barrido.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p4-pubs/observables-3x10",
+                    "Este código quiere un `evs_barrido` con una fila por observable (`ZZZ`, `XXX`, `YYY`) y una columna por cada uno de los 10 valores de `a`, pero sale con forma `(10,)`. Corrige cómo se arma `observables`.",
+                    level=2,
+                    needs="qiskit",
+                    id="e2",
+                    hidden=True,
+                    kind="fix",
+                    hints=[
+                        "Un solo `SparsePauliOp` con tres términos es un único observable: tiene forma `()`.",
+                        "Necesitas tres observables, con forma `(3, 1)`, para que el broadcasting los cruce con los valores de forma `(10,)`.",
+                        "Una lista de listas de un solo elemento, una lista por cada Pauli.",
+                    ],
+                ),
+                Exercise(
+                    "p4-pubs/probabilidad-uno",
+                    'Escribe `probabilidad_uno(angulos, disparos)`: `angulos` es un arreglo de NumPy de cualquier forma y `disparos` es un entero. Devuelve un arreglo con la forma de `angulos` con la probabilidad de medir 1 tras $R_y(\\theta)$ en un qubit, usando **un solo PUB** de `StatevectorSampler` y sin `get_counts`: con `expectation_values("Z")` del `BitArray` y $P(1)=(1-\\langle Z\\rangle)/2$. Ojo: los valores de un parámetro necesitan un último eje de tamaño 1, así que `angulos` de forma `(2, 3)` se entrega como `(2, 3, 1)`.',
+                    level=3,
+                    needs="qiskit",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Un solo PUB barre todos los ángulos a la vez: el circuito, los valores del parámetro y los disparos.",
+                        "`datos.meas` es un `BitArray` con la forma de los ángulos y tiene el método `expectation_values`.",
+                        "Añade el eje del parámetro con `[..., None]` y devuelve `(1 - ...) / 2`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -957,28 +996,49 @@ sampler.run([(circuit, None, 123), (circuit, None, 456)])""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces los valores esperados exactos de la lección.
-             [[n2]]Después ajustas la precisión para que el error de muestreo sea pequeño, pero no cero. [[n3]]Y por último estimas una probabilidad con cuatro cantidades de disparos, un PUB por cada una, en una sola llamada a run.""",
+            "Ahora te toca a ti. [[n1]]Primero apuestas los valores esperados exactos de la lección y los comparas con lo que calcula Estimator. [[n2]]Después ajustas la precisión para que el error de muestreo sea pequeño, pero no cero. [[n3]]Y por último escribes una función que estima una probabilidad con varias cantidades de disparos, un PUB por cada una, en una sola llamada a run.",
             [
-                Mission(
-                    "practica/p4-simular-exacto.py",
-                    [
-                        (1, "Ejecuta `StatevectorEstimator` y comprueba los tres valores exactos."),
-                        (2, "Elige `precision` para que el error máximo quede entre 0 y 0.02."),
-                        (
-                            3,
-                            "Envía cuatro PUBs de Sampler con 100 a 100 000 disparos y mide su error.",
-                        ),
+                Exercise(
+                    "p4-simular-exacto/valores-exactos",
+                    "Este código calcula con `StatevectorEstimator` el valor esperado exacto del observable $II+XX-YY+ZZ$ para tres valores de `theta`. Apuesta en `prediccion` una lista con los tres valores y compruébala después.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Con `theta = 0` el circuito prepara un estado conocido; empieza por ahí.",
+                        "Cada término del observable vale +1 o -1 en los estados de Bell; con otros `theta`, el estado cambia y algunos términos dejan de ser exactos.",
+                        "La lista tiene tres números, uno por cada valor de `theta`, en el orden de `valores`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p4-simular-exacto/precision",
+                    "Cambia **solo** `precision` para que el error máximo de `ruidoso` frente a `exacto` sea menor que 0.02, pero no cero: sigue siendo una simulación con ruido de muestreo.",
+                    level=2,
+                    needs="qiskit",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "`precision` es la desviación estándar del error estadístico que añade la simulación.",
+                        "Un valor menor da menos error; un valor de cero lo quita del todo.",
+                        "Prueba con un número de la forma `0.00…`, mucho menor que 0.5.",
+                    ],
+                ),
+                Exercise(
+                    "p4-simular-exacto/cuatro-pubs",
+                    "Escribe `errores_por_disparos(sampler, disparos)`: `sampler` es una primitiva Sampler y `disparos` una lista de cantidades de disparos. Estima $P(1)$ del circuito `qubit` con **una sola llamada a `run`**, con un PUB `(qubit, None, n)` por cada cantidad `n` de `disparos`. Devuelve la lista con la diferencia absoluta entre cada $P(1)$ estimada y `p1_exacto`, en el mismo orden. Ojo: en un PUB, los disparos son el tercer elemento de la tupla.",
+                    level=3,
+                    needs="qiskit",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Un PUB es una tupla: el circuito, los valores de los parámetros y los disparos.",
+                        "Construye la lista de PUBs antes de llamar a `run` y llámalo una vez; cada resultado conserva el orden de su PUB.",
+                        "Con `get_counts()` y `num_shots` de cada resultado calculas la fracción de unos; resta `p1_exacto` y toma el valor absoluto.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -987,7 +1047,7 @@ sampler.run([(circuit, None, 123), (circuit, None, 456)])""",
             [T("Un resultado exacto no es lo que verás en un experimento.", "subtitle")],
             ask=reflect(
                 "Si la simulación exacta da el valor perfecto, ¿para qué te serviría simular con ruido de muestreo antes de ir a un QPU?",
-                "Si multiplicas por cuatro los disparos, ¿qué crees que le pasa al error? Apuesta primero y compruébalo en el cuaderno.",
+                "Si multiplicas por cuatro los disparos, ¿qué crees que le pasa al error? Apuesta primero y compruébalo con tu función `errores_por_disparos`.",
             ),
         ),
         beat(
@@ -1363,28 +1423,49 @@ for j in range(4):
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero comparas un GHZ ideal con el mismo circuito bajo ruido despolarizante.
-             [[n2]]Después buscas qué probabilidad de error deja la mitad de los disparos correctos, y la comparas con la estimación uno menos p a la m. [[n3]]Y por último construyes tú mismo un error de lectura asimétrico.""",
+            "Ahora te toca a ti. [[n1]]Primero apuestas qué fracción de los disparos de un GHZ sigue siendo correcta bajo ruido despolarizante. [[n2]]Después buscas qué probabilidad de error deja cerca de la mitad de los disparos correctos. [[n3]]Y por último escribes la función que construye un error de lectura asimétrico.",
             [
-                Mission(
-                    "practica/p4-aer-ruido.py",
-                    [
-                        (1, "Compara un GHZ de 6 qubits ideal y con un 2 % despolarizante por CX."),
-                        (2, "Ajusta `p` hasta que la fracción correcta caiga entre 0.55 y 0.65."),
-                        (
-                            3,
-                            "Construye un `ReadoutError` y comprueba que lees `0` el 10 % de las veces.",
-                        ),
+                Exercise(
+                    "p4-aer-ruido/ideal-vs-ruidoso",
+                    "El GHZ de 6 qubits tiene 5 CX, y cada una lleva un error despolarizante del 2 %. Apuesta en `prediccion` qué fracción de los disparos sigue siendo `000000` o `111111` (un número entre 0 y 1) y compruébala después.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "El ideal solo da dos cadenas; el ruido de cada CX hace que algunos disparos salgan de ellas.",
+                        "La lección estima la supervivencia con $(1-p)^m$: aquí $p=0.02$ y $m=5$.",
+                        "Calcula $0.98^5$ y piensa si una estimación así sobrestima o subestima los disparos correctos.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p4-aer-ruido/p-a-la-mitad",
+                    "Cambia **solo** `p`, la probabilidad despolarizante de cada CX, para que la fracción de disparos correctos de `fraccion` caiga entre 0.55 y 0.65. Después compara con $(1-p)^5$: ¿la estimación es pesimista u optimista?",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Más ruido en cada CX deja menos disparos correctos.",
+                        "Prueba valores de `p` mayores que 0.02 y mira `fraccion` en lo que imprime el programa.",
+                        "Un valor entre 0.1 y 0.2 deja la fracción cerca de la mitad.",
+                    ],
+                ),
+                Exercise(
+                    "p4-aer-ruido/error-de-lectura",
+                    "Completa `modelo_lectura(p01, p10)`: devuelve un `NoiseModel` con un `ReadoutError` en todos los qubits, donde `p01` es la probabilidad de leer 1 cuando el valor verdadero es 0 y `p10` la de leer 0 cuando es 1. Ojo: la matriz de asignación tiene una fila por valor verdadero, y cada fila suma 1. Por ejemplo, con `p01 = 0.05` y `p10 = 0.10`, un qubit en $|1\\rangle$ se lee como `0` el 10 % de las veces.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Un `ReadoutError` se da como una matriz de probabilidades de asignación.",
+                        "La fila $i$ es lo que se registra cuando el valor verdadero es $i$: la fila 0 reparte entre leer 0 y leer 1.",
+                        "Rellena las dos filas con `1 - p01`, `p01`, `p10` y `1 - p10`, y añádelo con `add_all_qubit_readout_error`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1392,7 +1473,7 @@ for j in range(4):
             """Dos preguntas para pensar, conectadas con tu proyecto. Escribe con tus palabras; se guardan en tu navegador.""",
             [T("El ruido se acumula con cada puerta de dos qubits.", "subtitle")],
             ask=reflect(
-                "En el cuaderno, la estimación `(1 - p) ** m` salió más pesimista que la simulación. ¿Por qué crees que subestima la fracción de disparos correctos?",
+                "En el ejercicio de la probabilidad a la mitad, la estimación `(1 - p) ** m` salió más pesimista que la simulación. ¿Por qué crees que subestima la fracción de disparos correctos?",
                 "En tu proyecto Ising, cada paso de Trotter añade CX. ¿Cómo esperas que cambie la curva de magnetización ruidosa a medida que avanza el tiempo simulado?",
             ),
         ),
@@ -1605,31 +1686,50 @@ print(float(estimator.run([pub]).result()[0].data.evs))""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado.
-             [[n2]]Después arreglas un circuito que el simulador rechaza, cambiando solo el ángulo de una rotación. [[n3]]Y por último escribes la función que redondea los ángulos de un circuito a múltiplos de pi medios, para obtener su versión de Clifford.""",
+            "Ahora te toca a ti. [[n1]]Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado, y apuestas cuántas cadenas distintas verás. [[n2]]Después arreglas un circuito que el simulador rechaza, cambiando solo el ángulo de una rotación. [[n3]]Y por último escribes la función que redondea los ángulos de un circuito a múltiplos de pi medios, para obtener su versión de Clifford.",
             [
-                Mission(
-                    "practica/p4-estabilizadores.py",
-                    [
-                        (1, 'Simula un GHZ de 100 qubits con `method="stabilizer"`.'),
-                        (
-                            2,
-                            r"Corrige el ángulo de una $R_z$ para que el circuito sea de Clifford.",
-                        ),
-                        (
-                            3,
-                            r"Escribe `a_clifford(params)`: redondea cada ángulo al múltiplo de $\pi/2$ más cercano.",
-                        ),
+                Exercise(
+                    "p4-estabilizadores/ghz-100",
+                    'Un vector de estado de 100 qubits no cabe en ninguna memoria, pero el GHZ es de Clifford y `method="stabilizer"` lo simula al instante. Apuesta en `prediccion` cuántas cadenas distintas salen en los 1024 disparos y compruébalo después.',
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "En un GHZ, al medir un qubit ya sabes todos los demás.",
+                        "Piensa en cuántas cadenas de 100 bits tienen todos sus bits iguales.",
+                        "Escribe un entero, el número de claves de `conteos_ghz`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p4-estabilizadores/rz-de-clifford",
+                    "Este circuito lleva una rotación $R_z$ con un ángulo que no es de Clifford, y el simulador de estabilizadores la rechaza. Corrige **solo el ángulo** para que corra. La rotación debe seguir en el circuito.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    kind="fix",
+                    hints=[
+                        "El método `stabilizer` solo acepta rotaciones que son puertas de Clifford.",
+                        "Las rotaciones $R_z$ de Clifford son las de ángulos que son múltiplos de $\\pi/2$.",
+                        "El ángulo de `angulo` está entre dos múltiplos de $\\pi/2$; elige uno.",
+                    ],
+                ),
+                Exercise(
+                    "p4-estabilizadores/a-clifford",
+                    "Escribe `a_clifford(params)`: recibe una lista o un arreglo de ángulos y devuelve un arreglo de la misma forma con cada ángulo redondeado al múltiplo de $\\pi/2$ **más cercano**, no hacia abajo. Debe servir también con ángulos negativos o mayores que $2\\pi$. Por ejemplo, `a_clifford([0.1, 2.0, 4.0])` devuelve $[0, \\pi/2, 3\\pi/2]$.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Redondear a un múltiplo de $\\pi/2$ es redondear cuántos $\\pi/2$ caben en el ángulo.",
+                        "Divide entre $\\pi/2$, redondea al entero más cercano y vuelve a multiplicar.",
+                        "NumPy redondea un arreglo entero de una vez con `np.rint`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1958,31 +2058,49 @@ for mitigation in (False, True):
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero ejecutas un estado de Bell en un backend falso y miras cuánto ruido trae su instantánea.
-             [[n2]]Después cambias el backend por un AerSimulator ideal, sin tocar el resto del programa. [[n3]]Y por último completas una función que estima Z Z con y sin mitigación, y compruebas que la mitigada se acerca más al valor ideal.""",
+            "Ahora te toca a ti. [[n1]]Primero apuestas cuántos disparos hace por defecto el Sampler sobre un backend falso, y ejecutas un estado de Bell. [[n2]]Después cambias el backend por un AerSimulator ideal, sin tocar el resto del programa. [[n3]]Y por último completas una función que estima Z Z con y sin mitigación, y compruebas que la mitigada se acerca más al valor ideal.",
             [
-                Mission(
-                    "practica/p4-local-testing.py",
-                    [
-                        (1, "Ejecuta un Bell en `FakeManilaV2` y cuenta los `01` y `10`."),
-                        (
-                            2,
-                            "Cambia `backend` por `AerSimulator()` y comprueba que el ruido desaparece.",
-                        ),
-                        (
-                            3,
-                            "Completa `ev_zz(mitigar)` y comprueba que la mitigación acerca el valor a 1.",
-                        ),
+                Exercise(
+                    "p4-local-testing/bell-fake",
+                    "Este código ejecuta un Bell en `FakeManilaV2`, que imita un procesador real de 5 qubits con su ruido. Apuesta en `prediccion` cuántos disparos hace el Sampler cuando no le pides ninguno, y compruébalo después.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Si no pides disparos, el Sampler usa los suyos por defecto.",
+                        "La suma de los conteos que devuelve es el número de disparos.",
+                        "El valor por defecto es una potencia de dos mayor que 1000.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p4-local-testing/sin-ruido",
+                    "Cambia `backend` por `AerSimulator()` y deja el resto igual: el programa no cambia, solo el backend. Con un simulador ideal ya no deben aparecer `01` ni `10`.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "`backend` es la única línea que decide dónde se ejecuta el programa.",
+                        "El resto del código lee `backend`: el transpilado y el Sampler.",
+                        "`AerSimulator()` sin argumentos es un simulador sin ruido.",
+                    ],
+                ),
+                Exercise(
+                    "p4-local-testing/mitigacion",
+                    "Completa `ev_zz(mitigar)`: estima $\\langle ZZ\\rangle$ del estado de Bell con un `Estimator` sobre `fake_manila`, activando `resilience.measure_mitigation` cuando `mitigar` es verdadero y desactivándolo cuando es falso. Devuelve un `float`. El valor ideal es 1: la versión mitigada debe acercarse más.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Las opciones del Estimator se cambian antes de ejecutar.",
+                        "La mitigación de errores de lectura está en `estimator.options.resilience`.",
+                        "Asigna el argumento `mitigar` a `measure_mitigation` antes de llamar a `run`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "proyecto",

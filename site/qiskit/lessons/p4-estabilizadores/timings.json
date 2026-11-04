@@ -161,11 +161,11 @@
   ]
  },
  "mision": {
-  "dur": 29.304,
+  "dur": 28.416,
   "marks": {
-   "n1": 6.454,
-   "n2": 13.106,
-   "n3": 20.324
+   "n1": 2.449,
+   "n2": 12.214,
+   "n3": 19.432
   },
   "cues": [
    [
@@ -174,18 +174,14 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado, y apuestas cuántas cadenas distintas verás."
    ],
    [
-    6.454,
-    "Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado."
-   ],
-   [
-    13.106,
+    12.214,
     "Después arreglas un circuito que el simulador rechaza, cambiando solo el ángulo de una rotación."
    ],
    [
-    20.324,
+    19.432,
     "Y por último escribes la función que redondea los ángulos de un circuito a múltiplos de pi medios, para obtener su versión de Clifford."
    ]
   ]

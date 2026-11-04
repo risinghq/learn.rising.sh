@@ -355,46 +355,77 @@
     "4.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces los valores esperados exactos de la lección. [[n2]]Después ajustas la precisión para que el error de muestreo sea pequeño, pero no cero. [[n3]]Y por último estimas una probabilidad con cuatro cantidades de disparos, un PUB por cada una, en una sola llamada a run.",
+   "say": "Ahora te toca a ti. [[n1]]Primero apuestas los valores esperados exactos de la lección y los comparas con lo que calcula Estimator. [[n2]]Después ajustas la precisión para que el error de muestreo sea pequeño, pero no cero. [[n3]]Y por último escribes una función que estima una probabilidad con varias cantidades de disparos, un PUB por cada una, en una sola llamada a run.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p4-simular-exacto.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta `StatevectorEstimator` y comprueba los tres valores exactos."
-      },
-      {
-       "level": 2,
-       "text": "Elige `precision` para que el error máximo quede entre 0 y 0.02."
-      },
-      {
-       "level": 3,
-       "text": "Envía cuatro PUBs de Sampler con 100 a 100 000 disparos y mide su error."
-      }
+     "type": "exercise",
+     "exercise": "p4-simular-exacto/valores-exactos",
+     "prompt": "Este código calcula con `StatevectorEstimator` el valor esperado exacto del observable $II+XX-YY+ZZ$ para tres valores de `theta`. Apuesta en `prediccion` una lista con los tres valores y compruébala después.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Con `theta = 0` el circuito prepara un estado conocido; empieza por ahí.",
+      "Cada término del observable vale +1 o -1 en los estados de Bell; con otros `theta`, el estado cambia y algunos términos dejan de ser exactos.",
+      "La lista tiene tres números, uno por cada valor de `theta`, en el orden de `valores`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.primitives import StatevectorEstimator\nfrom qiskit.quantum_info import SparsePauliOp\n\ncircuito = QuantumCircuit(2)\ncircuito.ry(Parameter(\"theta\"), 0)\ncircuito.h(0)\ncircuito.cx(0, 1)\nobservable = SparsePauliOp([\"II\", \"XX\", \"YY\", \"ZZ\"], coeffs=[1, 1, -1, 1])\nvalores = [[0], [np.pi / 6], [np.pi / 2]]\n\nexacto = StatevectorEstimator().run([(circuito, observable, valores)]).result()[0].data.evs\n\nprediccion = None   # ✏️ tu apuesta: una lista con los tres valores esperados, uno por cada valor de theta\n# compruébalo con print(exacto)",
+     "cases": [
+      "tu apuesta son los tres valores exactos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-simular-exacto/precision",
+     "prompt": "Cambia **solo** `precision` para que el error máximo de `ruidoso` frente a `exacto` sea menor que 0.02, pero no cero: sigue siendo una simulación con ruido de muestreo.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "`precision` es la desviación estándar del error estadístico que añade la simulación.",
+      "Un valor menor da menos error; un valor de cero lo quita del todo.",
+      "Prueba con un número de la forma `0.00…`, mucho menor que 0.5."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.circuit import Parameter\nfrom qiskit.primitives import StatevectorEstimator\nfrom qiskit.quantum_info import SparsePauliOp\n\ncircuito = QuantumCircuit(2)\ncircuito.ry(Parameter(\"theta\"), 0)\ncircuito.h(0)\ncircuito.cx(0, 1)\nobservable = SparsePauliOp([\"II\", \"XX\", \"YY\", \"ZZ\"], coeffs=[1, 1, -1, 1])\nvalores = [[0], [np.pi / 6], [np.pi / 2]]\n\nexacto = StatevectorEstimator().run([(circuito, observable, valores)]).result()[0].data.evs\n\nprecision = 0.5   # ✏️ elige un valor menor\n\nruidoso = StatevectorEstimator(seed=1).run([(circuito, observable, valores)], precision=precision).result()[0].data.evs\nerror_max = float(np.abs(ruidoso - exacto).max())\nprint(ruidoso, f\"· error máximo {error_max:.4f}\")",
+     "cases": [
+      "el error máximo queda por debajo de 0.02"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-simular-exacto/cuatro-pubs",
+     "prompt": "Escribe `errores_por_disparos(sampler, disparos)`: `sampler` es una primitiva Sampler y `disparos` una lista de cantidades de disparos. Estima $P(1)$ del circuito `qubit` con **una sola llamada a `run`**, con un PUB `(qubit, None, n)` por cada cantidad `n` de `disparos`. Devuelve la lista con la diferencia absoluta entre cada $P(1)$ estimada y `p1_exacto`, en el mismo orden. Ojo: en un PUB, los disparos son el tercer elemento de la tupla.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Un PUB es una tupla: el circuito, los valores de los parámetros y los disparos.",
+      "Construye la lista de PUBs antes de llamar a `run` y llámalo una vez; cada resultado conserva el orden de su PUB.",
+      "Con `get_counts()` y `num_shots` de cada resultado calculas la fracción de unos; resta `p1_exacto` y toma el valor absoluto."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\n\nqubit = QuantumCircuit(1)\nqubit.ry(1.0, 0)\nqubit.measure_all()\np1_exacto = np.sin(0.5) ** 2\n\n\ndef errores_por_disparos(sampler, disparos):\n    pubs = []   # ✏️ un PUB (qubit, None, n) por cada cantidad de disparos n\n    errores = []   # ✏️ |P(1) estimada − p1_exacto| de cada PUB, con get_counts()\n    return errores\n\n\nerrores = errores_por_disparos(StatevectorSampler(seed=11), [100, 1000, 10_000, 100_000])\nprint([round(float(e), 4) for e in errores])",
+     "cases": [
+      "cuatro errores con 100, 1 000, 10 000 y 100 000 disparos"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]
@@ -418,7 +449,7 @@
     "kind": "reflect",
     "prompts": [
      "Si la simulación exacta da el valor perfecto, ¿para qué te serviría simular con ruido de muestreo antes de ir a un QPU?",
-     "Si multiplicas por cuatro los disparos, ¿qué crees que le pasa al error? Apuesta primero y compruébalo en el cuaderno."
+     "Si multiplicas por cuatro los disparos, ¿qué crees que le pasa al error? Apuesta primero y compruébalo con tu función `errores_por_disparos`."
     ]
    },
    "align": "top"

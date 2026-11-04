@@ -411,46 +411,79 @@
     "4.5",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado. [[n2]]Después arreglas un circuito que el simulador rechaza, cambiando solo el ángulo de una rotación. [[n3]]Y por último escribes la función que redondea los ángulos de un circuito a múltiplos de pi medios, para obtener su versión de Clifford.",
+   "say": "Ahora te toca a ti. [[n1]]Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado, y apuestas cuántas cadenas distintas verás. [[n2]]Después arreglas un circuito que el simulador rechaza, cambiando solo el ángulo de una rotación. [[n3]]Y por último escribes la función que redondea los ángulos de un circuito a múltiplos de pi medios, para obtener su versión de Clifford.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p4-estabilizadores.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Simula un GHZ de 100 qubits con `method=\"stabilizer\"`."
-      },
-      {
-       "level": 2,
-       "text": "Corrige el ángulo de una $R_z$ para que el circuito sea de Clifford."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `a_clifford(params)`: redondea cada ángulo al múltiplo de $\\pi/2$ más cercano."
-      }
+     "type": "exercise",
+     "exercise": "p4-estabilizadores/ghz-100",
+     "prompt": "Un vector de estado de 100 qubits no cabe en ninguna memoria, pero el GHZ es de Clifford y `method=\"stabilizer\"` lo simula al instante. Apuesta en `prediccion` cuántas cadenas distintas salen en los 1024 disparos y compruébalo después.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "En un GHZ, al medir un qubit ya sabes todos los demás.",
+      "Piensa en cuántas cadenas de 100 bits tienen todos sus bits iguales.",
+      "Escribe un entero, el número de claves de `conteos_ghz`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\n\nsimulador = AerSimulator(method=\"stabilizer\", seed_simulator=3)\npm = generate_preset_pass_manager(1, simulador)\n\nghz100 = QuantumCircuit(100)\nghz100.h(0)\nfor k in range(99):\n    ghz100.cx(k, k + 1)\nghz100.measure_all()\n\nconteos_ghz = simulador.run(pm.run(ghz100), shots=1024).result().get_counts()\n\nprediccion = None   # ✏️ tu apuesta: ¿cuántas cadenas distintas aparecen en los 1024 disparos?\n# compruébalo con print(len(conteos_ghz), \"cadenas distintas de\", len(next(iter(conteos_ghz))), \"bits\")",
+     "cases": [
+      "tu apuesta es el número de cadenas distintas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-estabilizadores/rz-de-clifford",
+     "prompt": "Este circuito lleva una rotación $R_z$ con un ángulo que no es de Clifford, y el simulador de estabilizadores la rechaza. Corrige **solo el ángulo** para que corra. La rotación debe seguir en el circuito.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "El método `stabilizer` solo acepta rotaciones que son puertas de Clifford.",
+      "Las rotaciones $R_z$ de Clifford son las de ángulos que son múltiplos de $\\pi/2$.",
+      "El ángulo de `angulo` está entre dos múltiplos de $\\pi/2$; elige uno."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\n\nsimulador = AerSimulator(method=\"stabilizer\", seed_simulator=3)\npm = generate_preset_pass_manager(1, simulador)\n\nangulo = np.pi / 4\n\ncon_rz = QuantumCircuit(2)\ncon_rz.h(0)\ncon_rz.rz(angulo, 0)\ncon_rz.cx(0, 1)\ncon_rz.measure_all()\n\ntry:\n    conteos_rz = simulador.run(pm.run(con_rz), shots=1024).result().get_counts()\n    print(conteos_rz)\nexcept Exception as e:\n    conteos_rz = None\n    print(\"el simulador lo rechaza:\", type(e).__name__)",
+     "cases": [
+      "el circuito corre con stabilizer y conserva su rz"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-estabilizadores/a-clifford",
+     "prompt": "Escribe `a_clifford(params)`: recibe una lista o un arreglo de ángulos y devuelve un arreglo de la misma forma con cada ángulo redondeado al múltiplo de $\\pi/2$ **más cercano**, no hacia abajo. Debe servir también con ángulos negativos o mayores que $2\\pi$. Por ejemplo, `a_clifford([0.1, 2.0, 4.0])` devuelve $[0, \\pi/2, 3\\pi/2]$.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Redondear a un múltiplo de $\\pi/2$ es redondear cuántos $\\pi/2$ caben en el ángulo.",
+      "Divide entre $\\pi/2$, redondea al entero más cercano y vuelve a multiplicar.",
+      "NumPy redondea un arreglo entero de una vez con `np.rint`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit.circuit.library import efficient_su2\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\n\nsimulador = AerSimulator(method=\"stabilizer\", seed_simulator=3)\npm = generate_preset_pass_manager(1, simulador)\n\n\ndef a_clifford(params):\n    # ✏️ redondea cada ángulo al múltiplo de π/2 más cercano\n    return np.asarray(params)\n\n\nbase = efficient_su2(12)\nparams = np.random.default_rng(7).uniform(0, 2 * np.pi, base.num_parameters)\n\nmedido = base.copy()\nmedido.measure_all()\ntry:\n    conteos = simulador.run(pm.run(medido.assign_parameters(a_clifford(params))), shots=1024).result().get_counts()\n    print(len(conteos), \"cadenas distintas de 12 bits\")\nexcept Exception as e:\n    print(\"el simulador lo rechaza:\", type(e).__name__)",
+     "cases": [
+      "redondea al múltiplo de π/2 más cercano",
+      "un efficient_su2 con esos ángulos corre con stabilizer"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

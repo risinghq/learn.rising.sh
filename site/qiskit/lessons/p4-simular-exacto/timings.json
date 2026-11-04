@@ -171,11 +171,11 @@
   ]
  },
  "mision": {
-  "dur": 26.808,
+  "dur": 26.688,
   "marks": {
-   "n1": 6.454,
-   "n2": 11.337,
-   "n3": 17.748
+   "n1": 2.449,
+   "n2": 9.695,
+   "n3": 16.106
   },
   "cues": [
    [
@@ -184,19 +184,15 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Primero apuestas los valores esperados exactos de la lección y los comparas con lo que calcula Estimator."
    ],
    [
-    6.454,
-    "Primero reproduces los valores esperados exactos de la lección."
-   ],
-   [
-    11.337,
+    9.695,
     "Después ajustas la precisión para que el error de muestreo sea pequeño, pero no cero."
    ],
    [
-    17.748,
-    "Y por último estimas una probabilidad con cuatro cantidades de disparos, un PUB por cada una, en una sola llamada a run."
+    16.106,
+    "Y por último escribes una función que estima una probabilidad con varias cantidades de disparos, un PUB por cada una, en una sola llamada a run."
    ]
   ]
  },

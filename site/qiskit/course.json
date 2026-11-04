@@ -249,70 +249,35 @@
      "section": "4.1",
      "title": "Las primitivas: Sampler y Estimator",
      "summary": "Por qué existen las primitivas, qué hacen Estimator y Sampler, y qué implementaciones hay: de referencia, de IBM, de backend y de Aer.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p4-primitivas.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p4-pubs",
      "section": "4.2",
      "title": "Entradas y salidas: PUBs y broadcasting",
      "summary": "Los Primitive Unified Blocs, las reglas de broadcasting, la estructura de los resultados y el procesamiento eficiente con BitArray.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p4-pubs.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p4-simular-exacto",
      "section": "4.3",
      "title": "Simulación exacta con las primitivas del SDK",
      "summary": "Cuándo y cómo simular: límites de memoria, StatevectorEstimator y StatevectorSampler, precisión, disparos y lectura de resultados.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p4-simular-exacto.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p4-aer-ruido",
      "section": "4.4",
      "title": "Qiskit Aer y modelos de ruido",
      "summary": "Simulación exacta y con ruido con las primitivas de Aer, el canal despolarizante, y cómo construir modelos de ruido a medida.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p4-aer-ruido.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p4-estabilizadores",
      "section": "4.5",
      "title": "Simular circuitos de Clifford",
      "summary": "Qué son los circuitos de estabilizadores, por qué se simulan eficientemente y cómo usarlos con Aer, incluso con 500 qubits y ruido de Pauli.",
-     "minutes": 6,
-     "missions": [
-      {
-       "notebook": "practica/p4-estabilizadores.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 6
     },
     {
      "id": "p4-local-testing",
@@ -321,11 +286,6 @@
      "summary": "Probar programas de IBM Quantum en tu computadora con backends falsos o Aer, los métodos de simulación, y probar mitigación de errores antes de usar un QPU.",
      "minutes": 9,
      "missions": [
-      {
-       "notebook": "practica/p4-local-testing.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito4.py",
        "title": "Proyecto Ising · Hito IV",

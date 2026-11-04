@@ -510,46 +510,79 @@
     "4.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero ejecutas Estimator y Sampler sobre el estado de Bell y comparas con tu apuesta. [[n2]]Después cambias la implementación de Sampler por BackendSamplerV2, sin tocar el resto del código. [[n3]]Y por último calculas un valor esperado de dos maneras, con Estimator y a partir de los conteos de Sampler, y compruebas que coinciden. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.",
+   "say": "Ahora te toca a ti. [[n1]]Primero apuestas los tres valores esperados que Estimator da para el estado de Bell, y los comparas con lo que calcula. [[n2]]Después cambias la implementación de Sampler por BackendSamplerV2, sin tocar el resto del código. [[n3]]Y por último escribes la función que calcula un valor esperado a partir de los conteos de Sampler, y compruebas que coincide con el de Estimator.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p4-primitivas.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta Estimator y Sampler sobre el estado de Bell."
-      },
-      {
-       "level": 2,
-       "text": "Cambia `StatevectorSampler` por `BackendSamplerV2` sin tocar el resto."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `z_desde_conteos` y compruébala contra el $\\langle Z_0\\rangle$ de Estimator."
-      }
+     "type": "exercise",
+     "exercise": "p4-primitivas/dos-vistas",
+     "prompt": "Este código calcula con Estimator tres valores esperados del estado de Bell y mide el mismo estado con Sampler. Apuesta en `prediccion` una lista con $\\langle ZZ\\rangle$, $\\langle ZI\\rangle$ y $\\langle XX\\rangle$, y compruébala después.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Piensa en lo que ve cada observable: Z mide el valor de un qubit y X, la fase entre las ramas.",
+      "En el estado de Bell, los dos qubits siempre coinciden; mira qué pasa cuando miras un solo qubit y cuando miras los dos.",
+      "La lista tiene tres números, en el orden `[ZZ, ZI, XX]`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorEstimator, StatevectorSampler\nfrom qiskit.quantum_info import SparsePauliOp\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\n\nobservables = [SparsePauliOp(p) for p in [\"ZZ\", \"ZI\", \"XX\"]]\nevs = StatevectorEstimator().run([(bell, observables)]).result()[0].data.evs\n\nprediccion = None   # ✏️ tu apuesta: una lista con ⟨ZZ⟩, ⟨ZI⟩ y ⟨XX⟩\n\nbell_medido = bell.copy()\nbell_medido.measure_all()\nconteos_bell = StatevectorSampler(seed=3).run([bell_medido], shots=1024).result()[0].data.meas.get_counts()\n# compruébalo con print(evs.round(3)) y print(conteos_bell)",
+     "cases": [
+      "tu apuesta son los tres valores esperados"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-primitivas/backend-sampler",
+     "prompt": "Cambia la línea de `sampler` para que use `BackendSamplerV2` sobre `backend`, sin tocar el resto: `run` recibe lo mismo y devuelve lo mismo. El circuito ya está transpilado para ese backend.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "`BackendSamplerV2` envuelve un backend en la interfaz de las primitivas.",
+      "Solo cambia la línea que crea `sampler`; la llamada a `run` y el resto del programa se quedan igual.",
+      "El constructor recibe el backend con el argumento `backend=`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import BackendSamplerV2, StatevectorSampler\nfrom qiskit.providers.fake_provider import GenericBackendV2\nfrom qiskit.transpiler import generate_preset_pass_manager\n\nbell_medido = QuantumCircuit(2)\nbell_medido.h(0)\nbell_medido.cx(0, 1)\nbell_medido.measure_all()\n\nbackend = GenericBackendV2(2, seed=1)\nisa_bell = generate_preset_pass_manager(1, backend=backend).run(bell_medido)\n\nsampler = StatevectorSampler(seed=3)   # ✏️ cambia esta línea por BackendSamplerV2(backend=backend)\n\nconteos_backend = sampler.run([isa_bell], shots=1024).result()[0].data.meas.get_counts()\nprint(type(sampler).__name__, conteos_backend)",
+     "cases": [
+      "sampler es un BackendSamplerV2",
+      "el backend deja casi todos los disparos en 00 y 11"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-primitivas/z-desde-conteos",
+     "prompt": "Escribe `z_desde_conteos(conteos, k)`: recibe el diccionario de `get_counts()` y el índice de un qubit, y devuelve $\\langle Z_k\\rangle$ como un número entre -1 y 1. Cada disparo con el bit `0` en ese qubit aporta $+1$ y cada disparo con `1` aporta $-1$; el resultado es el promedio sobre todos los disparos. Ojo: el qubit 0 es el carácter de la **derecha** de la cadena. Por ejemplo, con `{\"00\": 3, \"01\": 1}` y `k = 0` devuelve 0.5.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Un valor esperado de Z es un promedio: el bit 0 vale $+1$ y el bit 1 vale $-1$.",
+      "Recorre los pares cadena y cantidad del diccionario, y elige el carácter del qubit `k` contando desde la derecha.",
+      "Suma cantidad por signo para cada cadena y divide entre el total de disparos, que es la suma de las cantidades."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorEstimator, StatevectorSampler\nfrom qiskit.quantum_info import SparsePauliOp\n\nry = QuantumCircuit(3)\nry.ry(0.8, 0)\n\nz0_estimator = float(StatevectorEstimator().run([(ry, SparsePauliOp(\"IIZ\"))]).result()[0].data.evs)\n\nry_medido = ry.copy()\nry_medido.measure_all()\nconteos_ry = StatevectorSampler(seed=5).run([ry_medido], shots=20000).result()[0].data.meas.get_counts()\n\n\ndef z_desde_conteos(conteos, k):\n    # ✏️ promedio de +1 (bit 0) y -1 (bit 1) del qubit k sobre todos los disparos\n    return 0.0\n\n\nprint(f\"Estimator: {z0_estimator:.3f} · Sampler: {z_desde_conteos(conteos_ry, 0):.3f}\")",
+     "cases": [
+      "el qubit 0 es el carácter de la derecha",
+      "coincide con Estimator: cos(0.8) en el qubit 0 y 1 en el qubit 1"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

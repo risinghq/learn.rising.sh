@@ -612,46 +612,78 @@
     "4.4",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero comparas un GHZ ideal con el mismo circuito bajo ruido despolarizante. [[n2]]Después buscas qué probabilidad de error deja la mitad de los disparos correctos, y la comparas con la estimación uno menos p a la m. [[n3]]Y por último construyes tú mismo un error de lectura asimétrico.",
+   "say": "Ahora te toca a ti. [[n1]]Primero apuestas qué fracción de los disparos de un GHZ sigue siendo correcta bajo ruido despolarizante. [[n2]]Después buscas qué probabilidad de error deja cerca de la mitad de los disparos correctos. [[n3]]Y por último escribes la función que construye un error de lectura asimétrico.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p4-aer-ruido.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Compara un GHZ de 6 qubits ideal y con un 2 % despolarizante por CX."
-      },
-      {
-       "level": 2,
-       "text": "Ajusta `p` hasta que la fracción correcta caiga entre 0.55 y 0.65."
-      },
-      {
-       "level": 3,
-       "text": "Construye un `ReadoutError` y comprueba que lees `0` el 10 % de las veces."
-      }
+     "type": "exercise",
+     "exercise": "p4-aer-ruido/ideal-vs-ruidoso",
+     "prompt": "El GHZ de 6 qubits tiene 5 CX, y cada una lleva un error despolarizante del 2 %. Apuesta en `prediccion` qué fracción de los disparos sigue siendo `000000` o `111111` (un número entre 0 y 1) y compruébala después.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "El ideal solo da dos cadenas; el ruido de cada CX hace que algunos disparos salgan de ellas.",
+      "La lección estima la supervivencia con $(1-p)^m$: aquí $p=0.02$ y $m=5$.",
+      "Calcula $0.98^5$ y piensa si una estimación así sobrestima o subestima los disparos correctos."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.noise import NoiseModel, depolarizing_error\n\nn = 6\n\n\ndef ghz(n):\n    qc = QuantumCircuit(n)\n    qc.h(0)\n    for k in range(n - 1):\n        qc.cx(k, k + 1)\n    qc.measure_all()\n    return qc\n\n\ndef conteos(qc, ruido, shots=4000):\n    sim = AerSimulator(noise_model=ruido, seed_simulator=5)\n    isa = generate_preset_pass_manager(1, backend=sim).run(qc)\n    return sim.run(isa, shots=shots).result().get_counts()\n\n\ndef correctos(c):\n    return (c.get(\"0\" * n, 0) + c.get(\"1\" * n, 0)) / sum(c.values())\n\n\nruido_cx = NoiseModel()\nruido_cx.add_all_qubit_quantum_error(depolarizing_error(0.02, 2), [\"cx\"])\n\nideal = correctos(conteos(ghz(n), None))\nruidoso = correctos(conteos(ghz(n), ruido_cx))\n\nprediccion = None   # ✏️ tu apuesta: la fracción de disparos correctos con ruido, un número entre 0 y 1\n# compruébalo con print(ideal, ruidoso)",
+     "cases": [
+      "tu apuesta es la fracción correcta con ruido"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-aer-ruido/p-a-la-mitad",
+     "prompt": "Cambia **solo** `p`, la probabilidad despolarizante de cada CX, para que la fracción de disparos correctos de `fraccion` caiga entre 0.55 y 0.65. Después compara con $(1-p)^5$: ¿la estimación es pesimista u optimista?",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Más ruido en cada CX deja menos disparos correctos.",
+      "Prueba valores de `p` mayores que 0.02 y mira `fraccion` en lo que imprime el programa.",
+      "Un valor entre 0.1 y 0.2 deja la fracción cerca de la mitad."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.noise import NoiseModel, depolarizing_error\n\n\ndef ghz(n):\n    qc = QuantumCircuit(n)\n    qc.h(0)\n    for k in range(n - 1):\n        qc.cx(k, k + 1)\n    qc.measure_all()\n    return qc\n\n\ndef conteos(qc, ruido, shots=4000):\n    sim = AerSimulator(noise_model=ruido, seed_simulator=5)\n    isa = generate_preset_pass_manager(1, backend=sim).run(qc)\n    return sim.run(isa, shots=shots).result().get_counts()\n\n\ndef correctos(c):\n    return (c.get(\"0\" * 6, 0) + c.get(\"1\" * 6, 0)) / sum(c.values())\n\n\np = 0.0   # ✏️ probabilidad despolarizante de cada CX\n\nruido_p = NoiseModel()\nruido_p.add_all_qubit_quantum_error(depolarizing_error(p, 2), [\"cx\"])\nfraccion = correctos(conteos(ghz(6), ruido_p))\nprint(f\"p = {p} → correctos {fraccion:.3f} · estimación (1-p)^5 = {(1 - p) ** 5:.3f}\")",
+     "cases": [
+      "la fracción correcta cae entre 0.55 y 0.65"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-aer-ruido/error-de-lectura",
+     "prompt": "Completa `modelo_lectura(p01, p10)`: devuelve un `NoiseModel` con un `ReadoutError` en todos los qubits, donde `p01` es la probabilidad de leer 1 cuando el valor verdadero es 0 y `p10` la de leer 0 cuando es 1. Ojo: la matriz de asignación tiene una fila por valor verdadero, y cada fila suma 1. Por ejemplo, con `p01 = 0.05` y `p10 = 0.10`, un qubit en $|1\\rangle$ se lee como `0` el 10 % de las veces.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Un `ReadoutError` se da como una matriz de probabilidades de asignación.",
+      "La fila $i$ es lo que se registra cuando el valor verdadero es $i$: la fila 0 reparte entre leer 0 y leer 1.",
+      "Rellena las dos filas con `1 - p01`, `p01`, `p10` y `1 - p10`, y añádelo con `add_all_qubit_readout_error`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.noise import NoiseModel, ReadoutError\n\n\ndef modelo_lectura(p01, p10):\n    ruido = NoiseModel()\n    # ✏️ añade el ReadoutError con ruido.add_all_qubit_readout_error(...)\n    return ruido\n\n\nuno = QuantumCircuit(1)\nuno.x(0)\nuno.measure_all()\n\nsim = AerSimulator(noise_model=modelo_lectura(0.05, 0.10), seed_simulator=5)\nc_uno = sim.run(generate_preset_pass_manager(1, backend=sim).run(uno), shots=20000).result().get_counts()\nprint(c_uno, f\"· lee 0 el {c_uno.get('0', 0) / 20000:.1%} de las veces\")",
+     "cases": [
+      "con |1⟩ lees 0 el 10 % de las veces",
+      "con |0⟩ lees 1 el 5 % de las veces"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]
@@ -674,7 +706,7 @@
    "ask": {
     "kind": "reflect",
     "prompts": [
-     "En el cuaderno, la estimación `(1 - p) ** m` salió más pesimista que la simulación. ¿Por qué crees que subestima la fracción de disparos correctos?",
+     "En el ejercicio de la probabilidad a la mitad, la estimación `(1 - p) ** m` salió más pesimista que la simulación. ¿Por qué crees que subestima la fracción de disparos correctos?",
      "En tu proyecto Ising, cada paso de Trotter añade CX. ¿Cómo esperas que cambie la curva de magnetización ruidosa a medida que avanza el tiempo simulado?"
     ]
    },

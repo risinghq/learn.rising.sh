@@ -499,46 +499,78 @@
     "4.6",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero ejecutas un estado de Bell en un backend falso y miras cuánto ruido trae su instantánea. [[n2]]Después cambias el backend por un AerSimulator ideal, sin tocar el resto del programa. [[n3]]Y por último completas una función que estima Z Z con y sin mitigación, y compruebas que la mitigada se acerca más al valor ideal.",
+   "say": "Ahora te toca a ti. [[n1]]Primero apuestas cuántos disparos hace por defecto el Sampler sobre un backend falso, y ejecutas un estado de Bell. [[n2]]Después cambias el backend por un AerSimulator ideal, sin tocar el resto del programa. [[n3]]Y por último completas una función que estima Z Z con y sin mitigación, y compruebas que la mitigada se acerca más al valor ideal.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p4-local-testing.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta un Bell en `FakeManilaV2` y cuenta los `01` y `10`."
-      },
-      {
-       "level": 2,
-       "text": "Cambia `backend` por `AerSimulator()` y comprueba que el ruido desaparece."
-      },
-      {
-       "level": 3,
-       "text": "Completa `ev_zz(mitigar)` y comprueba que la mitigación acerca el valor a 1."
-      }
+     "type": "exercise",
+     "exercise": "p4-local-testing/bell-fake",
+     "prompt": "Este código ejecuta un Bell en `FakeManilaV2`, que imita un procesador real de 5 qubits con su ruido. Apuesta en `prediccion` cuántos disparos hace el Sampler cuando no le pides ninguno, y compruébalo después.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Si no pides disparos, el Sampler usa los suyos por defecto.",
+      "La suma de los conteos que devuelve es el número de disparos.",
+      "El valor por defecto es una potencia de dos mayor que 1000."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit.circuit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake_manila = FakeManilaV2()\n\nbell_medido = QuantumCircuit(2)\nbell_medido.h(0)\nbell_medido.cx(0, 1)\nbell_medido.measure_all()\n\nisa_bell = generate_preset_pass_manager(backend=fake_manila, optimization_level=1).run(bell_medido)\nsampler_fake = Sampler(mode=fake_manila, options={\"simulator\": {\"seed_simulator\": 42}})\nconteos_fake = sampler_fake.run([isa_bell]).result()[0].data.meas.get_counts()\n\nprediccion = None   # ✏️ tu apuesta: ¿cuántos disparos hace el Sampler por defecto?\n# compruébalo con print(sum(conteos_fake.values()), conteos_fake)",
+     "cases": [
+      "tu apuesta es el número de disparos por defecto"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-local-testing/sin-ruido",
+     "prompt": "Cambia `backend` por `AerSimulator()` y deja el resto igual: el programa no cambia, solo el backend. Con un simulador ideal ya no deben aparecer `01` ni `10`.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "`backend` es la única línea que decide dónde se ejecuta el programa.",
+      "El resto del código lee `backend`: el transpilado y el Sampler.",
+      "`AerSimulator()` sin argumentos es un simulador sin ruido."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit.circuit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake_manila = FakeManilaV2()\n\nbell_medido = QuantumCircuit(2)\nbell_medido.h(0)\nbell_medido.cx(0, 1)\nbell_medido.measure_all()\n\nbackend = fake_manila   # ✏️ cambia a AerSimulator()\n\nisa_local = generate_preset_pass_manager(backend=backend, optimization_level=1).run(bell_medido)\nsampler_local = Sampler(mode=backend, options={\"simulator\": {\"seed_simulator\": 42}})\nconteos_local = sampler_local.run([isa_local]).result()[0].data.meas.get_counts()\nprint(type(backend).__name__, conteos_local)",
+     "cases": [
+      "backend es un AerSimulator",
+      "sin ruido solo salen 00 y 11"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-local-testing/mitigacion",
+     "prompt": "Completa `ev_zz(mitigar)`: estima $\\langle ZZ\\rangle$ del estado de Bell con un `Estimator` sobre `fake_manila`, activando `resilience.measure_mitigation` cuando `mitigar` es verdadero y desactivándolo cuando es falso. Devuelve un `float`. El valor ideal es 1: la versión mitigada debe acercarse más.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Las opciones del Estimator se cambian antes de ejecutar.",
+      "La mitigación de errores de lectura está en `estimator.options.resilience`.",
+      "Asigna el argumento `mitigar` a `measure_mitigation` antes de llamar a `run`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit.circuit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake_manila = FakeManilaV2()\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\n\nisa_estado = generate_preset_pass_manager(backend=fake_manila, optimization_level=1).run(bell)\nzz = SparsePauliOp(\"ZZ\").apply_layout(isa_estado.layout)\n\n\ndef ev_zz(mitigar):\n    estimator = Estimator(mode=fake_manila, options={\"simulator\": {\"seed_simulator\": 1}})\n    # ✏️ activa o desactiva estimator.options.resilience.measure_mitigation según `mitigar`\n    return float(estimator.run([(isa_estado, zz)]).result()[0].data.evs)\n\n\nsin_mitigar, mitigado = ev_zz(False), ev_zz(True)\nprint(f\"sin mitigar {sin_mitigar:.3f} · mitigado {mitigado:.3f}\")",
+     "cases": [
+      "la mitigación acerca ⟨ZZ⟩ a 1"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

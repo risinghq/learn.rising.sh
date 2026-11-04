@@ -271,11 +271,11 @@
   ]
  },
  "mision": {
-  "dur": 29.064,
+  "dur": 24.432,
   "marks": {
-   "n1": 6.454,
-   "n2": 11.86,
-   "n3": 18.371
+   "n1": 2.449,
+   "n2": 7.374,
+   "n3": 13.771
   },
   "cues": [
    [
@@ -284,19 +284,15 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Primero apuestas las formas que tienen los dos barridos de la lección."
    ],
    [
-    6.454,
-    "Primero reproduces los dos barridos de la lección y compruebas sus formas."
+    7.374,
+    "Después corriges la forma de los observables para que evs salga con forma tres por diez."
    ],
    [
-    11.86,
-    "Después cambias solo la forma de los observables para que evs salga con forma tres por diez."
-   ],
-   [
-    18.371,
-    "Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para cinco ángulos, posprocesando el BitArray sin diccionarios."
+    13.771,
+    "Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para varios ángulos, posprocesando el BitArray sin diccionarios."
    ]
   ]
  },

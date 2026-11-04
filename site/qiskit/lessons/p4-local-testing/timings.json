@@ -252,11 +252,11 @@
   ]
  },
  "mision": {
-  "dur": 29.808,
+  "dur": 27.288,
   "marks": {
-   "n1": 6.454,
-   "n2": 13.191,
-   "n3": 20.041
+   "n1": 2.449,
+   "n2": 10.686,
+   "n3": 17.536
   },
   "cues": [
    [
@@ -265,18 +265,14 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Primero apuestas cuántos disparos hace por defecto el Sampler sobre un backend falso, y ejecutas un estado de Bell."
    ],
    [
-    6.454,
-    "Primero ejecutas un estado de Bell en un backend falso y miras cuánto ruido trae su instantánea."
-   ],
-   [
-    13.191,
+    10.686,
     "Después cambias el backend por un AerSimulator ideal, sin tocar el resto del programa."
    ],
    [
-    20.041,
+    17.536,
     "Y por último completas una función que estima Z Z con y sin mitigación, y compruebas que la mitigada se acerca más al valor ideal."
    ]
   ]
