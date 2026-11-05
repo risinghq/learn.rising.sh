@@ -252,41 +252,33 @@
   ]
  },
  "mision": {
-  "dur": 37.848,
+  "dur": 37.008,
   "marks": {
-   "n1": 17.069,
-   "n2": 21.428,
-   "n3": 26.565,
-   "check": 30.84
+   "n1": 5.279,
+   "n2": 13.332,
+   "n3": 21.017,
+   "check": 30.825
   },
   "cues": [
    [
     0.107,
-    "Ahora te toca a ti."
+    "Ahora practicas el contrato de Serverless en ejercicios locales."
    ],
    [
-    2.449,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
+    5.279,
+    "Primero escribe ejecutar(circuitos), que devuelve una profundidad por circuito al transpilar con FakeFez."
    ],
    [
-    7.374,
-    "Serverless corre en la nube y pide una cuenta de pago, así que el cuaderno reproduce su contrato en tu equipo, con un backend simulado."
+    13.332,
+    "Después corrige argumentos(circuitos): el programa remoto recibe el nombre serializable del backend."
    ],
    [
-    17.069,
-    "Primero ejecutas un programa y lees sus resultados."
+    21.017,
+    "Y por último escribe profundidades(circuitos), que crea una referencia por circuito con distribute_task y reúne los resultados con get."
    ],
    [
-    21.428,
-    "Después arreglas una llamada cuyo argumento no se puede serializar."
-   ],
-   [
-    26.565,
-    "Y por último paralelizas con distribute task y get."
-   ],
-   [
-    30.84,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde."
+    30.825,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

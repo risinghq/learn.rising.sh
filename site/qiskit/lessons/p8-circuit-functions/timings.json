@@ -166,32 +166,28 @@
   ]
  },
  "mision": {
-  "dur": 26.568,
+  "dur": 23.184,
   "marks": {
-   "n1": 8.393,
-   "n2": 13.601,
-   "n3": 19.319
+   "n1": 5.392,
+   "n2": 11.591,
+   "n3": 16.63
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica de esta lección."
+    "Ahora practicas el costo de pedir precisión a una función de circuito."
    ],
    [
-    3.807,
-    "Corre con primitivas locales; no usa ninguna cuenta."
+    5.392,
+    "Primero escribe un barrido que mida la dispersión de un estimador para varias precisiones."
    ],
    [
-    8.393,
-    "Primero mides cómo baja el error de un estimador al subir su precisión."
+    11.591,
+    "Después corrige el exponente de la fórmula de tiempo de QPU."
    ],
    [
-    13.601,
-    "Después arreglas una fórmula de tiempo de QPU cuyo exponente está mal."
-   ],
-   [
-    19.319,
-    "Y por último inviertes la fórmula: dado un tiempo máximo, calculas qué precisión puedes pedir."
+    16.63,
+    "Y por último escribe precision_alcanzable(t_max, va), la función inversa."
    ]
   ]
  },

@@ -454,46 +454,78 @@
     "8.2",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica de esta lección. Todo corre en tu equipo con OBP. [[n1]]Primero reproduces la retropropagación: cuatro capas absorbidas, sesenta y cuatro términos. [[n2]]Después le pones un presupuesto de operador, para que OBP se detenga antes de que el observable crezca demasiado. [[n3]]Y por último escribes una función que elige cuántas capas absorber dado un límite de términos.",
+   "say": "Ahora practicas la retropropagación de operadores con una cadena local de seis espines. [[n1]]Primero escribe `retropropaga(capas_absorbidas)` y comprueba cómo cambian los términos y la profundidad. [[n2]]Después corrige el presupuesto para que OBP se detenga antes de superar el límite. [[n3]]Y por último escribe `mejor_k(limite)`, que elige cuántas capas finales caben.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p8-addons.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Retropropaga cuatro capas y compara términos, profundidad y valor esperado."
-      },
-      {
-       "level": 2,
-       "text": "Añade un presupuesto de operador para que OBP se detenga solo."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `mejor_k(limite)`: cuántas capas puedes absorber sin pasar del límite de términos."
-      }
+     "type": "exercise",
+     "exercise": "p8-addons/retropropaga-observable",
+     "prompt": "Escribe `retropropaga(capas_absorbidas)`: absorbe las capas finales de la cadena de seis espines con OBP y devuelve `(terminos, profundidad, valor)`, donde `valor` conserva el valor esperado del observable de magnetización.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Construye la misma cadena de Ising y el observable de magnetización antes de llamar a OBP.",
+      "Separa las capas con `slice_by_gate_types` y combina las capas que quedan.",
+      "El resultado final contiene el número de términos, la profundidad y el valor esperado."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def retropropaga(capas_absorbidas):\n    # Devuelve (términos del observable, profundidad restante, valor esperado).\n    return None",
+     "cases": [
+      "absorbe cuatro capas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-addons/presupuesto-operador",
+     "prompt": "Corrige `terminos_con_presupuesto(limite)`: crea el presupuesto de OBP con el límite recibido y devuelve `(terminos, profundidad, valor)` sin superar ese límite.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "El presupuesto debe controlar la expansión del observable durante la retropropagación.",
+      "Busca la variable `presupuesto` en la llamada a `backpropagate`.",
+      "Configura la clase de presupuesto con el límite que recibe la función."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit_addon_obp import backpropagate\nfrom qiskit_addon_utils.slicing import combine_slices, slice_by_gate_types\n\n\ndef terminos_con_presupuesto(limite):\n    circuito = QuantumCircuit(6)\n    for _ in range(4):\n        for qubit in range(0, 5, 2):\n            circuito.rzz(0.4, qubit, qubit + 1)\n        for qubit in range(1, 5, 2):\n            circuito.rzz(0.4, qubit, qubit + 1)\n        for qubit in range(6):\n            circuito.rx(0.2, qubit)\n    observable = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / 6) for i in range(6)], num_qubits=6)\n    capas = slice_by_gate_types(circuito)\n    presupuesto = None\n    nuevo, resto, _ = backpropagate(observable, capas, operator_budget=presupuesto)\n    corto = combine_slices(resto, include_barriers=False) if resto else QuantumCircuit(6)\n    valor = float(np.real(Statevector(corto).expectation_value(nuevo)))\n    return len(nuevo), corto.depth(), valor",
+     "cases": [
+      "respeta un límite de 100 términos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-addons/mejor-capas",
+     "prompt": "Escribe `mejor_k(limite)`: devuelve el mayor número de capas finales de la cadena de seis espines cuyo observable no supera `limite` términos. Si no cabe una capa, devuelve 0.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Prueba los valores de `k` en orden creciente y conserva el último que cabe.",
+      "En cada prueba retropropaga `capas[-k:]` sobre el mismo observable.",
+      "Detén el recorrido cuando el tamaño del observable rebase el límite."
+     ],
+     "id": "e3",
+     "starter": "def mejor_k(limite):\n    return 0",
+     "cases": [
+      "elige capas para tres límites"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

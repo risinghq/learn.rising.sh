@@ -423,46 +423,78 @@
     "8.5",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica de esta lección. Las funciones de aplicación piden problemas en el formato del dominio; aquí los resuelves tú, en tu equipo, sin cuenta. [[n1]]Primero resuelves un máximo corte, con el diccionario QUBO de Parity Twine. [[n2]]Después arreglas una cartera que debe elegir exactamente dos activos: la penalización es demasiado pequeña. [[n3]]Y por último escribes la conversión de QUBO a Hamiltoniano de Ising, y la compruebas contra las dieciséis energías.",
+   "say": "Ahora practicas tres transformaciones que usan las funciones de aplicación. [[n1]]Primero escribe un QUBO de máximo corte y encuentra el mejor corte. [[n2]]Después corrige la penalización de una cartera que debe elegir exactamente dos activos. [[n3]]Y por último escribe `qubo_a_ising(qubo, n)` y comprueba sus energías.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p8-app-functions.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Resuelve un máximo corte con el diccionario QUBO y busca el mejor corte."
-      },
-      {
-       "level": 2,
-       "text": "Sube la penalización para que la cartera elija exactamente dos activos."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `qubo_a_ising`: convierte x = (1 − Z)/2 y comprueba las energías."
-      }
+     "type": "exercise",
+     "exercise": "p8-app-functions/maximo-corte",
+     "prompt": "Escribe `maximo_corte(aristas, n)`: construye el diccionario QUBO con `2*x_i*x_j - x_i - x_j` por arista, busca la asignación binaria de menor energía y devuelve `(qubo, asignacion, numero_de_aristas_cortadas)`.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "Una arista cortada debe bajar la energía del QUBO.",
+      "Acumula los términos lineales y cuadráticos para cada pareja de `aristas`.",
+      "Enumera todas las asignaciones binarias de longitud `n` y elige la de menor energía."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def maximo_corte(aristas, n):\n    return {}, (0,) * n, 0",
+     "cases": [
+      "encuentra un corte de cuatro aristas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-app-functions/penalizacion-cartera",
+     "prompt": "Corrige `elegir_cartera(penalizacion)`: usa la penalización recibida para que la asignación binaria de menor energía tenga exactamente dos activos.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "La penalización debe participar en los términos lineales, cuadráticos y constante del QUBO.",
+      "Busca si el valor recibido se reemplaza antes de construir la cartera.",
+      "Conserva el argumento `penalizacion` que llega a la función."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "import itertools\n\n\ndef energia(qubo, x):\n    return sum(c * __import__(\"math\").prod(x[i] for i in indices) for indices, c in qubo.items())\n\n\ndef elegir_cartera(penalizacion):\n    penalizacion = 0.01\n    rendimiento = (0.10, 0.08, 0.06, 0.04)\n    riesgo = (0.10, 0.08, 0.05, 0.02)\n    qubo = {(): penalizacion * 4}\n    for i in range(4):\n        qubo[(i,)] = -rendimiento[i] + 0.3 * riesgo[i] - 3 * penalizacion\n        for j in range(i + 1, 4):\n            qubo[(i, j)] = 2 * penalizacion\n    return min(itertools.product([0, 1], repeat=4), key=lambda x: energia(qubo, x))",
+     "cases": [
+      "elige exactamente dos activos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-app-functions/qubo-ising",
+     "prompt": "Escribe `qubo_a_ising(qubo, n)`: recibe claves de términos como `\"()\"`, `\"(i,)\"` y `\"(i, j)\"`, y devuelve `(H, constante)` con `H` como `SparsePauliOp` de `n` qubits. La sustitución es `x = (1 - Z) / 2`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Separa la constante, los términos de un qubit y los términos de dos qubits.",
+      "Un término lineal aporta `c/2` a la constante y `-c/2` a su operador Z.",
+      "Un término cuadrático aporta `q/4` a la constante, dos términos Z negativos y un término ZZ positivo."
+     ],
+     "id": "e3",
+     "starter": "def qubo_a_ising(qubo, n):\n    return None",
+     "cases": [
+      "coinciden las ocho energías"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

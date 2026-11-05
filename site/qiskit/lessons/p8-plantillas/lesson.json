@@ -352,46 +352,78 @@
     "8.6",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica de esta lección. Las plantillas se despliegan en Serverless y piden una cuenta; el cuaderno trae una versión local con la misma estructura y los backends statevector y fake. [[n1]]Primero ejecutas la misma función en los dos backends y miras cómo el ruido separa las curvas. [[n2]]Después reordenas la función para que valide antes de la etapa cara. [[n3]]Y por último calculas cuántas capas de Trotter deja un plan de compresión, con validación temprana.",
+   "say": "Ahora practicas el patrón de una plantilla de función con simuladores locales. [[n1]]Primero ejecuta la misma cadena en `statevector` y `fake` y compara sus resultados. [[n2]]Después corrige la función para validar antes de construir. [[n3]]Y por último escribe `pasos_en_qpu(t_steps, plan)` con validación del plan.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p8-plantillas.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta la función en `statevector` y en `fake` y compara las curvas."
-      },
-      {
-       "level": 2,
-       "text": "Mueve la validación antes de la etapa cara."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `pasos_en_qpu(t_steps, plan)` y lanza `ValueError` si el plan no cabe."
-      }
+     "type": "exercise",
+     "exercise": "p8-plantillas/dos-backends",
+     "prompt": "Escribe `comparar_backends(t_steps)`: construye una cadena de cuatro qubits para `t_steps`, ejecútala con `StatevectorEstimator` y con `AerEstimator` sobre `FakeBelemV2`, y devuelve `(numero_de_instantes, magnetizacion_inicial, diferencia_maxima)`.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Construye un circuito por instante y usa el mismo observable de magnetización en ambos backends.",
+      "Transpila los circuitos para `FakeBelemV2` antes de pasarlos al estimador de Aer.",
+      "Convierte los valores a `float` y calcula la diferencia máxima entre las dos listas."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def comparar_backends(t_steps):\n    return None",
+     "cases": [
+      "compara statevector y fake"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-plantillas/validar-pronto",
+     "prompt": "Corrige `mi_funcion(entradas)`: valida `t_steps` antes de llamar a la etapa cara `construir`. Una entrada inválida debe lanzar `ValueError` sin aumentar `COSTE[\"etapas\"]`.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "La validación no necesita construir circuitos para decidir si una entrada sirve.",
+      "Observa el orden de las dos llamadas dentro de `mi_funcion`.",
+      "Coloca `validar(entradas)` antes de `construir(entradas)`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "COSTE = {\"etapas\": 0}\n\n\ndef construir(entradas):\n    COSTE[\"etapas\"] += 1\n    return [object() for _ in range(entradas[\"t_steps\"] + 1)]\n\n\ndef validar(entradas):\n    if not isinstance(entradas.get(\"t_steps\"), int) or entradas[\"t_steps\"] < 1:\n        raise ValueError(\"t_steps debe ser un entero positivo\")\n\n\ndef mi_funcion(entradas):\n    circuitos = construir(entradas)\n    validar(entradas)\n    return len(circuitos)",
+     "cases": [
+      "rechaza antes de gastar una etapa"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-plantillas/pasos-en-qpu",
+     "prompt": "Escribe `pasos_en_qpu(t_steps, plan)`: el plan `{'n_steps': k, 'ansatz_steps': m}` devuelve `m + t_steps - k`, y lanza `ValueError` si `k` es mayor que `t_steps`.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Primero comprueba que el plan cabe en el número total de pasos.",
+      "Los pasos comprimidos cuestan las capas del ansatz y los restantes siguen sin comprimir.",
+      "Suma las capas del ansatz con los pasos que quedan sin comprimir."
+     ],
+     "id": "e3",
+     "starter": "def pasos_en_qpu(t_steps, plan):\n    return None",
+     "cases": [
+      "calcula las capas restantes"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

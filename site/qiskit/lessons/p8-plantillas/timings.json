@@ -144,32 +144,28 @@
   ]
  },
  "mision": {
-  "dur": 33.768,
+  "dur": 23.952,
   "marks": {
-   "n1": 14.691,
-   "n2": 21.484,
-   "n3": 26.594
+   "n1": 5.93,
+   "n2": 12.271,
+   "n3": 16.842
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica de esta lección."
+    "Ahora practicas el patrón de una plantilla de función con simuladores locales."
    ],
    [
-    3.807,
-    "Las plantillas se despliegan en Serverless y piden una cuenta; el cuaderno trae una versión local con la misma estructura y los backends statevector y fake."
+    5.93,
+    "Primero ejecuta la misma cadena en statevector y fake y compara sus resultados."
    ],
    [
-    14.691,
-    "Primero ejecutas la misma función en los dos backends y miras cómo el ruido separa las curvas."
+    12.271,
+    "Después corrige la función para validar antes de construir."
    ],
    [
-    21.484,
-    "Después reordenas la función para que valide antes de la etapa cara."
-   ],
-   [
-    26.594,
-    "Y por último calculas cuántas capas de Trotter deja un plan de compresión, con validación temprana."
+    16.842,
+    "Y por último escribe pasos_en_qpu(t_steps, plan) con validación del plan."
    ]
   ]
  },

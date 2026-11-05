@@ -205,32 +205,28 @@
   ]
  },
  "mision": {
-  "dur": 29.28,
+  "dur": 26.904,
   "marks": {
-   "n1": 6.878,
-   "n2": 14.139,
-   "n3": 22.235
+   "n1": 6.553,
+   "n2": 14.394,
+   "n3": 20.451
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica de esta lección."
+    "Ahora practicas la retropropagación de operadores con una cadena local de seis espines."
    ],
    [
-    3.807,
-    "Todo corre en tu equipo con OBP."
+    6.553,
+    "Primero escribe retropropaga(capas_absorbidas) y comprueba cómo cambian los términos y la profundidad."
    ],
    [
-    6.878,
-    "Primero reproduces la retropropagación: cuatro capas absorbidas, sesenta y cuatro términos."
+    14.394,
+    "Después corrige el presupuesto para que OBP se detenga antes de superar el límite."
    ],
    [
-    14.139,
-    "Después le pones un presupuesto de operador, para que OBP se detenga antes de que el observable crezca demasiado."
-   ],
-   [
-    22.235,
-    "Y por último escribes una función que elige cuántas capas absorber dado un límite de términos."
+    20.451,
+    "Y por último escribe mejor_k(limite), que elige cuántas capas finales caben."
    ]
   ]
  },

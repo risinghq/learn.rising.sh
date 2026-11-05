@@ -172,32 +172,28 @@
   ]
  },
  "mision": {
-  "dur": 33.432,
+  "dur": 26.28,
   "marks": {
-   "n1": 13.233,
-   "n2": 20.069,
-   "n3": 24.329
+   "n1": 5.661,
+   "n2": 12.964,
+   "n3": 18.286
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica de esta lección."
+    "Ahora practicas la interfaz de Qiskit Functions con un catálogo local."
    ],
    [
-    3.807,
-    "Las funciones piden un plan de pago, así que el cuaderno trae un catálogo local con la misma interfaz, y nada sale de tu equipo."
+    5.661,
+    "Primero lista el catálogo, carga una función de circuito, ejecútala y sigue sus estados."
    ],
    [
-    13.233,
-    "Primero listas el catálogo, cargas una función, la ejecutas y sigues sus estados."
+    12.964,
+    "Después corrige el nombre de un backend al que la función sí tiene acceso."
    ],
    [
-    20.069,
-    "Después arreglas un backend al que no tienes acceso."
-   ],
-   [
-    24.329,
-    "Y por último escribes una función que resume un trabajo: sus estados, sus trabajos de Runtime, sus registros y su error."
+    18.286,
+    "Y por último escribe resumen(job), que reúne estados, trabajos de Runtime, registros y error."
    ]
   ]
  },

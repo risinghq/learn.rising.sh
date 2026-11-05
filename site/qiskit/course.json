@@ -504,70 +504,35 @@
      "section": "8.1",
      "title": "Qiskit Serverless",
      "summary": "Ejecutar flujos cuánticos-clásicos completos en la nube de IBM: escribir un programa, subirlo, ejecutarlo, paralelizar tareas, gestionar datos y portar código existente.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p8-serverless.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p8-addons",
      "section": "8.2",
      "title": "Qiskit addons",
      "summary": "El catálogo de herramientas de investigación de Qiskit: qué hace cada addon y en qué paso del patrón encaja.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p8-addons.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p8-functions",
      "section": "8.3",
      "title": "Qiskit Functions",
      "summary": "El catálogo de funciones de IBM y sus socios: qué tipos hay, cómo acceder, ejecutarlas y seguir sus trabajos.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p8-functions.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p8-circuit-functions",
      "section": "8.4",
      "title": "Funciones de circuito",
      "summary": "Las cuatro funciones de circuito del catálogo: TEM, QESEM, Performance Management y Orbit: qué hacen, cuándo convienen y cómo se llaman.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p8-circuit-functions.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p8-app-functions",
      "section": "8.5",
      "title": "Funciones de aplicación",
      "summary": "Las funciones de aplicación del catálogo: optimización, finanzas, química, ecuaciones diferenciales y aprendizaje automático.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p8-app-functions.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p8-plantillas",
@@ -576,11 +541,6 @@
      "summary": "Plantillas de código abierto con flujos de investigación reales, y plantillas base para escribir tus propias funciones y desplegarlas en Serverless.",
      "minutes": 7,
      "missions": [
-      {
-       "notebook": "practica/p8-plantillas.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito8.py",
        "title": "Proyecto Ising · Hito VIII",

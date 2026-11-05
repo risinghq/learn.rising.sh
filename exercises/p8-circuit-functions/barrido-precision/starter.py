@@ -1,0 +1,2 @@
+def dispersiones(precisiones):
+    return {}

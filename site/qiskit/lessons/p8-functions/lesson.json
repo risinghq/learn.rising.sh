@@ -353,46 +353,78 @@
     "8.3",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica de esta lección. Las funciones piden un plan de pago, así que el cuaderno trae un catálogo local con la misma interfaz, y nada sale de tu equipo. [[n1]]Primero listas el catálogo, cargas una función, la ejecutas y sigues sus estados. [[n2]]Después arreglas un backend al que no tienes acceso. [[n3]]Y por último escribes una función que resume un trabajo: sus estados, sus trabajos de Runtime, sus registros y su error.",
+   "say": "Ahora practicas la interfaz de Qiskit Functions con un catálogo local. [[n1]]Primero lista el catálogo, carga una función de circuito, ejecútala y sigue sus estados. [[n2]]Después corrige el nombre de un backend al que la función sí tiene acceso. [[n3]]Y por último escribe `resumen(job)`, que reúne estados, trabajos de Runtime, registros y error.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p8-functions.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Lista el catálogo, carga una función, ejecútala y sigue sus estados."
-      },
-      {
-       "level": 2,
-       "text": "Arregla el backend: cambia el nombre por uno al que tu instancia tiene acceso."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `resumen(job)`: los estados que recorre, sus trabajos de Runtime, sus registros y su error."
-      }
+     "type": "exercise",
+     "exercise": "p8-functions/ejecutar-funcion",
+     "prompt": "Escribe `ejecutar(backend_name)`: carga `ibm/circuit-function`, ejecuta un PUB de Bell con `ZZ`, consulta cuatro estados y devuelve un diccionario con `tipo`, `estados` y `valor`.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "El catálogo se consulta antes de cargar la función de circuito.",
+      "Después de `run`, llama a `status()` cuatro veces y conserva el resultado del trabajo.",
+      "Devuelve las tres claves `tipo`, `estados` y `valor` con los datos obtenidos."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "class Trabajo:\n    def __init__(self):\n        self._estado = 0\n\n    def status(self):\n        self._estado += 1\n        return [\"QUEUED\", \"INITIALIZING\", \"RUNNING\", \"DONE\"][min(self._estado - 1, 3)]\n\n    def result(self):\n        return [[1.0]]\n\n\nclass Funcion:\n    tipo = \"circuito\"\n\n    def run(self, pubs, backend_name):\n        return Trabajo()\n\n\nclass CatalogoLocal:\n    def list(self):\n        return [\"ibm/circuit-function\"]\n\n    def load(self, nombre):\n        return Funcion()\n\n\ndef ejecutar(backend_name=\"fake_fez\"):\n    return {}",
+     "cases": [
+      "ejecuta una función de circuito"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-functions/backend-accesible",
+     "prompt": "Corrige `backend_accesible(nombre)`: devuelve `True` si `nombre` aparece entre los backends de la función y `False` en otro caso.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "La función ya expone el conjunto de backends disponibles.",
+      "Compara el argumento `nombre` con ese conjunto.",
+      "La expresión final tiene la forma `nombre in ...`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "class Funcion:\n    backends = frozenset((\"fake_fez\", \"fake_brisbane\"))\n\n\ndef backend_accesible(nombre):\n    funcion = Funcion()\n    return \"ibm_inexistente\" in funcion.backends",
+     "cases": [
+      "acepta fake_fez"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-functions/resumen-trabajo",
+     "prompt": "Escribe `resumen(job)`: consulta `status()` hasta `DONE` o `ERROR`, y devuelve un diccionario con los estados, `runtime_jobs()`, las líneas de `filtered_logs(include=\"iteration\")` y `error_message()`.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Guarda cada estado en una lista mientras el trabajo siga activo.",
+      "El bucle termina cuando el estado sea `DONE` o `ERROR`.",
+      "Rellena las cuatro claves con los métodos del trabajo después de terminar."
+     ],
+     "id": "e3",
+     "starter": "class Trabajo:\n    def __init__(self, error=False):\n        self._estado = 0\n        self._error = error\n\n    def status(self):\n        self._estado += 1\n        if self._estado == 4:\n            return \"ERROR\" if self._error else \"DONE\"\n        return [\"QUEUED\", \"INITIALIZING\", \"RUNNING\"][self._estado - 1]\n\n    def runtime_jobs(self):\n        return [\"runtime-1\"]\n\n    def filtered_logs(self, include):\n        return \"iteration 1: valores esperados calculados\"\n\n    def error_message(self):\n        return \"falló el observable\" if self._error else None\n\n\ndef resumen(job):\n    return {\"estados\": [], \"runtime_jobs\": [], \"iteraciones\": \"\", \"error\": None}",
+     "cases": [
+      "resume un trabajo terminado"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

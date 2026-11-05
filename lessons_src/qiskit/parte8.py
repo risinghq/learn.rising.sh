@@ -4,6 +4,7 @@ from lib import (
     A,
     Box,
     Code,
+    Exercise,
     Flow,
     Hist,
     L,
@@ -341,31 +342,49 @@ serverless.file_delete(...)""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. Serverless corre en la nube y pide una cuenta de pago, así que el cuaderno reproduce su contrato en tu equipo, con un backend simulado.
-             [[n1]]Primero ejecutas un programa y lees sus resultados. [[n2]]Después arreglas una llamada cuyo argumento no se puede serializar. [[n3]]Y por último paralelizas con distribute task y get.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.""",
+            """Ahora practicas el contrato de Serverless en ejercicios locales.
+             [[n1]]Primero escribe `ejecutar(circuitos)`, que devuelve una profundidad por circuito al transpilar con `FakeFez`. [[n2]]Después corrige `argumentos(circuitos)`: el programa remoto recibe el nombre serializable del backend. [[n3]]Y por último escribe `profundidades(circuitos)`, que crea una referencia por circuito con `distribute_task` y reúne los resultados con `get`.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p8-serverless.py",
-                    [
-                        (
-                            1,
-                            "Ejecuta el programa y lee la profundidad transpilada de cada circuito.",
-                        ),
-                        (2, "Arregla la llamada: cambia la entrada que no se puede serializar."),
-                        (
-                            3,
-                            "Paraleliza la transpilación con `distribute_task` y reúne los resultados con `get`.",
-                        ),
+                Exercise(
+                    "p8-serverless/ejecutar-programa",
+                    "Escribe `ejecutar(circuitos)`: recibe una lista de circuitos de Qiskit, los transpila para `FakeFez` con nivel 1 y devuelve una lista con una profundidad positiva por circuito.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "El programa remoto crea un backend y un pass manager antes de procesar la lista.",
+                        "Pon la configuración del pass manager al principio de `ejecutar`.",
+                        "Construye una lista con la profundidad del circuito transpilado en cada posición.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p8-serverless/entrada-serializable",
+                    "Corrige `argumentos(circuitos)`: devuelve `circuits`, `backend_name` y `optimization_level`. `backend_name` debe ser el texto `fake_fez`, porque el objeto `FakeFez` no se puede serializar.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Las entradas del programa deben poder convertirse en datos simples.",
+                        "Busca el valor que se guarda en la clave `backend_name`.",
+                        "Cambia esa expresión por un nombre de backend entre comillas.",
+                    ],
+                ),
+                Exercise(
+                    "p8-serverless/tareas-paralelas",
+                    "Escribe `profundidades(circuitos)`: transpila cada circuito con nivel 1 y `FakeFez`, devuelve una referencia por llamada a la función decorada con `distribute_task` y entrega la lista de profundidades al aplicar `get`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Una llamada decorada devuelve una tarea pendiente, no su valor.",
+                        "Crea el pass manager dentro de `profundidades` y reúne después todas las referencias.",
+                        "Aplica la función decorada una vez por circuito y pasa la lista completa a `get`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -661,30 +680,48 @@ print(f"valor: {valor(circuito, M):.4f} {valor(corto, obs):.4f}")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica de esta lección. Todo corre en tu equipo con OBP.
-             [[n1]]Primero reproduces la retropropagación: cuatro capas absorbidas, sesenta y cuatro términos. [[n2]]Después le pones un presupuesto de operador, para que OBP se detenga antes de que el observable crezca demasiado. [[n3]]Y por último escribes una función que elige cuántas capas absorber dado un límite de términos.""",
+            """Ahora practicas la retropropagación de operadores con una cadena local de seis espines.
+             [[n1]]Primero escribe `retropropaga(capas_absorbidas)` y comprueba cómo cambian los términos y la profundidad. [[n2]]Después corrige el presupuesto para que OBP se detenga antes de superar el límite. [[n3]]Y por último escribe `mejor_k(limite)`, que elige cuántas capas finales caben.""",
             [
-                Mission(
-                    "practica/p8-addons.py",
-                    [
-                        (
-                            1,
-                            "Retropropaga cuatro capas y compara términos, profundidad y valor esperado.",
-                        ),
-                        (2, "Añade un presupuesto de operador para que OBP se detenga solo."),
-                        (
-                            3,
-                            "Escribe `mejor_k(limite)`: cuántas capas puedes absorber sin pasar del límite de términos.",
-                        ),
+                Exercise(
+                    "p8-addons/retropropaga-observable",
+                    "Escribe `retropropaga(capas_absorbidas)`: absorbe las capas finales de la cadena de seis espines con OBP y devuelve `(terminos, profundidad, valor)`, donde `valor` conserva el valor esperado del observable de magnetización.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Construye la misma cadena de Ising y el observable de magnetización antes de llamar a OBP.",
+                        "Separa las capas con `slice_by_gate_types` y combina las capas que quedan.",
+                        "El resultado final contiene el número de términos, la profundidad y el valor esperado.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p8-addons/presupuesto-operador",
+                    "Corrige `terminos_con_presupuesto(limite)`: crea el presupuesto de OBP con el límite recibido y devuelve `(terminos, profundidad, valor)` sin superar ese límite.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "El presupuesto debe controlar la expansión del observable durante la retropropagación.",
+                        "Busca la variable `presupuesto` en la llamada a `backpropagate`.",
+                        "Configura la clase de presupuesto con el límite que recibe la función.",
+                    ],
+                ),
+                Exercise(
+                    "p8-addons/mejor-capas",
+                    "Escribe `mejor_k(limite)`: devuelve el mayor número de capas finales de la cadena de seis espines cuyo observable no supera `limite` términos. Si no cabe una capa, devuelve 0.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Prueba los valores de `k` en orden creciente y conserva el último que cabe.",
+                        "En cada prueba retropropaga `capas[-k:]` sobre el mismo observable.",
+                        "Detén el recorrido cuando el tamaño del observable rebase el límite.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -928,30 +965,51 @@ job.error_message()""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica de esta lección. Las funciones piden un plan de pago, así que el cuaderno trae un catálogo local con la misma interfaz, y nada sale de tu equipo.
-             [[n1]]Primero listas el catálogo, cargas una función, la ejecutas y sigues sus estados. [[n2]]Después arreglas un backend al que no tienes acceso. [[n3]]Y por último escribes una función que resume un trabajo: sus estados, sus trabajos de Runtime, sus registros y su error.""",
+            """Ahora practicas la interfaz de Qiskit Functions con un catálogo local.
+             [[n1]]Primero lista el catálogo, carga una función de circuito, ejecútala y sigue sus estados. [[n2]]Después corrige el nombre de un backend al que la función sí tiene acceso. [[n3]]Y por último escribe `resumen(job)`, que reúne estados, trabajos de Runtime, registros y error.""",
             [
-                Mission(
-                    "practica/p8-functions.py",
-                    [
-                        (1, "Lista el catálogo, carga una función, ejecútala y sigue sus estados."),
-                        (
-                            2,
-                            "Arregla el backend: cambia el nombre por uno al que tu instancia tiene acceso.",
-                        ),
-                        (
-                            3,
-                            "Escribe `resumen(job)`: los estados que recorre, sus trabajos de Runtime, sus registros y su error.",
-                        ),
+                Exercise(
+                    "p8-functions/ejecutar-funcion",
+                    "Escribe `ejecutar(backend_name)`: carga `ibm/circuit-function`, ejecuta un PUB de Bell con `ZZ`, consulta cuatro estados y devuelve un diccionario con `tipo`, `estados` y `valor`.",
+                    level=1,
+                    needs="python",
+                    id="e1",
+                    hints=[
+                        "El catálogo se consulta antes de cargar la función de circuito.",
+                        "Después de `run`, llama a `status()` cuatro veces y conserva el resultado del trabajo.",
+                        "Devuelve las tres claves `tipo`, `estados` y `valor` con los datos obtenidos.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p8-functions/backend-accesible",
+                    "Corrige `backend_accesible(nombre)`: devuelve `True` si `nombre` aparece entre los backends de la función y `False` en otro caso.",
+                    level=2,
+                    needs="python",
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "La función ya expone el conjunto de backends disponibles.",
+                        "Compara el argumento `nombre` con ese conjunto.",
+                        "La expresión final tiene la forma `nombre in ...`.",
+                    ],
+                ),
+                Exercise(
+                    "p8-functions/resumen-trabajo",
+                    'Escribe `resumen(job)`: consulta `status()` hasta `DONE` o `ERROR`, y devuelve un diccionario con los estados, `runtime_jobs()`, las líneas de `filtered_logs(include="iteration")` y `error_message()`.',
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hints=[
+                        "Guarda cada estado en una lista mientras el trabajo siga activo.",
+                        "El bucle termina cuando el estado sea `DONE` o `ERROR`.",
+                        "Rellena las cuatro claves con los métodos del trabajo después de terminar.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1192,27 +1250,48 @@ job = orbit.run(
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica de esta lección. Corre con primitivas locales; no usa ninguna cuenta.
-             [[n1]]Primero mides cómo baja el error de un estimador al subir su precisión. [[n2]]Después arreglas una fórmula de tiempo de QPU cuyo exponente está mal. [[n3]]Y por último inviertes la fórmula: dado un tiempo máximo, calculas qué precisión puedes pedir.""",
+            """Ahora practicas el costo de pedir precisión a una función de circuito.
+             [[n1]]Primero escribe un barrido que mida la dispersión de un estimador para varias precisiones. [[n2]]Después corrige el exponente de la fórmula de tiempo de QPU. [[n3]]Y por último escribe `precision_alcanzable(t_max, va)`, la función inversa.""",
             [
-                Mission(
-                    "practica/p8-circuit-functions.py",
-                    [
-                        (
-                            1,
-                            "Ejecuta el estimador con varias precisiones y mide cómo cambia la dispersión.",
-                        ),
-                        (2, "Arregla el exponente de la fórmula del tiempo de QPU."),
-                        (3, "Escribe `precision_alcanzable(t_max, va)`: la inversa de la fórmula."),
+                Exercise(
+                    "p8-circuit-functions/barrido-precision",
+                    "Escribe `dispersiones(precisiones)`: para cada `eps` de la tupla recibida, usa un estimador con 60 semillas y devuelve un diccionario `eps -> (ceil(1 / eps**2), desviacion_estandar)`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Prepara un circuito de dos qubits y el observable `ZZ` una sola vez.",
+                        "Repite el estimador con semillas enteras y reúne sus valores para cada precisión.",
+                        "Guarda el número entero de disparos y la desviación estándar como la pareja de cada entrada.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p8-circuit-functions/tiempo-qpu",
+                    "Corrige `tiempo_qpu(eps, va)`: la parte variable del modelo es `a * exp(alfa * va) / eps**2` y después se suma el costo fijo `b`.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "La mitad de `eps` debe cuadruplicar la parte variable del tiempo.",
+                        "Busca el exponente de `eps` en la expresión que devuelve la función.",
+                        "Usa el cuadrado de `eps` en el denominador.",
+                    ],
+                ),
+                Exercise(
+                    "p8-circuit-functions/precision-alcanzable",
+                    "Escribe `precision_alcanzable(t_max, va, a, alfa, b)`: despeja la precisión más fina que cabe en `t_max` segundos para un volumen `va`, y lanza `ValueError` si `t_max <= b`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Aísla primero la parte variable restando el costo fijo `b`.",
+                        "El volumen aparece en el numerador dentro de la fórmula despejada.",
+                        "Devuelve la raíz cuadrada del cociente entre el factor de volumen y el presupuesto variable.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1465,33 +1544,50 @@ singularity.run(action="predict", name="my_classifier", X="X_test.npy")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica de esta lección. Las funciones de aplicación piden problemas en el formato del dominio; aquí los resuelves tú, en tu equipo, sin cuenta.
-             [[n1]]Primero resuelves un máximo corte, con el diccionario QUBO de Parity Twine. [[n2]]Después arreglas una cartera que debe elegir exactamente dos activos: la penalización es demasiado pequeña. [[n3]]Y por último escribes la conversión de QUBO a Hamiltoniano de Ising, y la compruebas contra las dieciséis energías.""",
+            """Ahora practicas tres transformaciones que usan las funciones de aplicación.
+             [[n1]]Primero escribe un QUBO de máximo corte y encuentra el mejor corte. [[n2]]Después corrige la penalización de una cartera que debe elegir exactamente dos activos. [[n3]]Y por último escribe `qubo_a_ising(qubo, n)` y comprueba sus energías.""",
             [
-                Mission(
-                    "practica/p8-app-functions.py",
-                    [
-                        (
-                            1,
-                            "Resuelve un máximo corte con el diccionario QUBO y busca el mejor corte.",
-                        ),
-                        (
-                            2,
-                            "Sube la penalización para que la cartera elija exactamente dos activos.",
-                        ),
-                        (
-                            3,
-                            "Escribe `qubo_a_ising`: convierte x = (1 − Z)/2 y comprueba las energías.",
-                        ),
+                Exercise(
+                    "p8-app-functions/maximo-corte",
+                    "Escribe `maximo_corte(aristas, n)`: construye el diccionario QUBO con `2*x_i*x_j - x_i - x_j` por arista, busca la asignación binaria de menor energía y devuelve `(qubo, asignacion, numero_de_aristas_cortadas)`.",
+                    level=1,
+                    needs="python",
+                    id="e1",
+                    hints=[
+                        "Una arista cortada debe bajar la energía del QUBO.",
+                        "Acumula los términos lineales y cuadráticos para cada pareja de `aristas`.",
+                        "Enumera todas las asignaciones binarias de longitud `n` y elige la de menor energía.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p8-app-functions/penalizacion-cartera",
+                    "Corrige `elegir_cartera(penalizacion)`: usa la penalización recibida para que la asignación binaria de menor energía tenga exactamente dos activos.",
+                    level=2,
+                    needs="python",
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "La penalización debe participar en los términos lineales, cuadráticos y constante del QUBO.",
+                        "Busca si el valor recibido se reemplaza antes de construir la cartera.",
+                        "Conserva el argumento `penalizacion` que llega a la función.",
+                    ],
+                ),
+                Exercise(
+                    "p8-app-functions/qubo-ising",
+                    'Escribe `qubo_a_ising(qubo, n)`: recibe claves de términos como `"()"`, `"(i,)"` y `"(i, j)"`, y devuelve `(H, constante)` con `H` como `SparsePauliOp` de `n` qubits. La sustitución es `x = (1 - Z) / 2`.',
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Separa la constante, los términos de un qubit y los términos de dos qubits.",
+                        "Un término lineal aporta `c/2` a la constante y `-c/2` a su operador Z.",
+                        "Un término cuadrático aporta `q/4` a la constante, dos términos Z negativos y un término ZZ positivo.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1712,30 +1808,51 @@ job = fn.run(hamiltonian=H, t_steps=10,
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica de esta lección. Las plantillas se despliegan en Serverless y piden una cuenta; el cuaderno trae una versión local con la misma estructura y los backends statevector y fake.
-             [[n1]]Primero ejecutas la misma función en los dos backends y miras cómo el ruido separa las curvas. [[n2]]Después reordenas la función para que valide antes de la etapa cara. [[n3]]Y por último calculas cuántas capas de Trotter deja un plan de compresión, con validación temprana.""",
+            """Ahora practicas el patrón de una plantilla de función con simuladores locales.
+             [[n1]]Primero ejecuta la misma cadena en `statevector` y `fake` y compara sus resultados. [[n2]]Después corrige la función para validar antes de construir. [[n3]]Y por último escribe `pasos_en_qpu(t_steps, plan)` con validación del plan.""",
             [
-                Mission(
-                    "practica/p8-plantillas.py",
-                    [
-                        (
-                            1,
-                            "Ejecuta la función en `statevector` y en `fake` y compara las curvas.",
-                        ),
-                        (2, "Mueve la validación antes de la etapa cara."),
-                        (
-                            3,
-                            "Escribe `pasos_en_qpu(t_steps, plan)` y lanza `ValueError` si el plan no cabe.",
-                        ),
+                Exercise(
+                    "p8-plantillas/dos-backends",
+                    "Escribe `comparar_backends(t_steps)`: construye una cadena de cuatro qubits para `t_steps`, ejecútala con `StatevectorEstimator` y con `AerEstimator` sobre `FakeBelemV2`, y devuelve `(numero_de_instantes, magnetizacion_inicial, diferencia_maxima)`.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hints=[
+                        "Construye un circuito por instante y usa el mismo observable de magnetización en ambos backends.",
+                        "Transpila los circuitos para `FakeBelemV2` antes de pasarlos al estimador de Aer.",
+                        "Convierte los valores a `float` y calcula la diferencia máxima entre las dos listas.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p8-plantillas/validar-pronto",
+                    'Corrige `mi_funcion(entradas)`: valida `t_steps` antes de llamar a la etapa cara `construir`. Una entrada inválida debe lanzar `ValueError` sin aumentar `COSTE["etapas"]`.',
+                    level=2,
+                    needs="python",
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "La validación no necesita construir circuitos para decidir si una entrada sirve.",
+                        "Observa el orden de las dos llamadas dentro de `mi_funcion`.",
+                        "Coloca `validar(entradas)` antes de `construir(entradas)`.",
+                    ],
+                ),
+                Exercise(
+                    "p8-plantillas/pasos-en-qpu",
+                    "Escribe `pasos_en_qpu(t_steps, plan)`: el plan `{'n_steps': k, 'ansatz_steps': m}` devuelve `m + t_steps - k`, y lanza `ValueError` si `k` es mayor que `t_steps`.",
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hints=[
+                        "Primero comprueba que el plan cabe en el número total de pasos.",
+                        "Los pasos comprimidos cuestan las capas del ansatz y los restantes siguen sin comprimir.",
+                        "Suma las capas del ansatz con los pasos que quedan sin comprimir.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(

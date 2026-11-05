@@ -584,46 +584,78 @@
     "8.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. Serverless corre en la nube y pide una cuenta de pago, así que el cuaderno reproduce su contrato en tu equipo, con un backend simulado. [[n1]]Primero ejecutas un programa y lees sus resultados. [[n2]]Después arreglas una llamada cuyo argumento no se puede serializar. [[n3]]Y por último paralelizas con distribute task y get. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes: busca la marca verde.",
+   "say": "Ahora practicas el contrato de Serverless en ejercicios locales. [[n1]]Primero escribe `ejecutar(circuitos)`, que devuelve una profundidad por circuito al transpilar con `FakeFez`. [[n2]]Después corrige `argumentos(circuitos)`: el programa remoto recibe el nombre serializable del backend. [[n3]]Y por último escribe `profundidades(circuitos)`, que crea una referencia por circuito con `distribute_task` y reúne los resultados con `get`. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p8-serverless.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta el programa y lee la profundidad transpilada de cada circuito."
-      },
-      {
-       "level": 2,
-       "text": "Arregla la llamada: cambia la entrada que no se puede serializar."
-      },
-      {
-       "level": 3,
-       "text": "Paraleliza la transpilación con `distribute_task` y reúne los resultados con `get`."
-      }
+     "type": "exercise",
+     "exercise": "p8-serverless/ejecutar-programa",
+     "prompt": "Escribe `ejecutar(circuitos)`: recibe una lista de circuitos de Qiskit, los transpila para `FakeFez` con nivel 1 y devuelve una lista con una profundidad positiva por circuito.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "El programa remoto crea un backend y un pass manager antes de procesar la lista.",
+      "Pon la configuración del pass manager al principio de `ejecutar`.",
+      "Construye una lista con la profundidad del circuito transpilado en cada posición."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def ejecutar(circuitos):\n    # Transpila cada circuito para FakeFez y devuelve sus profundidades.\n    return []",
+     "cases": [
+      "una profundidad por circuito"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-serverless/entrada-serializable",
+     "prompt": "Corrige `argumentos(circuitos)`: devuelve `circuits`, `backend_name` y `optimization_level`. `backend_name` debe ser el texto `fake_fez`, porque el objeto `FakeFez` no se puede serializar.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Las entradas del programa deben poder convertirse en datos simples.",
+      "Busca el valor que se guarda en la clave `backend_name`.",
+      "Cambia esa expresión por un nombre de backend entre comillas."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "from qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef argumentos(circuitos):\n    backend_name = FakeFez()\n    return {\"circuits\": circuitos, \"backend_name\": backend_name, \"optimization_level\": 3}",
+     "cases": [
+      "pasa el nombre del backend"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-serverless/tareas-paralelas",
+     "prompt": "Escribe `profundidades(circuitos)`: transpila cada circuito con nivel 1 y `FakeFez`, devuelve una referencia por llamada a la función decorada con `distribute_task` y entrega la lista de profundidades al aplicar `get`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Una llamada decorada devuelve una tarea pendiente, no su valor.",
+      "Crea el pass manager dentro de `profundidades` y reúne después todas las referencias.",
+      "Aplica la función decorada una vez por circuito y pasa la lista completa a `get`."
+     ],
+     "id": "e3",
+     "starter": "from concurrent.futures import ThreadPoolExecutor\n\n_EXECUTOR = ThreadPoolExecutor(max_workers=4)\n\n\ndef distribute_task(target):\n    def decorador(funcion):\n        return lambda *args: _EXECUTOR.submit(funcion, *args)\n\n    return decorador\n\n\ndef get(refs):\n    return [ref.result() for ref in refs]\n\n\ndef profundidades(circuitos):\n    @distribute_task(target={\"cpu\": 1})\n    def transpilar(circuito):\n        return None\n\n    refs = []\n    return get(refs)",
+     "cases": [
+      "reúne cuatro referencias"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

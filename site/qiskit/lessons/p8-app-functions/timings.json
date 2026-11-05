@@ -172,32 +172,28 @@
   ]
  },
  "mision": {
-  "dur": 34.92,
+  "dur": 23.832,
   "marks": {
-   "n1": 12.582,
-   "n2": 18.569,
-   "n3": 26.594
+   "n1": 5.619,
+   "n2": 10.657,
+   "n3": 17.253
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica de esta lección."
+    "Ahora practicas tres transformaciones que usan las funciones de aplicación."
    ],
    [
-    3.807,
-    "Las funciones de aplicación piden problemas en el formato del dominio; aquí los resuelves tú, en tu equipo, sin cuenta."
+    5.619,
+    "Primero escribe un QUBO de máximo corte y encuentra el mejor corte."
    ],
    [
-    12.582,
-    "Primero resuelves un máximo corte, con el diccionario QUBO de Parity Twine."
+    10.657,
+    "Después corrige la penalización de una cartera que debe elegir exactamente dos activos."
    ],
    [
-    18.569,
-    "Después arreglas una cartera que debe elegir exactamente dos activos: la penalización es demasiado pequeña."
-   ],
-   [
-    26.594,
-    "Y por último escribes la conversión de QUBO a Hamiltoniano de Ising, y la compruebas contra las dieciséis energías."
+    17.253,
+    "Y por último escribe qubo_a_ising(qubo, n) y comprueba sus energías."
    ]
   ]
  },

@@ -376,46 +376,78 @@
     "8.4",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica de esta lección. Corre con primitivas locales; no usa ninguna cuenta. [[n1]]Primero mides cómo baja el error de un estimador al subir su precisión. [[n2]]Después arreglas una fórmula de tiempo de QPU cuyo exponente está mal. [[n3]]Y por último inviertes la fórmula: dado un tiempo máximo, calculas qué precisión puedes pedir.",
+   "say": "Ahora practicas el costo de pedir precisión a una función de circuito. [[n1]]Primero escribe un barrido que mida la dispersión de un estimador para varias precisiones. [[n2]]Después corrige el exponente de la fórmula de tiempo de QPU. [[n3]]Y por último escribe `precision_alcanzable(t_max, va)`, la función inversa.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p8-circuit-functions.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta el estimador con varias precisiones y mide cómo cambia la dispersión."
-      },
-      {
-       "level": 2,
-       "text": "Arregla el exponente de la fórmula del tiempo de QPU."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `precision_alcanzable(t_max, va)`: la inversa de la fórmula."
-      }
+     "type": "exercise",
+     "exercise": "p8-circuit-functions/barrido-precision",
+     "prompt": "Escribe `dispersiones(precisiones)`: para cada `eps` de la tupla recibida, usa un estimador con 60 semillas y devuelve un diccionario `eps -> (ceil(1 / eps**2), desviacion_estandar)`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Prepara un circuito de dos qubits y el observable `ZZ` una sola vez.",
+      "Repite el estimador con semillas enteras y reúne sus valores para cada precisión.",
+      "Guarda el número entero de disparos y la desviación estándar como la pareja de cada entrada."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def dispersiones(precisiones):\n    return {}",
+     "cases": [
+      "cuadruplica los disparos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-circuit-functions/tiempo-qpu",
+     "prompt": "Corrige `tiempo_qpu(eps, va)`: la parte variable del modelo es `a * exp(alfa * va) / eps**2` y después se suma el costo fijo `b`.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "La mitad de `eps` debe cuadruplicar la parte variable del tiempo.",
+      "Busca el exponente de `eps` en la expresión que devuelve la función.",
+      "Usa el cuadrado de `eps` en el denominador."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "import math\n\n\ndef tiempo_qpu(eps, va, a=0.004, alfa=0.35, b=60.0):\n    return a * math.exp(alfa * va) / eps + b",
+     "cases": [
+      "el cuadrado de la precisión"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-circuit-functions/precision-alcanzable",
+     "prompt": "Escribe `precision_alcanzable(t_max, va, a, alfa, b)`: despeja la precisión más fina que cabe en `t_max` segundos para un volumen `va`, y lanza `ValueError` si `t_max <= b`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Aísla primero la parte variable restando el costo fijo `b`.",
+      "El volumen aparece en el numerador dentro de la fórmula despejada.",
+      "Devuelve la raíz cuadrada del cociente entre el factor de volumen y el presupuesto variable."
+     ],
+     "id": "e3",
+     "starter": "def precision_alcanzable(t_max, va, a=0.004, alfa=0.35, b=60.0):\n    return None",
+     "cases": [
+      "invierte el tiempo"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]
