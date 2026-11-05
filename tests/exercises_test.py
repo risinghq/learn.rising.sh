@@ -729,6 +729,45 @@ WRONG += [
     ]
 ]
 
+WRONG += [
+    (eid, mutant(eid, name), expected)
+    for eid, name, expected in [
+        ("p9-c-api/resumen-observable", "cuenta-etiquetas", "`resumen_observable` devuelve"),
+        ("p9-c-api/resumen-observable", "siempre-uno", "`resumen_observable` devuelve"),
+        ("p9-c-api/etiquetas-observable", "qubit-cero-primero", "`etiquetas` devuelve"),
+        ("p9-c-api/restriccion-version", "con-parche", "`restriccion` devuelve"),
+        ("p9-c-api/restriccion-version", "un-digito", "`restriccion` devuelve"),
+        ("p9-ia/pasa-prueba", "ignora-la-prueba", "tu `pasa` dice"),
+        ("p9-ia/pasa-prueba", "ignora-el-error-de-exec", "tu `pasa` dice"),
+        ("p9-ia/bell-corregido", "con-fase", "prepara el estado con otra fase"),
+        ("p9-ia/detecta-anti-bell", "solo-probabilidades", "tu `es_anti_bell` acepta"),
+        ("p9-ia/detecta-anti-bell", "acepta-todo", "tu `es_anti_bell` acepta"),
+        ("p9-hpc/qpus-recibidos", "no-filtra", "`recibidos` devuelve"),
+        ("p9-hpc/qpus-recibidos", "orden-del-admin", "`recibidos` devuelve"),
+        ("p9-hpc/anadir-marrakesh", "reemplaza-los-recursos", "`con_marrakesh` deja"),
+        ("p9-hpc/anadir-marrakesh", "pierde-el-entorno", "`con_marrakesh` deja"),
+        ("p9-hpc/variables-entorno", "ordena-por-nombre", "`entorno` devuelve"),
+        ("p9-hpc/variables-entorno", "solo-la-primera-variable", "`entorno` devuelve"),
+        ("p9-migraciones/condicion-if-test", "valor-uno", "compara el registro con"),
+        ("p9-migraciones/condicion-if-test", "x-en-el-qubit-uno", "El bloque de `x_si_11()` tiene"),
+        ("p9-migraciones/opciones-pydantic", "solo-shots", "`opciones_como_dict(10)` devuelve"),
+        ("p9-migraciones/opciones-pydantic", "sin-asignar", "`opciones_como_dict(2000)` devuelve"),
+        ("p9-migraciones/dividir-por-precision", "uno-por-pub", "`dividir` devuelve"),
+        ("p9-migraciones/dividir-por-precision", "ordena-por-precision", "`dividir` devuelve"),
+        ("p9-proveedores/crear-target", "cz-entre-todos", "`crear_target` pone la CZ en"),
+        ("p9-proveedores/duraciones-target", "sin-duraciones", "`target_durable` estima"),
+        ("p9-proveedores/duraciones-target", "fija-el-ejemplo", "`target_durable` estima"),
+        ("p9-proveedores/duraciones-target", "errores-perdidos", "`target_durable` son"),
+        ("p9-proveedores/run-simulado", "ignora-las-opciones", "`run` produce"),
+        ("p6-postseleccion/fidelidad-filtrada", "ignora-la-mascara", "`fidelidad` devuelve"),
+        ("p6-postseleccion/fidelidad-filtrada", "divide-entre-todos", "`fidelidad` devuelve"),
+        ("p6-postseleccion/mascara-node", "algun-bit", "`mascara_node` conserva"),
+        ("p6-postseleccion/mascara-node", "sin-invertir", "`mascara_node` conserva"),
+        ("p6-postseleccion/mascara-edge", "como-node", "`mascara_edge` conserva"),
+        ("p6-postseleccion/mascara-edge", "solo-la-primera-arista", "`mascara_edge` conserva"),
+    ]
+]
+
 # Wrong code that fails the hidden cases: (exercise, code). The message of each failing hidden
 # case is compared with the reference solution in test_hidden_messages_*.
 MUTANTS = [
@@ -903,7 +942,9 @@ MUTANTS = [
     ],
     *[
         m
-        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-", "p6-", "p7-", "p8-")))
+        for eid in sorted(
+            e for e in REAL if e.startswith(("p3-", "p5-", "p6-", "p7-", "p8-", "p9-"))
+        )
         for m in mutants_of(eid)
     ],
 ]
