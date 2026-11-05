@@ -380,46 +380,80 @@
     "6.4",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. Las opciones se validan en local, así que no hace falta cuenta. [[n1]]Primero lees lo que trae por defecto un Estimator y un Sampler. [[n2]]Después partes del nivel cero y activas TREX y ZNE a mano, y pruebas un nivel inválido para ver el error. [[n3]]Y por último escribes una función que prepara cualquiera de las dos primitivas y rechaza TREX o ZNE para el Sampler. [[check]]Cada misión tiene una comprobación: busca la marca verde.",
+   "say": "Ahora te toca. Las opciones se validan en tu equipo, sin enviar nada, así que todo corre con un backend falso y sin cuenta. [[n1]]Primero lees lo que trae por defecto un Estimator y apuestas qué nivel es. [[n2]]Después partes del nivel cero y activas TREX y ZNE a mano. [[n3]]Y por último escribes una función que prepara cualquiera de las dos primitivas y rechaza TREX o ZNE para el Sampler.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p6-configurar.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Crea un Estimator y un Sampler sin opciones y lee sus valores por defecto."
-      },
-      {
-       "level": 2,
-       "text": "Nivel 0 más TREX y ZNE con factores 1, 3 y 5; prueba `resilience_level = 7`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `preparar(primitiva, tecnicas)`: un Sampler con `\"trex\"` o `\"zne\"` lanza `ValueError`."
-      }
+     "type": "exercise",
+     "exercise": "p6-configurar/opciones-por-defecto",
+     "prompt": "Crea un `Estimator` sin pedir nada y lee sus opciones: guarda en `nivel_por_defecto` el `resilience_level` que trae `estimator`. Antes de mirar el resultado, apuesta en `prediccion` qué nivel es: `0`, `1` o `2`. Fíjate también en `measure_mitigation`: `None` significa «que lo decida el nivel».",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Las opciones de una primitiva viven en `estimator.options`.",
+      "El nivel es un atributo directo de `options`, no está dentro de `resilience`.",
+      "`nivel_por_defecto = estimator.options.___`, con el nombre del nivel de resiliencia."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake = FakeManilaV2()\nestimator = Estimator(fake)\n\n# ✏️ lee el nivel de resiliencia que trae el Estimator sin pedir nada\nnivel_por_defecto = None\nprint(\"resilience_level:\", nivel_por_defecto)\nprint(\"measure_mitigation:\", estimator.options.resilience.measure_mitigation)\nprint(\"zne_mitigation:\", estimator.options.resilience.zne_mitigation)\n\n# ✏️ apuesta antes de mirar las líneas de arriba: ¿qué nivel es: 0, 1 o 2?\nprediccion = None",
+     "cases": [
+      "`nivel_por_defecto` es el nivel de `estimator`",
+      "tu apuesta coincide con el nivel por defecto"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-configurar/trex-y-zne",
+     "prompt": "Parte del nivel 0 (sin mitigación) y activa a mano, en `opciones.resilience`, TREX (`measure_mitigation`), ZNE (`zne_mitigation`) y los factores de ruido 1, 3 y 5 de ZNE. Las opciones explícitas se aplican encima del nivel base.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "TREX, ZNE y sus factores son opciones del grupo `resilience`.",
+      "Cada una es un atributo de `opciones.resilience`; los factores están dentro del subgrupo `zne`.",
+      "`opciones.resilience.measure_mitigation = ...`, `opciones.resilience.zne_mitigation = ...` y `opciones.resilience.zne.noise_factors = (..., ..., ...)`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake = FakeManilaV2()\nestimator = Estimator(fake, options={\"resilience_level\": 0})\nopciones = estimator.options\n\n# ✏️ activa TREX (measure_mitigation), ZNE (zne_mitigation) y zne.noise_factors = (1, 3, 5)\n\nr = opciones.resilience\nprint(\"nivel:\", opciones.resilience_level)\nprint(\"TREX:\", r.measure_mitigation, \"· ZNE:\", r.zne_mitigation, \"· factores:\", r.zne.noise_factors)",
+     "cases": [
+      "TREX y ZNE están activados",
+      "los factores de ruido son 1, 3 y 5"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-configurar/preparar",
+     "prompt": "Completa `preparar(primitiva, tecnicas)`: recibe `\"estimator\"` o `\"sampler\"` y un conjunto de técnicas (`\"dd\"`, `\"twirling\"` de puertas, `\"trex\"` y `\"zne\"`), y devuelve esa primitiva con las técnicas activadas. Una técnica que no pides no se activa. Un `Sampler` no tiene mitigación de expectativas: si le pides `\"trex\"` o `\"zne\"`, lanza `ValueError`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Cada técnica es un grupo de opciones con su interruptor: `dynamical_decoupling`, `twirling` y `resilience`.",
+      "Faltan twirling, TREX y ZNE. TREX y ZNE solo existen en el `Estimator`: comprueba `primitiva` antes de activarlas.",
+      "Cada técnica es `if \"...\" in tecnicas:` con `p.options.___.___ = True` dentro; para el Sampler, `raise ValueError(...)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake = FakeManilaV2()\n\n\ndef preparar(primitiva, tecnicas):\n    \"\"\"Devuelve un Estimator (\"estimator\") o un Sampler (\"sampler\") con las técnicas pedidas.\"\"\"\n    p = Estimator(fake) if primitiva == \"estimator\" else Sampler(fake)\n    if \"dd\" in tecnicas:\n        p.options.dynamical_decoupling.enable = True\n    # ✏️ twirling de puertas (\"twirling\"), TREX (\"trex\") y ZNE (\"zne\"); un Sampler no admite las dos últimas\n    return p\n\n\ntry:\n    preparar(\"sampler\", {\"trex\"})\nexcept ValueError as error:\n    print(\"el Sampler rechaza TREX:\", error)",
+     "cases": [
+      "un Estimator con dd, twirling, trex y zne",
+      "un Sampler con dd y twirling"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

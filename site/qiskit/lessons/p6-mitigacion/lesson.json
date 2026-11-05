@@ -536,46 +536,80 @@
     "6.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero haces ZNE con una recta sobre el GHZ y ves cuánto se queda corta. [[n2]]Después cambias a una exponencial y llegas al valor ideal. [[n3]]Y por último escribes los pesos de PEC para un qubit, con un peso negativo, y calculas cuánto crece el número de disparos. [[check]]Cada misión tiene una comprobación: busca la marca verde.",
+   "say": "Ahora te toca. Todo corre en un simulador exacto, sin ruido de muestreo y sin cuenta. [[n1]]Primero haces ZNE con una recta sobre el GHZ y apuestas si llega al valor ideal. [[n2]]Después arreglas el ajuste para que sea una exponencial y llegas a él. [[n3]]Y por último escribes los pesos de PEC para un qubit, con un peso negativo.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p6-mitigacion.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Mide a factores 1, 3 y 5 y extrapola con una recta."
-      },
-      {
-       "level": 2,
-       "text": "Ajusta una exponencial: el error debe bajar de $10^{-3}$."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `pesos_pec(lam)` y mira cómo crece el sobrecoste $\\gamma^{2n}$ con la profundidad."
-      }
+     "type": "exercise",
+     "exercise": "p6-mitigacion/zne-lineal",
+     "prompt": "El código mide el GHZ de cuatro qubits con los factores de ruido 1, 3 y 5. Guarda en `zne_lineal` la extrapolación al factor 0 de una recta ajustada a `(factores, valores)`. Antes de mirar el resultado, apuesta en `prediccion` si, frente al valor ideal 1, la recta `\"llega a 1\"`, `\"se pasa\"` o `\"se queda corta\"`.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "El valor de una recta en el factor 0 es su término independiente.",
+      "`np.polyfit(x, y, 1)` devuelve `[pendiente, término independiente]`.",
+      "`zne_lineal = float(np.polyfit(___, ___, ___)[___])`, con el elemento que no es la pendiente."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import DensityMatrix, SparsePauliOp\nfrom qiskit_aer.noise import depolarizing_error\n\n\ndef plegar(qc, k):\n    \"\"\"Plegado global U (U† U)^k: misma operación ideal, factor de ruido 2k + 1.\"\"\"\n    out = qc.copy()\n    for _ in range(k):\n        out.compose(qc.inverse(), inplace=True)\n        out.compose(qc, inplace=True)\n    return out\n\n\ndef esperanza(qc, lam, obs):\n    \"\"\"Valor esperado exacto si cada CX sufre ruido despolarizante lam (matriz densidad).\"\"\"\n    rho = DensityMatrix.from_label(\"0\" * qc.num_qubits)\n    canal = depolarizing_error(lam, 2).to_quantumchannel()\n    for inst in qc.data:\n        qubits = [qc.find_bit(q).index for q in inst.qubits]\n        rho = rho.evolve(inst.operation, qubits)\n        if inst.operation.name == \"cx\":\n            rho = rho.evolve(canal, qubits)\n    return float(rho.expectation_value(obs).real)\n\n\nghz = QuantumCircuit(4)\nghz.h(0)\nfor q in range(3):\n    ghz.cx(q, q + 1)\nobservable = SparsePauliOp(\"ZIIZ\")\nlam = 0.02\n\nfactores = [1, 3, 5]\nvalores = [esperanza(plegar(ghz, (f - 1) // 2), lam, observable) for f in factores]\nprint(\"valores a factor 1, 3, 5:\", np.round(valores, 4))\n\n# ✏️ ajusta una recta a (factores, valores) y toma su valor en el factor 0\nzne_lineal = valores[0]\nprint(f\"sin mitigar: {valores[0]:.4f} · ZNE lineal: {zne_lineal:.4f} · ideal: 1\")\n\n# ✏️ apuesta antes de mirar la línea de arriba: \"llega a 1\", \"se pasa\" o \"se queda corta\"\nprediccion = \"\"",
+     "cases": [
+      "`zne_lineal` es el valor en el factor 0 de la recta",
+      "tu apuesta coincide con lo que da la recta"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-mitigacion/zne-exponencial",
+     "prompt": "Con ruido despolarizante cada puerta multiplica el valor por $(1-\\lambda)$, así que los puntos siguen una exponencial $E(c) = E_0\\,e^{-\\gamma c}$ y no una recta. `extrapolar_exp(factores, valores)` debe devolver $E_0$, pero ajusta una recta. Arréglala: con los puntos del GHZ el error debe bajar de $10^{-3}$.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Una exponencial es una recta en el logaritmo: $\\ln E = \\ln E_0 - \\gamma c$.",
+      "Cambia lo que ajusta `np.polyfit` y lo que devuelve la función.",
+      "`coef = np.polyfit(factores, ___, 1)` y `return float(___(coef[1]))`, con la función inversa del logaritmo."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import DensityMatrix, SparsePauliOp\nfrom qiskit_aer.noise import depolarizing_error\n\n\ndef plegar(qc, k):\n    \"\"\"Plegado global U (U† U)^k: misma operación ideal, factor de ruido 2k + 1.\"\"\"\n    out = qc.copy()\n    for _ in range(k):\n        out.compose(qc.inverse(), inplace=True)\n        out.compose(qc, inplace=True)\n    return out\n\n\ndef esperanza(qc, lam, obs):\n    \"\"\"Valor esperado exacto si cada CX sufre ruido despolarizante lam (matriz densidad).\"\"\"\n    rho = DensityMatrix.from_label(\"0\" * qc.num_qubits)\n    canal = depolarizing_error(lam, 2).to_quantumchannel()\n    for inst in qc.data:\n        qubits = [qc.find_bit(q).index for q in inst.qubits]\n        rho = rho.evolve(inst.operation, qubits)\n        if inst.operation.name == \"cx\":\n            rho = rho.evolve(canal, qubits)\n    return float(rho.expectation_value(obs).real)\n\n\nghz = QuantumCircuit(4)\nghz.h(0)\nfor q in range(3):\n    ghz.cx(q, q + 1)\nobservable = SparsePauliOp(\"ZIIZ\")\nlam = 0.02\n\nfactores = [1, 3, 5]\nvalores = [esperanza(plegar(ghz, (f - 1) // 2), lam, observable) for f in factores]\n\n\ndef extrapolar_exp(factores, valores):\n    \"\"\"Valor en el factor 0 de una exponencial E(c) = E0 · exp(-g · c) ajustada a los puntos.\"\"\"\n    coef = np.polyfit(factores, valores, 1)\n    return float(coef[1])\n\n\nzne_exp = extrapolar_exp(factores, valores)\nprint(f\"sin mitigar: {valores[0]:.4f} · ZNE exponencial: {zne_exp:.4f} · ideal: 1\")",
+     "cases": [
+      "con los puntos del GHZ el error baja de 0,001"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-mitigacion/pesos-pec",
+     "prompt": "Un canal despolarizante de un qubit multiplica cada Pauli ($X$, $Y$, $Z$) por $1-\\lambda$ y deja $I$ igual. Para invertirlo, PEC lo escribe como combinación de insertar $I$ (peso $a$) o una Pauli $X$, $Y$ o $Z$ (peso $b$ cada una). Escribe `pesos_pec(lam)`: recibe $\\lambda$ y devuelve `(a, b)` con $a + 3b = 1$ (la identidad se conserva) y $a - b = \\frac{1}{1-\\lambda}$ (cancela el factor de las Paulis). Un peso sale negativo: por eso hay que muestrear. Por ejemplo, con $\\lambda = 0{,}05$ el sobrecoste por puerta $\\gamma = |a| + 3|b|$ vale 1,0789.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Son dos ecuaciones lineales con dos incógnitas.",
+      "Resta la segunda ecuación de la primera para despejar $b$ y luego despeja $a$.",
+      "Llama `s` al segundo miembro de la segunda ecuación, `b = (1 - s) / ___` y `a` en función de `s` y `b`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "def pesos_pec(lam):\n    a, b = 1.0, 0.0  # ✏️ resuelve las dos ecuaciones\n    return a, b\n\n\na, b = pesos_pec(0.05)\ngamma = abs(a) + 3 * abs(b)\nprint(f\"con lam = 0.05: a = {a:.4f}, b = {b:.4f}, γ = {gamma:.4f}\")",
+     "cases": [
+      "con lam = 0,05 se cumplen las dos ecuaciones",
+      "b sale negativo"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]
@@ -598,7 +632,7 @@
    "ask": {
     "kind": "reflect",
     "prompts": [
-     "La exponencial dio exactamente 1 en el cuaderno. ¿Por qué eso no te garantiza nada en un QPU real?",
+     "La exponencial dio exactamente 1 en el ejercicio. ¿Por qué eso no te garantiza nada en un QPU real?",
      "PEC no tiene sesgo pero su costo crece muy rápido con la profundidad; ZNE es barato pero sesgado. Para tu cadena de Ising con muchos pasos de Trotter, ¿cuál probarías primero?"
     ]
    },

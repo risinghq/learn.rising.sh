@@ -601,46 +601,78 @@
     "6.2",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero rellenas los huecos de un circuito con la secuencia XX y compruebas que la operación no cambia. [[n2]]Después la alargas a cuatro pulsos X y cuentas el doble. [[n3]]Y por último escribes tú una variante de twirling de la CNOT: la Pauli de después que mantiene la operación. [[check]]Cada misión tiene una comprobación: busca la marca verde.",
+   "say": "Ahora te toca. Todo corre con un backend falso, sin cuenta. [[n1]]Primero rellenas los huecos de un circuito con la secuencia XX y apuestas cuántos pulsos se añaden. [[n2]]Después la alargas a cuatro pulsos X y cuentas el doble. [[n3]]Y por último escribes tú una variante de twirling de la CNOT: la Pauli de después que mantiene la operación.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p6-supresion.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Rellena los huecos con XX y verifica que la operación es la misma."
-      },
-      {
-       "level": 2,
-       "text": "Cambia la secuencia a cuatro pulsos X: debe añadir el doble."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `variante(rng)`: elige `antes` al azar y calcula `despues` con `evolve`."
-      }
+     "type": "exercise",
+     "exercise": "p6-supresion/rellenar-con-xx",
+     "prompt": "El circuito `isa` deja esperando a algunos qubits. Guarda en `con_xx` el circuito con esos huecos rellenos con una secuencia XX, usando `con_dd`. Antes de mirar el resultado, apuesta en `prediccion` cuántos pulsos X se añaden: `0`, `2` u `8`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "`con_dd` programa el circuito y rellena los huecos con la secuencia que le pases.",
+      "Una secuencia XX son dos puertas `XGate()`, en una lista.",
+      "`con_xx = con_dd([..., ...])`, con una `XGate()` en cada posición de la lista."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit, transpile\nfrom qiskit.circuit.library import XGate\nfrom qiskit.quantum_info import Operator\nfrom qiskit.transpiler import PassManager\nfrom qiskit.transpiler.passes import ALAPScheduleAnalysis, PadDynamicalDecoupling\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake = FakeManilaV2()\nlogico = QuantumCircuit(3)\nlogico.h(0)\nfor _ in range(3):\n    logico.cx(0, 1)\nlogico.cx(1, 2)\nlogico.h(2)\nisa = transpile(logico, fake, optimization_level=0, initial_layout=[0, 1, 2], seed_transpiler=1)\n\n\ndef con_dd(secuencia):\n    \"\"\"Programa el circuito y rellena los huecos de espera con la secuencia.\"\"\"\n    pm = PassManager(\n        [\n            ALAPScheduleAnalysis(target=fake.target),\n            PadDynamicalDecoupling(target=fake.target, dd_sequence=secuencia),\n        ]\n    )\n    return pm.run(isa)\n\n\ndef pulsos_x(qc):\n    return sum(1 for inst in qc.data if inst.operation.name == \"x\")\n\n\ncon_xx = isa  # ✏️ rellena los huecos con una secuencia XX\nprint(\"pulsos X añadidos:\", pulsos_x(con_xx) - pulsos_x(isa))\nprint(\"misma operación:\", Operator(isa).equiv(Operator(con_xx)))\n\n# ✏️ apuesta antes de mirar las líneas de arriba: ¿cuántos pulsos X se añaden: 0, 2 u 8?\nprediccion = None",
+     "cases": [
+      "`con_xx` añade pulsos X",
+      "tu apuesta coincide con los pulsos añadidos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-supresion/cuatro-pulsos",
+     "prompt": "Cambia `secuencia` por cuatro pulsos X, que también es la identidad. Tendrás el doble de pulsos en cada hueco: más protección contra la deriva lenta, pero cada pulso también puede fallar. `pulsos_secuencia` debe valer el doble que `base` y el circuito debe seguir haciendo la misma operación.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Cuatro pulsos X seguidos también son la identidad: cada X deshace al anterior.",
+      "Cambia la lista `secuencia`, la que `con_dd` rellena en los huecos.",
+      "La lista lleva cuatro `XGate()` separadas por comas."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit, transpile\nfrom qiskit.circuit.library import XGate\nfrom qiskit.quantum_info import Operator\nfrom qiskit.transpiler import PassManager\nfrom qiskit.transpiler.passes import ALAPScheduleAnalysis, PadDynamicalDecoupling\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\nfake = FakeManilaV2()\nlogico = QuantumCircuit(3)\nlogico.h(0)\nfor _ in range(3):\n    logico.cx(0, 1)\nlogico.cx(1, 2)\nlogico.h(2)\nisa = transpile(logico, fake, optimization_level=0, initial_layout=[0, 1, 2], seed_transpiler=1)\n\n\ndef con_dd(secuencia):\n    \"\"\"Programa el circuito y rellena los huecos de espera con la secuencia.\"\"\"\n    pm = PassManager(\n        [\n            ALAPScheduleAnalysis(target=fake.target),\n            PadDynamicalDecoupling(target=fake.target, dd_sequence=secuencia),\n        ]\n    )\n    return pm.run(isa)\n\n\ndef pulsos_x(qc):\n    return sum(1 for inst in qc.data if inst.operation.name == \"x\")\n\n\nbase = pulsos_x(con_dd([XGate(), XGate()])) - pulsos_x(isa)\n\nsecuencia = [XGate(), XGate()]  # ✏️ cuatro pulsos X\ncon_secuencia = con_dd(secuencia)\npulsos_secuencia = pulsos_x(con_secuencia) - pulsos_x(isa)\nprint(f\"con XX: {base} pulsos · con tu secuencia: {pulsos_secuencia}\")\nprint(\"misma operación:\", Operator(isa).equiv(Operator(con_secuencia)))",
+     "cases": [
+      "el doble de pulsos que con XX"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-supresion/variante-twirling",
+     "prompt": "Completa `variante(antes)`: recibe una cadena de dos letras como `\"XZ\"` (la letra de la derecha es el qubit 0) y devuelve un circuito de dos qubits con esa Pauli antes de una CNOT y otra Pauli después, de modo que el conjunto siga siendo la misma CNOT. La Pauli de después es la que sale de empujar `antes` a través de la CNOT: $P_R = \\mathrm{CX}\\,P_L\\,\\mathrm{CX}^\\dagger$. Con `despues = antes` solo salen bien algunas de las 16 Paulis.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "La Pauli de después depende de la de antes: es la que resulta de empujar `antes` a través de la CNOT.",
+      "Se calcula en la línea marcada con ✏️, a partir de `antes`, antes de armar el circuito.",
+      "`despues = antes.___(...)`: busca en `Pauli` el método que aplica una puerta."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.circuit.library import CXGate\nfrom qiskit.quantum_info import Operator, Pauli\n\n\ndef variante(antes):\n    \"\"\"Una CX con la Pauli `antes` (una cadena como \"XZ\") antes y otra Pauli después.\"\"\"\n    antes = Pauli(antes)\n    despues = antes  # ✏️ la Pauli que mantiene la operación ideal\n    qc = QuantumCircuit(2)\n    qc.append(antes.to_instruction(), [0, 1])\n    qc.cx(0, 1)\n    qc.append(despues.to_instruction(), [0, 1])\n    return qc\n\n\nfor etiqueta in (\"IX\", \"ZI\", \"YY\"):\n    print(etiqueta, \"→ equivale a una CX:\", Operator(variante(etiqueta)).equiv(Operator(CXGate())))",
+     "cases": [
+      "las 16 variantes equivalen a una CX"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

@@ -5,6 +5,7 @@ from lib import (
     Box,
     Circ,
     Code,
+    Exercise,
     Flow,
     G,
     Graph,
@@ -298,33 +299,54 @@ print(f"disparos erróneos: {(cuentas['01'] + cuentas['10']) / 4000:.1%}")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. Todo corre en un simulador con ruido, sin cuenta de IBM. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte.""",
             [
-                Mission(
-                    "practica/p6-panorama.py",
-                    [
-                        (1, "Ejecuta el Bell con ruido y mide la fracción de `01` y `10`."),
-                        (2, "Sube el error de la CNOT hasta superar el 12 % de disparos erróneos."),
-                        (
-                            3,
-                            "Escribe `distancia_tv(medida, ideal)`, la distancia de variación total entre dos distribuciones.",
-                        ),
+                Exercise(
+                    "p6-panorama/bell-ruidoso",
+                    "El código mide un Bell con un 1 % de error despolarizante en cada CNOT y un 2 % de error de lectura, y guarda los conteos en `cuentas_bell`. Cuenta en `erroneos` los disparos que dieron `01` o `10`. Antes de mirar el resultado, apuesta en `prediccion` cuántos de los 4000 disparos serán erróneos: `10`, `160` o `1500`.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Un Bell ideal solo produce `00` y `11`: todo lo demás es ruido.",
+                        "Los conteos son un diccionario `{cadena: disparos}`; una cadena que no apareció no está en él.",
+                        "Suma dos `get` sobre `cuentas_bell`, uno por cada cadena errónea, con 0 si falta.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-panorama/mas-ruido-cx",
+                    "Cambia `p_cx` para que entre el 12 % y el 50 % de los disparos del Bell sea erróneo, sin pasar de 0,5. Fíjate en cuánto hay que subir el error de la puerta para mover el resultado: la lectura aporta una parte fija.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Cada CNOT despolariza con probabilidad `p_cx`: cuanto mayor es, más disparos `01` y `10` salen.",
+                        "Solo cambia el valor de `p_cx`; el resto del código ya mide y calcula la fracción.",
+                        "Con 0,01 sale cerca de un 4 %: prueba con varias veces ese valor y mira lo que imprime.",
+                    ],
+                ),
+                Exercise(
+                    "p6-panorama/distancia-tv",
+                    r"Completa `distancia_tv(a, b)`: recibe dos diccionarios de conteos `{cadena: disparos}` y devuelve su distancia de variación total, $\mathrm{TV}(a,b) = \tfrac12 \sum_x |p_a(x) - p_b(x)|$, donde $p(x)$ es la fracción de disparos de la cadena $x$. La suma recorre todas las cadenas que aparezcan en alguno de los dos conteos, y los conteos pueden tener distinto número de disparos. Vale 0 si son iguales y 1 si no comparten ninguna cadena. Por ejemplo, `{'00': 3, '11': 1}` contra `{'00': 1, '11': 1}` da `0.25`.",
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Compara fracciones, no conteos: divide cada conteo entre el total de su diccionario.",
+                        "Recorre la unión de las claves de `a` y de `b`: una cadena que falta en un conteo vale 0.",
+                        "Para cada cadena `x`, `abs(a.get(x, 0) / sum(a.values()) - ...)`; suma todo y divide entre 2.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
             ("", "Reflexiona"),
-            """Dos preguntas para pensar con calma, conectadas con lo que viste en el cuaderno.""",
+            """Dos preguntas para pensar con calma, conectadas con lo que mediste.""",
             [T("Antes de mitigar, mide cuánto ruido hay.", "subtitle")],
             ask=reflect(
                 "Con un 1 % de error por CNOT y un 2 % de lectura, el Bell salió con un 4 % de disparos erróneos. ¿Qué crees que pasaría con un circuito de 50 CNOT? ¿Qué cifra mirarías para saberlo?",
@@ -670,28 +692,46 @@ estimator.options.twirling.enable_gates = True""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero rellenas los huecos de un circuito con la secuencia XX y compruebas que la operación no cambia. [[n2]]Después la alargas a cuatro pulsos X y cuentas el doble. [[n3]]Y por último escribes tú una variante de twirling de la CNOT: la Pauli de después que mantiene la operación.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. Todo corre con un backend falso, sin cuenta. [[n1]]Primero rellenas los huecos de un circuito con la secuencia XX y apuestas cuántos pulsos se añaden. [[n2]]Después la alargas a cuatro pulsos X y cuentas el doble. [[n3]]Y por último escribes tú una variante de twirling de la CNOT: la Pauli de después que mantiene la operación.""",
             [
-                Mission(
-                    "practica/p6-supresion.py",
-                    [
-                        (1, "Rellena los huecos con XX y verifica que la operación es la misma."),
-                        (2, "Cambia la secuencia a cuatro pulsos X: debe añadir el doble."),
-                        (
-                            3,
-                            "Escribe `variante(rng)`: elige `antes` al azar y calcula `despues` con `evolve`.",
-                        ),
+                Exercise(
+                    "p6-supresion/rellenar-con-xx",
+                    "El circuito `isa` deja esperando a algunos qubits. Guarda en `con_xx` el circuito con esos huecos rellenos con una secuencia XX, usando `con_dd`. Antes de mirar el resultado, apuesta en `prediccion` cuántos pulsos X se añaden: `0`, `2` u `8`.",
+                    level=1,
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "`con_dd` programa el circuito y rellena los huecos con la secuencia que le pases.",
+                        "Una secuencia XX son dos puertas `XGate()`, en una lista.",
+                        "`con_xx = con_dd([..., ...])`, con una `XGate()` en cada posición de la lista.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-supresion/cuatro-pulsos",
+                    "Cambia `secuencia` por cuatro pulsos X, que también es la identidad. Tendrás el doble de pulsos en cada hueco: más protección contra la deriva lenta, pero cada pulso también puede fallar. `pulsos_secuencia` debe valer el doble que `base` y el circuito debe seguir haciendo la misma operación.",
+                    level=2,
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Cuatro pulsos X seguidos también son la identidad: cada X deshace al anterior.",
+                        "Cambia la lista `secuencia`, la que `con_dd` rellena en los huecos.",
+                        "La lista lleva cuatro `XGate()` separadas por comas.",
+                    ],
+                ),
+                Exercise(
+                    "p6-supresion/variante-twirling",
+                    'Completa `variante(antes)`: recibe una cadena de dos letras como `"XZ"` (la letra de la derecha es el qubit 0) y devuelve un circuito de dos qubits con esa Pauli antes de una CNOT y otra Pauli después, de modo que el conjunto siga siendo la misma CNOT. La Pauli de después es la que sale de empujar `antes` a través de la CNOT: $P_R = \\mathrm{CX}\\,P_L\\,\\mathrm{CX}^\\dagger$. Con `despues = antes` solo salen bien algunas de las 16 Paulis.',
+                    level=3,
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "La Pauli de después depende de la de antes: es la que resulta de empujar `antes` a través de la CNOT.",
+                        "Se calcula en la línea marcada con ✏️, a partir de `antes`, antes de armar el circuito.",
+                        "`despues = antes.___(...)`: busca en `Pauli` el método que aplica una puerta.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -987,28 +1027,50 @@ print(f"exponencial: {exponencial:.4f}")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero haces ZNE con una recta sobre el GHZ y ves cuánto se queda corta. [[n2]]Después cambias a una exponencial y llegas al valor ideal. [[n3]]Y por último escribes los pesos de PEC para un qubit, con un peso negativo, y calculas cuánto crece el número de disparos.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. Todo corre en un simulador exacto, sin ruido de muestreo y sin cuenta. [[n1]]Primero haces ZNE con una recta sobre el GHZ y apuestas si llega al valor ideal. [[n2]]Después arreglas el ajuste para que sea una exponencial y llegas a él. [[n3]]Y por último escribes los pesos de PEC para un qubit, con un peso negativo.""",
             [
-                Mission(
-                    "practica/p6-mitigacion.py",
-                    [
-                        (1, "Mide a factores 1, 3 y 5 y extrapola con una recta."),
-                        (2, "Ajusta una exponencial: el error debe bajar de $10^{-3}$."),
-                        (
-                            3,
-                            "Escribe `pesos_pec(lam)` y mira cómo crece el sobrecoste $\\gamma^{2n}$ con la profundidad.",
-                        ),
+                Exercise(
+                    "p6-mitigacion/zne-lineal",
+                    'El código mide el GHZ de cuatro qubits con los factores de ruido 1, 3 y 5. Guarda en `zne_lineal` la extrapolación al factor 0 de una recta ajustada a `(factores, valores)`. Antes de mirar el resultado, apuesta en `prediccion` si, frente al valor ideal 1, la recta `"llega a 1"`, `"se pasa"` o `"se queda corta"`.',
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "El valor de una recta en el factor 0 es su término independiente.",
+                        "`np.polyfit(x, y, 1)` devuelve `[pendiente, término independiente]`.",
+                        "`zne_lineal = float(np.polyfit(___, ___, ___)[___])`, con el elemento que no es la pendiente.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-mitigacion/zne-exponencial",
+                    r"Con ruido despolarizante cada puerta multiplica el valor por $(1-\lambda)$, así que los puntos siguen una exponencial $E(c) = E_0\,e^{-\gamma c}$ y no una recta. `extrapolar_exp(factores, valores)` debe devolver $E_0$, pero ajusta una recta. Arréglala: con los puntos del GHZ el error debe bajar de $10^{-3}$.",
+                    level=2,
+                    kind="fix",
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        r"Una exponencial es una recta en el logaritmo: $\ln E = \ln E_0 - \gamma c$.",
+                        "Cambia lo que ajusta `np.polyfit` y lo que devuelve la función.",
+                        "`coef = np.polyfit(factores, ___, 1)` y `return float(___(coef[1]))`, con la función inversa del logaritmo.",
+                    ],
+                ),
+                Exercise(
+                    "p6-mitigacion/pesos-pec",
+                    r"Un canal despolarizante de un qubit multiplica cada Pauli ($X$, $Y$, $Z$) por $1-\lambda$ y deja $I$ igual. Para invertirlo, PEC lo escribe como combinación de insertar $I$ (peso $a$) o una Pauli $X$, $Y$ o $Z$ (peso $b$ cada una). Escribe `pesos_pec(lam)`: recibe $\lambda$ y devuelve `(a, b)` con $a + 3b = 1$ (la identidad se conserva) y $a - b = \frac{1}{1-\lambda}$ (cancela el factor de las Paulis). Un peso sale negativo: por eso hay que muestrear. Por ejemplo, con $\lambda = 0{,}05$ el sobrecoste por puerta $\gamma = |a| + 3|b|$ vale 1,0789.",
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Son dos ecuaciones lineales con dos incógnitas.",
+                        "Resta la segunda ecuación de la primera para despejar $b$ y luego despeja $a$.",
+                        "Llama `s` al segundo miembro de la segunda ecuación, `b = (1 - s) / ___` y `a` en función de `s` y `b`.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1016,7 +1078,7 @@ print(f"exponencial: {exponencial:.4f}")""",
             """Dos preguntas para pensar con calma, conectadas con tu proyecto.""",
             [T("Una extrapolación es un modelo, no una medida.", "subtitle")],
             ask=reflect(
-                "La exponencial dio exactamente 1 en el cuaderno. ¿Por qué eso no te garantiza nada en un QPU real?",
+                "La exponencial dio exactamente 1 en el ejercicio. ¿Por qué eso no te garantiza nada en un QPU real?",
                 "PEC no tiene sesgo pero su costo crece muy rápido con la profundidad; ZNE es barato pero sesgado. Para tu cadena de Ising con muchos pasos de Trotter, ¿cuál probarías primero?",
             ),
         ),
@@ -1255,34 +1317,46 @@ sampler.options.twirling.enable_gates = True""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. Las opciones se validan en local, así que no hace falta cuenta. [[n1]]Primero lees lo que trae por defecto un Estimator y un Sampler. [[n2]]Después partes del nivel cero y activas TREX y ZNE a mano, y pruebas un nivel inválido para ver el error. [[n3]]Y por último escribes una función que prepara cualquiera de las dos primitivas y rechaza TREX o ZNE para el Sampler.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. Las opciones se validan en tu equipo, sin enviar nada, así que todo corre con un backend falso y sin cuenta. [[n1]]Primero lees lo que trae por defecto un Estimator y apuestas qué nivel es. [[n2]]Después partes del nivel cero y activas TREX y ZNE a mano. [[n3]]Y por último escribes una función que prepara cualquiera de las dos primitivas y rechaza TREX o ZNE para el Sampler.""",
             [
-                Mission(
-                    "practica/p6-configurar.py",
-                    [
-                        (
-                            1,
-                            "Crea un Estimator y un Sampler sin opciones y lee sus valores por defecto.",
-                        ),
-                        (
-                            2,
-                            "Nivel 0 más TREX y ZNE con factores 1, 3 y 5; prueba `resilience_level = 7`.",
-                        ),
-                        (
-                            3,
-                            'Escribe `preparar(primitiva, tecnicas)`: un Sampler con `"trex"` o `"zne"` lanza `ValueError`.',
-                        ),
+                Exercise(
+                    "p6-configurar/opciones-por-defecto",
+                    "Crea un `Estimator` sin pedir nada y lee sus opciones: guarda en `nivel_por_defecto` el `resilience_level` que trae `estimator`. Antes de mirar el resultado, apuesta en `prediccion` qué nivel es: `0`, `1` o `2`. Fíjate también en `measure_mitigation`: `None` significa «que lo decida el nivel».",
+                    level=1,
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "Las opciones de una primitiva viven en `estimator.options`.",
+                        "El nivel es un atributo directo de `options`, no está dentro de `resilience`.",
+                        "`nivel_por_defecto = estimator.options.___`, con el nombre del nivel de resiliencia.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-configurar/trex-y-zne",
+                    "Parte del nivel 0 (sin mitigación) y activa a mano, en `opciones.resilience`, TREX (`measure_mitigation`), ZNE (`zne_mitigation`) y los factores de ruido 1, 3 y 5 de ZNE. Las opciones explícitas se aplican encima del nivel base.",
+                    level=2,
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "TREX, ZNE y sus factores son opciones del grupo `resilience`.",
+                        "Cada una es un atributo de `opciones.resilience`; los factores están dentro del subgrupo `zne`.",
+                        "`opciones.resilience.measure_mitigation = ...`, `opciones.resilience.zne_mitigation = ...` y `opciones.resilience.zne.noise_factors = (..., ..., ...)`.",
+                    ],
+                ),
+                Exercise(
+                    "p6-configurar/preparar",
+                    'Completa `preparar(primitiva, tecnicas)`: recibe `"estimator"` o `"sampler"` y un conjunto de técnicas (`"dd"`, `"twirling"` de puertas, `"trex"` y `"zne"`), y devuelve esa primitiva con las técnicas activadas. Una técnica que no pides no se activa. Un `Sampler` no tiene mitigación de expectativas: si le pides `"trex"` o `"zne"`, lanza `ValueError`.',
+                    level=3,
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Cada técnica es un grupo de opciones con su interruptor: `dynamical_decoupling`, `twirling` y `resilience`.",
+                        "Faltan twirling, TREX y ZNE. TREX y ZNE solo existen en el `Estimator`: comprueba `primitiva` antes de activarlas.",
+                        'Cada técnica es `if "..." in tecnicas:` con `p.options.___.___ = True` dentro; para el Sampler, `raise ValueError(...)`.',
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1580,34 +1654,47 @@ result = estimator.run(pubs).result()""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. No necesita cuenta: el modelo de ruido es una lista de Paulis con tasas. [[n1]]Primero construyes un modelo Pauli–Lindblad y calculas cuánto cuesta invertirlo. [[n2]]Después lo amplificas multiplicando sus tasas por tres, como hace PEA. [[n3]]Y por último aprendes tú una fidelidad: mides cómo decae un valor esperado con la profundidad y ajustas la tasa.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. El modelo de ruido es una lista de Paulis con tasas, así que no hace falta cuenta. [[n1]]Primero construyes un modelo Pauli–Lindblad y calculas cuánto cuesta invertirlo. [[n2]]Después lo amplificas multiplicando sus tasas por tres, como hace PEA. [[n3]]Y por último aprendes tú una fidelidad: mides cómo decae un valor esperado con la profundidad y ajustas la tasa.""",
             [
-                Mission(
-                    "practica/p6-aprender-ruido.py",
-                    [
-                        (
-                            1,
-                            "Construye un `PauliLindbladMap` y calcula $\\gamma$ para invertir una capa.",
-                        ),
-                        (
-                            2,
-                            "Obtén el modelo amplificado con `scale_rates(3)` y comprueba que $\\gamma$ pasa a $\\gamma^3$.",
-                        ),
-                        (
-                            3,
-                            "Ajusta $f$ con $\\langle ZZ\\rangle(d)=f^d$ y calcula la tasa $r=-\\tfrac12\\ln f$.",
-                        ),
+                Exercise(
+                    "p6-aprender-ruido/costo-de-invertir",
+                    '`modelo` tiene tres términos con tasas pequeñas. Guarda en `gamma_capa` el coste $\\gamma$ de invertir una capa con ese modelo. Antes de mirar el resultado, apuesta en `prediccion` si será `"menor que 1"` o `"mayor que 1"`.',
+                    level=1,
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        r"Para PEC, invertir el modelo cuesta $\gamma = e^{2\sum_j r_j}$ por capa.",
+                        r"El modelo invertido es otro `PauliLindbladMap`, y ese objeto sabe calcular su $\gamma$.",
+                        r"`modelo.inverse().___()`, con el método que devuelve $\gamma$.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-aprender-ruido/amplificar",
+                    r"PEA aumenta el ruido multiplicando las tasas del modelo aprendido. Completa `amplificar(modelo, factor)` para que devuelva el mismo modelo con las tasas multiplicadas por `factor`, sin cambiar el original. Con factor 3, $\gamma$ debe pasar a $\gamma^3$.",
+                    level=2,
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "`PauliLindbladMap` ya sabe cambiar la escala de sus tasas.",
+                        "El método devuelve un modelo nuevo y deja el original como estaba: devuélvelo.",
+                        "`modelo.scale_rates(...)` con el argumento adecuado.",
+                    ],
+                ),
+                Exercise(
+                    "p6-aprender-ruido/aprender-fidelidad",
+                    r"Completa `aprender_fidelidad(ds, valores)`: recibe las profundidades `ds` y los $\langle ZZ\rangle$ medidos `valores`, que siguen $\langle ZZ\rangle(d) = f^{\,d}$, y devuelve $f$ ajustando una recta a $\ln\langle ZZ\rangle$ con todos los puntos. Después calcula en `tasa` el valor de $r$ para el único término `XI` que reproduce esa fidelidad de $ZZ$: $f = e^{-2r}$. Por ejemplo, con `ds = [1, 2]` y `valores = [0.9, 0.81]` devuelve `0.9`.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        r"Si $\langle ZZ\rangle = f^d$, entonces $\ln\langle ZZ\rangle = d\,\ln f$: una recta en $d$.",
+                        r"`np.polyfit(ds, np.log(valores), 1)` devuelve la pendiente primero, y la pendiente es $\ln f$.",
+                        r"`pendiente, _ = np.polyfit(ds, ___, 1)` y `return float(___(pendiente))`; para `tasa`, despeja $r$ de $f = e^{-2r}$.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "reflexion",
@@ -1620,7 +1707,7 @@ result = estimator.run(pubs).result()""",
                 )
             ],
             ask=reflect(
-                "En el cuaderno un solo término reprodujo la fidelidad de $ZZ$. ¿Qué otras medidas necesitarías para distinguir los muchos términos del ruido real de una capa?",
+                "En el ejercicio un solo término reprodujo la fidelidad de $ZZ$. ¿Qué otras medidas necesitarías para distinguir los muchos términos del ruido real de una capa?",
                 "¿Cada cuánto crees que habría que volver a aprender el modelo si ejecutas tu cadena de Ising durante varios días? ¿Qué lo cambiaría?",
             ),
         ),
@@ -2331,34 +2418,49 @@ for n, (i, r) in enumerate(zip(ideal, noisy), 1):
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. Usa el backend falso Sherbrooke, sin cuenta ni cola. [[n1]]Primero analizas uno, dos y tres capas y ves cómo crece la diferencia. [[n2]]Después sustituyes el modelo de ruido del backend por uno tuyo, con un dos por ciento de despolarización en cada puerta de dos qubits. [[n3]]Y por último escribes las reglas de la guía como una función: qué técnicas sugiere cada diferencia media.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. Todo corre con un backend falso de cinco qubits, sin cuenta ni cola, y con un circuito espejo de cuatro qubits. [[n1]]Primero analizas uno, dos y tres capas y ves cómo crece la diferencia. [[n2]]Después sustituyes el modelo de ruido del backend por uno tuyo, con un dos por ciento de despolarización en cada puerta de dos qubits. [[n3]]Y por último escribes las reglas de la guía como una función: qué técnicas sugiere cada diferencia media.""",
             [
-                Mission(
-                    "practica/p6-neat.py",
-                    [
-                        (
-                            1,
-                            "Analiza 1, 2 y 3 capas con el modelo del backend y comprueba que la diferencia crece.",
-                        ),
-                        (
-                            2,
-                            "Pasa a `Neat` un modelo de Aer con 2 % de despolarización en `ecr` y compáralo con el del backend.",
-                        ),
-                        (
-                            3,
-                            'Escribe `sugerencia(dif)`: `[]`, `["PEA"]` o `["PEA", "ZNE"]` según las reglas de la guía.',
-                        ),
+                Exercise(
+                    "p6-neat/capas-y-ruido",
+                    'NEAT simula tu circuito, convertido a Clifford, sin ruido y con ruido, y la diferencia absoluta media entre los dos es la cifra para comparar. Simula `pubs_cliff` con el modelo de ruido del backend, con `seed_simulator=1`, y guarda el resultado en `ruidoso`. Antes de mirar el resultado, apuesta en `prediccion` si la diferencia a 3 capas será `"menor"`, `"parecida"` (a menos de un punto porcentual) o `"mayor"` que a 1 capa.',
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hidden=True,
+                    hints=[
+                        "`Neat` simula con ruido igual que simula sin él con `ideal_sim`.",
+                        "El método se llama como `ideal_sim`: con los mismos PUBs y el mismo `seed_simulator`.",
+                        "`ruidoso = analizador.___(pubs_cliff, seed_simulator=...)`, con el método de ruido.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-neat/modelo-propio",
+                    "NEAT acepta un modelo de Aer. El de abajo pone un error despolarizante `p_cx` en cada CNOT del backend. Cambia `p_cx` para que tu modelo dé más diferencia media a 3 capas que el modelo del backend, un diagnóstico más pesimista.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Un error mayor en cada CNOT acumula más diferencia cuantas más capas hay.",
+                        "Solo cambia el valor de `p_cx`; el resto del código ya simula y compara.",
+                        "Sube `p_cx` por pasos y mira lo que imprime, hasta que el tercer valor de tu modelo supere al del backend.",
+                    ],
+                ),
+                Exercise(
+                    "p6-neat/sugerencia",
+                    'Escribe `sugerencia(dif)`: recibe la diferencia media en porcentaje y devuelve la lista de técnicas que sugiere la guía. Con una diferencia mayor que 90 ninguna mitigación ayuda probablemente: `[]`. Con una menor que 90, PEA probablemente mejora: `["PEA"]`. Con una menor que 80, además, ZNE con plegado de puertas: `["PEA", "ZNE"]`. Los límites no cuentan: con 90 devuelve `[]` y con 80, `["PEA"]`.',
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Son dos condiciones independientes sobre `dif`, una por técnica.",
+                        "Empieza con la lista vacía y añade cada técnica si se cumple su condición, en el orden de la guía.",
+                        "`if dif < ...:` con `tecnicas.append(...)` dentro, una vez para PEA y otra para ZNE.",
+                    ],
+                ),
             ],
-            [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
-            ],
+            [A("show", "e1", at="n1"), A("show", "e2", at="n2"), A("show", "e3", at="n3")],
         ),
         beat(
             "proyecto",

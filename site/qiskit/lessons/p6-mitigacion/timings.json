@@ -262,12 +262,11 @@
   ]
  },
  "mision": {
-  "dur": 31.632,
+  "dur": 26.592,
   "marks": {
-   "n1": 6.142,
-   "n2": 12.766,
-   "n3": 17.309,
-   "check": 26.919
+   "n1": 7.798,
+   "n2": 14.762,
+   "n3": 20.14
   },
   "cues": [
    [
@@ -276,23 +275,19 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Todo corre en un simulador exacto, sin ruido de muestreo y sin cuenta."
    ],
    [
-    6.142,
-    "Primero haces ZNE con una recta sobre el GHZ y ves cuánto se queda corta."
+    7.798,
+    "Primero haces ZNE con una recta sobre el GHZ y apuestas si llega al valor ideal."
    ],
    [
-    12.766,
-    "Después cambias a una exponencial y llegas al valor ideal."
+    14.762,
+    "Después arreglas el ajuste para que sea una exponencial y llegas a él."
    ],
    [
-    17.309,
-    "Y por último escribes los pesos de PEC para un qubit, con un peso negativo, y calculas cuánto crece el número de disparos."
-   ],
-   [
-    26.919,
-    "Cada misión tiene una comprobación: busca la marca verde."
+    20.14,
+    "Y por último escribes los pesos de PEC para un qubit, con un peso negativo."
    ]
   ]
  },

@@ -413,70 +413,35 @@
      "section": "6.1",
      "title": "Panorama de la gestión del ruido",
      "summary": "De dónde vienen los errores y cómo elegir entre supresión, mitigación, aprendizaje del ruido y postselección.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p6-panorama.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p6-supresion",
      "section": "6.2",
      "title": "Supresión: desacoplamiento dinámico y twirling",
      "summary": "Reducir el efecto del ruido durante la ejecución con pulsos de desacoplamiento dinámico y twirling de Pauli.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/p6-supresion.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     },
     {
      "id": "p6-mitigacion",
      "section": "6.3",
      "title": "Mitigación: TREX, ZNE, PEA, PEC y PNA",
      "summary": "Qué corrigen TREX, ZNE, PEA y PEC en IBM Quantum Compute, y dónde encaja PNA en el ecosistema de addons.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p6-mitigacion.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p6-configurar",
      "section": "6.4",
      "title": "Configurar el ruido en Estimator y Sampler",
      "summary": "Ajustar niveles de resiliencia y opciones de supresión en las primitivas nuevas del lado del cliente.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p6-configurar.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p6-aprender-ruido",
      "section": "6.5",
      "title": "Aprender el ruido",
      "summary": "Caracterizar el ruido por capas con NoiseLearner y NoiseLearnerV3 para alimentar técnicas de mitigación.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p6-aprender-ruido.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p6-postseleccion",
@@ -499,11 +464,6 @@
      "summary": "Usar Noisy Estimator Analyzer Tool para explorar el impacto del ruido y comparar opciones antes de enviar trabajos costosos.",
      "minutes": 10,
      "missions": [
-      {
-       "notebook": "practica/p6-neat.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito6.py",
        "title": "Proyecto Ising · Hito VI",

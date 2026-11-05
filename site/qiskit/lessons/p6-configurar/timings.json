@@ -191,12 +191,11 @@
   ]
  },
  "mision": {
-  "dur": 38.016,
+  "dur": 29.832,
   "marks": {
-   "n1": 11.209,
-   "n2": 16.248,
-   "n3": 24.825,
-   "check": 33.288
+   "n1": 10.219,
+   "n2": 15.795,
+   "n3": 21.357
   },
   "cues": [
    [
@@ -205,27 +204,19 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Las opciones se validan en tu equipo, sin enviar nada, así que todo corre con un backend falso y sin cuenta."
    ],
    [
-    6.142,
-    "Las opciones se validan en local, así que no hace falta cuenta."
+    10.219,
+    "Primero lees lo que trae por defecto un Estimator y apuestas qué nivel es."
    ],
    [
-    11.209,
-    "Primero lees lo que trae por defecto un Estimator y un Sampler."
+    15.795,
+    "Después partes del nivel cero y activas TREX y ZNE a mano."
    ],
    [
-    16.248,
-    "Después partes del nivel cero y activas TREX y ZNE a mano, y pruebas un nivel inválido para ver el error."
-   ],
-   [
-    24.825,
+    21.357,
     "Y por último escribes una función que prepara cualquiera de las dos primitivas y rechaza TREX o ZNE para el Sampler."
-   ],
-   [
-    33.288,
-    "Cada misión tiene una comprobación: busca la marca verde."
    ]
   ]
  },

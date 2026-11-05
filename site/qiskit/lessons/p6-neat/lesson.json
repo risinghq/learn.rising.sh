@@ -538,46 +538,78 @@
     "6.7",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. Usa el backend falso Sherbrooke, sin cuenta ni cola. [[n1]]Primero analizas uno, dos y tres capas y ves cómo crece la diferencia. [[n2]]Después sustituyes el modelo de ruido del backend por uno tuyo, con un dos por ciento de despolarización en cada puerta de dos qubits. [[n3]]Y por último escribes las reglas de la guía como una función: qué técnicas sugiere cada diferencia media. [[check]]Cada misión tiene una comprobación: busca la marca verde.",
+   "say": "Ahora te toca. Todo corre con un backend falso de cinco qubits, sin cuenta ni cola, y con un circuito espejo de cuatro qubits. [[n1]]Primero analizas uno, dos y tres capas y ves cómo crece la diferencia. [[n2]]Después sustituyes el modelo de ruido del backend por uno tuyo, con un dos por ciento de despolarización en cada puerta de dos qubits. [[n3]]Y por último escribes las reglas de la guía como una función: qué técnicas sugiere cada diferencia media.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p6-neat.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Analiza 1, 2 y 3 capas con el modelo del backend y comprueba que la diferencia crece."
-      },
-      {
-       "level": 2,
-       "text": "Pasa a `Neat` un modelo de Aer con 2 % de despolarización en `ecr` y compáralo con el del backend."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `sugerencia(dif)`: `[]`, `[\"PEA\"]` o `[\"PEA\", \"ZNE\"]` según las reglas de la guía."
-      }
+     "type": "exercise",
+     "exercise": "p6-neat/capas-y-ruido",
+     "prompt": "NEAT simula tu circuito, convertido a Clifford, sin ruido y con ruido, y la diferencia absoluta media entre los dos es la cifra para comparar. Simula `pubs_cliff` con el modelo de ruido del backend, con `seed_simulator=1`, y guarda el resultado en `ruidoso`. Antes de mirar el resultado, apuesta en `prediccion` si la diferencia a 3 capas será `\"menor\"`, `\"parecida\"` (a menos de un punto porcentual) o `\"mayor\"` que a 1 capa.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "`Neat` simula con ruido igual que simula sin él con `ideal_sim`.",
+      "El método se llama como `ideal_sim`: con los mismos PUBs y el mismo `seed_simulator`.",
+      "`ruidoso = analizador.___(pubs_cliff, seed_simulator=...)`, con el método de ruido."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import random\n\nimport numpy as np\nfrom qiskit.circuit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.debug_tools import Neat\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef circuito_espejo(n_qubits, capas):\n    \"\"\"Rotaciones RZ aleatorias y CX, seguidas de su inverso: cada ⟨Z⟩ ideal vale 1.\"\"\"\n    rng = random.Random(10)\n    angulos = [[rng.random() for _ in range(n_qubits)] for _ in range(capas)]\n    qc = QuantumCircuit(n_qubits)\n    qubits = list(range(n_qubits))\n\n    def pares(capa):\n        return qubits[::2] if capa % 2 == 0 else qubits[1 : n_qubits - 1 : 2]\n\n    for capa in range(capas):\n        for q in qubits:\n            qc.rz(angulos[capa][q], q)\n        for q in pares(capa):\n            qc.cx(q, q + 1)\n    for capa in reversed(range(capas)):\n        for q in pares(capa):\n            qc.cx(q, q + 1)\n        for q in qubits:\n            qc.rz(-angulos[capa][q], q)\n    return qc\n\n\ndef diferencia_media(ideal, ruidoso):\n    \"\"\"Diferencia absoluta media entre dos NeatResult, en porcentaje, por PUB.\"\"\"\n    return [float(np.mean(abs(i - r).vals) * 100) for i, r in zip(ideal, ruidoso)]\n\n\nfake = FakeManilaV2()\npm = generate_preset_pass_manager(backend=fake, optimization_level=0)\n\n\ndef pubs_con_capas(capas):\n    \"\"\"Un PUB por número de capas, con los cuatro ⟨Z_i⟩ ya mapeados al layout.\"\"\"\n    pubs = []\n    for n in capas:\n        isa = pm.run(circuito_espejo(4, n))\n        observables = [\n            SparsePauliOp(\"I\" * (3 - i) + \"Z\" + \"I\" * i).apply_layout(isa.layout) for i in range(4)\n        ]\n        pubs.append((isa, observables))\n    return pubs\n\n\nanalizador = Neat(fake)\npubs_cliff = analizador.to_clifford(pubs_con_capas([1, 2, 3]))\nideal = analizador.ideal_sim(pubs_cliff, seed_simulator=1)\n\n# ✏️ simula los mismos PUBs con el modelo de ruido del backend (seed_simulator=1)\nruidoso = ideal\ndif_backend = diferencia_media(ideal, ruidoso)\nfor capas, d in zip([1, 2, 3], dif_backend):\n    print(f\"{capas} capas: {d:.2f} %\")\n\n# ✏️ apuesta antes de mirar las líneas de arriba: la diferencia a 3 capas, ¿\"menor\", \"parecida\" o \"mayor\" que a 1 capa?\nprediccion = \"\"",
+     "cases": [
+      "la diferencia crece con las capas",
+      "tu apuesta coincide con la diferencia a 3 capas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-neat/modelo-propio",
+     "prompt": "NEAT acepta un modelo de Aer. El de abajo pone un error despolarizante `p_cx` en cada CNOT del backend. Cambia `p_cx` para que tu modelo dé más diferencia media a 3 capas que el modelo del backend, un diagnóstico más pesimista.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Un error mayor en cada CNOT acumula más diferencia cuantas más capas hay.",
+      "Solo cambia el valor de `p_cx`; el resto del código ya simula y compara.",
+      "Sube `p_cx` por pasos y mira lo que imprime, hasta que el tercer valor de tu modelo supere al del backend."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "import random\n\nimport numpy as np\nfrom qiskit.circuit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer.noise import NoiseModel, depolarizing_error\nfrom qiskit_ibm_runtime.debug_tools import Neat\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef circuito_espejo(n_qubits, capas):\n    \"\"\"Rotaciones RZ aleatorias y CX, seguidas de su inverso: cada ⟨Z⟩ ideal vale 1.\"\"\"\n    rng = random.Random(10)\n    angulos = [[rng.random() for _ in range(n_qubits)] for _ in range(capas)]\n    qc = QuantumCircuit(n_qubits)\n    qubits = list(range(n_qubits))\n\n    def pares(capa):\n        return qubits[::2] if capa % 2 == 0 else qubits[1 : n_qubits - 1 : 2]\n\n    for capa in range(capas):\n        for q in qubits:\n            qc.rz(angulos[capa][q], q)\n        for q in pares(capa):\n            qc.cx(q, q + 1)\n    for capa in reversed(range(capas)):\n        for q in pares(capa):\n            qc.cx(q, q + 1)\n        for q in qubits:\n            qc.rz(-angulos[capa][q], q)\n    return qc\n\n\ndef diferencia_media(ideal, ruidoso):\n    \"\"\"Diferencia absoluta media entre dos NeatResult, en porcentaje, por PUB.\"\"\"\n    return [float(np.mean(abs(i - r).vals) * 100) for i, r in zip(ideal, ruidoso)]\n\n\nfake = FakeManilaV2()\npm = generate_preset_pass_manager(backend=fake, optimization_level=0)\n\n\ndef pubs_con_capas(capas):\n    \"\"\"Un PUB por número de capas, con los cuatro ⟨Z_i⟩ ya mapeados al layout.\"\"\"\n    pubs = []\n    for n in capas:\n        isa = pm.run(circuito_espejo(4, n))\n        observables = [\n            SparsePauliOp(\"I\" * (3 - i) + \"Z\" + \"I\" * i).apply_layout(isa.layout) for i in range(4)\n        ]\n        pubs.append((isa, observables))\n    return pubs\n\n\nanalizador = Neat(fake)\npubs_cliff = analizador.to_clifford(pubs_con_capas([1, 2, 3]))\nideal = analizador.ideal_sim(pubs_cliff, seed_simulator=1)\nruidoso = analizador.noisy_sim(pubs_cliff, seed_simulator=1)\ndif_backend = diferencia_media(ideal, ruidoso)\n\np_cx = 0.002  # ✏️ prueba 0.02\nmodelo_propio = NoiseModel()\nmodelo_propio.add_all_qubit_quantum_error(depolarizing_error(p_cx, 2), [\"cx\"])\nruidoso_propio = Neat(fake, noise_model=modelo_propio).noisy_sim(pubs_cliff, seed_simulator=1)\ndif_propio = diferencia_media(ideal, ruidoso_propio)\nprint(\"backend:\", [round(d, 2) for d in dif_backend])\nprint(\"tu modelo:\", [round(d, 2) for d in dif_propio])",
+     "cases": [
+      "tu modelo da más diferencia que el del backend a 3 capas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-neat/sugerencia",
+     "prompt": "Escribe `sugerencia(dif)`: recibe la diferencia media en porcentaje y devuelve la lista de técnicas que sugiere la guía. Con una diferencia mayor que 90 ninguna mitigación ayuda probablemente: `[]`. Con una menor que 90, PEA probablemente mejora: `[\"PEA\"]`. Con una menor que 80, además, ZNE con plegado de puertas: `[\"PEA\", \"ZNE\"]`. Los límites no cuentan: con 90 devuelve `[]` y con 80, `[\"PEA\"]`.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Son dos condiciones independientes sobre `dif`, una por técnica.",
+      "Empieza con la lista vacía y añade cada técnica si se cumple su condición, en el orden de la guía.",
+      "`if dif < ...:` con `tecnicas.append(...)` dentro, una vez para PEA y otra para ZNE."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "def sugerencia(dif):\n    tecnicas = []\n    # ✏️ añade \"PEA\" si dif < 90 y también \"ZNE\" si dif < 80\n    return tecnicas\n\n\nfor dif in (95, 90, 85, 50):\n    print(f\"{dif} %: {sugerencia(dif)}\")",
+     "cases": [
+      "95 %, 85 % y 50 %"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

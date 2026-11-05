@@ -529,46 +529,79 @@
     "6.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte. [[check]]Cada misión tiene una comprobación: busca la marca verde.",
+   "say": "Ahora te toca. Todo corre en un simulador con ruido, sin cuenta de IBM. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p6-panorama.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta el Bell con ruido y mide la fracción de `01` y `10`."
-      },
-      {
-       "level": 2,
-       "text": "Sube el error de la CNOT hasta superar el 12 % de disparos erróneos."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `distancia_tv(medida, ideal)`, la distancia de variación total entre dos distribuciones."
-      }
+     "type": "exercise",
+     "exercise": "p6-panorama/bell-ruidoso",
+     "prompt": "El código mide un Bell con un 1 % de error despolarizante en cada CNOT y un 2 % de error de lectura, y guarda los conteos en `cuentas_bell`. Cuenta en `erroneos` los disparos que dieron `01` o `10`. Antes de mirar el resultado, apuesta en `prediccion` cuántos de los 4000 disparos serán erróneos: `10`, `160` o `1500`.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Un Bell ideal solo produce `00` y `11`: todo lo demás es ruido.",
+      "Los conteos son un diccionario `{cadena: disparos}`; una cadena que no apareció no está en él.",
+      "Suma dos `get` sobre `cuentas_bell`, uno por cada cadena errónea, con 0 si falta."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.noise import NoiseModel, ReadoutError, depolarizing_error\n\n\ndef modelo_ruido(p_cx, p_lectura):\n    \"\"\"Ruido despolarizante en cada CX y una lectura que se equivoca con probabilidad p_lectura.\"\"\"\n    modelo = NoiseModel()\n    modelo.add_all_qubit_quantum_error(depolarizing_error(p_cx, 2), [\"cx\"])\n    modelo.add_all_qubit_readout_error(\n        ReadoutError([[1 - p_lectura, p_lectura], [p_lectura, 1 - p_lectura]])\n    )\n    return modelo\n\n\ndef medir(qc, modelo, shots=4000):\n    sim = AerSimulator(noise_model=modelo, seed_simulator=7)\n    return sim.run(qc, shots=shots).result().get_counts()\n\n\ndef fraccion_erronea(cuentas):\n    \"\"\"Fracción de disparos que ningún Bell ideal produciría: 01 o 10.\"\"\"\n    return (cuentas.get(\"01\", 0) + cuentas.get(\"10\", 0)) / sum(cuentas.values())\n\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nbell.measure_all()\n\ncuentas_bell = medir(bell, modelo_ruido(0.01, 0.02))\nprint(dict(sorted(cuentas_bell.items())))\n\n# ✏️ cuenta los disparos que dieron 01 o 10\nerroneos = 0\nprint(f\"disparos erróneos: {erroneos} de {sum(cuentas_bell.values())}\")\n\n# ✏️ apuesta antes de mirar la línea de arriba: ¿10, 160 o 1500 disparos erróneos?\nprediccion = None",
+     "cases": [
+      "`erroneos` cuenta los disparos 01 y 10",
+      "tu apuesta es la opción más cercana a lo medido"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-panorama/mas-ruido-cx",
+     "prompt": "Cambia `p_cx` para que entre el 12 % y el 50 % de los disparos del Bell sea erróneo, sin pasar de 0,5. Fíjate en cuánto hay que subir el error de la puerta para mover el resultado: la lectura aporta una parte fija.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Cada CNOT despolariza con probabilidad `p_cx`: cuanto mayor es, más disparos `01` y `10` salen.",
+      "Solo cambia el valor de `p_cx`; el resto del código ya mide y calcula la fracción.",
+      "Con 0,01 sale cerca de un 4 %: prueba con varias veces ese valor y mira lo que imprime."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.noise import NoiseModel, ReadoutError, depolarizing_error\n\n\ndef modelo_ruido(p_cx, p_lectura):\n    \"\"\"Ruido despolarizante en cada CX y una lectura que se equivoca con probabilidad p_lectura.\"\"\"\n    modelo = NoiseModel()\n    modelo.add_all_qubit_quantum_error(depolarizing_error(p_cx, 2), [\"cx\"])\n    modelo.add_all_qubit_readout_error(\n        ReadoutError([[1 - p_lectura, p_lectura], [p_lectura, 1 - p_lectura]])\n    )\n    return modelo\n\n\ndef medir(qc, modelo, shots=4000):\n    sim = AerSimulator(noise_model=modelo, seed_simulator=7)\n    return sim.run(qc, shots=shots).result().get_counts()\n\n\ndef fraccion_erronea(cuentas):\n    \"\"\"Fracción de disparos que ningún Bell ideal produciría: 01 o 10.\"\"\"\n    return (cuentas.get(\"01\", 0) + cuentas.get(\"10\", 0)) / sum(cuentas.values())\n\n\nbell = QuantumCircuit(2)\nbell.h(0)\nbell.cx(0, 1)\nbell.measure_all()\n\np_cx = 0.01  # ✏️ sube este error\ncuentas_mas = medir(bell, modelo_ruido(p_cx, 0.02))\nfrac_mas = fraccion_erronea(cuentas_mas)\nprint(f\"p_cx = {p_cx}: {frac_mas:.1%} de los disparos es erróneo\")",
+     "cases": [
+      "entre el 12 % y el 50 % de los disparos es erróneo"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-panorama/distancia-tv",
+     "prompt": "Completa `distancia_tv(a, b)`: recibe dos diccionarios de conteos `{cadena: disparos}` y devuelve su distancia de variación total, $\\mathrm{TV}(a,b) = \\tfrac12 \\sum_x |p_a(x) - p_b(x)|$, donde $p(x)$ es la fracción de disparos de la cadena $x$. La suma recorre todas las cadenas que aparezcan en alguno de los dos conteos, y los conteos pueden tener distinto número de disparos. Vale 0 si son iguales y 1 si no comparten ninguna cadena. Por ejemplo, `{'00': 3, '11': 1}` contra `{'00': 1, '11': 1}` da `0.25`.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Compara fracciones, no conteos: divide cada conteo entre el total de su diccionario.",
+      "Recorre la unión de las claves de `a` y de `b`: una cadena que falta en un conteo vale 0.",
+      "Para cada cadena `x`, `abs(a.get(x, 0) / sum(a.values()) - ...)`; suma todo y divide entre 2."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "def distancia_tv(a, b):\n    total = 0.0\n    # ✏️ normaliza cada conteo y suma |pa - pb| sobre todas las cadenas\n    return total\n\n\nprint(distancia_tv({\"00\": 5, \"11\": 5}, {\"00\": 50, \"11\": 50}))\nprint(distancia_tv({\"00\": 10}, {\"11\": 10}))",
+     "cases": [
+      "dos distribuciones iguales o sin cadenas en común",
+      "conteos de 4 y 2 disparos con la misma proporción"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]
@@ -579,7 +612,7 @@
     "6.1",
     "Reflexiona"
    ],
-   "say": "Dos preguntas para pensar con calma, conectadas con lo que viste en el cuaderno.",
+   "say": "Dos preguntas para pensar con calma, conectadas con lo que mediste.",
    "scene": [
     {
      "type": "text",

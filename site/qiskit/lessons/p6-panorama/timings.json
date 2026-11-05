@@ -241,12 +241,11 @@
   ]
  },
  "mision": {
-  "dur": 32.208,
+  "dur": 28.56,
   "marks": {
-   "n1": 6.142,
-   "n2": 11.294,
-   "n3": 18.003,
-   "check": 27.499
+   "n1": 7.204,
+   "n2": 12.356,
+   "n3": 19.064
   },
   "cues": [
    [
@@ -255,33 +254,29 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Todo corre en un simulador con ruido, sin cuenta de IBM."
    ],
    [
-    6.142,
+    7.204,
     "Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos."
    ],
    [
-    11.294,
+    12.356,
     "Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal."
    ],
    [
-    18.003,
+    19.064,
     "Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte."
-   ],
-   [
-    27.499,
-    "Cada misión tiene una comprobación: busca la marca verde."
    ]
   ]
  },
  "reflexion": {
-  "dur": 6.072,
+  "dur": 5.376,
   "marks": {},
   "cues": [
    [
     0.107,
-    "Dos preguntas para pensar con calma, conectadas con lo que viste en el cuaderno."
+    "Dos preguntas para pensar con calma, conectadas con lo que mediste."
    ]
   ]
  },

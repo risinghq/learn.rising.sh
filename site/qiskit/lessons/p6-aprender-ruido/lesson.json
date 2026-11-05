@@ -477,46 +477,79 @@
     "6.5",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. No necesita cuenta: el modelo de ruido es una lista de Paulis con tasas. [[n1]]Primero construyes un modelo Pauli–Lindblad y calculas cuánto cuesta invertirlo. [[n2]]Después lo amplificas multiplicando sus tasas por tres, como hace PEA. [[n3]]Y por último aprendes tú una fidelidad: mides cómo decae un valor esperado con la profundidad y ajustas la tasa. [[check]]Cada misión tiene una comprobación: busca la marca verde.",
+   "say": "Ahora te toca. El modelo de ruido es una lista de Paulis con tasas, así que no hace falta cuenta. [[n1]]Primero construyes un modelo Pauli–Lindblad y calculas cuánto cuesta invertirlo. [[n2]]Después lo amplificas multiplicando sus tasas por tres, como hace PEA. [[n3]]Y por último aprendes tú una fidelidad: mides cómo decae un valor esperado con la profundidad y ajustas la tasa.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p6-aprender-ruido.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Construye un `PauliLindbladMap` y calcula $\\gamma$ para invertir una capa."
-      },
-      {
-       "level": 2,
-       "text": "Obtén el modelo amplificado con `scale_rates(3)` y comprueba que $\\gamma$ pasa a $\\gamma^3$."
-      },
-      {
-       "level": 3,
-       "text": "Ajusta $f$ con $\\langle ZZ\\rangle(d)=f^d$ y calcula la tasa $r=-\\tfrac12\\ln f$."
-      }
+     "type": "exercise",
+     "exercise": "p6-aprender-ruido/costo-de-invertir",
+     "prompt": "`modelo` tiene tres términos con tasas pequeñas. Guarda en `gamma_capa` el coste $\\gamma$ de invertir una capa con ese modelo. Antes de mirar el resultado, apuesta en `prediccion` si será `\"menor que 1\"` o `\"mayor que 1\"`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Para PEC, invertir el modelo cuesta $\\gamma = e^{2\\sum_j r_j}$ por capa.",
+      "El modelo invertido es otro `PauliLindbladMap`, y ese objeto sabe calcular su $\\gamma$.",
+      "`modelo.inverse().___()`, con el método que devuelve $\\gamma$."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit.quantum_info import PauliLindbladMap, QubitSparsePauli\n\nmodelo = PauliLindbladMap.from_list([(\"XI\", 0.010), (\"IZ\", 0.005), (\"ZZ\", 0.002)])\nfor etiqueta in (\"ZZ\", \"XX\", \"IZ\"):\n    print(\n        f\"fidelidad de {etiqueta}:\",\n        round(modelo.pauli_fidelity(QubitSparsePauli.from_label(etiqueta)), 5),\n    )\n\n# ✏️ el coste γ de invertir una capa con este modelo\ngamma_capa = 0.0\nprint(\"γ para invertir una capa:\", round(gamma_capa, 5))\n\n# ✏️ apuesta antes de mirar la línea de arriba: ¿γ será \"menor que 1\" o \"mayor que 1\"?\nprediccion = \"\"",
+     "cases": [
+      "`gamma_capa` es el coste de invertir el modelo",
+      "tu apuesta coincide con `gamma_capa`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-aprender-ruido/amplificar",
+     "prompt": "PEA aumenta el ruido multiplicando las tasas del modelo aprendido. Completa `amplificar(modelo, factor)` para que devuelva el mismo modelo con las tasas multiplicadas por `factor`, sin cambiar el original. Con factor 3, $\\gamma$ debe pasar a $\\gamma^3$.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "`PauliLindbladMap` ya sabe cambiar la escala de sus tasas.",
+      "El método devuelve un modelo nuevo y deja el original como estaba: devuélvelo.",
+      "`modelo.scale_rates(...)` con el argumento adecuado."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit.quantum_info import PauliLindbladMap\n\nmodelo = PauliLindbladMap.from_list([(\"XI\", 0.010), (\"IZ\", 0.005), (\"ZZ\", 0.002)])\ngamma_capa = modelo.inverse().gamma()\n\n\ndef amplificar(modelo, factor):\n    \"\"\"El mismo modelo con todas sus tasas multiplicadas por `factor`.\"\"\"\n    return modelo  # ✏️ multiplica las tasas\n\n\namplificado = amplificar(modelo, 3)\nprint(\"tasas:\", [round(float(r), 5) for r in amplificado.rates])\nprint(f\"γ: {gamma_capa:.5f} → {amplificado.inverse().gamma():.5f} (γ³ = {gamma_capa**3:.5f})\")",
+     "cases": [
+      "con factor 3 las tasas se triplican y γ pasa a γ³"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-aprender-ruido/aprender-fidelidad",
+     "prompt": "Completa `aprender_fidelidad(ds, valores)`: recibe las profundidades `ds` y los $\\langle ZZ\\rangle$ medidos `valores`, que siguen $\\langle ZZ\\rangle(d) = f^{\\,d}$, y devuelve $f$ ajustando una recta a $\\ln\\langle ZZ\\rangle$ con todos los puntos. Después calcula en `tasa` el valor de $r$ para el único término `XI` que reproduce esa fidelidad de $ZZ$: $f = e^{-2r}$. Por ejemplo, con `ds = [1, 2]` y `valores = [0.9, 0.81]` devuelve `0.9`.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Si $\\langle ZZ\\rangle = f^d$, entonces $\\ln\\langle ZZ\\rangle = d\\,\\ln f$: una recta en $d$.",
+      "`np.polyfit(ds, np.log(valores), 1)` devuelve la pendiente primero, y la pendiente es $\\ln f$.",
+      "`pendiente, _ = np.polyfit(ds, ___, 1)` y `return float(___(pendiente))`; para `tasa`, despeja $r$ de $f = e^{-2r}$."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import DensityMatrix, PauliLindbladMap, QubitSparsePauli, SparsePauliOp\nfrom qiskit_aer.noise import depolarizing_error\n\n\ndef zz_tras(d, lam=0.03):\n    \"\"\"⟨ZZ⟩ exacto tras d capas (dos CX) con ruido despolarizante lam en cada CX.\"\"\"\n    rho = DensityMatrix.from_label(\"00\")\n    canal = depolarizing_error(lam, 2).to_quantumchannel()\n    cx = QuantumCircuit(2)\n    cx.cx(0, 1)\n    for _ in range(2 * d):\n        rho = rho.evolve(cx).evolve(canal)\n    return float(rho.expectation_value(SparsePauliOp(\"ZZ\")).real)\n\n\nprofundidades = [1, 2, 4, 8]\nmedidas = [zz_tras(d) for d in profundidades]\nprint(\"⟨ZZ⟩ para d = 1, 2, 4, 8:\", [round(m, 4) for m in medidas])\n\n\ndef aprender_fidelidad(ds, valores):\n    f = 1.0  # ✏️ ajusta ln⟨ZZ⟩ = d · ln f con np.polyfit y devuelve f\n    return f\n\n\nf_aprendida = aprender_fidelidad(profundidades, medidas)\ntasa = 0.0  # ✏️ r = -ln(f) / 2\nmodelo_aprendido = PauliLindbladMap.from_list([(\"XI\", tasa)])\nfidelidad_zz = modelo_aprendido.pauli_fidelity(QubitSparsePauli.from_label(\"ZZ\"))\nprint(f\"f = {f_aprendida:.5f} · r = {tasa:.5f} · fidelidad de ZZ en el modelo: {fidelidad_zz:.5f}\")",
+     "cases": [
+      "`aprender_fidelidad` recupera f = (1 − 0,03)²",
+      "el modelo con tu tasa reproduce esa fidelidad para ZZ"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]
@@ -539,7 +572,7 @@
    "ask": {
     "kind": "reflect",
     "prompts": [
-     "En el cuaderno un solo término reprodujo la fidelidad de $ZZ$. ¿Qué otras medidas necesitarías para distinguir los muchos términos del ruido real de una capa?",
+     "En el ejercicio un solo término reprodujo la fidelidad de $ZZ$. ¿Qué otras medidas necesitarías para distinguir los muchos términos del ruido real de una capa?",
      "¿Cada cuánto crees que habría que volver a aprender el modelo si ejecutas tu cadena de Ising durante varios días? ¿Qué lo cambiaría?"
     ]
    },

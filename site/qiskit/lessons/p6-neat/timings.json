@@ -243,12 +243,11 @@
   ]
  },
  "mision": {
-  "dur": 38.16,
+  "dur": 33.48,
   "marks": {
-   "n1": 10.586,
-   "n2": 16.347,
-   "n3": 25.886,
-   "check": 33.43
+   "n1": 10.629,
+   "n2": 16.389,
+   "n3": 25.928
   },
   "cues": [
    [
@@ -257,27 +256,19 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Todo corre con un backend falso de cinco qubits, sin cuenta ni cola, y con un circuito espejo de cuatro qubits."
    ],
    [
-    6.142,
-    "Usa el backend falso Sherbrooke, sin cuenta ni cola."
-   ],
-   [
-    10.586,
+    10.629,
     "Primero analizas uno, dos y tres capas y ves cómo crece la diferencia."
    ],
    [
-    16.347,
+    16.389,
     "Después sustituyes el modelo de ruido del backend por uno tuyo, con un dos por ciento de despolarización en cada puerta de dos qubits."
    ],
    [
-    25.886,
+    25.928,
     "Y por último escribes las reglas de la guía como una función: qué técnicas sugiere cada diferencia media."
-   ],
-   [
-    33.43,
-    "Cada misión tiene una comprobación: busca la marca verde."
    ]
   ]
  },

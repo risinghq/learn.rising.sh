@@ -232,12 +232,11 @@
   ]
  },
  "mision": {
-  "dur": 37.08,
+  "dur": 28.848,
   "marks": {
-   "n1": 12.129,
-   "n2": 18.314,
-   "n3": 24.386,
-   "check": 32.354
+   "n1": 8.619,
+   "n2": 14.804,
+   "n3": 20.876
   },
   "cues": [
    [
@@ -246,27 +245,19 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "El modelo de ruido es una lista de Paulis con tasas, así que no hace falta cuenta."
    ],
    [
-    6.142,
-    "No necesita cuenta: el modelo de ruido es una lista de Paulis con tasas."
-   ],
-   [
-    12.129,
+    8.619,
     "Primero construyes un modelo Pauli–Lindblad y calculas cuánto cuesta invertirlo."
    ],
    [
-    18.314,
+    14.804,
     "Después lo amplificas multiplicando sus tasas por tres, como hace PEA."
    ],
    [
-    24.386,
+    20.876,
     "Y por último aprendes tú una fidelidad: mides cómo decae un valor esperado con la profundidad y ajustas la tasa."
-   ],
-   [
-    32.354,
-    "Cada misión tiene una comprobación: busca la marca verde."
    ]
   ]
  },

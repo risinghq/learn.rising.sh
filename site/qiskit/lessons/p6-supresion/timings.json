@@ -295,12 +295,11 @@
   ]
  },
  "mision": {
-  "dur": 30.888,
+  "dur": 26.136,
   "marks": {
-   "n1": 6.142,
-   "n2": 13.615,
-   "n3": 18.328,
-   "check": 26.155
+   "n1": 6.185,
+   "n2": 13.587,
+   "n3": 18.3
   },
   "cues": [
    [
@@ -309,23 +308,19 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Todo corre con un backend falso, sin cuenta."
    ],
    [
-    6.142,
-    "Primero rellenas los huecos de un circuito con la secuencia XX y compruebas que la operación no cambia."
+    6.185,
+    "Primero rellenas los huecos de un circuito con la secuencia XX y apuestas cuántos pulsos se añaden."
    ],
    [
-    13.615,
+    13.587,
     "Después la alargas a cuatro pulsos X y cuentas el doble."
    ],
    [
-    18.328,
+    18.3,
     "Y por último escribes tú una variante de twirling de la CNOT: la Pauli de después que mantiene la operación."
-   ],
-   [
-    26.155,
-    "Cada misión tiene una comprobación: busca la marca verde."
    ]
   ]
  },
