@@ -473,6 +473,105 @@ WRONG += [
     ]
 ]
 
+WRONG += [
+    (eid, mutant(eid, name), expected)
+    for eid, name, expected in [
+        ("p6-panorama/bell-ruidoso", "otro-ruido", "`cuentas_bell` tiene 1000 disparos"),
+        ("p6-panorama/mas-ruido-cx", "fraccion-a-mano", "`frac_mas` vale 0.3 y"),
+        ("p6-panorama/mas-ruido-cx", "p-cx-enorme", "`p_cx` vale 0.9"),
+        (
+            "p6-panorama/distancia-tv",
+            "sin-la-mitad",
+            "Con a = {'00': 3, '11': 1} y b = {'00': 1, '11': 1} devuelve 0.5",
+        ),
+        (
+            "p6-panorama/distancia-tv",
+            "solo-cadenas-de-a",
+            "Con a = {'00': 6, '11': 2, '01': 2} y b = {'00': 5, '10': 5} devuelve 0.25",
+        ),
+        (
+            "p6-panorama/distancia-tv",
+            "total-de-a",
+            "y al intercambiar a y b devuelve 1.25",
+        ),
+        (
+            "p6-supresion/rellenar-con-xx",
+            "cuatro-x",
+            "`con_xx` añade 4 pulsos X",
+        ),
+        (
+            "p6-supresion/rellenar-con-xx",
+            "x-de-mas",
+            "`con_xx` se parece a `isa` en 0.0",
+        ),
+        (
+            "p6-supresion/cuatro-pulsos",
+            "valor-a-mano",
+            "`pulsos_secuencia` vale 4 pero `con_secuencia` añade 2 pulsos X",
+        ),
+        (
+            "p6-supresion/cuatro-pulsos",
+            "x-de-mas",
+            "`con_secuencia` se parece a `isa` en 0.0",
+        ),
+        (
+            "p6-supresion/variante-twirling",
+            "ignora-la-etiqueta",
+            "Con antes = 'IX' lo que va antes de la CX se parece a esa Pauli en 0.0",
+        ),
+        ("p6-mitigacion/zne-lineal", "otro-ruido", "`valores` es [0.51, 0.13, 0.04]"),
+        (
+            "p6-mitigacion/zne-exponencial",
+            "sin-ordenada",
+            "Con factores = [1, 3, 5, 7] y valores = [0.7459, 0.6485, 0.5638, 0.4901] devuelve 1.0.",
+        ),
+        (
+            "p6-mitigacion/zne-exponencial",
+            "factores-fijos",
+            "Con factores = [1, 2] y valores = [0.9, 0.81] devuelve 0.9487",
+        ),
+        ("p6-mitigacion/pesos-pec", "lam-fijo", "Con lam = 0.01 devuelve a = 1.0394736842105263"),
+        (
+            "p6-configurar/opciones-por-defecto",
+            "nivel-2",
+            "`estimator` tiene el nivel 2",
+        ),
+        (
+            "p6-configurar/trex-y-zne",
+            "nivel-por-defecto",
+            "`opciones.resilience_level` vale 1",
+        ),
+        ("p6-configurar/trex-y-zne", "opciones-aparte", "Las opciones de `estimator` quedan"),
+        (
+            "p6-configurar/preparar",
+            "sampler-acepta",
+            "Con primitiva = 'sampler' y tecnicas = {'trex'} devuelve {'dd': False, 'twirling': None}",
+        ),
+        (
+            "p6-configurar/preparar",
+            "dd-siempre",
+            "Con primitiva = 'estimator' y tecnicas = set() queda",
+        ),
+        ("p6-aprender-ruido/costo-de-invertir", "otras-tasas", "Las tasas de `modelo` son [0.02"),
+        ("p6-aprender-ruido/amplificar", "solo-triple", "Con factor = 1 las tasas quedan"),
+        (
+            "p6-aprender-ruido/amplificar",
+            "cambia-el-original",
+            "Tras amplificar con factor = 3, las tasas de `modelo` son",
+        ),
+        (
+            "p6-aprender-ruido/aprender-fidelidad",
+            "dos-puntos",
+            "Con ds = [1, 2, 3, 6] y valores = [0.95, 0.9, 0.84, 0.6] devuelve f = 0.94737",
+        ),
+        ("p6-neat/capas-y-ruido", "modelo-propio", "`dif_backend` vale [4.15, 6.45, 11.04]"),
+        ("p6-neat/modelo-propio", "dif-a-mano", "`dif_propio` vale [7.54, 10.37, 13.2]"),
+        ("p6-neat/modelo-propio", "p-cx-enorme", "`p_cx` vale 0.9"),
+        ("p6-neat/sugerencia", "limites-incluidos", "Con dif = 90 devuelve ['PEA']"),
+        ("p6-neat/sugerencia", "redondea", "Con dif = 79.9 devuelve ['PEA']"),
+    ]
+]
+
 # Wrong code that fails the hidden cases: (exercise, code). The message of each failing hidden
 # case is compared with the reference solution in test_hidden_messages_*.
 MUTANTS = [
@@ -576,7 +675,7 @@ MUTANTS = [
     ],
     *[
         m
-        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-")))
+        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-", "p6-")))
         for m in mutants_of(eid)
     ],
 ]
