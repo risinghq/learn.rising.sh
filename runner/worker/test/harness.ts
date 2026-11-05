@@ -128,7 +128,8 @@ export interface Harness {
   purge(at?: Date): Promise<void>;
   remind(at: Date): Promise<void>;
   pushes: PushCall[];
-  // Lines the Worker wrote to Workers Logs.
+  // Lines the Worker wrote to Workers Logs. Each is one JSON object
+  // (src/log.ts); workerd writes its own text lines to the same streams.
   workerLogs(): string[];
   runnerCalls(): { path: string; headers: string[]; instance: string }[];
   // How many times the Worker stopped an instance.
@@ -363,7 +364,7 @@ export async function start(options: Options = {}): Promise<Harness> {
     },
     get: async (pathname) =>
       reply(await mf.dispatchFetch(`http://runner.test${pathname}`)),
-    workerLogs: () => logs.filter((line) => !line.startsWith("FAKE_RUNNER_")),
+    workerLogs: () => logs.filter((line) => line.startsWith("{")),
     runnerStops: () =>
       logs.filter((line) => line === "FAKE_RUNNER_STOP").length,
     advance: async (ms) => {
