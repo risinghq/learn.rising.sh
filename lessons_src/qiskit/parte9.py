@@ -5,6 +5,7 @@ from lib import (
     Box,
     Circ,
     Code,
+    Exercise,
     Flow,
     G,
     L,
@@ -247,30 +248,47 @@ class EstimatorImplementation(BaseEstimatorV2):
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces MiQPU y transpilas un circuito. [[n2]]Después le añades duraciones al Target y estimas cuánto dura un circuito. [[n3]]Y por último implementas run con un simulador local, para que MiQPU funcione con las primitivas.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes. Todo corre en tu equipo: no hace falta cuenta.""",
+            """Ahora te toca a ti. [[n1]]Primero completas el Target de MiQPU, con sus puertas y los pares donde vive la CZ. [[n2]]Después le añades duraciones al Target, para estimar cuánto dura un circuito. [[n3]]Y por último implementas run con un simulador local, para que MiQPU funcione con las primitivas.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos. Todo corre en tu equipo: no hace falta cuenta.""",
             [
-                Mission(
-                    "practica/p9-proveedores.py",
-                    [
-                        (
-                            1,
-                            "Construye `MiQPU` y mira en qué se transpila una CNOT entre qubits lejanos.",
-                        ),
-                        (2, "Añade duraciones al Target y estima la duración de un circuito."),
-                        (
-                            3,
-                            "Implementa `run` con `BasicSimulator` y úsalo con `BackendSamplerV2`.",
-                        ),
+                Exercise(
+                    "p9-proveedores/crear-target",
+                    "Completa `crear_target(pares)`: añade `Measure()` a las puertas de un qubit, en los tres qubits, y la CZ con error `1e-2` solo en los `pares` dados.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "El Target dice qué instrucciones existen y en qué qubits.",
+                        "Una instrucción de dos qubits se añade con un diccionario cuyas claves son los pares.",
+                        "`target.add_instruction(CZGate(), {par: InstructionProperties(error=1e-2) for par in pares})`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p9-proveedores/duraciones-target",
+                    "Completa `target_durable(duracion_1q, duracion_cz)`: asigna `duracion_1q` a las puertas de un qubit y a `measure`, y `duracion_cz` a la CZ, conservando los errores.",
+                    level=2,
+                    id="e2",
+                    hints=[
+                        "`InstructionProperties` guarda el error y también la duración.",
+                        "Pásale `duration=` junto a `error=` al crear cada `InstructionProperties`.",
+                        "Con duraciones, `estimate_duration` suma el camino más largo del circuito.",
+                    ],
+                ),
+                Exercise(
+                    "p9-proveedores/run-simulado",
+                    "Implementa `run` en `MiQPUSimulado`: delega en `BasicSimulator().run(run_input, **options)` para que `BackendSamplerV2` use tu backend.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Un proveedor real enviaría el trabajo a su servicio; aquí lo simulas.",
+                        "`BackendSamplerV2` pasa opciones como `shots` a `run`.",
+                        "Devuelve `BasicSimulator().run(run_input, **options)`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -516,30 +534,47 @@ static PyObject *py_add_spectator_measures(PyObject *self, PyObject *args, PyObj
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. No necesita compilador de C: usa el mismo observable desde Python. [[n1]]Primero reproduces el observable de cien qubits con un solo término. [[n2]]Después le añades un segundo término, Z en el qubit noventa y nueve. [[n3]]Y por último escribes la función que da la restricción de versión para una extensión.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.""",
+            """Ahora te toca a ti. No necesitas compilador de C: usas el mismo observable desde Python. [[n1]]Primero resumes un observable de cien qubits. [[n2]]Después escribes sus etiquetas de Pauli y ves en qué posición queda cada qubit. [[n3]]Y por último escribes la función que da la restricción de versión para una extensión.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p9-c-api.py",
-                    [
-                        (1, "Construye el observable de 100 qubits y cuenta sus términos."),
-                        (
-                            2,
-                            "Añade un segundo término `Z` en el qubit 99 y comprueba que ahora son dos.",
-                        ),
-                        (
-                            3,
-                            "Escribe `restriccion(version)` con la dependencia que fija la versión menor.",
-                        ),
+                Exercise(
+                    "p9-c-api/resumen-observable",
+                    "Escribe `resumen_observable(terminos)`: crea con `SparsePauliOp.from_sparse_list` un observable de 100 qubits a partir de la lista de términos `(pauli, qubits, coeficiente)` y devuelve `(num_qubits, num_terms)`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Cada tupla de la lista es un solo término, aunque tenga varios operadores de Pauli.",
+                        "`from_sparse_list` recibe la lista y el número de qubits en `num_qubits`.",
+                        "El observable tiene los atributos `num_qubits` y su longitud con `len`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p9-c-api/etiquetas-observable",
+                    "Escribe `etiquetas(terminos, n)`: crea el observable de `n` qubits con los términos `(pauli, qubits, coeficiente)` y devuelve un diccionario de la etiqueta de cada término a su coeficiente, como número real.",
+                    level=2,
+                    id="e2",
+                    hints=[
+                        "Las etiquetas salen de `paulis.to_labels()` y los coeficientes de `coeffs`.",
+                        "En la etiqueta, el qubit 0 es el carácter de la derecha.",
+                        "Une etiquetas y coeficientes con `zip` y convierte cada coeficiente con `float`.",
+                    ],
+                ),
+                Exercise(
+                    "p9-c-api/restriccion-version",
+                    'Escribe `restriccion(version)`: dada la versión con la que compilas, como `"2.4.0"`, devuelve la dependencia que deja pasar solo esa versión menor, en la forma `"qiskit~=2.4.0"`. El último número de la dependencia es siempre 0.',
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "La versión tiene tres números separados por puntos.",
+                        'Separa el texto con `split(".")`; un número puede tener más de un dígito.',
+                        "Une los dos primeros números, el cero final y el prefijo `qiskit~=`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -772,27 +807,47 @@ print(job.result()[0].data.meas.get_counts())
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. No necesita Slurm ni cuenta: repites en Python lo que hace el plugin. [[n1]]Primero reproduces el cruce entre lo que pide el script y lo que define el administrador. [[n2]]Después añades un recurso nuevo a la configuración, con el modo lote. [[n3]]Y por último escribes la función que calcula las variables de entorno del trabajo.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.""",
+            """Ahora te toca a ti. No necesitas Slurm ni cuenta: repites en Python lo que hace el plugin. [[n1]]Primero escribes el cruce entre lo que pide el script y lo que define el administrador. [[n2]]Después añades un recurso nuevo a la configuración, con el modo lote. [[n3]]Y por último escribes la función que calcula las variables de entorno del trabajo.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p9-hpc.py",
-                    [
-                        (1, "Cruza los QPUs pedidos con los definidos y mira cuál se ignora."),
-                        (
-                            2,
-                            "Añade `ibm_marrakesh` a la configuración con el modo de sesión `batch`.",
-                        ),
-                        (3, "Escribe `entorno(qpu, config)` con las variables que deja el plugin."),
+                Exercise(
+                    "p9-hpc/qpus-recibidos",
+                    "Escribe `recibidos(script, config)`: lee la opción `--qpu=` del script y devuelve, en el orden pedido, los nombres que `config` define en `resources`. Los nombres sin definir se ignoran.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "La opción `--qpu=` lleva los nombres separados por comas, sin espacios.",
+                        'Busca esa opción con una expresión regular y separa el texto con `split(",")`.',
+                        "Conserva solo los nombres que aparecen en algún recurso de `config`, recorriendo la lista pedida.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p9-hpc/anadir-marrakesh",
+                    'Escribe `con_marrakesh(config)`: devuelve una copia de `config` con un recurso más, `ibm_marrakesh`, de tipo `qiskit-runtime-service` y con la variable `QRMI_IBM_QRS_SESSION_MODE` igual a `"batch"` en su `environment`.',
+                    level=2,
+                    id="e2",
+                    hints=[
+                        "Cada recurso es un diccionario con `name`, `type` y `environment`.",
+                        "Copia la configuración antes de cambiarla para no tocar la original.",
+                        "Añade el diccionario nuevo al final de la lista `resources` de la copia.",
+                    ],
+                ),
+                Exercise(
+                    "p9-hpc/variables-entorno",
+                    "Escribe `entorno(qpu, config)`: `qpu` es el texto de `--qpu`. Devuelve un diccionario con `SLURM_JOB_QPU_RESOURCES` (los nombres definidos, en el orden pedido), `SLURM_JOB_QPU_TYPES` (el tipo de cada uno), ambas separadas por comas, y cada variable del `environment` de un recurso con el nombre del recurso como prefijo, como `ibm_fez_QRMI_IBM_QRS_SESSION_MODE`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Primero decide qué recursos recibe el trabajo y guárdalos en el orden pedido.",
+                        "Las dos listas de comas salen de recorrer esos mismos recursos.",
+                        "Después recorre el `environment` de cada recurso y une el nombre, un guion bajo y la variable.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1044,27 +1099,48 @@ npx @modelcontextprotocol/inspector qiskit-mcp-server""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. No usa ningún modelo ni red: trae un pequeño banco de pruebas, como el de Qiskit HumanEval, y tres respuestas ya escritas. [[n1]]Primero reproduces la puntuación de tres candidatos. [[n2]]Después corriges el código de uno que escribió una CNOT al revés. [[n3]]Y por último escribes una prueba unitaria que no se deje engañar por respuestas casi correctas.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.""",
+            """Ahora te toca a ti. No usas ningún modelo ni red: trabajas con respuestas ya escritas, como las de Qiskit HumanEval. [[n1]]Primero escribes la función que decide si un código pasa su prueba. [[n2]]Después corriges el código de uno que escribió una CNOT al revés. [[n3]]Y por último escribes una prueba que no se deje engañar por respuestas casi correctas.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p9-ia.py",
-                    [
-                        (1, "Pasa tres candidatos por las pruebas y lee su puntuación."),
-                        (2, "Corrige la CNOT del candidato B para que pase la prueba."),
-                        (
-                            3,
-                            "Escribe `prueba_anti_bell`: debe aceptar el Bell correcto y rechazar dos casi correctos.",
-                        ),
+                Exercise(
+                    "p9-ia/pasa-prueba",
+                    "Escribe `pasa(codigo, esperado)`: ejecuta el texto `codigo` con `exec`, llama a la función `valor()` que define y devuelve `True` solo si devuelve `esperado`. Cualquier excepción, al ejecutar o al llamar, cuenta como `False`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Un código que no se ejecuta entero es una respuesta incorrecta, aunque defina `valor`.",
+                        "Ejecuta con `exec(codigo, espacio)` y lee `valor` de ese diccionario.",
+                        "Pon la ejecución y la llamada dentro del mismo `try`, y devuelve `False` en el `except`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p9-ia/bell-corregido",
+                    "Corrige `bell()`: el modelo escribió la CNOT con el control y el objetivo al revés. Debe devolver un circuito de dos qubits que prepare $(|00\\rangle+|11\\rangle)/\\sqrt2$.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Mira qué qubit recibe la Hadamard y cuál debería ser el control.",
+                        "Busca la línea de `cx` en `bell`.",
+                        "El primer argumento de `cx` es el control: cambia el orden de los dos qubits.",
+                    ],
+                ),
+                Exercise(
+                    "p9-ia/detecta-anti-bell",
+                    "Escribe `es_anti_bell(codigo)`: ejecuta el texto `codigo`, que define `anti_bell()`, y devuelve `True` solo si el circuito prepara $(|01\\rangle+|10\\rangle)/\\sqrt2$ con esa fase relativa. Un código que falla al ejecutarse devuelve `False`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Dos circuitos pueden dar las mismas probabilidades y ser estados distintos.",
+                        "Compara el `Statevector` del circuito con el estado esperado, no solo sus conteos.",
+                        "`Statevector.equiv` ignora la fase global pero distingue la fase relativa.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1420,24 +1496,48 @@ print(clifford.layout)""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. Todo corre en tu equipo. [[n1]]Primero migras un circuito de c if a if test. [[n2]]Después conviertes las opciones del Estimator a un diccionario con model dump. [[n3]]Y por último escribes la función que reparte los PUBs en un trabajo por valor de precisión.
-             [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.""",
+            """Ahora te toca a ti. Todo corre en tu equipo. [[n1]]Primero migras un circuito de c if a if test. [[n2]]Después conviertes las opciones del Estimator a un diccionario con model dump. [[n3]]Y por último escribes la función que reparte los PUBs en un trabajo por valor de precisión.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p9-migraciones.py",
-                    [
-                        (1, "Migra una condición de `c_if` a `if_test` y cuenta sus operaciones."),
-                        (2, "Convierte `EstimatorOptions` en un diccionario con `model_dump`."),
-                        (3, "Escribe `dividir(pubs)`: un grupo por cada valor de precisión."),
+                Exercise(
+                    "p9-migraciones/condicion-if-test",
+                    "Completa `x_si_11()`: añade al circuito una X en el qubit 0 que se aplique solo si el registro clásico midió `11`. Usa `if_test`, porque `c_if` ya no existe.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "En Qiskit 2.0 la condición es un bloque, no un argumento de la puerta.",
+                        "Usa `with qc.if_test((cr, valor)):` y escribe la puerta dentro.",
+                        "`11` en binario es 3: `with qc.if_test((cr, 3)): qc.x(0)`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p9-migraciones/opciones-pydantic",
+                    "Completa `opciones_como_dict(shots)`: devuelve las opciones de `EstimatorOptions` como diccionario, con `default_shots` igual a `shots`. `dataclasses.asdict` ya no sirve.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Las opciones del lado del cliente son modelos de Pydantic.",
+                        "Pydantic tiene un método que vuelca el modelo a un diccionario.",
+                        "Devuelve `opciones.model_dump()`.",
+                    ],
+                ),
+                Exercise(
+                    "p9-migraciones/dividir-por-precision",
+                    'Escribe `dividir(pubs)`: recibe una lista de pares `(nombre, precisión)` y devuelve los grupos de nombres, uno por cada valor de precisión, en el orden en que aparece cada valor. Para `[("A", 0.01), ("B", 0.05), ("C", 0.01)]` da `[["A", "C"], ["B"]]`.',
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Cada valor de precisión es un trabajo, sin importar cuántos PUBs tenga.",
+                        "Un diccionario de precisión a lista de nombres agrupa y recuerda el orden de aparición.",
+                        "`grupos.setdefault(precision, []).append(nombre)` y al final `list(grupos.values())`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(

@@ -532,46 +532,78 @@
     "9.5",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. Todo corre en tu equipo. [[n1]]Primero migras un circuito de c if a if test. [[n2]]Después conviertes las opciones del Estimator a un diccionario con model dump. [[n3]]Y por último escribes la función que reparte los PUBs en un trabajo por valor de precisión. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.",
+   "say": "Ahora te toca a ti. Todo corre en tu equipo. [[n1]]Primero migras un circuito de c if a if test. [[n2]]Después conviertes las opciones del Estimator a un diccionario con model dump. [[n3]]Y por último escribes la función que reparte los PUBs en un trabajo por valor de precisión. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p9-migraciones.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Migra una condición de `c_if` a `if_test` y cuenta sus operaciones."
-      },
-      {
-       "level": 2,
-       "text": "Convierte `EstimatorOptions` en un diccionario con `model_dump`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `dividir(pubs)`: un grupo por cada valor de precisión."
-      }
+     "type": "exercise",
+     "exercise": "p9-migraciones/condicion-if-test",
+     "prompt": "Completa `x_si_11()`: añade al circuito una X en el qubit 0 que se aplique solo si el registro clásico midió `11`. Usa `if_test`, porque `c_if` ya no existe.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "En Qiskit 2.0 la condición es un bloque, no un argumento de la puerta.",
+      "Usa `with qc.if_test((cr, valor)):` y escribe la puerta dentro.",
+      "`11` en binario es 3: `with qc.if_test((cr, 3)): qc.x(0)`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.circuit import ClassicalRegister, QuantumRegister\n\n\ndef x_si_11():\n    qr, cr = QuantumRegister(2, \"q\"), ClassicalRegister(2, \"c\")\n    qc = QuantumCircuit(qr, cr)\n    qc.h([0, 1])\n    qc.measure(qr, cr)\n    # Aplica una X al qubit 0 solo si se midió 11.\n    return qc",
+     "cases": [
+      "la condición es una sola instrucción `if_else`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/opciones-pydantic",
+     "prompt": "Completa `opciones_como_dict(shots)`: devuelve las opciones de `EstimatorOptions` como diccionario, con `default_shots` igual a `shots`. `dataclasses.asdict` ya no sirve.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Las opciones del lado del cliente son modelos de Pydantic.",
+      "Pydantic tiene un método que vuelca el modelo a un diccionario.",
+      "Devuelve `opciones.model_dump()`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "from qiskit_ibm_runtime.options_models import EstimatorOptions\n\n\ndef opciones_como_dict(shots):\n    opciones = EstimatorOptions()\n    opciones.default_shots = shots\n    return None",
+     "cases": [
+      "devuelve un diccionario con `default_shots`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/dividir-por-precision",
+     "prompt": "Escribe `dividir(pubs)`: recibe una lista de pares `(nombre, precisión)` y devuelve los grupos de nombres, uno por cada valor de precisión, en el orden en que aparece cada valor. Para `[(\"A\", 0.01), (\"B\", 0.05), (\"C\", 0.01)]` da `[[\"A\", \"C\"], [\"B\"]]`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Cada valor de precisión es un trabajo, sin importar cuántos PUBs tenga.",
+      "Un diccionario de precisión a lista de nombres agrupa y recuerda el orden de aparición.",
+      "`grupos.setdefault(precision, []).append(nombre)` y al final `list(grupos.values())`."
+     ],
+     "id": "e3",
+     "starter": "def dividir(pubs):\n    # Un grupo de nombres por cada valor de precisión.\n    return [[nombre] for nombre, _ in pubs]",
+     "cases": [
+      "A y C comparten precisión y forman un solo trabajo"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

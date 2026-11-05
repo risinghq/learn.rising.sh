@@ -476,46 +476,78 @@
     "9.4",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. No usa ningún modelo ni red: trae un pequeño banco de pruebas, como el de Qiskit HumanEval, y tres respuestas ya escritas. [[n1]]Primero reproduces la puntuación de tres candidatos. [[n2]]Después corriges el código de uno que escribió una CNOT al revés. [[n3]]Y por último escribes una prueba unitaria que no se deje engañar por respuestas casi correctas. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.",
+   "say": "Ahora te toca a ti. No usas ningún modelo ni red: trabajas con respuestas ya escritas, como las de Qiskit HumanEval. [[n1]]Primero escribes la función que decide si un código pasa su prueba. [[n2]]Después corriges el código de uno que escribió una CNOT al revés. [[n3]]Y por último escribes una prueba que no se deje engañar por respuestas casi correctas. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p9-ia.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Pasa tres candidatos por las pruebas y lee su puntuación."
-      },
-      {
-       "level": 2,
-       "text": "Corrige la CNOT del candidato B para que pase la prueba."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `prueba_anti_bell`: debe aceptar el Bell correcto y rechazar dos casi correctos."
-      }
+     "type": "exercise",
+     "exercise": "p9-ia/pasa-prueba",
+     "prompt": "Escribe `pasa(codigo, esperado)`: ejecuta el texto `codigo` con `exec`, llama a la función `valor()` que define y devuelve `True` solo si devuelve `esperado`. Cualquier excepción, al ejecutar o al llamar, cuenta como `False`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Un código que no se ejecuta entero es una respuesta incorrecta, aunque defina `valor`.",
+      "Ejecuta con `exec(codigo, espacio)` y lee `valor` de ese diccionario.",
+      "Pon la ejecución y la llamada dentro del mismo `try`, y devuelve `False` en el `except`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def pasa(codigo, esperado):\n    return True",
+     "cases": [
+      "pasa el código con el valor esperado y falla el de otro valor"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-ia/bell-corregido",
+     "prompt": "Corrige `bell()`: el modelo escribió la CNOT con el control y el objetivo al revés. Debe devolver un circuito de dos qubits que prepare $(|00\\rangle+|11\\rangle)/\\sqrt2$.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Mira qué qubit recibe la Hadamard y cuál debería ser el control.",
+      "Busca la línea de `cx` en `bell`.",
+      "El primer argumento de `cx` es el control: cambia el orden de los dos qubits."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "from qiskit import QuantumCircuit\n\n\ndef bell():\n    qc = QuantumCircuit(2)\n    qc.h(0)\n    qc.cx(1, 0)\n    return qc",
+     "cases": [
+      "la medición da 00 y 11 con la misma probabilidad"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-ia/detecta-anti-bell",
+     "prompt": "Escribe `es_anti_bell(codigo)`: ejecuta el texto `codigo`, que define `anti_bell()`, y devuelve `True` solo si el circuito prepara $(|01\\rangle+|10\\rangle)/\\sqrt2$ con esa fase relativa. Un código que falla al ejecutarse devuelve `False`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Dos circuitos pueden dar las mismas probabilidades y ser estados distintos.",
+      "Compara el `Statevector` del circuito con el estado esperado, no solo sus conteos.",
+      "`Statevector.equiv` ignora la fase global pero distingue la fase relativa."
+     ],
+     "id": "e3",
+     "starter": "def es_anti_bell(codigo):\n    return True",
+     "cases": [
+      "acepta la respuesta correcta"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

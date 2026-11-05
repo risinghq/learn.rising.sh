@@ -182,12 +182,12 @@
   ]
  },
  "mision": {
-  "dur": 38.304,
+  "dur": 33.192,
   "marks": {
-   "n1": 16.106,
-   "n2": 20.395,
-   "n3": 25.943,
-   "check": 32.849
+   "n1": 10.063,
+   "n2": 15.144,
+   "n3": 20.692,
+   "check": 27.004
   },
   "cues": [
    [
@@ -196,27 +196,23 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "No usas ningún modelo ni red: trabajas con respuestas ya escritas, como las de Qiskit HumanEval."
    ],
    [
-    6.454,
-    "No usa ningún modelo ni red: trae un pequeño banco de pruebas, como el de Qiskit HumanEval, y tres respuestas ya escritas."
+    10.063,
+    "Primero escribes la función que decide si un código pasa su prueba."
    ],
    [
-    16.106,
-    "Primero reproduces la puntuación de tres candidatos."
-   ],
-   [
-    20.395,
+    15.144,
     "Después corriges el código de uno que escribió una CNOT al revés."
    ],
    [
-    25.943,
-    "Y por último escribes una prueba unitaria que no se deje engañar por respuestas casi correctas."
+    20.692,
+    "Y por último escribes una prueba que no se deje engañar por respuestas casi correctas."
    ],
    [
-    32.849,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes."
+    27.004,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

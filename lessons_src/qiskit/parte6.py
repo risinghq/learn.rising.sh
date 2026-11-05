@@ -2053,33 +2053,47 @@ print(f"node: {mask_node.mean():.1%} · edge: {mask_edge.mean():.1%} · node & e
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica con el comando de abajo. Usa el mismo GHZ de cuatro qubits con controles, sobre Aer. [[n1]]Primero filtras con la máscara node y mides cuánto sube la fidelidad. [[n2]]Después subes el error de lectura hasta que sobreviva menos del sesenta por ciento de los disparos. [[n3]]Y por último escribes tú las máscaras node y edge y las comparas con las de PostSelector.
-             [[check]]Cada misión tiene una comprobación: busca la marca verde.""",
+            """Ahora te toca. Trabajas con las medidas del GHZ de cuatro qubits con controles, ya convertidas en listas de ceros y unos. [[n1]]Primero calculas la fidelidad del GHZ con los disparos que conserva una máscara. [[n2]]Después escribes la máscara node, que exige que todos los bits pasen el control. [[n3]]Y por último escribes la máscara edge, que exige un bit que pase en cada arista.
+             [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p6-postseleccion.py",
-                    [
-                        (
-                            1,
-                            "Calcula la máscara `node` y compara la fidelidad con el GHZ antes y después de filtrar.",
-                        ),
-                        (
-                            2,
-                            "Sube el error de lectura hasta que `node` conserve menos del 60 % de los disparos.",
-                        ),
-                        (
-                            3,
-                            "Escribe `mascara(res, estrategia)` para `node` y `edge`; debe coincidir con `compute_mask`.",
-                        ),
+                Exercise(
+                    "p6-postseleccion/fidelidad-filtrada",
+                    "Escribe `fidelidad(bits, mascara)`: de los disparos que conserva `mascara`, devuelve la fracción que son todo ceros o todo unos. Si no se conserva ninguno, devuelve `0.0`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "El denominador son los disparos conservados, no todos.",
+                        "Filtra las filas con la máscara antes de contar.",
+                        "Un disparo del GHZ es válido si `fila.all()` o `(~fila).all()`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p6-postseleccion/mascara-node",
+                    "Completa `mascara_node(meas, meas_ps)`: conserva un disparo solo si todos sus bits pasaron el control. Un bit pasó si `meas` y `meas_ps` difieren.",
+                    level=2,
+                    id="e2",
+                    hints=[
+                        "Compara las dos matrices bit a bit.",
+                        "`meas != meas_ps` es verdadero donde el bit pasó el control.",
+                        "Reduce cada fila con `.all(axis=1)`.",
+                    ],
+                ),
+                Exercise(
+                    "p6-postseleccion/mascara-edge",
+                    "Completa `mascara_edge(meas, meas_ps, aristas)`: conserva un disparo solo si, en cada arista `(a, b)`, pasó al menos uno de los dos bits.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Calcula primero qué bits pasaron, igual que en node.",
+                        "Una arista se satisface con `paso[:, a] | paso[:, b]`.",
+                        "Empieza con todo verdadero y aplica `&=` por cada arista.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(

@@ -172,12 +172,12 @@
   ]
  },
  "mision": {
-  "dur": 33.264,
+  "dur": 33.024,
   "marks": {
-   "n1": 6.454,
-   "n2": 11.054,
-   "n3": 16.616,
-   "check": 23.905
+   "n1": 2.449,
+   "n2": 9.539,
+   "n3": 15.611,
+   "check": 22.9
   },
   "cues": [
    [
@@ -186,26 +186,22 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Primero completas el Target de MiQPU, con sus puertas y los pares donde vive la CZ."
    ],
    [
-    6.454,
-    "Primero reproduces MiQPU y transpilas un circuito."
+    9.539,
+    "Después le añades duraciones al Target, para estimar cuánto dura un circuito."
    ],
    [
-    11.054,
-    "Después le añades duraciones al Target y estimas cuánto dura un circuito."
-   ],
-   [
-    16.616,
+    15.611,
     "Y por último implementas run con un simulador local, para que MiQPU funcione con las primitivas."
    ],
    [
-    23.905,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes."
+    22.9,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ],
    [
-    29.339,
+    29.085,
     "Todo corre en tu equipo: no hace falta cuenta."
    ]
   ]

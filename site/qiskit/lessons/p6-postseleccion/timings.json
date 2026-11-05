@@ -283,12 +283,12 @@
   ]
  },
  "mision": {
-  "dur": 35.28,
+  "dur": 35.784,
   "marks": {
-   "n1": 11.903,
-   "n2": 17.182,
-   "n3": 23.989,
-   "check": 30.571
+   "n1": 10.572,
+   "n2": 16.97,
+   "n3": 23.381,
+   "check": 29.594
   },
   "cues": [
    [
@@ -297,27 +297,23 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "Trabajas con las medidas del GHZ de cuatro qubits con controles, ya convertidas en listas de ceros y unos."
    ],
    [
-    6.142,
-    "Usa el mismo GHZ de cuatro qubits con controles, sobre Aer."
+    10.572,
+    "Primero calculas la fidelidad del GHZ con los disparos que conserva una máscara."
    ],
    [
-    11.903,
-    "Primero filtras con la máscara node y mides cuánto sube la fidelidad."
+    16.97,
+    "Después escribes la máscara node, que exige que todos los bits pasen el control."
    ],
    [
-    17.182,
-    "Después subes el error de lectura hasta que sobreviva menos del sesenta por ciento de los disparos."
+    23.381,
+    "Y por último escribes la máscara edge, que exige un bit que pase en cada arista."
    ],
    [
-    23.989,
-    "Y por último escribes tú las máscaras node y edge y las comparas con las de PostSelector."
-   ],
-   [
-    30.571,
-    "Cada misión tiene una comprobación: busca la marca verde."
+    29.594,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

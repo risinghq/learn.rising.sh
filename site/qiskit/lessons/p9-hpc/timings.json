@@ -186,12 +186,12 @@
   ]
  },
  "mision": {
-  "dur": 35.232,
+  "dur": 31.848,
   "marks": {
-   "n1": 12.2,
-   "n2": 18.47,
-   "n3": 23.989,
-   "check": 29.792
+   "n1": 8.294,
+   "n2": 14.337,
+   "n3": 19.857,
+   "check": 25.66
   },
   "cues": [
    [
@@ -200,27 +200,23 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "No necesitas Slurm ni cuenta: repites en Python lo que hace el plugin."
    ],
    [
-    6.454,
-    "No necesita Slurm ni cuenta: repites en Python lo que hace el plugin."
+    8.294,
+    "Primero escribes el cruce entre lo que pide el script y lo que define el administrador."
    ],
    [
-    12.2,
-    "Primero reproduces el cruce entre lo que pide el script y lo que define el administrador."
-   ],
-   [
-    18.47,
+    14.337,
     "Después añades un recurso nuevo a la configuración, con el modo lote."
    ],
    [
-    23.989,
+    19.857,
     "Y por último escribes la función que calcula las variables de entorno del trabajo."
    ],
    [
-    29.792,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes."
+    25.66,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

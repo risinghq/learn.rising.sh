@@ -373,46 +373,78 @@
     "9.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. [[n1]]Primero reproduces MiQPU y transpilas un circuito. [[n2]]Después le añades duraciones al Target y estimas cuánto dura un circuito. [[n3]]Y por último implementas run con un simulador local, para que MiQPU funcione con las primitivas. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes. Todo corre en tu equipo: no hace falta cuenta.",
+   "say": "Ahora te toca a ti. [[n1]]Primero completas el Target de MiQPU, con sus puertas y los pares donde vive la CZ. [[n2]]Después le añades duraciones al Target, para estimar cuánto dura un circuito. [[n3]]Y por último implementas run con un simulador local, para que MiQPU funcione con las primitivas. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos. Todo corre en tu equipo: no hace falta cuenta.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p9-proveedores.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Construye `MiQPU` y mira en qué se transpila una CNOT entre qubits lejanos."
-      },
-      {
-       "level": 2,
-       "text": "Añade duraciones al Target y estima la duración de un circuito."
-      },
-      {
-       "level": 3,
-       "text": "Implementa `run` con `BasicSimulator` y úsalo con `BackendSamplerV2`."
-      }
+     "type": "exercise",
+     "exercise": "p9-proveedores/crear-target",
+     "prompt": "Completa `crear_target(pares)`: añade `Measure()` a las puertas de un qubit, en los tres qubits, y la CZ con error `1e-2` solo en los `pares` dados.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "El Target dice qué instrucciones existen y en qué qubits.",
+      "Una instrucción de dos qubits se añade con un diccionario cuyas claves son los pares.",
+      "`target.add_instruction(CZGate(), {par: InstructionProperties(error=1e-2) for par in pares})`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "from qiskit.circuit import Measure, Parameter\nfrom qiskit.circuit.library import CZGate, RZGate, SXGate, XGate\nfrom qiskit.transpiler import InstructionProperties, Target\n\n\ndef crear_target(pares):\n    target = Target(num_qubits=3)\n    theta = Parameter(\"θ\")\n    for puerta in (RZGate(theta), SXGate(), XGate()):\n        target.add_instruction(puerta, {(q,): InstructionProperties(error=1e-4) for q in range(3)})\n    # Añade Measure() en los tres qubits y la CZ solo en los pares dados.\n    return target",
+     "cases": [
+      "el Target tiene las cinco instrucciones",
+      "la CZ une los pares dados"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-proveedores/duraciones-target",
+     "prompt": "Completa `target_durable(duracion_1q, duracion_cz)`: asigna `duracion_1q` a las puertas de un qubit y a `measure`, y `duracion_cz` a la CZ, conservando los errores.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "`InstructionProperties` guarda el error y también la duración.",
+      "Pásale `duration=` junto a `error=` al crear cada `InstructionProperties`.",
+      "Con duraciones, `estimate_duration` suma el camino más largo del circuito."
+     ],
+     "id": "e2",
+     "starter": "from qiskit.circuit import Measure, Parameter\nfrom qiskit.circuit.library import CZGate, RZGate, SXGate, XGate\nfrom qiskit.transpiler import InstructionProperties, Target\n\n\ndef target_durable(duracion_1q, duracion_cz):\n    target = Target(num_qubits=3)\n    theta = Parameter(\"θ\")\n    for puerta in (RZGate(theta), SXGate(), XGate(), Measure()):\n        target.add_instruction(puerta, {(q,): InstructionProperties(error=1e-4) for q in range(3)})\n    pares = [(0, 1), (1, 2)]\n    target.add_instruction(CZGate(), {par: InstructionProperties(error=1e-2) for par in pares})\n    # Asigna las duraciones, en segundos, conservando los errores.\n    return target",
+     "cases": [
+      "el circuito dura 6e-07 s con 5e-8 y 3e-7"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-proveedores/run-simulado",
+     "prompt": "Implementa `run` en `MiQPUSimulado`: delega en `BasicSimulator().run(run_input, **options)` para que `BackendSamplerV2` use tu backend.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Un proveedor real enviaría el trabajo a su servicio; aquí lo simulas.",
+      "`BackendSamplerV2` pasa opciones como `shots` a `run`.",
+      "Devuelve `BasicSimulator().run(run_input, **options)`."
+     ],
+     "id": "e3",
+     "starter": "from qiskit.circuit import Measure, Parameter\nfrom qiskit.circuit.library import CZGate, RZGate, SXGate, XGate\nfrom qiskit.providers import BackendV2, Options\nfrom qiskit.providers.basic_provider import BasicSimulator\nfrom qiskit.transpiler import InstructionProperties, Target\n\n\nclass MiQPU(BackendV2):\n    def __init__(self):\n        super().__init__(name=\"mi_qpu\")\n        self._target = Target(num_qubits=3)\n        theta = Parameter(\"θ\")\n        for puerta in (RZGate(theta), SXGate(), XGate(), Measure()):\n            self._target.add_instruction(\n                puerta, {(q,): InstructionProperties(error=1e-4) for q in range(3)}\n            )\n        self._target.add_instruction(\n            CZGate(),\n            {(0, 1): InstructionProperties(error=1e-2), (1, 2): InstructionProperties(error=1e-2)},\n        )\n\n    @property\n    def target(self):\n        return self._target\n\n    @property\n    def max_circuits(self):\n        return None\n\n    @classmethod\n    def _default_options(cls):\n        return Options(shots=1024)\n\n\nclass MiQPUSimulado(MiQPU):\n    def run(self, run_input, **options):\n        raise NotImplementedError(\"delega en BasicSimulator\")",
+     "cases": [
+      "el GHZ solo da 000 y 111"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

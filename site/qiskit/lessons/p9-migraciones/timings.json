@@ -261,12 +261,12 @@
   ]
  },
  "mision": {
-  "dur": 30.336,
+  "dur": 27.072,
   "marks": {
-   "n1": 8.789,
-   "n2": 12.695,
-   "n3": 18.399,
-   "check": 24.881
+   "n1": 4.784,
+   "n2": 8.69,
+   "n3": 14.394,
+   "check": 20.876
   },
   "cues": [
    [
@@ -275,27 +275,23 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
-   ],
-   [
-    6.454,
     "Todo corre en tu equipo."
    ],
    [
-    8.789,
+    4.784,
     "Primero migras un circuito de c if a if test."
    ],
    [
-    12.695,
+    8.69,
     "Después conviertes las opciones del Estimator a un diccionario con model dump."
    ],
    [
-    18.399,
+    14.394,
     "Y por último escribes la función que reparte los PUBs en un trabajo por valor de precisión."
    ],
    [
-    24.881,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes."
+    20.876,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

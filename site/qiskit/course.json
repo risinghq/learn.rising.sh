@@ -408,14 +408,7 @@
      "section": "6.6",
      "title": "Postselección",
      "summary": "Añadir controles de error no Markoviano y filtrar muestras con verificaciones sobre qubits activos y espectadores.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p6-postseleccion.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p6-neat",
@@ -559,56 +552,28 @@
      "section": "9.1",
      "title": "Integrar recursos cuánticos externos",
      "summary": "Cómo un proveedor externo integra su hardware en Qiskit: un BackendV2 con su Target, implementaciones de las primitivas, y la migración de BackendV1 a BackendV2.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p9-proveedores.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p9-c-api",
      "section": "9.2",
      "title": "La API de C de Qiskit",
      "summary": "Usar Qiskit desde C: compilar la biblioteca independiente, construir observables, y escribir extensiones de Python en C para acelerar pases del transpilador.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p9-c-api.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p9-hpc",
      "section": "9.3",
      "title": "HPC: QRMI y Slurm",
      "summary": "Integrar computadores cuánticos en centros de supercomputación: la interfaz QRMI, el plugin SPANK para Slurm y cómo lo usan administradores, usuarios y aplicaciones.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p9-hpc.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p9-ia",
      "section": "9.4",
      "title": "IA para programar con Qiskit",
      "summary": "Modelos de lenguaje especializados en Qiskit, servidores MCP para asistentes de IA y skills reutilizables.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p9-ia.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p9-migraciones",
@@ -617,11 +582,6 @@
      "summary": "La estrategia de versiones de Qiskit, las migraciones a 1.0 y 2.0, el paso a las primitivas del lado del cliente y cómo seguir las novedades.",
      "minutes": 10,
      "missions": [
-      {
-       "notebook": "practica/p9-migraciones.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito9.py",
        "title": "Proyecto Ising · Hito IX",

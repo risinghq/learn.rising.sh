@@ -334,46 +334,77 @@
     "9.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica con el comando de abajo. No necesita Slurm ni cuenta: repites en Python lo que hace el plugin. [[n1]]Primero reproduces el cruce entre lo que pide el script y lo que define el administrador. [[n2]]Después añades un recurso nuevo a la configuración, con el modo lote. [[n3]]Y por último escribes la función que calcula las variables de entorno del trabajo. [[check]]Cada misión tiene una comprobación que se actualiza sola mientras escribes.",
+   "say": "Ahora te toca a ti. No necesitas Slurm ni cuenta: repites en Python lo que hace el plugin. [[n1]]Primero escribes el cruce entre lo que pide el script y lo que define el administrador. [[n2]]Después añades un recurso nuevo a la configuración, con el modo lote. [[n3]]Y por último escribes la función que calcula las variables de entorno del trabajo. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p9-hpc.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Cruza los QPUs pedidos con los definidos y mira cuál se ignora."
-      },
-      {
-       "level": 2,
-       "text": "Añade `ibm_marrakesh` a la configuración con el modo de sesión `batch`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `entorno(qpu, config)` con las variables que deja el plugin."
-      }
+     "type": "exercise",
+     "exercise": "p9-hpc/qpus-recibidos",
+     "prompt": "Escribe `recibidos(script, config)`: lee la opción `--qpu=` del script y devuelve, en el orden pedido, los nombres que `config` define en `resources`. Los nombres sin definir se ignoran.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "La opción `--qpu=` lleva los nombres separados por comas, sin espacios.",
+      "Busca esa opción con una expresión regular y separa el texto con `split(\",\")`.",
+      "Conserva solo los nombres que aparecen en algún recurso de `config`, recorriendo la lista pedida."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def recibidos(script, config):\n    return []",
+     "cases": [
+      "ignora el QPU que el administrador no definió"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-hpc/anadir-marrakesh",
+     "prompt": "Escribe `con_marrakesh(config)`: devuelve una copia de `config` con un recurso más, `ibm_marrakesh`, de tipo `qiskit-runtime-service` y con la variable `QRMI_IBM_QRS_SESSION_MODE` igual a `\"batch\"` en su `environment`.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Cada recurso es un diccionario con `name`, `type` y `environment`.",
+      "Copia la configuración antes de cambiarla para no tocar la original.",
+      "Añade el diccionario nuevo al final de la lista `resources` de la copia."
+     ],
+     "id": "e2",
+     "starter": "def con_marrakesh(config):\n    return config",
+     "cases": [
+      "ibm_marrakesh usa el servicio de IBM en modo lote"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-hpc/variables-entorno",
+     "prompt": "Escribe `entorno(qpu, config)`: `qpu` es el texto de `--qpu`. Devuelve un diccionario con `SLURM_JOB_QPU_RESOURCES` (los nombres definidos, en el orden pedido), `SLURM_JOB_QPU_TYPES` (el tipo de cada uno), ambas separadas por comas, y cada variable del `environment` de un recurso con el nombre del recurso como prefijo, como `ibm_fez_QRMI_IBM_QRS_SESSION_MODE`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Primero decide qué recursos recibe el trabajo y guárdalos en el orden pedido.",
+      "Las dos listas de comas salen de recorrer esos mismos recursos.",
+      "Después recorre el `environment` de cada recurso y une el nombre, un guion bajo y la variable."
+     ],
+     "id": "e3",
+     "starter": "def entorno(qpu, config):\n    return {}",
+     "cases": [
+      "filtra el QPU sin definir y prefija la variable"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

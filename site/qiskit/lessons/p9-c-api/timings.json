@@ -175,12 +175,12 @@
   ]
  },
  "mision": {
-  "dur": 34.368,
+  "dur": 30.336,
   "marks": {
-   "n1": 12.101,
-   "n2": 17.38,
-   "n3": 22.928,
-   "check": 28.915
+   "n1": 8.308,
+   "n2": 12.313,
+   "n3": 18.158,
+   "check": 24.145
   },
   "cues": [
    [
@@ -189,27 +189,23 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica con el comando de abajo."
+    "No necesitas compilador de C: usas el mismo observable desde Python."
    ],
    [
-    6.454,
-    "No necesita compilador de C: usa el mismo observable desde Python."
+    8.308,
+    "Primero resumes un observable de cien qubits."
    ],
    [
-    12.101,
-    "Primero reproduces el observable de cien qubits con un solo término."
+    12.313,
+    "Después escribes sus etiquetas de Pauli y ves en qué posición queda cada qubit."
    ],
    [
-    17.38,
-    "Después le añades un segundo término, Z en el qubit noventa y nueve."
-   ],
-   [
-    22.928,
+    18.158,
     "Y por último escribes la función que da la restricción de versión para una extensión."
    ],
    [
-    28.915,
-    "Cada misión tiene una comprobación que se actualiza sola mientras escribes."
+    24.145,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },
