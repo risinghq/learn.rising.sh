@@ -7,4 +7,4 @@ paths = ['''^content/.*\.cache\.json$''', '''^\.cache/''']
 
 [[allowlists]]
 description = "The generated drill bank holds item ids such as p9-c-api:choice-1a2b3c4d, which read as an API key"
-paths = ['''^site/[^/]+/items\.json$''']
+paths = ['''^site/[^/]+/items\.json$''', '''^runner/worker/\.cloudflare/output/.*/assets/[^/]+/items\.json$''']

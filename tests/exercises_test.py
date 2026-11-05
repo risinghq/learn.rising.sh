@@ -584,7 +584,7 @@ WRONG += [
         ),
         (
             "p4-primitivas/backend-sampler",
-            "sampler = BackendSamplerV2(backend=backend)",
+            'sampler = BackendSamplerV2(backend=backend, options={"seed_simulator": 3})',
             "sampler = StatevectorSampler(seed=1)",
             "`sampler` es un StatevectorSampler",
         ),
@@ -770,8 +770,8 @@ MUTANTS = [
             ("p4-primitivas/dos-vistas", '"XX"]', '"YY"]'),
             (
                 "p4-primitivas/backend-sampler",
-                "sampler = BackendSamplerV2(backend=backend)",
-                "sampler = BackendSamplerV2(backend=GenericBackendV2(3, seed=1))",
+                "BackendSamplerV2(backend=backend,",
+                "BackendSamplerV2(backend=GenericBackendV2(3, seed=1),",
             ),
             ("p4-primitivas/backend-sampler", "shots=1024", "shots=512"),
             ("p4-primitivas/z-desde-conteos", "cadena[-1 - k]", "cadena[k]"),
