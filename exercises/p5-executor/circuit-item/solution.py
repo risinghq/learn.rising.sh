@@ -27,7 +27,7 @@ argumentos = rng.random((10, 2))
 
 programa = QuantumProgram(shots=DISPAROS)
 programa.append_circuit_item(pm.run(circuito), circuit_arguments=argumentos)
-resultado = Executor(mode=backend).run(programa).result()
+resultado = Executor(mode=backend, options={"simulator": {"seed_simulator": 3}}).run(programa).result()
 forma = resultado[0]["meas"].shape
 print("forma de meas:", forma)
 

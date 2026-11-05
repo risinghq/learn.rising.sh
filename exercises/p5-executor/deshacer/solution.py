@@ -33,7 +33,7 @@ programa.append_samplex_item(
     samplex_arguments={"parameter_values": rng.random((4, 2))},
     shape=(2, 4),
 )
-item = Executor(mode=backend).run(programa).result()[0]
+item = Executor(mode=backend, options={"simulator": {"seed_simulator": 3}}).run(programa).result()[0]
 
 
 def deshacer(item):

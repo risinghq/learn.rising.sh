@@ -11,7 +11,7 @@ bell_medido.measure_all()
 backend = GenericBackendV2(2, seed=1)
 isa_bell = generate_preset_pass_manager(1, backend=backend).run(bell_medido)
 
-sampler = BackendSamplerV2(backend=backend)
+sampler = BackendSamplerV2(backend=backend, options={"seed_simulator": 3})
 
 conteos_backend = sampler.run([isa_bell], shots=1024).result()[0].data.meas.get_counts()
 print(type(sampler).__name__, conteos_backend)

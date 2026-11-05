@@ -33,6 +33,6 @@ programa.append_samplex_item(
     samplex_arguments={"parameter_values": rng.random((10, 2))},
     shape=(2, 10),   # ✏️ (aleatorizaciones, configuraciones): pide 20 aleatorizaciones
 )
-item = Executor(mode=backend).run(programa).result()[0]
+item = Executor(mode=backend, options={"simulator": {"seed_simulator": 3}}).run(programa).result()[0]
 forma_twirl = item["meas"].shape
 print("forma de meas:", forma_twirl)
