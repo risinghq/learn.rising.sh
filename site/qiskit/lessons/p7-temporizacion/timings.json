@@ -152,33 +152,28 @@
   ]
  },
  "mision": {
-  "dur": 24.888,
+  "dur": 20.832,
   "marks": {
-   "n1": 2.916,
-   "n2": 7.685,
-   "n3": 14.139,
-   "check": 21.612
+   "n1": 6.779,
+   "n2": 11.775,
+   "n3": 16.333
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica."
+    "Ahora analizas una programación, calculas sus duraciones y la construyes desde Qiskit."
    ],
    [
-    2.916,
-    "Primero escribes un analizador de las líneas de temporización."
+    6.779,
+    "Empieza por convertir las líneas de temporización en registros."
    ],
    [
-    7.685,
-    "Después calculas cuándo termina cada instrucción y cuánto dura todo, en nanosegundos."
+    11.775,
+    "Después calcula los finales y el total en nanosegundos."
    ],
    [
-    14.139,
-    "Y por último construyes la programación de un circuito con Qiskit, sin necesidad de un QPU."
-   ],
-   [
-    21.612,
-    "Busca la marca verde en cada misión."
+    16.333,
+    "Y por último devuelve la programación de un circuito local."
    ]
   ]
  },

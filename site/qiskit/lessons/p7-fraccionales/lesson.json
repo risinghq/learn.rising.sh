@@ -518,46 +518,75 @@
     "7.2",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica. [[n1]]Primero reproduces la comparación de la cadena de Ising y ves cuánto acortan las fraccionales. [[n2]]Después cambias el ángulo de las RZZ para que el backend convencional necesite menos CZ. [[n3]]Y por último escribes una función que construye la cadena de Ising con los parámetros que quieras. [[check]]Cada misión tiene su comprobación: busca la marca verde.",
+   "say": "Ahora comparas las dos compilaciones y construyes una cadena parametrizable. [[n1]]Mide cuántas `cz` y `rzz` aparecen en dos backends. [[n2]]Prueba un ángulo especial para acortar la descomposición convencional. [[n3]]Y por último escribe la cadena de Ising con los parámetros que quieras.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-fraccionales.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Transpila la cadena de Ising para los dos backends y cuenta las `cz` y las `rzz`."
-      },
-      {
-       "level": 2,
-       "text": "Cambia `theta_zz` por un múltiplo de $\\pi/2$ y mira cuántas `cz` necesita el convencional."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `cadena_ising(n, pasos, theta_x, theta_zz)`; la comprobación cuenta sus puertas."
-      }
+     "type": "exercise",
+     "exercise": "p7-fraccionales/compara-cadena",
+     "prompt": "Escribe `conteos(n, pasos)`: construye la cadena de Ising con `rx(0.1)` y `rzz(0.1)`, transpílala para un backend convencional y otro con `rx` y `rzz` nativas, y devuelve `(cz_conv, rzz_conv, cz_frac, rzz_frac)`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Hay dos listas de puertas base: la segunda añade `rx` y `rzz`.",
+      "Usa `generate_preset_pass_manager(3, backend=..., scheduling_method=\"alap\")`.",
+      "Cuenta con `isa.count_ops().get(nombre, 0)` y devuelve las cuatro cifras en orden."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def conteos(n, pasos):\n    return (0, 0, 0, 0)",
+     "cases": [
+      "la cadena de 5 qubits usa 24 CZ o 12 RZZ"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-fraccionales/angulo-especial",
+     "prompt": "Corrige `conteos_con_angulo(theta_zz)`: el ángulo recibido debe llegar a cada `rzz`. Para `π/2` y `3π/2`, el backend convencional debe necesitar menos de 24 `cz`.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "El ángulo ya llega como argumento de la función.",
+      "Busca qué asignación dentro de `conteos_con_angulo` lo reemplaza antes de construir el circuito.",
+      "Elimina la asignación fija `theta_zz = 0.1`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.providers.fake_provider import GenericBackendV2\nfrom qiskit.transpiler import generate_preset_pass_manager\n\n\ndef conteos_con_angulo(theta_zz):\n    theta_zz = 0.1\n    circuito = QuantumCircuit(5)\n    for _ in range(3):\n        for qubit in range(5):\n            circuito.rx(0.1, qubit)\n        for qubit in range(1, 4, 2):\n            circuito.rzz(theta_zz, qubit, qubit + 1)\n        for qubit in range(0, 4, 2):\n            circuito.rzz(theta_zz, qubit, qubit + 1)\n    backend = GenericBackendV2(5, basis_gates=[\"cz\", \"rz\", \"sx\", \"x\"], seed=1)\n    isa = generate_preset_pass_manager(3, backend=backend).run(circuito)\n    return isa.count_ops().get(\"cz\", 0)",
+     "cases": [
+      "un múltiplo de pi/2 acorta la descomposición"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-fraccionales/cadena-ising",
+     "prompt": "Escribe `cadena_ising(n, pasos, theta_x, theta_zz)`: en cada paso añade `rx` a todos los qubits, `rzz` a los pares impares y pares, y una barrera.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Crea `QuantumCircuit(n)` y repite la capa `pasos` veces.",
+      "Los pares son `range(1, n - 1, 2)` y `range(0, n - 1, 2)`.",
+      "Usa `qc.rx(theta_x, qubit)`, `qc.rzz(theta_zz, qubit, qubit + 1)` y `qc.barrier()`."
+     ],
+     "id": "e3",
+     "starter": "from qiskit import QuantumCircuit\n\n\ndef cadena_ising(n, pasos, theta_x, theta_zz):\n    return QuantumCircuit(n)",
+     "cases": [
+      "dos pasos en cuatro qubits"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

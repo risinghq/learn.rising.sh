@@ -264,33 +264,28 @@
   ]
  },
  "mision": {
-  "dur": 26.712,
+  "dur": 21.96,
   "marks": {
-   "n1": 3.807,
-   "n2": 10.756,
-   "n3": 16.856,
-   "check": 23.423
+   "n1": 7.317,
+   "n2": 12.625,
+   "n3": 17.649
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica de esta lección."
+    "Ahora practicas la corrección, los registros clásicos y los límites de los circuitos dinámicos."
    ],
    [
-    3.807,
-    "Primero reproduces la corrección que acabamos de ver y compruebas que la segunda medición es siempre cero."
+    7.317,
+    "Empieza por construir una corrección que deje la segunda medición en cero."
    ],
    [
-    10.756,
-    "Después reemplazas dos if anidados por uno solo sobre un registro de dos bits."
+    12.625,
+    "Después concentra dos condiciones en un registro de dos bits."
    ],
    [
-    16.856,
-    "Y por último escribes una función que decide si un circuito cumple los límites del hardware."
-   ],
-   [
-    23.423,
-    "Busca la marca verde en cada misión."
+    17.649,
+    "Y por último decide qué circuitos admite el hardware."
    ]
   ]
  },

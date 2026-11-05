@@ -273,33 +273,28 @@
   ]
  },
  "mision": {
-  "dur": 23.64,
+  "dur": 16.32,
   "marks": {
-   "n1": 2.916,
-   "n2": 6.921,
-   "n3": 13.035,
-   "check": 20.352
+   "n1": 4.076,
+   "n2": 6.68,
+   "n3": 10.983
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica."
+    "Ahora estimas el costo antes de enviar un trabajo."
    ],
    [
-    2.916,
-    "Primero reproduces la estimación del estado de Bell."
+    4.076,
+    "Calcula el uso de un Bell."
    ],
    [
-    6.921,
-    "Después corriges el conteo de ejecuciones de un PUB con varios valores de parámetro."
+    6.68,
+    "Cuenta todas las ejecuciones de un PUB con broadcasting."
    ],
    [
-    13.035,
-    "Y por último conviertes la cuenta en una función, estimar uso, que sirva para cualquier circuito."
-   ],
-   [
-    20.352,
-    "Busca la marca verde en cada misión."
+    10.983,
+    "Y por último convierte la fórmula en una función para cualquier circuito."
    ]
   ]
  },

@@ -338,46 +338,74 @@
     "7.3",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica. [[n1]]Primero escribes un analizador de las líneas de temporización. [[n2]]Después calculas cuándo termina cada instrucción y cuánto dura todo, en nanosegundos. [[n3]]Y por último construyes la programación de un circuito con Qiskit, sin necesidad de un QPU. [[check]]Busca la marca verde en cada misión.",
+   "say": "Ahora analizas una programación, calculas sus duraciones y la construyes desde Qiskit. [[n1]]Empieza por convertir las líneas de temporización en registros. [[n2]]Después calcula los finales y el total en nanosegundos. [[n3]]Y por último devuelve la programación de un circuito local.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-temporizacion.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Lee las líneas de temporización y conviértelas en tuplas."
-      },
-      {
-       "level": 2,
-       "text": "Calcula el fin de cada instrucción y el total en nanosegundos con `backend.dt`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `programacion(isa, backend)` con `op_start_times` y las duraciones del `target`."
-      }
+     "type": "exercise",
+     "exercise": "p7-temporizacion/leer-lineas",
+     "prompt": "Escribe `leer(texto)`: recibe líneas `rama,instrucción,canal,inicio,duración,pulso` y devuelve una lista de diccionarios con esos seis campos; `inicio` y `duración` son enteros.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "Separa el texto en líneas y cada línea en seis campos.",
+      "Quita el espacio exterior de la línea antes de separarla.",
+      "Convierte los campos `inicio` y `duracion` con `int` y crea un diccionario."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def leer(texto):\n    return []",
+     "cases": [
+      "lee cuatro líneas y convierte los números"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-temporizacion/fin-en-nanosegundos",
+     "prompt": "Completa `fin_y_total(registros, dt)`: devuelve los finales `inicio + duracion` en `dt` y el intervalo total convertido a nanosegundos con `dt` en segundos.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "El final de una instrucción combina sus dos campos de tiempo.",
+      "El intervalo empieza en el inicio mínimo y termina en el final máximo.",
+      "Multiplica el total en `dt` por `dt` y por `1e9`."
+     ],
+     "id": "e2",
+     "starter": "def fin_y_total(registros, dt):\n    finales = [registro[\"inicio\"] for registro in registros]\n    total_dt = max(finales) - min(registro[\"inicio\"] for registro in registros)\n    return finales, total_dt * dt * 1e9",
+     "cases": [
+      "suma inicio y duración"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-temporizacion/programa-isa",
+     "prompt": "Escribe `programacion(isa, backend)`: devuelve `(nombre, qubits, inicio, duración)` para cada instrucción, usando `isa.op_start_times`; un `delay` usa `op.duration` y las demás operaciones usan `backend.target`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Recorre `zip(isa.data, isa.op_start_times)` y obtiene el nombre de `inst.operation`.",
+      "Convierte los qubits de la instrucción a índices con `isa.find_bit(qubit).index`.",
+      "Para el target, divide la duración en segundos entre `backend.dt`."
+     ],
+     "id": "e3",
+     "starter": "def programacion(isa, backend):\n    return []",
+     "cases": [
+      "programa todas las instrucciones del Bell"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

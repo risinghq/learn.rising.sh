@@ -442,84 +442,42 @@
      "section": "7.1",
      "title": "Circuitos dinámicos en hardware",
      "summary": "Qué parte del control de flujo admite el hardware de IBM, la medición a mitad de circuito, store, sus límites y cómo estimar valores esperados.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p7-dinamicos.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p7-fraccionales",
      "section": "7.2",
      "title": "Puertas fraccionales",
      "summary": "Rotaciones RX y RZZ ejecutadas directamente en procesadores Heron: cuándo convienen, cómo activarlas, sus límites, y el reemplazo de Qiskit Pulse.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p7-fraccionales.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p7-temporizacion",
      "section": "7.3",
      "title": "Temporización de circuitos",
      "summary": "Obtener del servicio la programación real de un circuito, sobre todo dinámico, interpretar sus datos y visualizarla.",
-     "minutes": 6,
-     "missions": [
-      {
-       "notebook": "practica/p7-temporizacion.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 6
     },
     {
      "id": "p7-procesadores",
      "section": "7.4",
      "title": "Los procesadores de IBM",
      "summary": "Familias de procesadores, cómo listar backends y leer sus propiedades estáticas y dinámicas, cómo se calibran, la inicialización de qubits y los procesadores retirados.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/p7-procesadores.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     },
     {
      "id": "p7-colas-costos",
      "section": "7.5",
      "title": "Colas, tiempos y costos",
      "summary": "Cómo decide el planificador, qué cuenta como uso, cómo estimarlo, cómo reducirlo, el tiempo máximo de ejecución y los límites de cada trabajo.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p7-colas-costos.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p7-trabajos",
      "section": "7.6",
      "title": "Monitorear, etiquetar y guardar trabajos",
      "summary": "Seguir el estado de un trabajo, entender por qué tarda, cancelarlo, consultar uso y métricas, etiquetarlo y guardar o recuperar sus resultados.",
-     "minutes": 6,
-     "missions": [
-      {
-       "notebook": "practica/p7-trabajos.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 6
     },
     {
      "id": "p7-modos",
@@ -528,11 +486,6 @@
      "summary": "Los tres modos de ejecución, cómo elegir, cómo abrir y cerrar lotes y sesiones, sus tiempos de vida, y las preguntas frecuentes.",
      "minutes": 10,
      "missions": [
-      {
-       "notebook": "practica/p7-modos.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito7.py",
        "title": "Proyecto Ising · Hito VII",

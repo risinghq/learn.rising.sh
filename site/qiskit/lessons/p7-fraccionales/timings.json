@@ -195,33 +195,28 @@
   ]
  },
  "mision": {
-  "dur": 28.44,
+  "dur": 21.528,
   "marks": {
-   "n1": 2.916,
-   "n2": 9.483,
-   "n3": 17.04,
-   "check": 23.763
+   "n1": 5.859,
+   "n2": 11.153,
+   "n3": 16.319
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica."
+    "Ahora comparas las dos compilaciones y construyes una cadena parametrizable."
    ],
    [
-    2.916,
-    "Primero reproduces la comparación de la cadena de Ising y ves cuánto acortan las fraccionales."
+    5.859,
+    "Mide cuántas cz y rzz aparecen en dos backends."
    ],
    [
-    9.483,
-    "Después cambias el ángulo de las RZZ para que el backend convencional necesite menos CZ."
+    11.153,
+    "Prueba un ángulo especial para acortar la descomposición convencional."
    ],
    [
-    17.04,
-    "Y por último escribes una función que construye la cadena de Ising con los parámetros que quieras."
-   ],
-   [
-    23.763,
-    "Cada misión tiene su comprobación: busca la marca verde."
+    16.319,
+    "Y por último escribe la cadena de Ising con los parámetros que quieras."
    ]
   ]
  },

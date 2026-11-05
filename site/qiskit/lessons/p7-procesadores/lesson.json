@@ -568,46 +568,75 @@
     "7.4",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica. [[n1]]Primero lees las propiedades de Fez y calculas cuántas veces más dura medir que una CZ. [[n2]]Después buscas el qubit con el T uno más largo. [[n3]]Y por último escribes una función que elige la mejor cadena de qubits, la de menor error total de CZ, para el proyecto de espines. [[check]]Busca la marca verde en cada misión.",
+   "say": "Ahora lees las propiedades y eliges qubits con ellas. [[n1]]Compara la duración de medir con una `cz`. [[n2]]Busca el qubit con mayor `T1`. [[n3]]Y por último encuentra la cadena acoplada con menor error total de `cz`.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-procesadores.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Lee las propiedades de `FakeFez` y calcula la razón entre medir y una `cz`."
-      },
-      {
-       "level": 2,
-       "text": "Encuentra el qubit con mayor $T_1$."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `mejor_cadena(backend, k)`: $k$ qubits acoplados con el menor error total de `cz`."
-      }
+     "type": "exercise",
+     "exercise": "p7-procesadores/razon-medicion",
+     "prompt": "Escribe `propiedades(backend)`: devuelve un diccionario con `qubits`, la familia del procesador (`backend.processor_type`), y `razon`, la duración de medir dividida por la de una `cz`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Las duraciones están en `backend.target`.",
+      "Lee `measure` con `(0,)` y `cz` con `(0, 1)`.",
+      "Devuelve `backend.num_qubits`, `backend.processor_type['family']` y `medir / cz`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def propiedades(backend):\n    return {}",
+     "cases": [
+      "FakeFez es un Heron de 156 qubits"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-procesadores/mejor-t1",
+     "prompt": "Corrige `mejor_t1(backend)` para que devuelva el índice del qubit con mayor `backend.qubit_properties(q).t1`.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Los índices válidos van de 0 a `backend.num_qubits - 1`.",
+      "`max` puede recibir una función `key` que lea una propiedad del qubit.",
+      "Usa `max(range(backend.num_qubits), key=lambda q: backend.qubit_properties(q).t1)`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "def mejor_t1(backend):\n    candidato = max(\n        range(backend.num_qubits),\n        key=lambda qubit: backend.qubit_properties(qubit).t1,\n    )\n    return 0",
+     "cases": [
+      "elige el qubit con mayor T1"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-procesadores/mejor-cadena",
+     "prompt": "Escribe `mejor_cadena(backend, k)`: devuelve `k` qubits distintos, unidos por `cz` consecutivas, cuyo error total sea mínimo. `backend.target['cz']` contiene los vecinos y su `.error`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Construye un diccionario de vecinos a partir de las claves `(origen, destino)`.",
+      "Recorre caminos sin repetir qubits y acumula el error de cada arista.",
+      "Guarda la ruta de menor coste después de alcanzar longitud `k`."
+     ],
+     "id": "e3",
+     "starter": "def mejor_cadena(backend, k):\n    return list(range(k))",
+     "cases": [
+      "encuentra una cadena óptima de 3 qubits"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

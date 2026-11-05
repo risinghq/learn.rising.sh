@@ -418,46 +418,75 @@
     "7.6",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica. [[n1]]Primero guardas un resultado y lo lees de vuelta. [[n2]]Después añades una etiqueta a un trabajo sin perder las que ya tenía. [[n3]]Y por último escribes dos funciones: una que guarda todos los trabajos de una etiqueta, y otra que los carga. [[check]]Busca la marca verde en cada misión.",
+   "say": "Ahora guardas, etiquetas y recuperas resultados. [[n1]]Serializa un resultado y léelo de vuelta. [[n2]]Añade una etiqueta conservando las anteriores. [[n3]]Y por último guarda todos los trabajos que coincidan con unas etiquetas.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-trabajos.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Guarda un resultado con `RuntimeEncoder` y léelo con `RuntimeDecoder`."
-      },
-      {
-       "level": 2,
-       "text": "Añade la etiqueta `c` a un trabajo sin perder `a` y `b`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `guardar_por_etiqueta` y `cargar`, y comprueba que los conteos coinciden."
-      }
+     "type": "exercise",
+     "exercise": "p7-trabajos/guardar-leer",
+     "prompt": "Completa `roundtrip(seed)`: crea un resultado de Bell con `StatevectorSampler`, guárdalo con `RuntimeEncoder`, léelo con `RuntimeDecoder` y devuelve su tipo y sus conteos.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Usa un archivo temporal para que la función no deje datos en el proyecto.",
+      "`json.dump(resultado, archivo, cls=RuntimeEncoder)` escribe el objeto de Qiskit.",
+      "Lee el archivo con `json.load(archivo, cls=RuntimeDecoder)` y devuelve `type(leido).__name__` y sus conteos."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "import json\n\nfrom qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\nfrom qiskit_ibm_runtime import RuntimeDecoder, RuntimeEncoder\n\n\ndef roundtrip(seed):\n    qc = QuantumCircuit(2)\n    qc.h(0)\n    qc.cx(0, 1)\n    qc.measure_all()\n    resultado = StatevectorSampler(seed=seed).run([qc]).result()\n    # Guarda resultado con RuntimeEncoder y vuelve a leerlo con RuntimeDecoder.\n    return None",
+     "cases": [
+      "recupera el tipo y los conteos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-trabajos/anadir-etiqueta",
+     "prompt": "Corrige `anadir_etiqueta(trabajo, etiqueta)`: `update_tags` reemplaza la lista, así que la nueva lista debe conservar las etiquetas actuales y añadir la recibida sin duplicados.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Lee primero `trabajo.tags`.",
+      "Pasa a `update_tags` las etiquetas actuales seguidas de `etiqueta`.",
+      "La clase elimina duplicados con `dict.fromkeys`, así que basta construir la lista completa."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "class Trabajo:\n    def __init__(self, etiquetas):\n        self.tags = list(etiquetas)\n\n    def update_tags(self, etiquetas):\n        self.tags = list(dict.fromkeys(etiquetas))\n        return self.tags\n\n\ndef anadir_etiqueta(trabajo, etiqueta):\n    return trabajo.update_tags([etiqueta])",
+     "cases": [
+      "conserva a y b al añadir c"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-trabajos/guardar-por-etiqueta",
+     "prompt": "Escribe `guardar_por_etiqueta(servicio, etiquetas, carpeta)` para serializar cada resultado de `servicio.jobs(job_tags=etiquetas)` en `<job_id>.json`, y `cargar(carpeta, job_id)` para leerlo. Devuelve los IDs guardados.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "`servicio.jobs(job_tags=etiquetas)` ya filtra los trabajos.",
+      "Construye cada ruta con `Path(carpeta) / f'{job.job_id()}.json'`.",
+      "Usa `RuntimeEncoder` al guardar, `RuntimeDecoder` al cargar y añade cada ID a la lista."
+     ],
+     "id": "e3",
+     "starter": "import json\nfrom pathlib import Path\n\nfrom qiskit import QuantumCircuit\nfrom qiskit.primitives import StatevectorSampler\nfrom qiskit_ibm_runtime import RuntimeDecoder, RuntimeEncoder\n\n\nclass Trabajo:\n    def __init__(self, job_id, seed, tags):\n        qc = QuantumCircuit(2)\n        qc.h(0)\n        qc.cx(0, 1)\n        qc.measure_all()\n        self._id = job_id\n        self.tags = tags\n        self._resultado = StatevectorSampler(seed=seed).run([qc]).result()\n\n    def job_id(self):\n        return self._id\n\n    def result(self):\n        return self._resultado\n\n\nclass Servicio:\n    def __init__(self):\n        self._trabajos = [\n            Trabajo(\"job-1\", 1, [\"a\", \"b\"]),\n            Trabajo(\"job-2\", 2, [\"a\"]),\n            Trabajo(\"job-3\", 3, [\"b\"]),\n        ]\n\n    def jobs(self, job_tags=()):\n        return [t for t in self._trabajos if set(job_tags) <= set(t.tags)]\n\n\ndef guardar_por_etiqueta(servicio, etiquetas, carpeta):\n    return []\n\n\ndef cargar(carpeta, job_id):\n    return None",
+     "cases": [
+      "guarda los dos trabajos con la etiqueta a"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

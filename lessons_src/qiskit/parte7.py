@@ -5,6 +5,7 @@ from lib import (
     Box,
     Circ,
     Code,
+    Exercise,
     Flow,
     G,
     Hist,
@@ -293,30 +294,50 @@ print(marginal_counts(counts, [1]))""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica de esta lección. [[n1]]Primero reproduces la corrección que acabamos de ver y compruebas que la segunda medición es siempre cero. [[n2]]Después reemplazas dos if anidados por uno solo sobre un registro de dos bits. [[n3]]Y por último escribes una función que decide si un circuito cumple los límites del hardware.
-             [[check]]Busca la marca verde en cada misión.""",
+            """Ahora practicas la corrección, los registros clásicos y los límites de los circuitos dinámicos. [[n1]]Empieza por construir una corrección que deje la segunda medición en cero. [[n2]]Después concentra dos condiciones en un registro de dos bits. [[n3]]Y por último decide qué circuitos admite el hardware.""",
             [
-                Mission(
-                    "practica/p7-dinamicos.py",
-                    [
-                        (
-                            1,
-                            "Mide, corrige con un `if` y comprueba que la segunda medición es siempre `0`.",
-                        ),
-                        (2, "Reemplaza dos `if` anidados por un único `if_test((cr, 0b11))`."),
-                        (
-                            3,
-                            "Escribe `es_valido(qc)`: rechaza bucles, `switch`, `if` anidados, mediciones dentro de un `if` y operandos de más de 32 bits.",
-                        ),
+                Exercise(
+                    "p7-dinamicos/correccion-dinamica",
+                    "Escribe `correccion()`: prepara `|+⟩`, mide el bit 0, aplica `X` si esa medición vale 1 y mide de nuevo en el bit 1. La segunda medición debe quedar siempre en 0.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hints=[
+                        "La primera medición necesita un bit clásico y debe ocurrir antes del `if`.",
+                        "Usa `qc.if_test((qc.clbits[0], 1))` para decidir sobre la medición.",
+                        "Dentro del bloque añade `qc.x(0)` y después mide `qc.measure(0, 1)`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-dinamicos/registro-un-if",
+                    "Corrige `circuito(bits)`: recibe un entero de 0 a 3, prepara los dos bits bajos, los mide en `cr` y aplica `X` al qubit 2 solo cuando `cr` vale `0b11`. Usa un único `if_test`.",
+                    level=2,
+                    needs="aer",
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "El registro `cr` representa los dos bits que ya mediste.",
+                        "La condición puede comparar el registro completo con el valor 3.",
+                        "Reemplaza los dos bloques anidados por `with qc.if_test((cr, 0b11)):`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-dinamicos/valida-limites",
+                    "Escribe `es_valido(qc)`: devuelve `True` para un `if` sencillo o con `else`, y `False` para bucles, `switch`, `if` anidados, `measure` o `reset` dentro de un `if`, o un registro de condición de más de 32 bits.",
+                    level=3,
+                    needs="qiskit",
+                    id="e3",
+                    hints=[
+                        "Recorre `qc.data` y mira `inst.operation.name`.",
+                        "Las ramas están en `op.blocks`; al recorrerlas puedes saber si ya estás dentro de un `if`.",
+                        "La condición de un `if` está en `op.condition`: rechaza un registro cuyo `size` sea mayor que 32.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(
@@ -604,33 +625,47 @@ fake_backend.refresh(service=service, use_fractional_gates=True)""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica. [[n1]]Primero reproduces la comparación de la cadena de Ising y ves cuánto acortan las fraccionales. [[n2]]Después cambias el ángulo de las RZZ para que el backend convencional necesite menos CZ. [[n3]]Y por último escribes una función que construye la cadena de Ising con los parámetros que quieras.
-             [[check]]Cada misión tiene su comprobación: busca la marca verde.""",
+            """Ahora comparas las dos compilaciones y construyes una cadena parametrizable. [[n1]]Mide cuántas `cz` y `rzz` aparecen en dos backends. [[n2]]Prueba un ángulo especial para acortar la descomposición convencional. [[n3]]Y por último escribe la cadena de Ising con los parámetros que quieras.""",
             [
-                Mission(
-                    "practica/p7-fraccionales.py",
-                    [
-                        (
-                            1,
-                            "Transpila la cadena de Ising para los dos backends y cuenta las `cz` y las `rzz`.",
-                        ),
-                        (
-                            2,
-                            r"Cambia `theta_zz` por un múltiplo de $\pi/2$ y mira cuántas `cz` necesita el convencional.",
-                        ),
-                        (
-                            3,
-                            "Escribe `cadena_ising(n, pasos, theta_x, theta_zz)`; la comprobación cuenta sus puertas.",
-                        ),
+                Exercise(
+                    "p7-fraccionales/compara-cadena",
+                    "Escribe `conteos(n, pasos)`: construye la cadena de Ising con `rx(0.1)` y `rzz(0.1)`, transpílala para un backend convencional y otro con `rx` y `rzz` nativas, y devuelve `(cz_conv, rzz_conv, cz_frac, rzz_frac)`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Hay dos listas de puertas base: la segunda añade `rx` y `rzz`.",
+                        'Usa `generate_preset_pass_manager(3, backend=..., scheduling_method="alap")`.',
+                        "Cuenta con `isa.count_ops().get(nombre, 0)` y devuelve las cuatro cifras en orden.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-fraccionales/angulo-especial",
+                    "Corrige `conteos_con_angulo(theta_zz)`: el ángulo recibido debe llegar a cada `rzz`. Para `π/2` y `3π/2`, el backend convencional debe necesitar menos de 24 `cz`.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "El ángulo ya llega como argumento de la función.",
+                        "Busca qué asignación dentro de `conteos_con_angulo` lo reemplaza antes de construir el circuito.",
+                        "Elimina la asignación fija `theta_zz = 0.1`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-fraccionales/cadena-ising",
+                    "Escribe `cadena_ising(n, pasos, theta_x, theta_zz)`: en cada paso añade `rx` a todos los qubits, `rzz` a los pares impares y pares, y una barrera.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Crea `QuantumCircuit(n)` y repite la capa `pasos` veces.",
+                        "Los pares son `range(1, n - 1, 2)` y `range(0, n - 1, 2)`.",
+                        "Usa `qc.rx(theta_x, qubit)`, `qc.rzz(theta_zz, qubit, qubit + 1)` y `qc.barrier()`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(
@@ -839,30 +874,47 @@ fig.write_html("scheduler_timing.html")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica. [[n1]]Primero escribes un analizador de las líneas de temporización. [[n2]]Después calculas cuándo termina cada instrucción y cuánto dura todo, en nanosegundos. [[n3]]Y por último construyes la programación de un circuito con Qiskit, sin necesidad de un QPU.
-             [[check]]Busca la marca verde en cada misión.""",
+            """Ahora analizas una programación, calculas sus duraciones y la construyes desde Qiskit. [[n1]]Empieza por convertir las líneas de temporización en registros. [[n2]]Después calcula los finales y el total en nanosegundos. [[n3]]Y por último devuelve la programación de un circuito local.""",
             [
-                Mission(
-                    "practica/p7-temporizacion.py",
-                    [
-                        (1, "Lee las líneas de temporización y conviértelas en tuplas."),
-                        (
-                            2,
-                            "Calcula el fin de cada instrucción y el total en nanosegundos con `backend.dt`.",
-                        ),
-                        (
-                            3,
-                            "Escribe `programacion(isa, backend)` con `op_start_times` y las duraciones del `target`.",
-                        ),
+                Exercise(
+                    "p7-temporizacion/leer-lineas",
+                    "Escribe `leer(texto)`: recibe líneas `rama,instrucción,canal,inicio,duración,pulso` y devuelve una lista de diccionarios con esos seis campos; `inicio` y `duración` son enteros.",
+                    level=1,
+                    needs="python",
+                    id="e1",
+                    hints=[
+                        "Separa el texto en líneas y cada línea en seis campos.",
+                        "Quita el espacio exterior de la línea antes de separarla.",
+                        "Convierte los campos `inicio` y `duracion` con `int` y crea un diccionario.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-temporizacion/fin-en-nanosegundos",
+                    "Completa `fin_y_total(registros, dt)`: devuelve los finales `inicio + duracion` en `dt` y el intervalo total convertido a nanosegundos con `dt` en segundos.",
+                    level=2,
+                    id="e2",
+                    hints=[
+                        "El final de una instrucción combina sus dos campos de tiempo.",
+                        "El intervalo empieza en el inicio mínimo y termina en el final máximo.",
+                        "Multiplica el total en `dt` por `dt` y por `1e9`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-temporizacion/programa-isa",
+                    "Escribe `programacion(isa, backend)`: devuelve `(nombre, qubits, inicio, duración)` para cada instrucción, usando `isa.op_start_times`; un `delay` usa `op.duration` y las demás operaciones usan `backend.target`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Recorre `zip(isa.data, isa.op_start_times)` y obtiene el nombre de `inst.operation`.",
+                        "Convierte los qubits de la instrucción a índices con `isa.find_bit(qubit).index`.",
+                        "Para el target, divide la duración en segundos entre `backend.dt`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(
@@ -1195,30 +1247,47 @@ jobs = service.jobs(backend_name="ibm_sherbrooke")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica. [[n1]]Primero lees las propiedades de Fez y calculas cuántas veces más dura medir que una CZ. [[n2]]Después buscas el qubit con el T uno más largo. [[n3]]Y por último escribes una función que elige la mejor cadena de qubits, la de menor error total de CZ, para el proyecto de espines.
-             [[check]]Busca la marca verde en cada misión.""",
+            """Ahora lees las propiedades y eliges qubits con ellas. [[n1]]Compara la duración de medir con una `cz`. [[n2]]Busca el qubit con mayor `T1`. [[n3]]Y por último encuentra la cadena acoplada con menor error total de `cz`.""",
             [
-                Mission(
-                    "practica/p7-procesadores.py",
-                    [
-                        (
-                            1,
-                            "Lee las propiedades de `FakeFez` y calcula la razón entre medir y una `cz`.",
-                        ),
-                        (2, "Encuentra el qubit con mayor $T_1$."),
-                        (
-                            3,
-                            "Escribe `mejor_cadena(backend, k)`: $k$ qubits acoplados con el menor error total de `cz`.",
-                        ),
+                Exercise(
+                    "p7-procesadores/razon-medicion",
+                    "Escribe `propiedades(backend)`: devuelve un diccionario con `qubits`, la familia del procesador (`backend.processor_type`), y `razon`, la duración de medir dividida por la de una `cz`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Las duraciones están en `backend.target`.",
+                        "Lee `measure` con `(0,)` y `cz` con `(0, 1)`.",
+                        "Devuelve `backend.num_qubits`, `backend.processor_type['family']` y `medir / cz`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-procesadores/mejor-t1",
+                    "Corrige `mejor_t1(backend)` para que devuelva el índice del qubit con mayor `backend.qubit_properties(q).t1`.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Los índices válidos van de 0 a `backend.num_qubits - 1`.",
+                        "`max` puede recibir una función `key` que lea una propiedad del qubit.",
+                        "Usa `max(range(backend.num_qubits), key=lambda q: backend.qubit_properties(q).t1)`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-procesadores/mejor-cadena",
+                    "Escribe `mejor_cadena(backend, k)`: devuelve `k` qubits distintos, unidos por `cz` consecutivas, cuyo error total sea mínimo. `backend.target['cz']` contiene los vecinos y su `.error`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Construye un diccionario de vecinos a partir de las claves `(origen, destino)`.",
+                        "Recorre caminos sin repetir qubits y acumula el error de cada arista.",
+                        "Guarda la ruta de menor coste después de alcanzar longitud `k`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(
@@ -1514,30 +1583,47 @@ print(job.metrics()["usage"]["quantum_seconds"])""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica. [[n1]]Primero reproduces la estimación del estado de Bell. [[n2]]Después corriges el conteo de ejecuciones de un PUB con varios valores de parámetro. [[n3]]Y por último conviertes la cuenta en una función, estimar uso, que sirva para cualquier circuito.
-             [[check]]Busca la marca verde en cada misión.""",
+            """Ahora estimas el costo antes de enviar un trabajo. [[n1]]Calcula el uso de un Bell. [[n2]]Cuenta todas las ejecuciones de un PUB con broadcasting. [[n3]]Y por último convierte la fórmula en una función para cualquier circuito.""",
             [
-                Mission(
-                    "practica/p7-colas-costos.py",
-                    [
-                        (1, "Estima el uso de un Bell con 4096 disparos en `FakeFez`."),
-                        (
-                            2,
-                            "Corrige `ejecuciones` para que cuente circuitos × disparos de un PUB.",
-                        ),
-                        (
-                            3,
-                            "Escribe `estimar_uso(backend, qc, ejecuciones)` y comprueba varios circuitos.",
-                        ),
+                Exercise(
+                    "p7-colas-costos/uso-bell",
+                    "Escribe `estimar_bell(backend, disparos)`: programa un Bell en `backend`, suma reset y `default_rep_delay`, añade 2 segundos de sobrecarga y redondea el uso hacia arriba.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "El programador necesita el target, nivel 0 y `scheduling_method='alap'`.",
+                        "La duración por ejecución incluye el circuito, `backend.target['reset'][(0,)].duration` y `backend.default_rep_delay`.",
+                        "Devuelve `math.ceil(2 + por_ejecucion * disparos)`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-colas-costos/ejecuciones-pub",
+                    "Corrige `ejecuciones(pub)`: un PUB con forma `pub.shape` representa varios circuitos y cada uno se ejecuta `pub.shots` veces.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "La forma del PUB contiene una dimensión por lote de parámetros.",
+                        "Multiplica todas las dimensiones de `pub.shape`.",
+                        "El total es `math.prod(pub.shape) * pub.shots`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-colas-costos/estimar-uso",
+                    "Escribe `estimar_uso(backend, qc, ejecuciones)`: programa `qc` con nivel 0 y ALAP, suma circuito, reset y `rep_delay`, añade 2 segundos y redondea hacia arriba.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Usa `generate_preset_pass_manager(target=backend.target, optimization_level=0, scheduling_method='alap')`.",
+                        "Obtén los segundos con `estimate_duration(backend.target, unit='s')`.",
+                        "Suma la duración del reset y `backend.default_rep_delay` antes de multiplicar.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(
@@ -1792,30 +1878,47 @@ print(type(loaded).__name__, loaded[0].data.meas.get_counts())""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica. [[n1]]Primero guardas un resultado y lo lees de vuelta. [[n2]]Después añades una etiqueta a un trabajo sin perder las que ya tenía. [[n3]]Y por último escribes dos funciones: una que guarda todos los trabajos de una etiqueta, y otra que los carga.
-             [[check]]Busca la marca verde en cada misión.""",
+            """Ahora guardas, etiquetas y recuperas resultados. [[n1]]Serializa un resultado y léelo de vuelta. [[n2]]Añade una etiqueta conservando las anteriores. [[n3]]Y por último guarda todos los trabajos que coincidan con unas etiquetas.""",
             [
-                Mission(
-                    "practica/p7-trabajos.py",
-                    [
-                        (
-                            1,
-                            "Guarda un resultado con `RuntimeEncoder` y léelo con `RuntimeDecoder`.",
-                        ),
-                        (2, "Añade la etiqueta `c` a un trabajo sin perder `a` y `b`."),
-                        (
-                            3,
-                            "Escribe `guardar_por_etiqueta` y `cargar`, y comprueba que los conteos coinciden.",
-                        ),
+                Exercise(
+                    "p7-trabajos/guardar-leer",
+                    "Completa `roundtrip(seed)`: crea un resultado de Bell con `StatevectorSampler`, guárdalo con `RuntimeEncoder`, léelo con `RuntimeDecoder` y devuelve su tipo y sus conteos.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Usa un archivo temporal para que la función no deje datos en el proyecto.",
+                        "`json.dump(resultado, archivo, cls=RuntimeEncoder)` escribe el objeto de Qiskit.",
+                        "Lee el archivo con `json.load(archivo, cls=RuntimeDecoder)` y devuelve `type(leido).__name__` y sus conteos.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-trabajos/anadir-etiqueta",
+                    "Corrige `anadir_etiqueta(trabajo, etiqueta)`: `update_tags` reemplaza la lista, así que la nueva lista debe conservar las etiquetas actuales y añadir la recibida sin duplicados.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Lee primero `trabajo.tags`.",
+                        "Pasa a `update_tags` las etiquetas actuales seguidas de `etiqueta`.",
+                        "La clase elimina duplicados con `dict.fromkeys`, así que basta construir la lista completa.",
+                    ],
+                ),
+                Exercise(
+                    "p7-trabajos/guardar-por-etiqueta",
+                    "Escribe `guardar_por_etiqueta(servicio, etiquetas, carpeta)` para serializar cada resultado de `servicio.jobs(job_tags=etiquetas)` en `<job_id>.json`, y `cargar(carpeta, job_id)` para leerlo. Devuelve los IDs guardados.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "`servicio.jobs(job_tags=etiquetas)` ya filtra los trabajos.",
+                        "Construye cada ruta con `Path(carpeta) / f'{job.job_id()}.json'`.",
+                        "Usa `RuntimeEncoder` al guardar, `RuntimeDecoder` al cargar y añade cada ID a la lista.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(
@@ -2156,30 +2259,49 @@ with Session(backend=backend) as session:
         beat(
             "mision",
             ("", "Tu turno"),
-            """Abre el cuaderno de práctica. [[n1]]Primero abres un lote, envías tres trabajos y compruebas los conteos. [[n2]]Después partes una lista de veinte circuitos en cinco trabajos. [[n3]]Y por último escribes una función que elige el modo, job, batch o session, según la carga y el plan.
-             [[check]]Busca la marca verde en cada misión.""",
+            """Ahora eliges cómo ejecutar una carga. [[n1]]Abre un lote y recoge tres resultados. [[n2]]Después reparte veinte circuitos en cinco trabajos. [[n3]]Y por último decide entre `job`, `batch` y `session` según la carga y el plan.""",
             [
-                Mission(
-                    "practica/p7-modos.py",
-                    [
-                        (
-                            1,
-                            "Abre un `Batch`, envía tres trabajos y lee `details()` en modo local.",
-                        ),
-                        (
-                            2,
-                            "Reparte 20 circuitos en 5 trabajos de 4, sin perder ni repetir ninguno.",
-                        ),
-                        (3, "Escribe `elegir_modo(...)` con las recomendaciones de la lección."),
+                Exercise(
+                    "p7-modos/tres-trabajos",
+                    "Escribe `trabajos(n_trabajos)`: usa un `Batch` local, envía `n_trabajos` veces el Bell preparado y devuelve la lista de disparos de cada resultado.",
+                    level=1,
+                    needs="aer",
+                    id="e1",
+                    hints=[
+                        "El backend local es `FakeBelemV2` y el modo del `Sampler` es el `Batch`.",
+                        "Prepara un Bell medido con `generate_preset_pass_manager`.",
+                        "Para cada trabajo, suma `job.result()[0].data.meas.get_counts().values()`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p7-modos/partir-circuitos",
+                    "Corrige `partir(circuitos)`: recibe una lista de 20 circuitos y debe devolver cinco listas de cuatro, sin perder ni repetir elementos. La función también debe servir para listas de otros tamaños múltiplos de cuatro.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Cada grupo empieza en 0, 4, 8 y así sucesivamente.",
+                        "Un corte de lista puede tomar cuatro elementos desde cada inicio.",
+                        "Devuelve una lista por cada `inicio` de `range(0, len(circuitos), 4)`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-modos/elegir-modo",
+                    "Escribe `elegir_modo(n_trabajos, entradas_listas, iterativo, minutos_qpu, plan)`: devuelve `(modo, juntar)`. Usa `job` para un trabajo, `session` para cargas iterativas o entradas tardías salvo en `open`, y `batch` en los demás casos; `juntar` vale `True` con varios trabajos de menos de un minuto cada uno.",
+                    level=3,
+                    needs="python",
+                    id="e3",
+                    hints=[
+                        "Primero decide el modo del plan: un trabajo siempre es `job`.",
+                        "El plan `open` no admite sesiones; los otros planes usan `session` si la carga es iterativa o incompleta.",
+                        "La condición para juntar es `n_trabajos > 1 and minutos_qpu < 1`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("show", "e1", at="n1"),
+                A("show", "e2", at="n2"),
+                A("show", "e3", at="n3"),
             ],
         ),
         beat(

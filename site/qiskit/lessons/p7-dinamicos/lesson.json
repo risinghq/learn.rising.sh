@@ -492,46 +492,75 @@
     "7.1",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica de esta lección. [[n1]]Primero reproduces la corrección que acabamos de ver y compruebas que la segunda medición es siempre cero. [[n2]]Después reemplazas dos if anidados por uno solo sobre un registro de dos bits. [[n3]]Y por último escribes una función que decide si un circuito cumple los límites del hardware. [[check]]Busca la marca verde en cada misión.",
+   "say": "Ahora practicas la corrección, los registros clásicos y los límites de los circuitos dinámicos. [[n1]]Empieza por construir una corrección que deje la segunda medición en cero. [[n2]]Después concentra dos condiciones en un registro de dos bits. [[n3]]Y por último decide qué circuitos admite el hardware.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-dinamicos.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Mide, corrige con un `if` y comprueba que la segunda medición es siempre `0`."
-      },
-      {
-       "level": 2,
-       "text": "Reemplaza dos `if` anidados por un único `if_test((cr, 0b11))`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `es_valido(qc)`: rechaza bucles, `switch`, `if` anidados, mediciones dentro de un `if` y operandos de más de 32 bits."
-      }
+     "type": "exercise",
+     "exercise": "p7-dinamicos/correccion-dinamica",
+     "prompt": "Escribe `correccion()`: prepara `|+⟩`, mide el bit 0, aplica `X` si esa medición vale 1 y mide de nuevo en el bit 1. La segunda medición debe quedar siempre en 0.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "La primera medición necesita un bit clásico y debe ocurrir antes del `if`.",
+      "Usa `qc.if_test((qc.clbits[0], 1))` para decidir sobre la medición.",
+      "Dentro del bloque añade `qc.x(0)` y después mide `qc.measure(0, 1)`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "from qiskit import QuantumCircuit\n\n\ndef correccion():\n    qc = QuantumCircuit(1, 2)\n    qc.h(0)\n    # Construye aquí la medición intermedia, el if y la medición final.\n    return qc",
+     "cases": [
+      "la segunda medición siempre da cero"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-dinamicos/registro-un-if",
+     "prompt": "Corrige `circuito(bits)`: recibe un entero de 0 a 3, prepara los dos bits bajos, los mide en `cr` y aplica `X` al qubit 2 solo cuando `cr` vale `0b11`. Usa un único `if_test`.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "El registro `cr` representa los dos bits que ya mediste.",
+      "La condición puede comparar el registro completo con el valor 3.",
+      "Reemplaza los dos bloques anidados por `with qc.if_test((cr, 0b11)):`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister\n\n\ndef circuito(bits):\n    cr = ClassicalRegister(2, \"cr\")\n    extra = ClassicalRegister(1, \"res\")\n    qc = QuantumCircuit(QuantumRegister(3), cr, extra)\n    if bits & 1:\n        qc.x(0)\n    if bits & 2:\n        qc.x(1)\n    qc.measure([0, 1], cr)\n    with qc.if_test((cr[0], 1)):\n        with qc.if_test((cr[1], 1)):\n            qc.x(2)\n    qc.measure(2, 2)\n    return qc",
+     "cases": [
+      "solo el registro 11 activa la X"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-dinamicos/valida-limites",
+     "prompt": "Escribe `es_valido(qc)`: devuelve `True` para un `if` sencillo o con `else`, y `False` para bucles, `switch`, `if` anidados, `measure` o `reset` dentro de un `if`, o un registro de condición de más de 32 bits.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Recorre `qc.data` y mira `inst.operation.name`.",
+      "Las ramas están en `op.blocks`; al recorrerlas puedes saber si ya estás dentro de un `if`.",
+      "La condición de un `if` está en `op.condition`: rechaza un registro cuyo `size` sea mayor que 32."
+     ],
+     "id": "e3",
+     "starter": "def es_valido(qc):\n    \"\"\"Indica si qc respeta los límites de circuitos dinámicos de IBM.\"\"\"\n    return True",
+     "cases": [
+      "acepta un if sencillo"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

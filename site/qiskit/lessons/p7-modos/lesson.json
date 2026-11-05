@@ -557,46 +557,75 @@
     "7.7",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica. [[n1]]Primero abres un lote, envías tres trabajos y compruebas los conteos. [[n2]]Después partes una lista de veinte circuitos en cinco trabajos. [[n3]]Y por último escribes una función que elige el modo, job, batch o session, según la carga y el plan. [[check]]Busca la marca verde en cada misión.",
+   "say": "Ahora eliges cómo ejecutar una carga. [[n1]]Abre un lote y recoge tres resultados. [[n2]]Después reparte veinte circuitos en cinco trabajos. [[n3]]Y por último decide entre `job`, `batch` y `session` según la carga y el plan.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-modos.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Abre un `Batch`, envía tres trabajos y lee `details()` en modo local."
-      },
-      {
-       "level": 2,
-       "text": "Reparte 20 circuitos en 5 trabajos de 4, sin perder ni repetir ninguno."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `elegir_modo(...)` con las recomendaciones de la lección."
-      }
+     "type": "exercise",
+     "exercise": "p7-modos/tres-trabajos",
+     "prompt": "Escribe `trabajos(n_trabajos)`: usa un `Batch` local, envía `n_trabajos` veces el Bell preparado y devuelve la lista de disparos de cada resultado.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "El backend local es `FakeBelemV2` y el modo del `Sampler` es el `Batch`.",
+      "Prepara un Bell medido con `generate_preset_pass_manager`.",
+      "Para cada trabajo, suma `job.result()[0].data.meas.get_counts().values()`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def trabajos(n_trabajos):\n    return []",
+     "cases": [
+      "tres trabajos con 4096 disparos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-modos/partir-circuitos",
+     "prompt": "Corrige `partir(circuitos)`: recibe una lista de 20 circuitos y debe devolver cinco listas de cuatro, sin perder ni repetir elementos. La función también debe servir para listas de otros tamaños múltiplos de cuatro.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Cada grupo empieza en 0, 4, 8 y así sucesivamente.",
+      "Un corte de lista puede tomar cuatro elementos desde cada inicio.",
+      "Devuelve una lista por cada `inicio` de `range(0, len(circuitos), 4)`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "def partir(circuitos):\n    return [circuitos[inicio : inicio + 5] for inicio in range(0, len(circuitos), 4)]",
+     "cases": [
+      "reparte veinte circuitos en cinco grupos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-modos/elegir-modo",
+     "prompt": "Escribe `elegir_modo(n_trabajos, entradas_listas, iterativo, minutos_qpu, plan)`: devuelve `(modo, juntar)`. Usa `job` para un trabajo, `session` para cargas iterativas o entradas tardías salvo en `open`, y `batch` en los demás casos; `juntar` vale `True` con varios trabajos de menos de un minuto cada uno.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Primero decide el modo del plan: un trabajo siempre es `job`.",
+      "El plan `open` no admite sesiones; los otros planes usan `session` si la carga es iterativa o incompleta.",
+      "La condición para juntar es `n_trabajos > 1 and minutos_qpu < 1`."
+     ],
+     "id": "e3",
+     "starter": "def elegir_modo(n_trabajos, entradas_listas, iterativo, minutos_qpu, plan=\"pago\"):\n    return (\"batch\", False)",
+     "cases": [
+      "un trabajo se ejecuta como job"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

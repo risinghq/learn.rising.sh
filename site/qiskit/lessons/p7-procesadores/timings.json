@@ -269,33 +269,28 @@
   ]
  },
  "mision": {
-  "dur": 27.216,
+  "dur": 17.04,
   "marks": {
-   "n1": 2.916,
-   "n2": 9.879,
-   "n3": 13.941,
-   "check": 23.933
+   "n1": 4.713,
+   "n2": 8.52,
+   "n3": 11.549
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica."
+    "Ahora lees las propiedades y eliges qubits con ellas."
    ],
    [
-    2.916,
-    "Primero lees las propiedades de Fez y calculas cuántas veces más dura medir que una CZ."
+    4.713,
+    "Compara la duración de medir con una cz."
    ],
    [
-    9.879,
-    "Después buscas el qubit con el T uno más largo."
+    8.52,
+    "Busca el qubit con mayor T1."
    ],
    [
-    13.941,
-    "Y por último escribes una función que elige la mejor cadena de qubits, la de menor error total de CZ, para el proyecto de espines."
-   ],
-   [
-    23.933,
-    "Busca la marca verde en cada misión."
+    11.549,
+    "Y por último encuentra la cadena acoplada con menor error total de cz."
    ]
   ]
  },

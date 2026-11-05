@@ -516,46 +516,75 @@
     "7.5",
     "Tu turno"
    ],
-   "say": "Abre el cuaderno de práctica. [[n1]]Primero reproduces la estimación del estado de Bell. [[n2]]Después corriges el conteo de ejecuciones de un PUB con varios valores de parámetro. [[n3]]Y por último conviertes la cuenta en una función, estimar uso, que sirva para cualquier circuito. [[check]]Busca la marca verde en cada misión.",
+   "say": "Ahora estimas el costo antes de enviar un trabajo. [[n1]]Calcula el uso de un Bell. [[n2]]Cuenta todas las ejecuciones de un PUB con broadcasting. [[n3]]Y por último convierte la fórmula en una función para cualquier circuito.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p7-colas-costos.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Estima el uso de un Bell con 4096 disparos en `FakeFez`."
-      },
-      {
-       "level": 2,
-       "text": "Corrige `ejecuciones` para que cuente circuitos × disparos de un PUB."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `estimar_uso(backend, qc, ejecuciones)` y comprueba varios circuitos."
-      }
+     "type": "exercise",
+     "exercise": "p7-colas-costos/uso-bell",
+     "prompt": "Escribe `estimar_bell(backend, disparos)`: programa un Bell en `backend`, suma reset y `default_rep_delay`, añade 2 segundos de sobrecarga y redondea el uso hacia arriba.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "El programador necesita el target, nivel 0 y `scheduling_method='alap'`.",
+      "La duración por ejecución incluye el circuito, `backend.target['reset'][(0,)].duration` y `backend.default_rep_delay`.",
+      "Devuelve `math.ceil(2 + por_ejecucion * disparos)`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def estimar_bell(backend, disparos):\n    return 0",
+     "cases": [
+      "Bell con 4096 disparos usa 4 segundos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-colas-costos/ejecuciones-pub",
+     "prompt": "Corrige `ejecuciones(pub)`: un PUB con forma `pub.shape` representa varios circuitos y cada uno se ejecuta `pub.shots` veces.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "La forma del PUB contiene una dimensión por lote de parámetros.",
+      "Multiplica todas las dimensiones de `pub.shape`.",
+      "El total es `math.prod(pub.shape) * pub.shots`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "import math\n\n\ndef ejecuciones(pub):\n    return math.prod(pub.shape) + pub.shots",
+     "cases": [
+      "cuatro circuitos por 2000 disparos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-colas-costos/estimar-uso",
+     "prompt": "Escribe `estimar_uso(backend, qc, ejecuciones)`: programa `qc` con nivel 0 y ALAP, suma circuito, reset y `rep_delay`, añade 2 segundos y redondea hacia arriba.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Usa `generate_preset_pass_manager(target=backend.target, optimization_level=0, scheduling_method='alap')`.",
+      "Obtén los segundos con `estimate_duration(backend.target, unit='s')`.",
+      "Suma la duración del reset y `backend.default_rep_delay` antes de multiplicar."
+     ],
+     "id": "e3",
+     "starter": "def estimar_uso(backend, qc, ejecuciones):\n    return 0",
+     "cases": [
+      "estima el Bell como la misión"
+     ]
     }
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e1",
      "at": "n1"
     },
     {
-     "do": "item",
-     "i": 1,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n2"
     },
     {
-     "do": "item",
-     "i": 2,
-     "id": "m",
+     "do": "show",
+     "id": "e3",
      "at": "n3"
     }
    ]

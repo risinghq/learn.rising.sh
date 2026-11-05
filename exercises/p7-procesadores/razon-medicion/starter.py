@@ -1,0 +1,2 @@
+def propiedades(backend):
+    return {}

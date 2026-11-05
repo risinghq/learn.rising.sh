@@ -173,33 +173,28 @@
   ]
  },
  "mision": {
-  "dur": 23.64,
+  "dur": 18.0,
   "marks": {
-   "n1": 2.916,
-   "n2": 6.85,
-   "n3": 12.412,
-   "check": 20.366
+   "n1": 4.699,
+   "n2": 8.492,
+   "n3": 12.54
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica."
+    "Ahora guardas, etiquetas y recuperas resultados."
    ],
    [
-    2.916,
-    "Primero guardas un resultado y lo lees de vuelta."
+    4.699,
+    "Serializa un resultado y léelo de vuelta."
    ],
    [
-    6.85,
-    "Después añades una etiqueta a un trabajo sin perder las que ya tenía."
+    8.492,
+    "Añade una etiqueta conservando las anteriores."
    ],
    [
-    12.412,
-    "Y por último escribes dos funciones: una que guarda todos los trabajos de una etiqueta, y otra que los carga."
-   ],
-   [
-    20.366,
-    "Busca la marca verde en cada misión."
+    12.54,
+    "Y por último guarda todos los trabajos que coincidan con unas etiquetas."
    ]
   ]
  },

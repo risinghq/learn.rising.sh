@@ -285,33 +285,28 @@
   ]
  },
  "mision": {
-  "dur": 24.816,
+  "dur": 17.184,
   "marks": {
-   "n1": 2.916,
-   "n2": 8.704,
-   "n3": 13.757,
-   "check": 21.527
+   "n1": 3.482,
+   "n2": 7.232,
+   "n3": 11.577
   },
   "cues": [
    [
     0.107,
-    "Abre el cuaderno de práctica."
+    "Ahora eliges cómo ejecutar una carga."
    ],
    [
-    2.916,
-    "Primero abres un lote, envías tres trabajos y compruebas los conteos."
+    3.482,
+    "Abre un lote y recoge tres resultados."
    ],
    [
-    8.704,
-    "Después partes una lista de veinte circuitos en cinco trabajos."
+    7.232,
+    "Después reparte veinte circuitos en cinco trabajos."
    ],
    [
-    13.757,
-    "Y por último escribes una función que elige el modo, job, batch o session, según la carga y el plan."
-   ],
-   [
-    21.527,
-    "Busca la marca verde en cada misión."
+    11.577,
+    "Y por último decide entre job, batch y session según la carga y el plan."
    ]
   ]
  },
