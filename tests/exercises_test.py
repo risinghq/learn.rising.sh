@@ -569,6 +569,27 @@ WRONG += [
         ("p6-neat/modelo-propio", "p-cx-enorme", "`p_cx` vale 0.9"),
         ("p6-neat/sugerencia", "limites-incluidos", "Con dif = 90 devuelve ['PEA']"),
         ("p6-neat/sugerencia", "redondea", "Con dif = 79.9 devuelve ['PEA']"),
+        ("p7-dinamicos/correccion-dinamica", "condicion-invertida", "`correccion()` devuelve"),
+        ("p7-dinamicos/registro-un-if", "dos-if", "Con bits = 3"),
+        ("p7-dinamicos/valida-limites", "acepta-todo", "registro-grande"),
+        ("p7-fraccionales/compara-cadena", "sin-rzz", "Con n = 4 y pasos = 2"),
+        ("p7-fraccionales/angulo-especial", "ignora-angulo", "theta_zz"),
+        ("p7-fraccionales/cadena-ising", "sin-capas", "Con n = 6 y pasos = 3"),
+        ("p7-temporizacion/leer-lineas", "sin-conversion", "Con texto ="),
+        ("p7-temporizacion/fin-en-nanosegundos", "sin-duracion", "Con registros ="),
+        ("p7-temporizacion/programa-isa", "vacio", "Con n = 1"),
+        ("p7-procesadores/razon-medicion", "sin-familia", "Con backend ="),
+        ("p7-procesadores/mejor-t1", "indice-fijo", "Con backend ="),
+        ("p7-procesadores/mejor-cadena", "primeros-qubits", "Con k = 5"),
+        ("p7-colas-costos/uso-bell", "sin-costo", "Con disparos = 8192"),
+        ("p7-colas-costos/ejecuciones-pub", "solo-shots", "Con shape = (2, 3)"),
+        ("p7-colas-costos/estimar-uso", "sin-ejecuciones", "Con qubits = 5"),
+        ("p7-trabajos/guardar-leer", "sin-conteos", "Con seed = 8"),
+        ("p7-trabajos/anadir-etiqueta", "pierde-anteriores", "Con etiquetas = ['a', 'b']"),
+        ("p7-trabajos/guardar-por-etiqueta", "no-guarda", "Con etiquetas = ['b']"),
+        ("p7-modos/tres-trabajos", "vacio", "Con n_trabajos = 2"),
+        ("p7-modos/partir-circuitos", "un-grupo", "Con circuitos ="),
+        ("p7-modos/elegir-modo", "no-juntar", "Con argumentos ="),
     ]
 ]
 
@@ -842,7 +863,7 @@ MUTANTS = [
     ],
     *[
         m
-        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-", "p6-")))
+        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-", "p6-", "p7-")))
         for m in mutants_of(eid)
     ],
 ]
