@@ -16,6 +16,7 @@ site/sw.js
 app/dist/
 shots/
 __pycache__/
+.mypy_cache/
 .venv/
 node_modules/
 .cloudflare/
