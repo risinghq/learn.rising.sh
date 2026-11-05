@@ -689,6 +689,46 @@ WRONG += [
     ]
 ]
 
+WRONG += [
+    (eid, mutant(eid, name), expected)
+    for eid, name, expected in [
+        ("p8-addons/mejor-capas", "absorbe-siempre", "`mejor_k` devuelve"),
+        (
+            "p8-addons/presupuesto-operador",
+            "sin-presupuesto",
+            "`terminos_con_presupuesto` devuelve",
+        ),
+        ("p8-addons/retropropaga-observable", "valor-roto", "`retropropaga` devuelve"),
+        ("p8-app-functions/maximo-corte", "sin-cuadraticos", "`maximo_corte` devuelve"),
+        (
+            "p8-app-functions/penalizacion-cartera",
+            "penalizacion-ignorada",
+            "`elegir_cartera` devuelve",
+        ),
+        ("p8-app-functions/qubo-ising", "sin-cuadratico", "`qubo_a_ising` devuelve"),
+        ("p8-circuit-functions/barrido-precision", "sin-dispersion", "`dispersiones` devuelve"),
+        (
+            "p8-circuit-functions/precision-alcanzable",
+            "sin-error",
+            "devuelve 0.01",
+        ),
+        (
+            "p8-circuit-functions/tiempo-qpu",
+            "ignora-volumen",
+            "`tiempo_qpu` devuelve",
+        ),
+        ("p8-functions/backend-accesible", "acepta-todos", "`backend_accesible` devuelve"),
+        ("p8-functions/ejecutar-funcion", "valor-roto", "`ejecutar` devuelve"),
+        ("p8-functions/resumen-trabajo", "oculta-error", "`resumen` devuelve"),
+        ("p8-plantillas/dos-backends", "sin-instante-cero", "`comparar_backends` devuelve"),
+        ("p8-plantillas/pasos-en-qpu", "sin-validacion", "devuelve 12"),
+        ("p8-plantillas/validar-pronto", "construye-mal", "`mi_funcion` devuelve"),
+        ("p8-serverless/ejecutar-programa", "sin-profundidades", "`ejecutar` devuelve"),
+        ("p8-serverless/entrada-serializable", "pierde-circuitos", "`argumentos` devuelve"),
+        ("p8-serverless/tareas-paralelas", "sin-tareas", "`profundidades` devuelve"),
+    ]
+]
+
 # Wrong code that fails the hidden cases: (exercise, code). The message of each failing hidden
 # case is compared with the reference solution in test_hidden_messages_*.
 MUTANTS = [
@@ -863,7 +903,7 @@ MUTANTS = [
     ],
     *[
         m
-        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-", "p6-", "p7-")))
+        for eid in sorted(e for e in REAL if e.startswith(("p3-", "p5-", "p6-", "p7-", "p8-")))
         for m in mutants_of(eid)
     ],
 ]
