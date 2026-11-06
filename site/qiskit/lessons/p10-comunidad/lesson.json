@@ -431,46 +431,78 @@
     "10.4",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero escribes la cita de un programa de IBM Quantum con la versión que tienes instalada. [[n2]]Después haces que la cita de un QPU sirva para cualquier backend, con su nombre, su versión y su familia. [[n3]]Y por último armas la sección de citas de un artículo: el agradecimiento, una frase por QPU y la referencia con el año. Usas backends simulados, sin cuenta. Busca la marca verde.",
+   "say": "Ahora te toca. [[n1]]Primero escribes la cita de un programa de IBM Quantum con la versión que tienes instalada. [[n2]]Después haces que la cita de un QPU sirva para cualquier backend, con su nombre, su versión y su familia. [[n3]]Y por último armas la sección de citas de un artículo: el agradecimiento, una frase por QPU y la referencia con el año. Usas backends simulados, sin cuenta. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p10-comunidad.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Cita un programa de IBM Quantum con la versión instalada."
-      },
-      {
-       "level": 2,
-       "text": "Haz que `cita_qpu` use el nombre, la versión y la familia del backend."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `seccion_de_citas(backends, anio)` con agradecimiento, QPU y referencia."
-      }
+     "type": "exercise",
+     "exercise": "p10-comunidad/cita-de-programa",
+     "prompt": "Completa `cita_programa(nombre, paquete, anio)`: devuelve `IBM Quantum (<anio>). <nombre> (Version <versión>) [computer software]. https://quantum.cloud.ibm.com/`, con la versión instalada del paquete `paquete`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "La versión no se escribe a mano: se lee del paquete instalado.",
+      "`version` de `importlib.metadata`, ya importada, devuelve la versión de un paquete por su nombre.",
+      "Arma el texto con una f-string que use `nombre`, `version(paquete)` y `anio`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def cita_programa(nombre, paquete, anio):\n    return \"\"",
+     "cases": [
+      "Qiskit IBM Runtime con la versión instalada"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-comunidad/cita-de-qpu",
+     "prompt": "`cita_qpu(backend)` devuelve `In this paper we used `<nombre>` (v<versión>), an IBM Quantum <familia> processor.`, pero escribe siempre `Heron` como familia, aunque el procesador sea de otra. Corrígela para que use la familia del backend.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Un dato de la frase no sale del backend, sino del texto.",
+      "El código ya lee la familia del procesador en una variable, pero la frase no la usa.",
+      "Cambia la palabra fija de la frase por `{familia}`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "def cita_qpu(backend):\n    familia = backend.processor_type[\"family\"]\n    return f\"In this paper we used `{backend.name}` (v{backend.backend_version}), an IBM Quantum Heron processor.\"",
+     "cases": [
+      "FakeSherbrooke: Eagle"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-comunidad/seccion-de-citas",
+     "prompt": "Escribe `seccion_de_citas(backends, anio)`: devuelve un texto con tres partes, una por línea: `AGRADECIMIENTO`, la cita de cada backend, en el orden recibido, y al final `IBM Quantum. https://quantum.cloud.ibm.com/, <anio>`. Con `cita_qpu` ya resuelta.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "El texto son líneas: junta una lista de líneas con saltos de línea.",
+      "La lista empieza con el agradecimiento, sigue con una cita por backend y termina con la referencia.",
+      "`lineas = [AGRADECIMIENTO]`, luego `+=` una comprensión con `cita_qpu`, y al final `\"\\n\".join(lineas)`."
+     ],
+     "id": "e3",
+     "starter": "AGRADECIMIENTO = (\n    \"We acknowledge the use of IBM Quantum services for this work. The views expressed are those of the \"\n    \"authors, and do not reflect the official policy or position of IBM or the IBM Quantum team.\"\n)\n\n\ndef cita_qpu(backend):\n    familia = backend.processor_type[\"family\"]\n    return f\"In this paper we used `{backend.name}` (v{backend.backend_version}), an IBM Quantum {familia} processor.\"\n\n\ndef seccion_de_citas(backends, anio):\n    return \"\"",
+     "cases": [
+      "agradecimiento, una frase por QPU y la referencia"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

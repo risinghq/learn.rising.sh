@@ -709,46 +709,78 @@
     "1.2",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero reproduces los cuatro pasos con el simulador exacto. [[n2]]Después cambias el observable y apuestas por el valor que saldrá. [[n3]]Y por último escribes el patrón como una función que sirve para cualquier circuito. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.",
+   "say": "Ahora te toca a ti. [[n1]]Primero conviertes un circuito en ISA para el chip de cinco qubits. [[n2]]Después corriges el cálculo del valor esperado, que olvida el layout del circuito ISA. [[n3]]Y por último escribes el patrón entero como una función que sirve para cualquier circuito y cualquier nivel. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p1-patrones.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta los cuatro pasos y comprueba que el circuito es ISA."
-      },
-      {
-       "level": 2,
-       "text": "Añade `YY` al observable y predice $\\langle ZZ\\rangle+\\langle XX\\rangle+\\langle YY\\rangle$."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `patron(qc, obs, backend, nivel)` y pruébala con los niveles 0, 1 y 3."
-      }
+     "type": "exercise",
+     "exercise": "p1-patrones/isa-belem",
+     "prompt": "Escribe `a_isa(qc)`: devuelve `qc` convertido en un circuito ISA para `FakeBelemV2`, con el pass manager preestablecido de nivel 1. Solo puede quedar con las puertas del chip y con las CNOT entre qubits vecinos.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Un circuito ISA usa solo las puertas del chip y su conectividad.",
+      "El pass manager preestablecido recibe el backend y lo conoce por completo.",
+      "Crea el pass manager con `generate_preset_pass_manager(optimization_level=1, backend=...)` y llama a su método `run`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def a_isa(qc):\n    return qc",
+     "cases": [
+      "un Bell de 2 qubits queda en puertas del chip"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-patrones/valor-ideal",
+     "prompt": "`valor_ideal(isa, obs)` debería dar el valor esperado exacto de `obs` en el circuito ISA, pero falla cuando el transpilador mueve los qubits. Encuentra el error y corrígelo.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "El transpilador puede poner el qubit 0 de tu circuito en otro qubit del chip.",
+      "El observable tiene que actuar sobre los qubits donde acabó el circuito, no sobre los virtuales.",
+      "El circuito ISA recuerda esa asignación en su atributo `layout`: pásalo a `apply_layout` del observable."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "from qiskit.primitives import StatevectorEstimator\n\n\ndef valor_ideal(isa, obs):\n    isa_obs = obs.apply_layout(None, num_qubits=isa.num_qubits)\n    resultado = StatevectorEstimator().run([(isa, isa_obs)]).result()\n    return float(resultado[0].data.evs)",
+     "cases": [
+      "el observable sigue al qubit 0 al otro lado del layout"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-patrones/patron",
+     "prompt": "Escribe `patron(qc, obs, nivel)`: usa `FakeBelemV2` y el nivel de optimización `nivel`. Devuelve una tupla `(isa, valor)`: el circuito ISA de `qc` y el valor esperado exacto de `obs`, con `StatevectorEstimator`, en ese circuito.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Son los cuatro pasos de la lección en una sola función: mapear, optimizar, ejecutar y posprocesar.",
+      "Transpila primero, adapta el observable al layout y ejecuta después.",
+      "El Estimator recibe una lista con un PUB `(isa, observable_adaptado)`; el valor sale de `resultado[0].data.evs`."
+     ],
+     "id": "e3",
+     "starter": "def patron(qc, obs, nivel):\n    return qc, 0.0",
+     "cases": [
+      "GHZ de 3 qubits con nivel = 1"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

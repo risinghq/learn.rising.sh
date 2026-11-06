@@ -806,20 +806,8 @@
     "1.4",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. [[n1]]Primero reproduces el estado de Bell. [[n2]]Después lo modificas para que los qubits salgan siempre distintos. [[n3]]Y por último creas una función que prepara un estado GHZ de cualquier tamaño. [[check]]Escribe tu código en el editor y pulsa Comprobar: los casos se corren en esta misma página.",
+   "say": "Ahora te toca a ti. [[n1]]Primero modificas el estado de Bell para que los qubits salgan siempre distintos. [[n2]]Después creas una función que prepara un estado GHZ de cualquier tamaño. [[n3]]Y por último corriges un Bell que tiene la CNOT al revés. [[check]]Escribe tu código en el editor y pulsa Comprobar: los casos se corren en esta misma página.",
    "scene": [
-    {
-     "type": "mission",
-     "notebook": "practica/p1-quickstart.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta el estado de Bell y lee sus conteos."
-      }
-     ],
-     "id": "m",
-     "stagger": true
-    },
     {
      "type": "exercise",
      "exercise": "p1-quickstart/bell-distinto",
@@ -882,25 +870,19 @@
    ],
    "actions": [
     {
-     "do": "item",
-     "i": 0,
-     "id": "m",
+     "do": "show",
+     "id": "e2",
      "at": "n1"
     },
     {
      "do": "show",
-     "id": "e2",
+     "id": "e3",
      "at": "n2"
     },
     {
      "do": "show",
-     "id": "e3",
-     "at": "n3"
-    },
-    {
-     "do": "show",
      "id": "e4",
-     "at": "check"
+     "at": "n3"
     }
    ]
   },

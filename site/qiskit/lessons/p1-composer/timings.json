@@ -326,12 +326,12 @@
   ]
  },
  "mision": {
-  "dur": 36.72,
+  "dur": 36.336,
   "marks": {
-   "n1": 13.644,
-   "n2": 17.762,
-   "n3": 26.48,
-   "check": 30.769
+   "n1": 10.813,
+   "n2": 14.861,
+   "n3": 23.579,
+   "check": 30.146
   },
   "cues": [
    [
@@ -340,27 +340,23 @@
    ],
    [
     2.449,
-    "Composer corre en la web, así que el cuaderno de práctica usa el mismo OpenQASM, ejecutado en tu equipo."
+    "Composer corre en la web, así que aquí escribes el mismo OpenQASM como texto y se ejecuta en esta página."
    ],
    [
-    10.799,
-    "Ábrelo con el comando de abajo."
+    10.813,
+    "Primero escribes un programa con una puerta propia."
    ],
    [
-    13.644,
-    "Primero ejecutas el programa con una puerta propia."
-   ],
-   [
-    17.762,
+    14.861,
     "Después cambias una CZ por una fase controlada y compruebas que las probabilidades no se mueven, pero la amplitud sí."
    ],
    [
-    26.48,
-    "Y por último defines tu propia puerta GHZ."
+    23.579,
+    "Y por último defines tu propia puerta GHZ, para cualquier número de qubits."
    ],
    [
-    30.769,
-    "Cada misión tiene una comprobación que se actualiza sola: busca la marca verde."
+    30.146,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

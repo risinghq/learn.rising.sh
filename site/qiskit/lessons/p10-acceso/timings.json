@@ -172,11 +172,12 @@
   ]
  },
  "mision": {
-  "dur": 36.552,
+  "dur": 33.072,
   "marks": {
-   "n1": 7.062,
-   "n2": 15.611,
-   "n3": 23.636
+   "n1": 2.137,
+   "n2": 9.214,
+   "n3": 17.238,
+   "check": 26.877
   },
   "cues": [
    [
@@ -185,23 +186,19 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
+    "Primero calculas qué llamadas de la API permite un rol, y confirmas si puede borrar trabajos."
    ],
    [
-    7.062,
-    "Primero compruebas qué llamadas de la API permite el rol de trabajar con instancias, y confirmas si puede borrar trabajos."
-   ],
-   [
-    15.611,
+    9.214,
     "Después derivas un rol lector a partir del escritor, quitando las acciones de cancelar, borrar y actualizar."
    ],
    [
-    23.636,
+    17.238,
     "Y por último escribes un detector de valores que son subcadenas de otros, para que una regla dinámica no dé más acceso del que pretendes."
    ],
    [
-    33.274,
-    "Busca la marca verde en cada misión."
+    26.877,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

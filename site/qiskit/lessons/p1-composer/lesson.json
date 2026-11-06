@@ -769,46 +769,78 @@
     "1.5",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Composer corre en la web, así que el cuaderno de práctica usa el mismo OpenQASM, ejecutado en tu equipo. Ábrelo con el comando de abajo. [[n1]]Primero ejecutas el programa con una puerta propia. [[n2]]Después cambias una CZ por una fase controlada y compruebas que las probabilidades no se mueven, pero la amplitud sí. [[n3]]Y por último defines tu propia puerta GHZ. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.",
+   "say": "Ahora te toca a ti. Composer corre en la web, así que aquí escribes el mismo OpenQASM como texto y se ejecuta en esta página. [[n1]]Primero escribes un programa con una puerta propia. [[n2]]Después cambias una CZ por una fase controlada y compruebas que las probabilidades no se mueven, pero la amplitud sí. [[n3]]Y por último defines tu propia puerta GHZ, para cualquier número de qubits. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p1-composer.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Ejecuta el OpenQASM con la puerta propia `bell` y lee los conteos."
-      },
-      {
-       "level": 2,
-       "text": "Cambia la `cz` por `cu1(pi/2)`: la amplitud de $|11\\rangle$ pasa a $i/2$ y las probabilidades no cambian."
-      },
-      {
-       "level": 3,
-       "text": "Define en OpenQASM una puerta `ghz a, b, c` para tres qubits."
-      }
+     "type": "exercise",
+     "exercise": "p1-composer/programa-bell",
+     "prompt": "Completa `programa_bell()`: devuelve un programa OpenQASM 2.0 que define la puerta `bell a, b` con una Hadamard y una CNOT, la usa sobre los dos qubits de `q` y los mide en `c`. La puerta debe quedar como una sola instrucción del circuito.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Una puerta propia se define con `gate nombre a, b { ... }` antes de usarla.",
+      "El cuerpo va entre las llaves, con una instrucción por puerta y un punto y coma al final de cada una.",
+      "Dentro del cuerpo, los qubits son los argumentos de la puerta: `a` y `b`, no `q[0]` ni `q[1]`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "def programa_bell():\n    return \"\"\"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\ngate bell a, b { }\nbell q[0], q[1];\nmeasure q -> c;\n\"\"\"",
+     "cases": [
+      "el programa deja solo 00 y 11 con probabilidad 1/2"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-composer/programa-fase",
+     "prompt": "`programa_fase(angulo)` devuelve un programa OpenQASM con una Hadamard en cada qubit y una `cz`. Corrígelo: cambia la `cz` por una fase controlada `cu1` del ángulo `angulo`, para que la amplitud de $|11\\rangle$ sea $e^{i\\,\\text{angulo}}/2$ y las demás no cambien.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "La `cz` es la fase controlada de media vuelta, $\\pi$. Hace falta una que acepte cualquier ángulo.",
+      "En OpenQASM 2, la fase controlada se llama `cu1` y lleva el ángulo entre paréntesis.",
+      "Como el programa es un texto, el ángulo entra con una f-string: `cu1({angulo!r}) q[0], q[1];`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "def programa_fase(angulo):\n    return \"\"\"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\nh q[0];\nh q[1];\ncz q[0], q[1];\n\"\"\"",
+     "cases": [
+      "con angulo = pi/2 la amplitud de 11 es i/2"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-composer/programa-ghz",
+     "prompt": "Escribe `programa_ghz(n)`: devuelve un programa OpenQASM 2.0 con un registro `q` de `n` qubits y una puerta `ghz` con `n` argumentos, definida con una Hadamard y `n - 1` CNOT, que se usa sobre todo el registro. Se espera el estado $(|0\\ldots0\\rangle+|1\\ldots1\\rangle)/\\sqrt2$ y la puerta como una sola instrucción.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "El programa es un texto: los nombres de los argumentos y las CNOT salen de un bucle sobre `range(n)`.",
+      "Usa un solo qubit como control de todas las CNOT, y une las piezas con `\", \".join` y `\" \".join`.",
+      "Define la puerta con `gate ghz q0, q1, ... { h q0; cx q0, q1; ... }` y úsala con `ghz q[0], q[1], ...;`."
+     ],
+     "id": "e3",
+     "starter": "def programa_ghz(n):\n    qubits = \", \".join(f\"q{k}\" for k in range(n))\n    return f\"\"\"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[{n}];\ngate ghz {qubits} {{ }}\nghz {\", \".join(f\"q[{k}]\" for k in range(n))};\n\"\"\"",
+     "cases": [
+      "con n = 3 quedan solo 000 y 111"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

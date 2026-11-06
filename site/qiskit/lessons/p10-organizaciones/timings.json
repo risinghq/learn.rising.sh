@@ -225,11 +225,13 @@
   ]
  },
  "mision": {
-  "dur": 40.152,
+  "dur": 41.304,
   "marks": {
-   "n1": 7.062,
-   "n2": 17.196,
-   "n3": 27.018
+   "n1": 2.137,
+   "n2": 10.756,
+   "n3": 17.394,
+   "n4": 26.976,
+   "check": 35.1
   },
   "cues": [
    [
@@ -238,23 +240,23 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
+    "Primero armas la dirección para leer una instancia con la API de gestión: el CRN va codificado en la ruta."
    ],
    [
-    7.062,
-    "Primero lees una instancia con la API de gestión: el CRN va codificado en la ruta, y la respuesta trae los campos cuánticos."
+    10.756,
+    "Después resuelves qué backends puede usar una instancia, y qué significa la lista con ANY."
    ],
    [
-    17.196,
-    "Después arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar."
+    17.394,
+    "Luego arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar."
    ],
    [
-    27.018,
+    26.976,
     "Y por último escribes qué pasa con los trabajos al llegar a un límite, con y sin límite, sin cancelar ninguno."
    ],
    [
-    35.142,
-    "Las comprobaciones se actualizan solas: busca la marca verde."
+    35.1,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

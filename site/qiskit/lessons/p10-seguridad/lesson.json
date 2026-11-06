@@ -478,46 +478,78 @@
     "10.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero lees una auditoría: conviertes eventos de actividad en los permisos que se ejercieron. [[n2]]Después amplías un detector de claves de API escritas en el código, sin marcar las que vienen del entorno. [[n3]]Y por último escribes qué hacer ante una caída regional, según tu plan, tus qubits y la residencia de tus datos. Todo con datos de ejemplo, sin cuenta. Busca la marca verde.",
+   "say": "Ahora te toca. [[n1]]Primero lees una auditoría: conviertes eventos de actividad en los permisos que se ejercieron. [[n2]]Después amplías un detector de claves de API escritas en el código, sin marcar las que vienen del entorno. [[n3]]Y por último escribes qué hacer ante una caída regional, según tu plan, tus qubits y la residencia de tus datos. Todo con datos de ejemplo, sin cuenta. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p10-seguridad.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Cuenta qué permisos ejercen los eventos de una auditoría."
-      },
-      {
-       "level": 2,
-       "text": "Amplía el patrón que detecta claves de API en el código."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `ante_desastre`: esperar o crear una instancia en la otra región."
-      }
+     "type": "exercise",
+     "exercise": "p10-seguridad/permisos-de-la-auditoria",
+     "prompt": "Completa `permisos_ejercidos(eventos)`: cada evento es una llamada de la API como `POST /v1/jobs`. Devuelve un diccionario con cuántas veces se ejerció cada permiso según `REQUIERE`. Los eventos que `REQUIERE` no conoce se ignoran.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "`REQUIERE` traduce cada llamada en el permiso que necesita.",
+      "Traduce solo los eventos que están en `REQUIERE` y cuenta los permisos resultantes.",
+      "`collections.Counter` cuenta elementos de un iterable; pásalo a `dict` al devolverlo."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "P = \"quantum-computing.\"\nREQUIERE = {\n    \"POST /v1/jobs\": P + \"job.create\",\n    \"POST /v1/jobs/{id}/cancel\": P + \"job.cancel\",\n    \"GET /v1/backends\": P + \"device.read\",\n    \"GET /v1/instances/usage\": P + \"instance-usage.read\",\n}\n\n\ndef permisos_ejercidos(eventos):\n    return {}",
+     "cases": [
+      "siete eventos de la auditoría"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-seguridad/claves-en-el-codigo",
+     "prompt": "`con_claves(archivos)` recibe un diccionario de nombre a texto y devuelve los nombres ordenados que contienen una clave escrita en el código, pero su patrón solo reconoce `apikey` con comillas dobles. Corrígelo: debe reconocer también `api_key` y `token`, con comillas simples o dobles, y valores de 20 caracteres o más. Una clave leída del entorno o un valor corto no cuentan.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "Hay que ampliar tres cosas del patrón: el nombre, las comillas y el valor mínimo.",
+      "Un grupo sin captura, como `(?:api_?key|token)`, admite varios nombres. Las comillas de apertura y cierre deben coincidir.",
+      "Captura la comilla de apertura con `([\"'])` y exige la misma al cerrar con `\\1`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "import re\n\npatron = re.compile(r'apikey\\s*=\\s*\"([^\"]{20,})\"')\n\n\ndef con_claves(archivos):\n    return sorted(nombre for nombre, texto in archivos.items() if patron.search(texto))",
+     "cases": [
+      "detecta `token` entre comillas dobles y `apikey`"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-seguridad/ante-desastre",
+     "prompt": "Escribe `ante_desastre(region_caida, plan, necesita_qubits_de_la_region, residencia_de_datos)`: devuelve `\"esperar\"` si necesitas los qubits de esa región, si tus datos deben quedarse en ella o si el plan es `Open`. Si no, devuelve `\"instancia en <región>\"` con la otra región: `eu-de` si cae `us-east` y `us-east` en otro caso.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Primero decide si esperar; solo si no, elige una región.",
+      "Tres condiciones llevan a esperar: los qubits, la residencia de datos y el plan Open.",
+      "La otra región depende solo de `region_caida`; el texto se arma con una f-string."
+     ],
+     "id": "e3",
+     "starter": "def ante_desastre(region_caida, plan, necesita_qubits_de_la_region, residencia_de_datos):\n    return \"\"",
+     "cases": [
+      "cae us-east con un plan de pago y sin requisitos"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

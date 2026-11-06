@@ -386,12 +386,12 @@
   ]
  },
  "mision": {
-  "dur": 37.872,
+  "dur": 35.28,
   "marks": {
-   "n1": 7.374,
-   "n2": 13.629,
-   "n3": 19.39,
-   "check": 31.929
+   "n1": 2.449,
+   "n2": 10.813,
+   "n3": 19.177,
+   "check": 29.099
   },
   "cues": [
    [
@@ -400,27 +400,23 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
+    "Primero corriges un archivo settings punto conf para que Qiskit dibuje con matplotlib y transpile sin optimizar."
    ],
    [
-    7.374,
-    "Primero compruebas tu instalación: la versión de Qiskit y el intérprete de Python."
+    10.813,
+    "Después lees un cuaderno de Jupyter, que por dentro es un archivo JSON, y sacas el código de sus celdas."
    ],
    [
-    13.629,
-    "Después editas un archivo settings punto conf y compruebas que Qiskit lo lee."
+    19.177,
+    "Y por último construyes un cuaderno de Jupyter desde una lista de celdas."
    ],
    [
-    19.39,
-    "Y por último escribes dos funciones que convierten cuadernos entre Jupyter y marimo, con marimo convert."
+    24.81,
+    "Así podrás abrir en Jupyter las guías de IBM."
    ],
    [
-    26.749,
-    "Así podrás usar las guías de IBM, que están en Jupyter."
-   ],
-   [
-    31.929,
-    "Cada misión tiene una comprobación que se actualiza sola: busca la marca verde."
+    29.099,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

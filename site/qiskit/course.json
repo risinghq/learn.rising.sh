@@ -9,42 +9,21 @@
      "section": "1.1",
      "title": "Qué es Qiskit",
      "summary": "El SDK, el servicio de cómputo de IBM, el ecosistema, los addons, Serverless y Functions: el mapa de todo lo que vas a aprender.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p1-que-es-qiskit.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p1-patrones",
      "section": "1.2",
      "title": "El flujo de trabajo: patrones de Qiskit",
      "summary": "Mapear, optimizar, ejecutar y posprocesar: los cuatro pasos de todo programa cuántico, con un ejemplo completo.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/p1-patrones.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p1-instalar",
      "section": "1.3",
      "title": "Instalar y configurar Qiskit",
      "summary": "Entornos virtuales, pip, Jupyter, sistemas soportados, instalación desde el código fuente, configuración local y entornos en línea.",
-     "minutes": 11,
-     "missions": [
-      {
-       "notebook": "practica/p1-instalar.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 11
     },
     {
      "id": "p1-quickstart",
@@ -53,11 +32,6 @@
      "summary": "Construir, simular y graficar un estado entrelazado en pocas líneas, sin cuenta ni clave.",
      "minutes": 10,
      "missions": [
-      {
-       "notebook": "practica/p1-quickstart.py",
-       "title": "Tu turno",
-       "tasks": 1
-      },
       {
        "notebook": "practica/proyecto/hito1.py",
        "title": "Proyecto Ising · Hito I",
@@ -70,14 +44,7 @@
      "section": "1.5",
      "title": "IBM Quantum Composer",
      "summary": "La herramienta gráfica de IBM: construir con arrastrar y soltar o con OpenQASM, inspeccionar paso a paso, ejecutar en QPUs y leer sus visualizaciones.",
-     "minutes": 11,
-     "missions": [
-      {
-       "notebook": "practica/p1-composer.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 11
     },
     {
      "id": "p1-cierre",
@@ -600,42 +567,21 @@
      "section": "10.1",
      "title": "Organizaciones e instancias",
      "summary": "Planificar IBM Quantum Platform para una organización: instancias, planes, regiones, asignaciones y límites, la API de gestión y los registros de plataforma.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/p10-organizaciones.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     },
     {
      "id": "p10-acceso",
      "section": "10.2",
      "title": "Cuentas, grupos de acceso y usuarios",
      "summary": "La estructura de una cuenta de IBM Cloud, los roles de plataforma y de servicio, los grupos de acceso, los roles personalizados y la gestión de usuarios.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p10-acceso.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p10-seguridad",
      "section": "10.3",
      "title": "Seguridad y cumplimiento",
      "summary": "Protección y retención de datos, responsabilidades compartidas, conexiones privadas, restricciones por contexto, alta disponibilidad, auditoría y políticas de seguridad.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/p10-seguridad.py",
-       "title": "Tu turno",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     },
     {
      "id": "p10-comunidad",
@@ -644,11 +590,6 @@
      "summary": "Dónde pedir ayuda, las preguntas frecuentes, cómo citar Qiskit y los QPUs, y cómo participar en la comunidad de código abierto.",
      "minutes": 8,
      "missions": [
-      {
-       "notebook": "practica/p10-comunidad.py",
-       "title": "Tu turno",
-       "tasks": 3
-      },
       {
        "notebook": "practica/proyecto/hito10.py",
        "title": "Proyecto Ising · Hito X",

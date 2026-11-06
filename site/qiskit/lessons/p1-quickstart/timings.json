@@ -290,12 +290,12 @@
   ]
  },
  "mision": {
-  "dur": 23.904,
+  "dur": 26.04,
   "marks": {
    "n1": 2.449,
-   "n2": 5.675,
-   "n3": 10.756,
-   "check": 17.026
+   "n2": 8.308,
+   "n3": 14.295,
+   "check": 19.149
   },
   "cues": [
    [
@@ -304,18 +304,18 @@
    ],
    [
     2.449,
-    "Primero reproduces el estado de Bell."
+    "Primero modificas el estado de Bell para que los qubits salgan siempre distintos."
    ],
    [
-    5.675,
-    "Después lo modificas para que los qubits salgan siempre distintos."
+    8.308,
+    "Después creas una función que prepara un estado GHZ de cualquier tamaño."
    ],
    [
-    10.756,
-    "Y por último creas una función que prepara un estado GHZ de cualquier tamaño."
+    14.295,
+    "Y por último corriges un Bell que tiene la CNOT al revés."
    ],
    [
-    17.026,
+    19.149,
     "Escribe tu código en el editor y pulsa Comprobar: los casos se corren en esta misma página."
    ]
   ]

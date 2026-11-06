@@ -275,12 +275,12 @@
   ]
  },
  "mision": {
-  "dur": 28.824,
+  "dur": 28.392,
   "marks": {
-   "n1": 7.374,
-   "n2": 12.044,
-   "n3": 16.927,
-   "check": 22.886
+   "n1": 2.449,
+   "n2": 7.784,
+   "n3": 14.762,
+   "check": 22.206
   },
   "cues": [
    [
@@ -289,23 +289,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
+    "Primero conviertes un circuito en ISA para el chip de cinco qubits."
    ],
    [
-    7.374,
-    "Primero reproduces los cuatro pasos con el simulador exacto."
+    7.784,
+    "Después corriges el cálculo del valor esperado, que olvida el layout del circuito ISA."
    ],
    [
-    12.044,
-    "Después cambias el observable y apuestas por el valor que saldrá."
+    14.762,
+    "Y por último escribes el patrón entero como una función que sirve para cualquier circuito y cualquier nivel."
    ],
    [
-    16.927,
-    "Y por último escribes el patrón como una función que sirve para cualquier circuito."
-   ],
-   [
-    22.886,
-    "Cada misión tiene una comprobación que se actualiza sola: busca la marca verde."
+    22.206,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

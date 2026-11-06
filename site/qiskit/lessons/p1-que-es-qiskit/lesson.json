@@ -613,46 +613,79 @@
     "1.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero reproduces un estado de Bell pasando por cuatro módulos del SDK. [[n2]]Después cambias un observable y calculas su valor exacto, sin simular mediciones. [[n3]]Y por último escribes tu propia función de valor esperado, y la comparas con la primitiva del SDK. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.",
+   "say": "Ahora te toca a ti. [[n1]]Primero pasas un estado de Bell por tres módulos del SDK. [[n2]]Después escribes un observable y calculas su valor exacto, sin simular mediciones. [[n3]]Y por último escribes tu propia función de valor esperado, que se comprueba contra la primitiva del SDK. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p1-que-es-qiskit.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Pasa un estado de Bell por `circuit`, `quantum_info`, `transpiler` y `primitives`."
-      },
-      {
-       "level": 2,
-       "text": "Cambia el observable para medir solo la $Z$ del qubit 0 y comprueba su valor exacto."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `valor_esperado(qc, obs)` con `quantum_info` y compárala con `StatevectorEstimator`."
-      }
+     "type": "exercise",
+     "exercise": "p1-que-es-qiskit/bell-por-modulos",
+     "prompt": "Escribe tres funciones. `bell()` devuelve el circuito de Bell de dos qubits, construido con `HGate` y `CXGate` de `qiskit.circuit.library` y `append`. `probabilidades(qc)` devuelve el diccionario de probabilidades del estado de `qc`, con `Statevector`. `a_base(qc)` devuelve `qc` transpilado a las puertas `rz`, `sx` y `cz`, con los qubits en línea (`CouplingMap.from_line`).",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Cada módulo hace una cosa: `circuit` construye, `quantum_info` calcula el estado, `transpiler` adapta el circuito.",
+      "`generate_preset_pass_manager` recibe `basis_gates` y `coupling_map`, y su método `run` transpila el circuito.",
+      "`Statevector(qc)` es el estado del circuito, y tiene un método que devuelve sus probabilidades como diccionario; `append` recibe la puerta y la lista de qubits."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "from qiskit import QuantumCircuit\n\n\ndef bell():\n    return QuantumCircuit(2)\n\n\ndef probabilidades(qc):\n    return {}\n\n\ndef a_base(qc):\n    return qc",
+     "cases": [
+      "`bell()` da probabilidad 1/2 a 00 y a 11",
+      "`probabilidades` de un GHZ de 3 qubits",
+      "`a_base` deja solo rz, sx y cz"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-que-es-qiskit/observable-z0",
+     "prompt": "Escribe `z_del_qubit_0(n)`: devuelve el observable $Z$ del qubit 0 en un sistema de `n` qubits, como `SparsePauliOp`. Recuerda que en una etiqueta el qubit 0 es el carácter de la derecha.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Una etiqueta de Pauli lleva un carácter por qubit: `Z` donde actúa y `I` donde no.",
+      "El qubit 0 es el último carácter de la etiqueta.",
+      "Une `\"I\" * (n - 1)` con `\"Z\"` y pásalo a `SparsePauliOp`."
+     ],
+     "id": "e2",
+     "starter": "from qiskit.quantum_info import SparsePauliOp\n\n\ndef z_del_qubit_0(n):\n    return SparsePauliOp(\"Z\" * n)",
+     "cases": [
+      "Z del qubit 0 en dos qubits"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-que-es-qiskit/valor-esperado",
+     "prompt": "Escribe `valor_esperado(qc, obs)`: `qc` es un circuito sin mediciones y `obs` un `SparsePauliOp`. Devuelve el valor esperado exacto de `obs` en el estado de `qc`, como un número real, usando solo `quantum_info`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "El valor esperado exacto no necesita muestras: sale del vector de estado.",
+      "`Statevector` sabe calcular el valor esperado de un operador.",
+      "El valor esperado sale como número complejo, aunque su parte imaginaria sea cero: devuelve solo la parte real, como `float`."
+     ],
+     "id": "e3",
+     "starter": "def valor_esperado(qc, obs):\n    return 0.0",
+     "cases": [
+      "Bell con ZZ, XX y YY"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

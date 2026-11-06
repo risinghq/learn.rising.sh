@@ -4,6 +4,7 @@ from lib import (
     A,
     Box,
     Code,
+    Exercise,
     Flow,
     L,
     M,
@@ -276,27 +277,64 @@ organizaciones = lesson(
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero lees una instancia con la API de gestión: el CRN va codificado en la ruta, y la respuesta trae los campos cuánticos. [[n2]]Después arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar.
-             [[n3]]Y por último escribes qué pasa con los trabajos al llegar a un límite, con y sin límite, sin cancelar ninguno. Las comprobaciones se actualizan solas: busca la marca verde.""",
+            """Ahora te toca. [[n1]]Primero armas la dirección para leer una instancia con la API de gestión: el CRN va codificado en la ruta. [[n2]]Después resuelves qué backends puede usar una instancia, y qué significa la lista con ANY.
+             [[n3]]Luego arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar. [[n4]]Y por último escribes qué pasa con los trabajos al llegar a un límite, con y sin límite, sin cancelar ninguno. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p10-organizaciones.py",
-                    [
-                        (1, "Codifica el CRN de una instancia y lee los campos de `extensions`."),
-                        (
-                            2,
-                            "Corrige `restante` para que solo cuente la ventana móvil de 28 días del plan Open.",
-                        ),
-                        (3, "Escribe `tras_alcanzar`: qué pasa con cada trabajo con y sin límite."),
+                Exercise(
+                    "p10-organizaciones/url-de-instancia",
+                    "Completa `url_de_instancia(crn)`: devuelve la dirección `BASE` seguida del CRN codificado para ir en una ruta. El CRN trae dos puntos y barras, y ninguno debe quedar sin codificar.",
+                    level=1,
+                    id="e1",
+                    needs="python",
+                    hints=[
+                        "El CRN es un solo segmento de la ruta, así que hasta sus barras se codifican.",
+                        "`urllib.parse` ya trae una función que codifica texto para una URL.",
+                        '`urllib.parse.quote(texto, safe="")` codifica también las barras.',
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p10-organizaciones/backends-permitidos",
+                    'Escribe `backends_permitidos(backends)`: si la instancia tiene la lista `["ANY"]`, permite todos los backends de `BACKENDS_DEL_PLAN`; en cualquier otro caso, permite justo los que tiene la lista, incluida una lista vacía, que no permite ninguno.',
+                    level=1,
+                    id="e2",
+                    needs="python",
+                    hints=[
+                        "`ANY` no es un backend: es una señal de que se permiten todos los del plan.",
+                        'Hay dos casos: la lista es exactamente `["ANY"]`, o es otra cosa.',
+                        'Compara la lista entera con `["ANY"]`, no la pertenencia, para que una lista vacía siga vacía.',
+                    ],
+                ),
+                Exercise(
+                    "p10-organizaciones/restante-en-ventana",
+                    "`restante(usos, hoy, tope=600)` resta todo el consumo del tope. Corrígelo: solo cuenta los usos de la ventana móvil de 28 días que termina `hoy`. Cada uso es una pareja `[fecha, segundos]` con la fecha en formato ISO.",
+                    level=2,
+                    kind="fix",
+                    id="e3",
+                    needs="python",
+                    hints=[
+                        "Un uso de hace mucho tiempo ya no debe restarse.",
+                        "Calcula cuántos días pasaron entre `hoy` y la fecha de cada uso, y suma solo los de la ventana.",
+                        "La ventana son 28 días: hace 27 días todavía cuenta y hace 28 ya no.",
+                    ],
+                ),
+                Exercise(
+                    "p10-organizaciones/tras-alcanzar",
+                    "Escribe `tras_alcanzar(trabajos, es_limite)`: devuelve, en el mismo orden, un diccionario `id`, `estado` y `prioridad` por trabajo. Un trabajo en ejecución sigue `ejecutando` con prioridad `normal`. Los pendientes pasan a `en espera de tiempo` con prioridad `normal` si hay límite, o a `en cola` con prioridad `baja` si solo hay asignación. Nunca se cancela ninguno.",
+                    level=3,
+                    id="e4",
+                    needs="python",
+                    hints=[
+                        "Recorre los trabajos y construye un diccionario nuevo por cada uno.",
+                        "Primero separa los que están ejecutando; con ellos no pasa nada. Para el resto decide con `es_limite`.",
+                        "Cada resultado lleva tres claves: `id`, `estado` y `prioridad`, y la lista conserva el orden de entrada.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
+                A("item", "e4", at="n4", i=3),
             ],
         ),
         beat(
@@ -585,27 +623,51 @@ quantum-computing.job.delete        # opcional""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero compruebas qué llamadas de la API permite el rol de trabajar con instancias, y confirmas si puede borrar trabajos. [[n2]]Después derivas un rol lector a partir del escritor, quitando las acciones de cancelar, borrar y actualizar.
-             [[n3]]Y por último escribes un detector de valores que son subcadenas de otros, para que una regla dinámica no dé más acceso del que pretendes. Busca la marca verde en cada misión.""",
+            """Ahora te toca. [[n1]]Primero calculas qué llamadas de la API permite un rol, y confirmas si puede borrar trabajos. [[n2]]Después derivas un rol lector a partir del escritor, quitando las acciones de cancelar, borrar y actualizar.
+             [[n3]]Y por último escribes un detector de valores que son subcadenas de otros, para que una regla dinámica no dé más acceso del que pretendes. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p10-acceso.py",
-                    [
-                        (1, "Lista qué llamadas de la API permite un rol personalizado."),
-                        (2, "Deriva `lector` del escritor sin tocar las demás acciones."),
-                        (
-                            3,
-                            "Escribe `conflictos(valores)` para detectar subcadenas como `ml` en `chemlab`.",
-                        ),
+                Exercise(
+                    "p10-acceso/llamadas-del-rol",
+                    "Completa `llamadas_permitidas(rol)`: recibe la lista de permisos de un rol y devuelve, en el orden de `ENDPOINTS`, las llamadas de la API cuyo permiso está en el rol.",
+                    level=1,
+                    id="e1",
+                    needs="python",
+                    hints=[
+                        "`ENDPOINTS` guarda parejas de llamada y permiso que ese permiso abre.",
+                        "Recorre `ENDPOINTS` y quédate con las llamadas cuyo permiso aparece en `rol`.",
+                        "Una lista por comprensión con `for llamada, permiso in ENDPOINTS` y la condición `permiso in rol`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p10-acceso/rol-lector",
+                    "`rol_lector(escritor)` deriva el rol lector del escritor: quita las acciones que terminan en `cancel`, `delete` o `update`, y devuelve los permisos que quedan, sin duplicados y ordenados. Pero deja pasar un permiso que no debería. Corrígelo.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    needs="python",
+                    hints=[
+                        "El rol lector debe quedarse sin tres acciones. Compara las que quita el código con las del enunciado.",
+                        "Las acciones que se quitan viven en una tupla; mira cuáles hay en ella.",
+                        "Falta una acción en esa tupla.",
+                    ],
+                ),
+                Exercise(
+                    "p10-acceso/conflictos",
+                    "Escribe `conflictos(valores)`: devuelve la lista ordenada de parejas `(corto, largo)` donde un valor está contenido en otro distinto. Distingue mayúsculas y minúsculas, y dos valores iguales no son un conflicto.",
+                    level=3,
+                    id="e3",
+                    needs="python",
+                    hints=[
+                        "Compara cada valor con cada otro valor.",
+                        "Una pareja cuenta si los dos son distintos y el corto está en el largo con `in`.",
+                        "Usa un conjunto de parejas para no repetir, y ordénalo al final con `sorted`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -872,27 +934,51 @@ seguridad = lesson(
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero lees una auditoría: conviertes eventos de actividad en los permisos que se ejercieron. [[n2]]Después amplías un detector de claves de API escritas en el código, sin marcar las que vienen del entorno.
-             [[n3]]Y por último escribes qué hacer ante una caída regional, según tu plan, tus qubits y la residencia de tus datos. Todo con datos de ejemplo, sin cuenta. Busca la marca verde.""",
+            """Ahora te toca. [[n1]]Primero lees una auditoría: conviertes eventos de actividad en los permisos que se ejercieron. [[n2]]Después amplías un detector de claves de API escritas en el código, sin marcar las que vienen del entorno.
+             [[n3]]Y por último escribes qué hacer ante una caída regional, según tu plan, tus qubits y la residencia de tus datos. Todo con datos de ejemplo, sin cuenta. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p10-seguridad.py",
-                    [
-                        (1, "Cuenta qué permisos ejercen los eventos de una auditoría."),
-                        (2, "Amplía el patrón que detecta claves de API en el código."),
-                        (
-                            3,
-                            "Escribe `ante_desastre`: esperar o crear una instancia en la otra región.",
-                        ),
+                Exercise(
+                    "p10-seguridad/permisos-de-la-auditoria",
+                    "Completa `permisos_ejercidos(eventos)`: cada evento es una llamada de la API como `POST /v1/jobs`. Devuelve un diccionario con cuántas veces se ejerció cada permiso según `REQUIERE`. Los eventos que `REQUIERE` no conoce se ignoran.",
+                    level=1,
+                    id="e1",
+                    needs="python",
+                    hints=[
+                        "`REQUIERE` traduce cada llamada en el permiso que necesita.",
+                        "Traduce solo los eventos que están en `REQUIERE` y cuenta los permisos resultantes.",
+                        "`collections.Counter` cuenta elementos de un iterable; pásalo a `dict` al devolverlo.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p10-seguridad/claves-en-el-codigo",
+                    "`con_claves(archivos)` recibe un diccionario de nombre a texto y devuelve los nombres ordenados que contienen una clave escrita en el código, pero su patrón solo reconoce `apikey` con comillas dobles. Corrígelo: debe reconocer también `api_key` y `token`, con comillas simples o dobles, y valores de 20 caracteres o más. Una clave leída del entorno o un valor corto no cuentan.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    needs="python",
+                    hints=[
+                        "Hay que ampliar tres cosas del patrón: el nombre, las comillas y el valor mínimo.",
+                        "Un grupo sin captura, como `(?:api_?key|token)`, admite varios nombres. Las comillas de apertura y cierre deben coincidir.",
+                        "Captura la comilla de apertura con `([\"'])` y exige la misma al cerrar con `\\1`.",
+                    ],
+                ),
+                Exercise(
+                    "p10-seguridad/ante-desastre",
+                    'Escribe `ante_desastre(region_caida, plan, necesita_qubits_de_la_region, residencia_de_datos)`: devuelve `"esperar"` si necesitas los qubits de esa región, si tus datos deben quedarse en ella o si el plan es `Open`. Si no, devuelve `"instancia en <región>"` con la otra región: `eu-de` si cae `us-east` y `us-east` en otro caso.',
+                    level=3,
+                    id="e3",
+                    needs="python",
+                    hints=[
+                        "Primero decide si esperar; solo si no, elige una región.",
+                        "Tres condiciones llevan a esperar: los qubits, la residencia de datos y el plan Open.",
+                        "La otra región depende solo de `region_caida`; el texto se arma con una f-string.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1159,30 +1245,48 @@ comunidad = lesson(
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero escribes la cita de un programa de IBM Quantum con la versión que tienes instalada. [[n2]]Después haces que la cita de un QPU sirva para cualquier backend, con su nombre, su versión y su familia.
-             [[n3]]Y por último armas la sección de citas de un artículo: el agradecimiento, una frase por QPU y la referencia con el año. Usas backends simulados, sin cuenta. Busca la marca verde.""",
+            """Ahora te toca. [[n1]]Primero escribes la cita de un programa de IBM Quantum con la versión que tienes instalada. [[n2]]Después haces que la cita de un QPU sirva para cualquier backend, con su nombre, su versión y su familia.
+             [[n3]]Y por último armas la sección de citas de un artículo: el agradecimiento, una frase por QPU y la referencia con el año. Usas backends simulados, sin cuenta. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p10-comunidad.py",
-                    [
-                        (1, "Cita un programa de IBM Quantum con la versión instalada."),
-                        (
-                            2,
-                            "Haz que `cita_qpu` use el nombre, la versión y la familia del backend.",
-                        ),
-                        (
-                            3,
-                            "Escribe `seccion_de_citas(backends, anio)` con agradecimiento, QPU y referencia.",
-                        ),
+                Exercise(
+                    "p10-comunidad/cita-de-programa",
+                    "Completa `cita_programa(nombre, paquete, anio)`: devuelve `IBM Quantum (<anio>). <nombre> (Version <versión>) [computer software]. https://quantum.cloud.ibm.com/`, con la versión instalada del paquete `paquete`.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "La versión no se escribe a mano: se lee del paquete instalado.",
+                        "`version` de `importlib.metadata`, ya importada, devuelve la versión de un paquete por su nombre.",
+                        "Arma el texto con una f-string que use `nombre`, `version(paquete)` y `anio`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p10-comunidad/cita-de-qpu",
+                    "`cita_qpu(backend)` devuelve `In this paper we used `<nombre>` (v<versión>), an IBM Quantum <familia> processor.`, pero escribe siempre `Heron` como familia, aunque el procesador sea de otra. Corrígela para que use la familia del backend.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "Un dato de la frase no sale del backend, sino del texto.",
+                        "El código ya lee la familia del procesador en una variable, pero la frase no la usa.",
+                        "Cambia la palabra fija de la frase por `{familia}`.",
+                    ],
+                ),
+                Exercise(
+                    "p10-comunidad/seccion-de-citas",
+                    "Escribe `seccion_de_citas(backends, anio)`: devuelve un texto con tres partes, una por línea: `AGRADECIMIENTO`, la cita de cada backend, en el orden recibido, y al final `IBM Quantum. https://quantum.cloud.ibm.com/, <anio>`. Con `cita_qpu` ya resuelta.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "El texto son líneas: junta una lista de líneas con saltos de línea.",
+                        "La lista empieza con el agradecimiento, sigue con una cita por backend y termina con la referencia.",
+                        '`lineas = [AGRADECIMIENTO]`, luego `+=` una comprensión con `cita_qpu`, y al final `"\\n".join(lineas)`.',
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(

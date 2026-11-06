@@ -257,12 +257,12 @@
   ]
  },
  "mision": {
-  "dur": 32.88,
+  "dur": 27.72,
   "marks": {
-   "n1": 7.374,
-   "n2": 13.106,
-   "n3": 19.503,
-   "check": 26.947
+   "n1": 2.449,
+   "n2": 7.345,
+   "n3": 13.813,
+   "check": 21.527
   },
   "cues": [
    [
@@ -271,23 +271,19 @@
    ],
    [
     2.449,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
+    "Primero pasas un estado de Bell por tres módulos del SDK."
    ],
    [
-    7.374,
-    "Primero reproduces un estado de Bell pasando por cuatro módulos del SDK."
+    7.345,
+    "Después escribes un observable y calculas su valor exacto, sin simular mediciones."
    ],
    [
-    13.106,
-    "Después cambias un observable y calculas su valor exacto, sin simular mediciones."
+    13.813,
+    "Y por último escribes tu propia función de valor esperado, que se comprueba contra la primitiva del SDK."
    ],
    [
-    19.503,
-    "Y por último escribes tu propia función de valor esperado, y la comparas con la primitiva del SDK."
-   ],
-   [
-    26.947,
-    "Cada misión tiene una comprobación que se actualiza sola: busca la marca verde."
+    21.527,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

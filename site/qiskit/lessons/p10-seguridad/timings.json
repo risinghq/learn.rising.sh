@@ -163,11 +163,12 @@
   ]
  },
  "mision": {
-  "dur": 36.264,
+  "dur": 35.16,
   "marks": {
-   "n1": 7.062,
-   "n2": 13.912,
-   "n3": 21.753
+   "n1": 2.137,
+   "n2": 8.987,
+   "n3": 16.828,
+   "check": 28.971
   },
   "cues": [
    [
@@ -176,27 +177,23 @@
    ],
    [
     2.137,
-    "Abre el cuaderno de práctica de esta lección con el comando de abajo."
-   ],
-   [
-    7.062,
     "Primero lees una auditoría: conviertes eventos de actividad en los permisos que se ejercieron."
    ],
    [
-    13.912,
+    8.987,
     "Después amplías un detector de claves de API escritas en el código, sin marcar las que vienen del entorno."
    ],
    [
-    21.753,
+    16.828,
     "Y por último escribes qué hacer ante una caída regional, según tu plan, tus qubits y la residencia de tus datos."
    ],
    [
-    30.302,
+    25.376,
     "Todo con datos de ejemplo, sin cuenta."
    ],
    [
-    33.897,
-    "Busca la marca verde."
+    28.971,
+    "Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos."
    ]
   ]
  },

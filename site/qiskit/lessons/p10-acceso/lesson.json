@@ -477,46 +477,78 @@
     "10.2",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero compruebas qué llamadas de la API permite el rol de trabajar con instancias, y confirmas si puede borrar trabajos. [[n2]]Después derivas un rol lector a partir del escritor, quitando las acciones de cancelar, borrar y actualizar. [[n3]]Y por último escribes un detector de valores que son subcadenas de otros, para que una regla dinámica no dé más acceso del que pretendes. Busca la marca verde en cada misión.",
+   "say": "Ahora te toca. [[n1]]Primero calculas qué llamadas de la API permite un rol, y confirmas si puede borrar trabajos. [[n2]]Después derivas un rol lector a partir del escritor, quitando las acciones de cancelar, borrar y actualizar. [[n3]]Y por último escribes un detector de valores que son subcadenas de otros, para que una regla dinámica no dé más acceso del que pretendes. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p10-acceso.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Lista qué llamadas de la API permite un rol personalizado."
-      },
-      {
-       "level": 2,
-       "text": "Deriva `lector` del escritor sin tocar las demás acciones."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `conflictos(valores)` para detectar subcadenas como `ml` en `chemlab`."
-      }
+     "type": "exercise",
+     "exercise": "p10-acceso/llamadas-del-rol",
+     "prompt": "Completa `llamadas_permitidas(rol)`: recibe la lista de permisos de un rol y devuelve, en el orden de `ENDPOINTS`, las llamadas de la API cuyo permiso está en el rol.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "`ENDPOINTS` guarda parejas de llamada y permiso que ese permiso abre.",
+      "Recorre `ENDPOINTS` y quédate con las llamadas cuyo permiso aparece en `rol`.",
+      "Una lista por comprensión con `for llamada, permiso in ENDPOINTS` y la condición `permiso in rol`."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "P = \"quantum-computing.\"\nENDPOINTS = [\n    (\"GET /v1/backends\", P + \"device.read\"),\n    (\"POST /v1/jobs\", P + \"job.create\"),\n    (\"GET /v1/jobs\", P + \"job.read\"),\n    (\"GET /v1/jobs/{id}/results\", P + \"job.read\"),\n    (\"POST /v1/jobs/{id}/cancel\", P + \"job.cancel\"),\n    (\"DELETE /v1/jobs/{id}\", P + \"job.delete\"),\n    (\"GET /v1/instances/usage\", P + \"instance-usage.read\"),\n]\n\n\ndef llamadas_permitidas(rol):\n    return []",
+     "cases": [
+      "el rol de trabajar con instancias lista y ejecuta trabajos, pero no los borra"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-acceso/rol-lector",
+     "prompt": "`rol_lector(escritor)` deriva el rol lector del escritor: quita las acciones que terminan en `cancel`, `delete` o `update`, y devuelve los permisos que quedan, sin duplicados y ordenados. Pero deja pasar un permiso que no debería. Corrígelo.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "El rol lector debe quedarse sin tres acciones. Compara las que quita el código con las del enunciado.",
+      "Las acciones que se quitan viven en una tupla; mira cuáles hay en ella.",
+      "Falta una acción en esa tupla."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "starter": "def rol_lector(escritor):\n    return sorted({a for a in escritor if a.rsplit(\".\", 1)[-1] not in (\"cancel\", \"delete\")})",
+     "cases": [
+      "el escritor de la guía pierde cancelar, borrar y actualizar"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-acceso/conflictos",
+     "prompt": "Escribe `conflictos(valores)`: devuelve la lista ordenada de parejas `(corto, largo)` donde un valor está contenido en otro distinto. Distingue mayúsculas y minúsculas, y dos valores iguales no son un conflicto.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Compara cada valor con cada otro valor.",
+      "Una pareja cuenta si los dos son distintos y el corto está en el largo con `in`.",
+      "Usa un conjunto de parejas para no repetir, y ordénalo al final con `sorted`."
+     ],
+     "id": "e3",
+     "starter": "def conflictos(valores):\n    return []",
+     "cases": [
+      "`ml` está dentro de `chemlab` y de `mlReader`"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]

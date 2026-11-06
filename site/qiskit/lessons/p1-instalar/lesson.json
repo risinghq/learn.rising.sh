@@ -765,46 +765,78 @@
     "1.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero compruebas tu instalación: la versión de Qiskit y el intérprete de Python. [[n2]]Después editas un archivo settings punto conf y compruebas que Qiskit lo lee. [[n3]]Y por último escribes dos funciones que convierten cuadernos entre Jupyter y marimo, con marimo convert. Así podrás usar las guías de IBM, que están en Jupyter. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.",
+   "say": "Ahora te toca a ti. [[n1]]Primero corriges un archivo settings punto conf para que Qiskit dibuje con matplotlib y transpile sin optimizar. [[n2]]Después lees un cuaderno de Jupyter, que por dentro es un archivo JSON, y sacas el código de sus celdas. [[n3]]Y por último construyes un cuaderno de Jupyter desde una lista de celdas. Así podrás abrir en Jupyter las guías de IBM. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p1-instalar.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Comprueba tu versión de Qiskit y que tu Python es CPython de 64 bits."
-      },
-      {
-       "level": 2,
-       "text": "Edita un `settings.conf`: dibujo `mpl` y `transpile` sin optimizar."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `jupyter_a_marimo` y `marimo_a_jupyter` con `marimo convert` y `marimo export ipynb`."
-      }
+     "type": "exercise",
+     "exercise": "p1-instalar/settings-conf",
+     "prompt": "`configuracion()` devuelve el texto de un `settings.conf`. Corrígelo para que el dibujo por defecto sea `mpl` y para que `transpile` conserve dos Hadamard seguidas, sin optimizar.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Dos opciones del archivo están mal: el tipo de dibujo y el nivel de optimización.",
+      "El nivel que no optimiza nada es el más bajo.",
+      "Cambia el valor de `circuit_drawer` y el de `transpile_optimization_level`."
      ],
-     "id": "m",
-     "stagger": true
+     "kind": "fix",
+     "id": "e1",
+     "starter": "def configuracion():\n    return \"\"\"[default]\ncircuit_drawer = text\ntranspile_optimization_level = 1\n\"\"\"",
+     "cases": [
+      "Qiskit lee `mpl` como dibujo por defecto"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-instalar/codigo-del-cuaderno",
+     "prompt": "Escribe `codigo_del_cuaderno(texto)`: `texto` es el contenido de un cuaderno `.ipynb`, que es JSON. Devuelve la lista del código de cada celda de tipo `code`, en orden. El código de una celda (`source`) puede venir como una lista de líneas o como una sola cadena.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "Un `.ipynb` es un diccionario con una lista de celdas en `cells`, y cada celda dice su `cell_type`.",
+      "Las celdas `markdown` y `raw` no son código. Si `source` es una lista, las líneas ya llevan su salto de línea.",
+      "`json.loads(texto)`, un recorrido de `cells` con un filtro por `cell_type` y `\"\".join(...)` sobre `source`."
+     ],
+     "id": "e2",
+     "starter": "import json\n\n\ndef codigo_del_cuaderno(texto):\n    cuaderno = json.loads(texto)\n    return []",
+     "cases": [
+      "un cuaderno con markdown y dos celdas de código"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-instalar/cuaderno-nuevo",
+     "prompt": "Escribe `cuaderno_nuevo(celdas)`: `celdas` es una lista de pares `[tipo, texto]`, con tipo `markdown` o `code`. Devuelve el texto JSON de un cuaderno con `nbformat` 4 y `nbformat_minor` 5, `metadata` vacío y una celda por par. En cada celda, `source` es la lista de líneas del texto, con su salto de línea. Las celdas de código llevan `execution_count` nulo y `outputs` vacío.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Es el camino inverso del ejercicio anterior: de una lista de celdas a un diccionario y de ahí a texto.",
+      "Cada celda lleva `cell_type`, `metadata` y `source`; solo las de código añaden `execution_count` y `outputs`.",
+      "`texto.splitlines(keepends=True)` parte el texto conservando los saltos; `json.dumps` devuelve el cuaderno completo."
+     ],
+     "id": "e3",
+     "starter": "import json\n\n\ndef cuaderno_nuevo(celdas):\n    return json.dumps({\"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 5})",
+     "cases": [
+      "un cuaderno con una celda de texto y una de código"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
     }
    ]
@@ -892,6 +924,7 @@
  "practice": [
   "Crea un proyecto nuevo con su `.venv`, instala `qiskit[visualization]` y `qiskit-ibm-runtime`, y comprueba las versiones.",
   "Crea `~/.qiskit/settings.conf` con `circuit_drawer = mpl` y verifica que `qc.draw()` ya dibuja con matplotlib.",
+  "Comprueba tu intérprete: imprime `qiskit.__version__`, `platform.python_implementation()` (debe ser `CPython`) y `struct.calcsize(\"P\") * 8` (debe ser 64).",
   "Guías originales: [install-qiskit](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit) · [install-qiskit-source](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit-source) · [configure-qiskit-local](https://quantum.cloud.ibm.com/docs/en/guides/configure-qiskit-local) · [online-lab-environments](https://quantum.cloud.ibm.com/docs/en/guides/online-lab-environments) · [install-qiskit-runtime](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit-runtime) · [install-qiskit-runtime-source](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit-runtime-source)"
  ],
  "next": "p1-quickstart",

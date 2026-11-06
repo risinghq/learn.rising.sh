@@ -355,33 +355,47 @@ que_es = lesson(
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero reproduces un estado de Bell pasando por cuatro módulos del SDK. [[n2]]Después cambias un observable y calculas su valor exacto, sin simular mediciones.
-             [[n3]]Y por último escribes tu propia función de valor esperado, y la comparas con la primitiva del SDK. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.""",
+            """Ahora te toca a ti. [[n1]]Primero pasas un estado de Bell por tres módulos del SDK. [[n2]]Después escribes un observable y calculas su valor exacto, sin simular mediciones.
+             [[n3]]Y por último escribes tu propia función de valor esperado, que se comprueba contra la primitiva del SDK. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p1-que-es-qiskit.py",
-                    [
-                        (
-                            1,
-                            "Pasa un estado de Bell por `circuit`, `quantum_info`, `transpiler` y `primitives`.",
-                        ),
-                        (
-                            2,
-                            "Cambia el observable para medir solo la $Z$ del qubit 0 y comprueba su valor exacto.",
-                        ),
-                        (
-                            3,
-                            "Escribe `valor_esperado(qc, obs)` con `quantum_info` y compárala con `StatevectorEstimator`.",
-                        ),
+                Exercise(
+                    "p1-que-es-qiskit/bell-por-modulos",
+                    "Escribe tres funciones. `bell()` devuelve el circuito de Bell de dos qubits, construido con `HGate` y `CXGate` de `qiskit.circuit.library` y `append`. `probabilidades(qc)` devuelve el diccionario de probabilidades del estado de `qc`, con `Statevector`. `a_base(qc)` devuelve `qc` transpilado a las puertas `rz`, `sx` y `cz`, con los qubits en línea (`CouplingMap.from_line`).",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Cada módulo hace una cosa: `circuit` construye, `quantum_info` calcula el estado, `transpiler` adapta el circuito.",
+                        "`generate_preset_pass_manager` recibe `basis_gates` y `coupling_map`, y su método `run` transpila el circuito.",
+                        "`Statevector(qc)` es el estado del circuito, y tiene un método que devuelve sus probabilidades como diccionario; `append` recibe la puerta y la lista de qubits.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p1-que-es-qiskit/observable-z0",
+                    "Escribe `z_del_qubit_0(n)`: devuelve el observable $Z$ del qubit 0 en un sistema de `n` qubits, como `SparsePauliOp`. Recuerda que en una etiqueta el qubit 0 es el carácter de la derecha.",
+                    level=2,
+                    id="e2",
+                    hints=[
+                        "Una etiqueta de Pauli lleva un carácter por qubit: `Z` donde actúa y `I` donde no.",
+                        "El qubit 0 es el último carácter de la etiqueta.",
+                        'Une `"I" * (n - 1)` con `"Z"` y pásalo a `SparsePauliOp`.',
+                    ],
+                ),
+                Exercise(
+                    "p1-que-es-qiskit/valor-esperado",
+                    "Escribe `valor_esperado(qc, obs)`: `qc` es un circuito sin mediciones y `obs` un `SparsePauliOp`. Devuelve el valor esperado exacto de `obs` en el estado de `qc`, como un número real, usando solo `quantum_info`.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "El valor esperado exacto no necesita muestras: sale del vector de estado.",
+                        "`Statevector` sabe calcular el valor esperado de un operador.",
+                        "El valor esperado sale como número complejo, aunque su parte imaginaria sea cero: devuelve solo la parte real, como `float`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -732,30 +746,48 @@ patrones = lesson(
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero reproduces los cuatro pasos con el simulador exacto. [[n2]]Después cambias el observable y apuestas por el valor que saldrá.
-             [[n3]]Y por último escribes el patrón como una función que sirve para cualquier circuito. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.""",
+            """Ahora te toca a ti. [[n1]]Primero conviertes un circuito en ISA para el chip de cinco qubits. [[n2]]Después corriges el cálculo del valor esperado, que olvida el layout del circuito ISA.
+             [[n3]]Y por último escribes el patrón entero como una función que sirve para cualquier circuito y cualquier nivel. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p1-patrones.py",
-                    [
-                        (1, "Ejecuta los cuatro pasos y comprueba que el circuito es ISA."),
-                        (
-                            2,
-                            r"Añade `YY` al observable y predice $\langle ZZ\rangle+\langle XX\rangle+\langle YY\rangle$.",
-                        ),
-                        (
-                            3,
-                            "Escribe `patron(qc, obs, backend, nivel)` y pruébala con los niveles 0, 1 y 3.",
-                        ),
+                Exercise(
+                    "p1-patrones/isa-belem",
+                    "Escribe `a_isa(qc)`: devuelve `qc` convertido en un circuito ISA para `FakeBelemV2`, con el pass manager preestablecido de nivel 1. Solo puede quedar con las puertas del chip y con las CNOT entre qubits vecinos.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Un circuito ISA usa solo las puertas del chip y su conectividad.",
+                        "El pass manager preestablecido recibe el backend y lo conoce por completo.",
+                        "Crea el pass manager con `generate_preset_pass_manager(optimization_level=1, backend=...)` y llama a su método `run`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p1-patrones/valor-ideal",
+                    "`valor_ideal(isa, obs)` debería dar el valor esperado exacto de `obs` en el circuito ISA, pero falla cuando el transpilador mueve los qubits. Encuentra el error y corrígelo.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "El transpilador puede poner el qubit 0 de tu circuito en otro qubit del chip.",
+                        "El observable tiene que actuar sobre los qubits donde acabó el circuito, no sobre los virtuales.",
+                        "El circuito ISA recuerda esa asignación en su atributo `layout`: pásalo a `apply_layout` del observable.",
+                    ],
+                ),
+                Exercise(
+                    "p1-patrones/patron",
+                    "Escribe `patron(qc, obs, nivel)`: usa `FakeBelemV2` y el nivel de optimización `nivel`. Devuelve una tupla `(isa, valor)`: el circuito ISA de `qc` y el valor esperado exacto de `obs`, con `StatevectorEstimator`, en ese circuito.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "Son los cuatro pasos de la lección en una sola función: mapear, optimizar, ejecutar y posprocesar.",
+                        "Transpila primero, adapta el observable al layout y ejecuta después.",
+                        "El Estimator recibe una lista con un PUB `(isa, observable_adaptado)`; el valor sale de `resultado[0].data.evs`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1196,30 +1228,50 @@ min_qpy_version = 14""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero compruebas tu instalación: la versión de Qiskit y el intérprete de Python. [[n2]]Después editas un archivo settings punto conf y compruebas que Qiskit lo lee.
-             [[n3]]Y por último escribes dos funciones que convierten cuadernos entre Jupyter y marimo, con marimo convert. Así podrás usar las guías de IBM, que están en Jupyter. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.""",
+            """Ahora te toca a ti. [[n1]]Primero corriges un archivo settings punto conf para que Qiskit dibuje con matplotlib y transpile sin optimizar. [[n2]]Después lees un cuaderno de Jupyter, que por dentro es un archivo JSON, y sacas el código de sus celdas.
+             [[n3]]Y por último construyes un cuaderno de Jupyter desde una lista de celdas. Así podrás abrir en Jupyter las guías de IBM. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p1-instalar.py",
-                    [
-                        (
-                            1,
-                            "Comprueba tu versión de Qiskit y que tu Python es CPython de 64 bits.",
-                        ),
-                        (2, "Edita un `settings.conf`: dibujo `mpl` y `transpile` sin optimizar."),
-                        (
-                            3,
-                            "Escribe `jupyter_a_marimo` y `marimo_a_jupyter` con `marimo convert` y `marimo export ipynb`.",
-                        ),
+                Exercise(
+                    "p1-instalar/settings-conf",
+                    "`configuracion()` devuelve el texto de un `settings.conf`. Corrígelo para que el dibujo por defecto sea `mpl` y para que `transpile` conserve dos Hadamard seguidas, sin optimizar.",
+                    level=1,
+                    kind="fix",
+                    id="e1",
+                    hints=[
+                        "Dos opciones del archivo están mal: el tipo de dibujo y el nivel de optimización.",
+                        "El nivel que no optimiza nada es el más bajo.",
+                        "Cambia el valor de `circuit_drawer` y el de `transpile_optimization_level`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p1-instalar/codigo-del-cuaderno",
+                    "Escribe `codigo_del_cuaderno(texto)`: `texto` es el contenido de un cuaderno `.ipynb`, que es JSON. Devuelve la lista del código de cada celda de tipo `code`, en orden. El código de una celda (`source`) puede venir como una lista de líneas o como una sola cadena.",
+                    level=2,
+                    id="e2",
+                    needs="python",
+                    hints=[
+                        "Un `.ipynb` es un diccionario con una lista de celdas en `cells`, y cada celda dice su `cell_type`.",
+                        "Las celdas `markdown` y `raw` no son código. Si `source` es una lista, las líneas ya llevan su salto de línea.",
+                        '`json.loads(texto)`, un recorrido de `cells` con un filtro por `cell_type` y `"".join(...)` sobre `source`.',
+                    ],
+                ),
+                Exercise(
+                    "p1-instalar/cuaderno-nuevo",
+                    "Escribe `cuaderno_nuevo(celdas)`: `celdas` es una lista de pares `[tipo, texto]`, con tipo `markdown` o `code`. Devuelve el texto JSON de un cuaderno con `nbformat` 4 y `nbformat_minor` 5, `metadata` vacío y una celda por par. En cada celda, `source` es la lista de líneas del texto, con su salto de línea. Las celdas de código llevan `execution_count` nulo y `outputs` vacío.",
+                    level=3,
+                    id="e3",
+                    needs="python",
+                    hints=[
+                        "Es el camino inverso del ejercicio anterior: de una lista de celdas a un diccionario y de ahí a texto.",
+                        "Cada celda lleva `cell_type`, `metadata` y `source`; solo las de código añaden `execution_count` y `outputs`.",
+                        "`texto.splitlines(keepends=True)` parte el texto conservando los saltos; `json.dumps` devuelve el cuaderno completo.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(
@@ -1268,6 +1320,7 @@ min_qpy_version = 14""",
     practice=[
         "Crea un proyecto nuevo con su `.venv`, instala `qiskit[visualization]` y `qiskit-ibm-runtime`, y comprueba las versiones.",
         "Crea `~/.qiskit/settings.conf` con `circuit_drawer = mpl` y verifica que `qc.draw()` ya dibuja con matplotlib.",
+        'Comprueba tu intérprete: imprime `qiskit.__version__`, `platform.python_implementation()` (debe ser `CPython`) y `struct.calcsize("P") * 8` (debe ser 64).',
     ],
 )
 
@@ -1606,15 +1659,9 @@ print(StatevectorSampler().run([qc]).result()[0].data.meas.get_counts())""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. [[n1]]Primero reproduces el estado de Bell. [[n2]]Después lo modificas para que los qubits salgan siempre distintos. [[n3]]Y por último creas una función que prepara un estado GHZ de cualquier tamaño.
+            """Ahora te toca a ti. [[n1]]Primero modificas el estado de Bell para que los qubits salgan siempre distintos. [[n2]]Después creas una función que prepara un estado GHZ de cualquier tamaño. [[n3]]Y por último corriges un Bell que tiene la CNOT al revés.
              [[check]]Escribe tu código en el editor y pulsa Comprobar: los casos se corren en esta misma página.""",
             [
-                Mission(
-                    "practica/p1-quickstart.py",
-                    [(1, "Ejecuta el estado de Bell y lee sus conteos.")],
-                    id="m",
-                    stagger=True,
-                ),
                 Exercise(
                     "p1-quickstart/bell-distinto",
                     r"Prepara $\tfrac{1}{\sqrt2}(|01\rangle+|10\rangle)$ añadiendo una sola puerta al circuito.",
@@ -1654,10 +1701,9 @@ print(StatevectorSampler().run([qc]).result()[0].data.meas.get_counts())""",
                 ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("show", "e2", at="n2"),
-                A("show", "e3", at="n3"),
-                A("show", "e4", at="check"),
+                A("show", "e2", at="n1"),
+                A("show", "e3", at="n2"),
+                A("show", "e4", at="n3"),
             ],
         ),
         beat(
@@ -2073,27 +2119,48 @@ measure q -> c;""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca a ti. Composer corre en la web, así que el cuaderno de práctica usa el mismo OpenQASM, ejecutado en tu equipo. Ábrelo con el comando de abajo. [[n1]]Primero ejecutas el programa con una puerta propia.
-             [[n2]]Después cambias una CZ por una fase controlada y compruebas que las probabilidades no se mueven, pero la amplitud sí. [[n3]]Y por último defines tu propia puerta GHZ. [[check]]Cada misión tiene una comprobación que se actualiza sola: busca la marca verde.""",
+            """Ahora te toca a ti. Composer corre en la web, así que aquí escribes el mismo OpenQASM como texto y se ejecuta en esta página. [[n1]]Primero escribes un programa con una puerta propia.
+             [[n2]]Después cambias una CZ por una fase controlada y compruebas que las probabilidades no se mueven, pero la amplitud sí. [[n3]]Y por último defines tu propia puerta GHZ, para cualquier número de qubits. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.""",
             [
-                Mission(
-                    "practica/p1-composer.py",
-                    [
-                        (1, "Ejecuta el OpenQASM con la puerta propia `bell` y lee los conteos."),
-                        (
-                            2,
-                            r"Cambia la `cz` por `cu1(pi/2)`: la amplitud de $|11\rangle$ pasa a $i/2$ y las probabilidades no cambian.",
-                        ),
-                        (3, "Define en OpenQASM una puerta `ghz a, b, c` para tres qubits."),
+                Exercise(
+                    "p1-composer/programa-bell",
+                    "Completa `programa_bell()`: devuelve un programa OpenQASM 2.0 que define la puerta `bell a, b` con una Hadamard y una CNOT, la usa sobre los dos qubits de `q` y los mide en `c`. La puerta debe quedar como una sola instrucción del circuito.",
+                    level=1,
+                    id="e1",
+                    hints=[
+                        "Una puerta propia se define con `gate nombre a, b { ... }` antes de usarla.",
+                        "El cuerpo va entre las llaves, con una instrucción por puerta y un punto y coma al final de cada una.",
+                        "Dentro del cuerpo, los qubits son los argumentos de la puerta: `a` y `b`, no `q[0]` ni `q[1]`.",
                     ],
-                    id="m",
-                    stagger=True,
-                )
+                ),
+                Exercise(
+                    "p1-composer/programa-fase",
+                    r"`programa_fase(angulo)` devuelve un programa OpenQASM con una Hadamard en cada qubit y una `cz`. Corrígelo: cambia la `cz` por una fase controlada `cu1` del ángulo `angulo`, para que la amplitud de $|11\rangle$ sea $e^{i\,\text{angulo}}/2$ y las demás no cambien.",
+                    level=2,
+                    kind="fix",
+                    id="e2",
+                    hints=[
+                        "La `cz` es la fase controlada de media vuelta, $\\pi$. Hace falta una que acepte cualquier ángulo.",
+                        "En OpenQASM 2, la fase controlada se llama `cu1` y lleva el ángulo entre paréntesis.",
+                        "Como el programa es un texto, el ángulo entra con una f-string: `cu1({angulo!r}) q[0], q[1];`.",
+                    ],
+                ),
+                Exercise(
+                    "p1-composer/programa-ghz",
+                    "Escribe `programa_ghz(n)`: devuelve un programa OpenQASM 2.0 con un registro `q` de `n` qubits y una puerta `ghz` con `n` argumentos, definida con una Hadamard y `n - 1` CNOT, que se usa sobre todo el registro. Se espera el estado $(|0\\ldots0\\rangle+|1\\ldots1\\rangle)/\\sqrt2$ y la puerta como una sola instrucción.",
+                    level=3,
+                    id="e3",
+                    hints=[
+                        "El programa es un texto: los nombres de los argumentos y las CNOT salen de un bucle sobre `range(n)`.",
+                        'Usa un solo qubit como control de todas las CNOT, y une las piezas con `", ".join` y `" ".join`.',
+                        "Define la puerta con `gate ghz q0, q1, ... { h q0; cx q0, q1; ... }` y úsala con `ghz q[0], q[1], ...;`.",
+                    ],
+                ),
             ],
             [
-                A("item", "m", at="n1", i=0),
-                A("item", "m", at="n2", i=1),
-                A("item", "m", at="n3", i=2),
+                A("item", "e1", at="n1", i=0),
+                A("item", "e2", at="n2", i=1),
+                A("item", "e3", at="n3", i=2),
             ],
         ),
         beat(

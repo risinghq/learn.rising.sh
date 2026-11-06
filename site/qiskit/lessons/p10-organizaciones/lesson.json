@@ -506,47 +506,102 @@
     "10.1",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Abre el cuaderno de práctica de esta lección con el comando de abajo. [[n1]]Primero lees una instancia con la API de gestión: el CRN va codificado en la ruta, y la respuesta trae los campos cuánticos. [[n2]]Después arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar. [[n3]]Y por último escribes qué pasa con los trabajos al llegar a un límite, con y sin límite, sin cancelar ninguno. Las comprobaciones se actualizan solas: busca la marca verde.",
+   "say": "Ahora te toca. [[n1]]Primero armas la dirección para leer una instancia con la API de gestión: el CRN va codificado en la ruta. [[n2]]Después resuelves qué backends puede usar una instancia, y qué significa la lista con ANY. [[n3]]Luego arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar. [[n4]]Y por último escribes qué pasa con los trabajos al llegar a un límite, con y sin límite, sin cancelar ninguno. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/p10-organizaciones.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Codifica el CRN de una instancia y lee los campos de `extensions`."
-      },
-      {
-       "level": 2,
-       "text": "Corrige `restante` para que solo cuente la ventana móvil de 28 días del plan Open."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `tras_alcanzar`: qué pasa con cada trabajo con y sin límite."
-      }
+     "type": "exercise",
+     "exercise": "p10-organizaciones/url-de-instancia",
+     "prompt": "Completa `url_de_instancia(crn)`: devuelve la dirección `BASE` seguida del CRN codificado para ir en una ruta. El CRN trae dos puntos y barras, y ninguno debe quedar sin codificar.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "El CRN es un solo segmento de la ruta, así que hasta sus barras se codifican.",
+      "`urllib.parse` ya trae una función que codifica texto para una URL.",
+      "`urllib.parse.quote(texto, safe=\"\")` codifica también las barras."
      ],
-     "id": "m",
-     "stagger": true
+     "id": "e1",
+     "starter": "BASE = \"https://resource-controller.cloud.ibm.com/v2/resource_instances/\"\n\n\ndef url_de_instancia(crn):\n    return BASE + crn",
+     "cases": [
+      "el CRN de la lección va codificado en la ruta"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-organizaciones/backends-permitidos",
+     "prompt": "Escribe `backends_permitidos(backends)`: si la instancia tiene la lista `[\"ANY\"]`, permite todos los backends de `BACKENDS_DEL_PLAN`; en cualquier otro caso, permite justo los que tiene la lista, incluida una lista vacía, que no permite ninguno.",
+     "level": 1,
+     "needs": "python",
+     "hints": [
+      "`ANY` no es un backend: es una señal de que se permiten todos los del plan.",
+      "Hay dos casos: la lista es exactamente `[\"ANY\"]`, o es otra cosa.",
+      "Compara la lista entera con `[\"ANY\"]`, no la pertenencia, para que una lista vacía siga vacía."
+     ],
+     "id": "e2",
+     "starter": "BACKENDS_DEL_PLAN = [\"ibm_fez\", \"ibm_torino\"]\n\n\ndef backends_permitidos(backends):\n    return backends",
+     "cases": [
+      "`[\"ANY\"]` permite todos los backends del plan"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-organizaciones/restante-en-ventana",
+     "prompt": "`restante(usos, hoy, tope=600)` resta todo el consumo del tope. Corrígelo: solo cuenta los usos de la ventana móvil de 28 días que termina `hoy`. Cada uso es una pareja `[fecha, segundos]` con la fecha en formato ISO.",
+     "level": 2,
+     "needs": "python",
+     "hints": [
+      "Un uso de hace mucho tiempo ya no debe restarse.",
+      "Calcula cuántos días pasaron entre `hoy` y la fecha de cada uso, y suma solo los de la ventana.",
+      "La ventana son 28 días: hace 27 días todavía cuenta y hace 28 ya no."
+     ],
+     "kind": "fix",
+     "id": "e3",
+     "starter": "from datetime import date\n\n\ndef restante(usos, hoy, tope=600):\n    hoy = date.fromisoformat(hoy)\n    gastado = sum(seg for fecha, seg in usos)\n    return tope - gastado",
+     "cases": [
+      "usos de hace 40, 20 y 3 días: el de hace 40 ya salió de la ventana"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-organizaciones/tras-alcanzar",
+     "prompt": "Escribe `tras_alcanzar(trabajos, es_limite)`: devuelve, en el mismo orden, un diccionario `id`, `estado` y `prioridad` por trabajo. Un trabajo en ejecución sigue `ejecutando` con prioridad `normal`. Los pendientes pasan a `en espera de tiempo` con prioridad `normal` si hay límite, o a `en cola` con prioridad `baja` si solo hay asignación. Nunca se cancela ninguno.",
+     "level": 3,
+     "needs": "python",
+     "hints": [
+      "Recorre los trabajos y construye un diccionario nuevo por cada uno.",
+      "Primero separa los que están ejecutando; con ellos no pasa nada. Para el resto decide con `es_limite`.",
+      "Cada resultado lleva tres claves: `id`, `estado` y `prioridad`, y la lista conserva el orden de entrada."
+     ],
+     "id": "e4",
+     "starter": "def tras_alcanzar(trabajos, es_limite):\n    return []",
+     "cases": [
+      "con límite lo pendiente espera, sin cancelar nada"
+     ]
     }
    ],
    "actions": [
     {
      "do": "item",
      "i": 0,
-     "id": "m",
+     "id": "e1",
      "at": "n1"
     },
     {
      "do": "item",
      "i": 1,
-     "id": "m",
+     "id": "e2",
      "at": "n2"
     },
     {
      "do": "item",
      "i": 2,
-     "id": "m",
+     "id": "e3",
      "at": "n3"
+    },
+    {
+     "do": "item",
+     "i": 3,
+     "id": "e4",
+     "at": "n4"
     }
    ]
   },
