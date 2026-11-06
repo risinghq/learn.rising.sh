@@ -30,10 +30,10 @@ mise run serve
 This serves the courses at <http://localhost:8810/> and grades your code
 exercises on your machine, without accounts. It needs no internet.
 
-A Qiskit mission opens its practice notebook with a command such as:
+A project milestone opens its notebook with a command such as:
 
 ```sh
-uv run marimo edit practica/p1-quickstart.py
+uv run marimo edit practica/proyecto/hito1.py
 ```
 
 ## Check
