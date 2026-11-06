@@ -765,6 +765,31 @@ WRONG += [
         ("p6-postseleccion/mascara-node", "sin-invertir", "`mascara_node` conserva"),
         ("p6-postseleccion/mascara-edge", "como-node", "`mascara_edge` conserva"),
         ("p6-postseleccion/mascara-edge", "solo-la-primera-arista", "`mascara_edge` conserva"),
+        ("p1-que-es-qiskit/bell-por-modulos", "bell-fijo", "`bell()`"),
+        ("p1-que-es-qiskit/observable-z0", "qubit-de-la-izquierda", "`z_del_qubit_0`"),
+        ("p1-que-es-qiskit/valor-esperado", "estado-cero", "`valor_esperado`"),
+        ("p1-patrones/isa-belem", "sin-conectividad", "`a_isa`"),
+        ("p1-patrones/valor-ideal", "layout-al-reves", "`valor_ideal`"),
+        ("p1-patrones/patron", "devuelve-el-original", "`patron`"),
+        ("p1-composer/programa-bell", "otra-fase", "`programa_bell`"),
+        ("p1-composer/programa-fase", "angulo-fijo", "`programa_fase`"),
+        ("p1-composer/programa-ghz", "otra-fase", "`programa_ghz`"),
+        ("p1-instalar/settings-conf", "nivel-uno", "`configuracion`"),
+        ("p1-instalar/codigo-del-cuaderno", "con-markdown", "`codigo_del_cuaderno`"),
+        ("p1-instalar/cuaderno-nuevo", "sin-celdas-vacias", "`cuaderno_nuevo`"),
+        ("p10-seguridad/permisos-de-la-auditoria", "cuenta-desconocidos", "`permisos_ejercidos`"),
+        ("p10-seguridad/claves-en-el-codigo", "marca-el-entorno", "`con_claves`"),
+        ("p10-seguridad/ante-desastre", "ignora-la-residencia", "`ante_desastre`"),
+        ("p10-acceso/llamadas-del-rol", "todo-si-hay-rol", "`llamadas_permitidas`"),
+        ("p10-acceso/rol-lector", "con-duplicados", "`rol_lector`"),
+        ("p10-acceso/conflictos", "incluye-iguales", "`conflictos`"),
+        ("p10-organizaciones/url-de-instancia", "barra-sin-codificar", "`url_de_instancia`"),
+        ("p10-organizaciones/backends-permitidos", "siempre-el-plan", "`backends_permitidos`"),
+        ("p10-organizaciones/restante-en-ventana", "tope-fijo", "`restante`"),
+        ("p10-organizaciones/tras-alcanzar", "ignora-el-limite", "`tras_alcanzar`"),
+        ("p10-comunidad/cita-de-programa", "anio-fijo", "`cita_programa`"),
+        ("p10-comunidad/cita-de-qpu", "familia-fija", "`cita_qpu`"),
+        ("p10-comunidad/seccion-de-citas", "anio-fijo", "`seccion_de_citas`"),
     ]
 ]
 
@@ -943,7 +968,9 @@ MUTANTS = [
     *[
         m
         for eid in sorted(
-            e for e in REAL if e.startswith(("p3-", "p5-", "p6-", "p7-", "p8-", "p9-"))
+            e
+            for e in REAL
+            if e.startswith(("p1-", "p10-", "p3-", "p5-", "p6-", "p7-", "p8-", "p9-"))
         )
         for m in mutants_of(eid)
     ],
