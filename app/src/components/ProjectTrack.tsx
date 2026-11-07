@@ -20,7 +20,10 @@ export function ProjectTrack({
   parts: Part[];
 }) {
   const key = courseKey(slug, "hitos");
-  const done = useJson(key, NO_MILESTONES);
+  const stored = useJson<unknown>(key, NO_MILESTONES);
+  const done = Array.isArray(stored)
+    ? stored.filter((value): value is number => typeof value === "number")
+    : NO_MILESTONES;
   const { milestones } = project;
   const linked = useMemo(
     () =>

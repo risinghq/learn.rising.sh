@@ -365,6 +365,28 @@ async function modeStoredOnce(
   await context.close();
 }
 
+async function malformedProgress(
+  report: Report,
+  browser: Browser,
+  base: string,
+): Promise<void> {
+  const { context, page, errors } = await newPage(
+    browser,
+    [1366, 768],
+    "light",
+    { "qiskit:misiones": "{}", "qiskit:hitos": "{}" },
+  );
+  await page.goto(`${base}/qiskit/`);
+  await page.waitForSelector(THEME_BUTTON);
+  await page.waitForTimeout(500);
+  report.check(!errors.length, `malformed progress: ${errors}`);
+  report.check(
+    (await page.locator("h1").innerText()) === "Qiskit",
+    "malformed progress: the course page did not render",
+  );
+  await context.close();
+}
+
 async function main(): Promise<void> {
   const { values } = parseArgs({
     options: { shots: { type: "string" }, table: { type: "boolean" } },
@@ -387,6 +409,7 @@ async function main(): Promise<void> {
   });
   const table = await contrasts(report, browser, base);
   await modeStoredOnce(report, browser, base);
+  await malformedProgress(report, browser, base);
   await visit(report, browser, base, values.shots, lastBeats);
   await browser.close();
   await stop();

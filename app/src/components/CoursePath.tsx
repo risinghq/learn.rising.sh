@@ -39,7 +39,10 @@ function Practice({
   done: ReadonlySet<string>;
 }) {
   const key = courseKey(slug, "misiones");
-  const marked = useJson(key, NO_NOTEBOOKS);
+  const stored = useJson<unknown>(key, NO_NOTEBOOKS);
+  const marked = Array.isArray(stored)
+    ? stored.filter((value): value is string => typeof value === "string")
+    : NO_NOTEBOOKS;
   const pending = pendingMission(lessons, done, marked);
   if (!pending) return null;
   const { lesson, mission } = pending;
