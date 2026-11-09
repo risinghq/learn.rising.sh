@@ -562,6 +562,25 @@ def test_fork_bomb_that_swallows_errors_is_contained(runner: local.Container) ->
     assert len(processes(runner)) <= before
 
 
+def test_thread_bomb_is_contained(runner: local.Container) -> None:
+    out = run(
+        runner,
+        "import threading, time\n"
+        "count = 0\n"
+        "while True:\n"
+        "    try:\n"
+        "        threading.Thread(target=time.sleep, args=(10,), daemon=True).start()\n"
+        "        count += 1\n"
+        "    except RuntimeError:\n"
+        "        print(count)\n"
+        "        raise\n",
+    )
+    assert out["passed"] is False
+    assert 0 < int(out["stdout"]) < 64
+    assert out["error"].startswith("RuntimeError: can't start new thread")
+    assert out["killed"] is None
+
+
 def test_detached_process_does_not_outlive_the_job(runner: local.Container) -> None:
     before = len(processes(runner))
     out = run(

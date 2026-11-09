@@ -73,6 +73,7 @@ def job_env(work: str, path: str) -> dict[str, str]:
         "MPLBACKEND": "Agg",
         "OMP_NUM_THREADS": "2",
         "OPENBLAS_NUM_THREADS": "2",
+        "RAYON_NUM_THREADS": "2",
     }
 
 
