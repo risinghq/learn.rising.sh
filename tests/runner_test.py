@@ -441,6 +441,18 @@ def test_memory_cap(runner: local.Container, code: str) -> None:
     assert health(runner) == 200
 
 
+def test_reserved_but_untouched_memory_is_allowed(runner: local.Container) -> None:
+    out = run(runner, "import mmap\nm = mmap.mmap(-1, 1 << 30)\nm[0] = 1\nprint('ok')")
+    assert out["error"] is None
+    assert out["stdout"] == "ok\n"
+    assert out["peak_mb"] < 200
+
+
+def test_the_job_is_the_first_to_die_when_memory_runs_out(runner: local.Container) -> None:
+    out = run(runner, "print(open('/proc/self/oom_score_adj').read())")
+    assert out["stdout"] == "1000\n\n"
+
+
 def test_job_is_killed_when_the_scan_cannot_read_memory() -> None:
     try:
         local.docker("info")

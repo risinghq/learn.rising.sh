@@ -80,6 +80,9 @@ def main() -> None:
     uid, cpu_s, data_b, fsize_b, nproc = map(int, argv[:sep])
     cmd = argv[sep + 1 :]
 
+    # Memory touched between two scans hits the container's cgroup: the kernel kills the job, not the server.
+    with open("/proc/self/oom_score_adj", "w") as f:
+        f.write("1000")
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
     resource.setrlimit(resource.RLIMIT_CPU, (cpu_s, cpu_s))
     resource.setrlimit(resource.RLIMIT_DATA, (data_b, data_b))

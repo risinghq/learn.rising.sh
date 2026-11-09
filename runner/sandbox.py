@@ -38,6 +38,8 @@ MAX_ENTRIES = 5000
 class Limits:
     wall_s: float = 10.0
     mem_mb: int = 512
+    # RLIMIT_DATA counts reserved address space: `import qiskit` alone reserves about 1.2 GB.
+    data_mb: int = 2048
     scratch_mb: int = 64
     out_bytes: int = 64 * 1024
     nproc: int = 64
@@ -246,7 +248,7 @@ def run_job(
             str(APP / "launcher.py"),
             str(uid),
             str(int(limits.wall_s) + 2),
-            str(limits.mem_mb * 2**20),
+            str(limits.data_mb * 2**20),
             str(limits.file_mb * 2**20),
             str(limits.nproc),
             "--",
