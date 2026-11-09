@@ -77,17 +77,17 @@ answers 200.
 
 ## Limits
 
-| Limit             | Value              | How it is applied                                                                                                                                          |
-| ----------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Time              | 10 s               | `sandbox.py` kills the process group and every process of the same uid.                                                                                    |
+| Limit             | Value              | How it is applied                                                                                                                                                |
+| ----------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Time              | 10 s               | `sandbox.py` kills the process group and every process of the same uid.                                                                                          |
 | Memory            | 512 MB             | `sandbox.py` checks every 20 ms and kills if the proportional memory (PSS) passes. `RLIMIT_DATA` (2 GB) makes a huge allocation fail at once with `MemoryError`. |
-| Working directory | 64 MB              | `sandbox.py` measures every 100 ms. More than 5000 entries count as a full disk.                                                                           |
-| One file          | 16 MB              | `RLIMIT_FSIZE`.                                                                                                                                            |
-| Processes/threads | 64                 | `RLIMIT_NPROC` on the uid of the slot.                                                                                                                     |
-| Output            | 64 KiB             | `sandbox.py` kills the job when it is exceeded.                                                                                                            |
-| CPU time          | time + 2 s         | `RLIMIT_CPU`.                                                                                                                                              |
-| Network           | `AF_UNIX` only     | A seccomp filter in `launcher.py` denies `socket` of any other family.                                                                                     |
-| Writing           | its directory only | An unprivileged uid. `/scratch`, `/tmp`, `/var/tmp` and `/app` belong to root.                                                                             |
+| Working directory | 64 MB              | `sandbox.py` measures every 100 ms. More than 5000 entries count as a full disk.                                                                                 |
+| One file          | 16 MB              | `RLIMIT_FSIZE`.                                                                                                                                                  |
+| Processes/threads | 64                 | `RLIMIT_NPROC` on the uid of the slot.                                                                                                                           |
+| Output            | 64 KiB             | `sandbox.py` kills the job when it is exceeded.                                                                                                                  |
+| CPU time          | time + 2 s         | `RLIMIT_CPU`.                                                                                                                                                    |
+| Network           | `AF_UNIX` only     | A seccomp filter in `launcher.py` denies `socket` of any other family.                                                                                           |
+| Writing           | its directory only | An unprivileged uid. `/scratch`, `/tmp`, `/var/tmp` and `/app` belong to root.                                                                                   |
 
 The values change with `QG_WALL_S` (10), `QG_MEM_MB` (512) and `QG_SCRATCH_MB`
 (64).
