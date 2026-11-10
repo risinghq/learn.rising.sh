@@ -70,6 +70,9 @@ def test_tres_espines():
     )
 
 
+# Seeded Aer counts differ across machines: over seeds 1-8 this case's bias from exacta stays at least 0.059.
 def test_otro_campo():
-    got = learner.magnetizacion_medida(3, 0.8, 1.2, 0.3, 3, 4000)
-    assert de_cuentas(got, 3, 4000) and abs(got - trotter(3, 0.8, 1.2, 0.3, 3)[-1]) < 0.15, f"Con n = 3, J = 0.8, h = 1.2, dt = 0.3, pasos = 3 y disparos = 4000, `magnetizacion_medida` devuelve {got!r}."
+    got = learner.magnetizacion_medida(3, 0.7, 0.6, 0.25, 4, 4000)
+    assert de_cuentas(got, 3, 4000) and abs(got - trotter(3, 0.7, 0.6, 0.25, 4)[-1]) < 0.15 and (
+        abs(got - exacta(3, 0.7, 0.6, 0.25, 4)[-1]) > 0.03
+    ), f"Con n = 3, J = 0.7, h = 0.6, dt = 0.25, pasos = 4 y disparos = 4000, `magnetizacion_medida` devuelve {got!r}."
