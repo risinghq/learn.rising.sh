@@ -23,6 +23,8 @@ from qgcheck.source import stopped
 PORT = int(os.environ.get("PORT", "8080"))
 # A control character takes 6 bytes escaped in JSON; the rest is the envelope.
 MAX_BODY_BYTES = 6 * MAX_CODE + 1024
+# A client still sending its body when the connection closes gets EPIPE, not the 413.
+DRAIN_BYTES = 8 * MAX_BODY_BYTES
 LIMITS = sandbox.Limits(
     wall_s=float(os.environ.get("QG_WALL_S", "10")),
     mem_mb=int(os.environ.get("QG_MEM_MB", "512")),
@@ -89,6 +91,13 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def discard(self, length: int) -> None:
+        while length > 0:
+            chunk = self.rfile.read(min(length, 65536))
+            if not chunk:
+                return
+            length -= len(chunk)
+
     def do_GET(self) -> None:
         if self.path == "/health":
             self.reply(200, {"ok": True})
@@ -105,6 +114,8 @@ class Handler(BaseHTTPRequestHandler):
             length = -1
         if not 0 <= length <= MAX_BODY_BYTES:
             self.close_connection = True
+            if length <= DRAIN_BYTES:
+                self.discard(length)
             self.reply(413 if length > 0 else 400, {"error": "cuerpo ausente o demasiado grande"})
             return
         try:
