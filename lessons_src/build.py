@@ -209,21 +209,6 @@ def main(course: str) -> None:
                 summary=les["summary"],
                 minutes=round(secs / 60),
             )
-            missions = [
-                blk
-                for b in les["beats"]
-                for blk in walk(b["scene"])
-                if blk.get("type") == "mission"
-            ]
-            if missions:
-                item["missions"] = [
-                    dict(
-                        notebook=m["notebook"],
-                        title=m.get("title", "Tu turno"),
-                        tasks=len(m["tasks"]),
-                    )
-                    for m in missions
-                ]
             entry["lessons"].append(item)
         course_json["parts"].append(entry)
     ERRORS.extend(

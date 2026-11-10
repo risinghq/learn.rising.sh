@@ -75,17 +75,14 @@ depends = ["typecheck:*"]
 
 [tasks."test:py"]
 description = "Run the pytest suites that need no browser"
-# The grader tests time learner code against a 10 s limit. This suite runs only beside the notebooks,
+# The grader tests time learner code against a 10 s limit. This suite runs only beside the exercise check,
 # each on its own core, and the browser, Worker and lesson suites wait for it.
 wait_for = ["lint", "typecheck", "build"]
 run ="uv run pytest tests/exercises_test.py"
 
-[tasks."test:notebooks"]
-description = "Run the practice notebooks with solutions and controls at both bounds, and check every exercise"
-run = [
-  "uv run python tools/practica.py",
-  "uv run python tools/exercises.py",
-]
+[tasks."test:exercises"]
+description = "Grade every exercise: its solution passes, its starter fails, its hints and needs hold"
+run = "uv run python tools/exercises.py"
 
 [tasks."test:ui"]
 description = "Drive the exercise editor, the browser-graded exercises, the project panel, the shell, the drill session, the theme, the optional account and the friends board in a browser, and hold the shell to its script budget"
@@ -131,7 +128,7 @@ run = "uv run pytest tests/runner_test.py"
 
 [tasks.test]
 description = "Run every test that needs no service, network or secret"
-depends = ["test:py", "test:notebooks", "test:ui", "test:tools", "test:worker", "test:lessons"]
+depends = ["test:py", "test:exercises","test:ui", "test:tools", "test:worker", "test:lessons"]
 
 [tasks."generate:lessons"]
 description = "Rewrite site/<course>/lessons/*/lesson.json and site/<course>/course.json of every course from lessons_src"
@@ -147,7 +144,7 @@ run = "bun drill/build.ts"
 [tasks."generate:scripts"]
 description = "Bundle the TypeScript in site/ and editor/src into the JavaScript the pages load, which git ignores"
 run = [
-  "bun build site/theme.ts site/account.ts site/qiskit/notebooks.ts site/player/engine.ts --root site --outdir site --format=iife --target=browser",
+  "bun build site/theme.ts site/account.ts site/player/engine.ts --root site --outdir site --format=iife --target=browser",
   "bun build editor/src/index.ts --outfile site/player/editor.js --format=iife --target=browser --minify",
   "bun build site/player/pyodide-worker.ts --outfile site/player/pyodide-worker.js --format=esm --target=browser --minify",
 ]

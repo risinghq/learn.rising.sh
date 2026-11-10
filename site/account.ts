@@ -38,7 +38,7 @@ const EXERCISE = new RegExp(
   `^${COURSE}:exercise:([a-z0-9-]{1,40}/[a-z0-9-]{1,40})$`,
 );
 const KV = new RegExp(
-  `^${COURSE}:(?:pos:[a-z0-9-]{1,60}|heard:[a-z0-9-]{1,60}|predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}|hitos|misiones|repaso)$`,
+  `^${COURSE}:(?:pos:[a-z0-9-]{1,60}|heard:[a-z0-9-]{1,60}|predict:[a-z0-9-]{1,60}:[A-Za-z0-9_-]{1,60}|hitos|repaso)$`,
 );
 
 // The body of POST /api/merge and PUT /api/progress, and the merge response.

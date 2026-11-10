@@ -24,25 +24,6 @@ export function stateOf(
 export const lessonHref = (slug: string, id: string) =>
   `/${slug}/lesson.html?l=${encodeURIComponent(id)}`;
 
-/** A mission of a finished lesson that the learner has not marked. The project's notebooks have their own track. */
-export function pendingMission(
-  lessons: Lesson[],
-  done: ReadonlySet<string>,
-  marked: readonly string[],
-) {
-  for (const lesson of lessons) {
-    if (!done.has(lesson.id)) continue;
-    const mission = lesson.missions?.find(
-      (m) => !m.notebook.includes("proyecto/") && !marked.includes(m.notebook),
-    );
-    if (mission) return { lesson, mission };
-  }
-  return undefined;
-}
-
-export const notebookCommand = (notebook: string) =>
-  `uv run marimo edit ${notebook}`;
-
 export const hours = (minutes: number) =>
   (minutes / 60).toLocaleString("es", { maximumFractionDigits: 1 });
 

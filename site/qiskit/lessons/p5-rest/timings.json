@@ -224,11 +224,11 @@
   ]
  },
  "proyecto": {
-  "dur": 37.896,
+  "dur": 36.912,
   "marks": {
    "estimar": 11.379,
-   "falso": 18.753,
-   "real": 26.226
+   "falso": 18.201,
+   "real": 25.249
   },
   "cues": [
    [
@@ -237,14 +237,14 @@
    ],
    [
     11.379,
-    "Antes de enviar, estimas el tiempo de QPU con una fórmula que el propio cuaderno te explica."
+    "Antes de enviar, estimas el tiempo de QPU con una fórmula que la lección te explica."
    ],
    [
-    18.753,
-    "El cuaderno corre completo en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí."
+    18.201,
+    "La práctica corre en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí."
    ],
    [
-    26.226,
+    25.249,
     "Un interruptor, bien marcado, manda el mismo trabajo a hardware real con tu cuenta guardada, y solo se envía si pulsas el botón y la estimación cabe en el presupuesto."
    ]
   ]

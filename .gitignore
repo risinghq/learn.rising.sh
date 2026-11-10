@@ -5,7 +5,6 @@ site/account.js
 site/player/editor.js
 site/player/engine.js
 site/player/pyodide-worker.js
-site/qiskit/notebooks.js
 site/*/items.json
 site/index.html
 site/privacidad.html

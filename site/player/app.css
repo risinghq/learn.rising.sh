@@ -1057,54 +1057,12 @@ code {
   color: var(--teal);
   margin-bottom: 12px;
 }
-.mtask {
-  display: flex;
-  gap: 16px;
-  align-items: baseline;
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
-  font-size: 24px;
-  transition: opacity var(--d-reveal) var(--ease);
-}
-.mtask.hid {
-  opacity: 0;
-  transition-duration: var(--d-base);
-}
-.mtask .mlv {
-  flex: none;
-  width: 150px;
-  font-size: 17px;
-  font-weight: var(--w-strong);
-  color: var(--muted);
-}
-.mcmd {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 14px;
-  flex-wrap: wrap;
-}
-.mcmd code {
-  font-size: 18px;
-  padding: 8px 12px;
-}
 .mhow {
   flex-basis: 100%;
   margin: 0;
   font-size: 18px;
   color: var(--muted);
 }
-.mhow a {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-@media (orientation: portrait) {
-  .mtask {
-    flex-direction: column;
-    gap: 4px;
-  }
-}
-
 div#stage.work {
   overflow-y: auto;
 }
@@ -1126,22 +1084,6 @@ div#stage.work .mcard {
 div#stage.work .mtitle {
   font-size: var(--t-lg);
   margin: 0;
-}
-div#stage.work .mtask {
-  font-size: var(--t-md);
-}
-div#stage.work .mtask .mlv {
-  width: 110px;
-  font-size: var(--t-sm);
-}
-div#stage.work .mcmd code {
-  font-size: var(--t-sm);
-}
-div#stage.work .mcmd .abtn {
-  height: auto;
-  min-height: 2.75rem;
-  padding: 0 var(--s4);
-  font-size: var(--t-md);
 }
 .xnext {
   align-self: flex-end;

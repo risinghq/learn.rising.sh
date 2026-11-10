@@ -10,7 +10,6 @@ from lib import (
     G,
     L,
     M,
-    Mission,
     Out,
     Row,
     Sh,
@@ -1544,7 +1543,7 @@ print(clifford.layout)""",
             "proyecto",
             ("", "Tu proyecto: el hito IX"),
             """Esta lección cierra la Parte nueve, y con ella llega el hito nueve del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice.
-             [[hito]]El cuaderno recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro cuaderno.""",
+             [[hito]]La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio.""",
             [
                 Row(
                     Box(
@@ -1563,28 +1562,54 @@ print(clifford.layout)""",
                     ),
                     gap=24,
                 ),
-                Mission(
-                    "practica/proyecto/hito9.py",
-                    [
-                        (
-                            1,
-                            "Recalcula el Hamiltoniano, el circuito de Trotter y la curva exacta de los hitos anteriores.",
-                        ),
-                        (
-                            2,
-                            "Cambia la importación al `Estimator` del lado del cliente y compara con la curva ideal.",
-                        ),
-                        (
-                            3,
-                            "Escribe `magnetizacion_conteos` y calcula la magnetización con el `Sampler`.",
-                        ),
-                    ],
-                    title="Proyecto Ising · Hito IX",
-                    id="m",
+                Exercise(
+                    "p9-migraciones/hito9-referencia",
+                    "Escribe `curva_ideal(n, J, h, dt, pasos)`: calcula la magnetización exacta del modelo de Ising en cada instante, incluido el inicial.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
                     hidden=True,
+                    hints=[
+                        "Construye `H = J·sum(ZZ) + h·sum(X)` y `M = sum(Z) / n` como `SparsePauliOp`.",
+                        "Usa `expm(-1j * H * dt)` y empieza con el estado `|0…0⟩`.",
+                        "Evalúa `⟨M⟩` antes de cada evolución y devuelve `pasos + 1` valores.",
+                    ],
+                ),
+                Exercise(
+                    "p9-migraciones/hito9-estimator",
+                    "Migra `medir(n, J, h, dt, pasos)`: mide ⟨M⟩ tras 1, …, `pasos` pasos de Trotter en `FakeManilaV2`, con ruido. Corrige la importación de `Estimator` para usar la implementación del lado del cliente de `qiskit_ibm_runtime`; el resto del código no cambia.",
+                    level=2,
+                    needs="aer",
+                    kind="fix",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "La migración cambia el módulo, no el nombre que usa el resto del código.",
+                        "Busca la implementación `executor_estimator` del paquete de Runtime.",
+                        "La forma es `from qiskit_ibm_runtime.___ import Estimator`.",
+                    ],
+                ),
+                Exercise(
+                    "p9-migraciones/hito9-conteos",
+                    "Completa `magnetizacion(conteos, n)`: `magnetizacion_conteos(n, J, h, dt, pasos, disparos)` ya mide la cadena con el `Sampler` del lado del cliente sobre `FakeManilaV2` y te pasa las cuentas. Convierte las cadenas de bits y sus frecuencias en ⟨M⟩ = (1/n) Σᵢ ⟨Zᵢ⟩, donde `0` aporta `+1` y `1` aporta `-1`. La trampa: normaliza por los disparos de las cuentas y por los `n` espines.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "Cada bit cero suma uno y cada bit uno resta uno, ponderados por cuántas veces salió la cadena.",
+                        "Suma los valores de `conteos` para saber los disparos totales y divide al final.",
+                        'La forma es `sum(cuenta * sum(1 if bit == "0" else -1 for bit in ___) for cadena, cuenta in conteos.items()) / (___ * disparos)`.',
+                    ],
                 ),
             ],
-            [A("show", "a", at="migrar"), A("show", "b", at="paquete"), A("show", "m", at="hito")],
+            [
+                A("show", "a", at="migrar"),
+                A("show", "b", at="paquete"),
+                A("show", "e1", at="hito"),
+                A("show", "e2", at="hito", t=1),
+                A("show", "e3", at="hito", t=2),
+            ],
         ),
         beat(
             "reflexion",

@@ -9,7 +9,6 @@
     "site/computational-physics/course.json",
     "site/vendor/**",
     "content/**",
-    "practica/soluciones/**",
     ".cache/**",
     "**/bun.lock",
     "**/*.html",

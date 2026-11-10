@@ -168,16 +168,6 @@ def reflect(*prompts: str) -> Block:
     return dict(kind="reflect", prompts=list(prompts))
 
 
-def Mission(notebook: str, tasks: Iterable[tuple[int, str]], **k: Any) -> Block:
-    """«Tu turno» card: tasks = [(level, text)] with level 1 (reproduce), 2 (modify) or 3 (create)."""
-    return dict(
-        type="mission",
-        notebook=notebook,
-        tasks=[dict(level=level, text=t) for level, t in tasks],
-        **k,
-    )
-
-
 def Exercise(
     path: str,
     prompt: str,

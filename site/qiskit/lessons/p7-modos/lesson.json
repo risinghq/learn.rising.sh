@@ -636,35 +636,81 @@
     "7.7",
     "Tu proyecto: hito VII"
    ],
-   "say": "El hito siete del proyecto de espines junta lo de esta parte. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz. [[lote]]Después mides varios pasos de tiempo en un lote, cada uno en su trabajo. [[real]]Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar. [[ojo]]El notebook recalcula los resultados de los hitos anteriores, así que no depende de ellos.",
+   "say": "El hito siete del proyecto de espines junta lo de esta parte. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz. [[lote]]Después mides varios pasos de tiempo en un lote, cada uno en su trabajo. [[real]]Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar. [[ojo]]La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos.",
    "scene": [
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito7.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Compara la cadena de Trotter en un backend con y sin `rx`/`rzz` nativas."
-      },
-      {
-       "level": 2,
-       "text": "Mide los pasos 1 a 4 en un `Batch` sobre un backend simulado."
-      },
-      {
-       "level": 3,
-       "text": "Escribe la guardia que estima el uso y respeta el presupuesto restante del plan Open."
-      }
+     "type": "exercise",
+     "exercise": "p7-modos/hito7-cadena",
+     "prompt": "Completa `cadena(n, J, h, dt, pasos)` y `transpilar(n, J, h, dt, pasos, fraccional)`. Cada paso aplica `rzz(2·J·dt)` en los enlaces impares, después en los pares, y `rx(2·h·dt)` en cada espín. `transpilar` usa un `GenericBackendV2` que, con `fraccional`, también acepta `rx` y `rzz`. Con puertas fraccionarias el circuito no lleva ninguna `cz` y dura menos.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Cada paso tiene una fase de enlaces y otra de campos locales; los enlaces impares empiezan en el qubit 1.",
+      "En `cadena`, cambia el `pass` por dos bucles de `rzz`. En `transpilar`, suma las dos puertas a `base` solo si `fraccional`.",
+      "Las formas son `for q in range(___, n - 1, 2): qc.rzz(2 * J * dt, q, q + 1)` y `base = [...] + ([\"rx\", \"rzz\"] if ___ else [])`."
      ],
-     "title": "Proyecto Ising · Hito VII",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.providers.fake_provider import GenericBackendV2\nfrom qiskit.transpiler import generate_preset_pass_manager\n\n\ndef cadena(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        pass  # ✏️ las rzz de los enlaces impares y después las de los pares\n        for q in range(n):\n            qc.rx(2 * h * dt, q)\n    return qc\n\n\ndef transpilar(n, J, h, dt, pasos, fraccional):\n    base = [\"cz\", \"rz\", \"sx\", \"x\"]  # ✏️ con fraccional, el backend también acepta rx y rzz\n    backend = GenericBackendV2(n, basis_gates=base, seed=1)\n    pm = generate_preset_pass_manager(3, backend=backend, scheduling_method=\"alap\", seed_transpiler=1)\n    return pm.run(cadena(n, J, h, dt, pasos))",
+     "cases": [
+      "4 espines y 6 pasos: 36 cz sin fraccionales, 18 rzz y ninguna cz con ellas, la misma evolución y menos duración"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-modos/hito7-lote",
+     "prompt": "Corrige `lote(n, J, h, dt, pasos)`: dentro de un `Batch` sobre `FakeBelemV2`, envía un trabajo del `Estimator` por cada número de pasos de 1 a `pasos` y devuelve ⟨M⟩ de cada uno, con ruido. Hoy solo envía el primer paso.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Un trabajo por instante da la curva completa, en orden temporal.",
+      "Solo cambia la lista del `for` que crea los trabajos.",
+      "La forma es `for k in range(___, ___):`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import Batch\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeBelemV2\n\n\ndef cadena(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for q in range(1, n - 1, 2):\n            qc.rzz(2 * J * dt, q, q + 1)\n        for q in range(0, n - 1, 2):\n            qc.rzz(2 * J * dt, q, q + 1)\n        for q in range(n):\n            qc.rx(2 * h * dt, q)\n    return qc\n\n\ndef lote(n, J, h, dt, pasos):\n    backend = FakeBelemV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    with Batch(backend=backend) as sesion:\n        estimator = Estimator(mode=sesion)\n        estimator.options.simulator.seed_simulator = 5\n        trabajos = []\n        for k in [1]:\n            isa = pm.run(cadena(n, J, h, dt, k))\n            trabajos.append(estimator.run([(isa, M.apply_layout(isa.layout))], precision=0.02))\n        return [float(t.result()[0].data.evs) for t in trabajos]",
+     "cases": [
+      "3 espines y 2 trabajos en un lote de FakeBelemV2: cada medida queda a menos de 0.15 del valor sin ruido"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p7-modos/hito7-guardia",
+     "prompt": "Completa `guardia(n, J, h, dt, pasos, disparos, restante_s, activado)`: transpila y programa en `FakeFez` los circuitos de 1 a `pasos` pasos y devuelve `(permitido, uso_s)`. Cada circuito cuesta `ceil(2 + (duración + espera) · disparos)` segundos, y la espera es el `reset` del qubit 0 más el `default_rep_delay` del backend. La trampa: solo se permite el envío si el interruptor está activo y el uso cabe en `restante_s`.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "La guardia calcula el coste aunque vaya a bloquear el envío, y cada disparo espera al reset.",
+      "Lee la duración del reset en `backend.target`, y une las dos condiciones en el `return`.",
+      "Las formas son `backend.target[\"reset\"][(0,)].duration + backend.___` y `activado and uso_s <= ___`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import math\n\nfrom qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef cadena(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for q in range(1, n - 1, 2):\n            qc.rzz(2 * J * dt, q, q + 1)\n        for q in range(0, n - 1, 2):\n            qc.rzz(2 * J * dt, q, q + 1)\n        for q in range(n):\n            qc.rx(2 * h * dt, q)\n    return qc\n\n\ndef guardia(n, J, h, dt, pasos, disparos, restante_s, activado):\n    backend = FakeFez()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    agenda = generate_preset_pass_manager(target=backend.target, optimization_level=0, scheduling_method=\"alap\")\n    espera = 0  # ✏️ el reset del qubit 0 más el rep_delay por defecto del backend\n    uso_s = 0\n    for k in range(1, pasos + 1):\n        duracion = agenda.run(pm.run(cadena(n, J, h, dt, k))).estimate_duration(backend.target, unit=\"s\")\n        uso_s += math.ceil(2 + (duracion + espera) * disparos)\n    return activado, uso_s  # ✏️ además, el uso debe caber en restante_s",
+     "cases": [
+      "4 espines, 4 circuitos y 4096 disparos en FakeFez: el uso estimado y el permiso"
+     ]
     }
    ],
    "actions": [
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "frac"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "frac",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "frac",
+     "t": 2
     }
    ]
   },

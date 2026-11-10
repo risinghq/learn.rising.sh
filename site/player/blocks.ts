@@ -989,37 +989,10 @@ B.table = (box, s, A) => {
   return o;
 };
 
-// notebook: path of the marimo notebook · tasks: [{level: 1|2|3, text}]
 export const LEVELS: Record<number, string> = {
   1: "Reproduce",
   2: "Modifica",
   3: "Crea",
-};
-
-B.mission = (box, s, A) => {
-  const o: BlockObject = { spec: s };
-  box.classList.remove("fig");
-  const card = A.el("div", "mcard", box);
-  A.el("div", "mtitle", card).textContent = s.title || "Tu turno";
-  o.items = s.tasks.map((t) => {
-    const r = A.el("div", "mtask" + (s.stagger ? " hid" : ""), card);
-    A.el("span", "mlv", r).textContent = LEVELS[t.level] || LEVELS[1];
-    A.rich(A.el("span", "mtx", r), t.text);
-    return r;
-  });
-  const cmd = `uv run marimo edit ${s.notebook}`;
-  const row = A.el("div", "mcmd", card);
-  A.el("code", "", row).textContent = cmd;
-  const b = A.el("button", "abtn", row);
-  b.textContent = "Copiar";
-  b.addEventListener("click", (e) => {
-    e.stopPropagation();
-    navigator.clipboard?.writeText(cmd).then(() => {
-      b.textContent = "Copiado";
-    });
-  });
-  window.notebookHelp(row);
-  return o;
 };
 
 B.flow = (box, s, A) => {

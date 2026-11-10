@@ -652,25 +652,59 @@
      "size": 24
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito6.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Recalcula el valor exacto y mide el error sin mitigar."
-      },
-      {
-       "level": 2,
-       "text": "Aplica TREX: divide la magnetización entre la calibración con el circuito vacío."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `extrapolar(factores, valores)` con una exponencial y compara los tres métodos."
-      }
+     "type": "exercise",
+     "exercise": "p6-neat/hito6-magnetizacion",
+     "prompt": "`magnetizacion_medida(n, J, h, dt, pasos, disparos)` ya mide la cadena de Trotter en un simulador con el ruido de `FakeManilaV2`. Completa el final: convierte las cuentas en ⟨M⟩ = (1/n) Σᵢ ⟨Zᵢ⟩. La trampa: el qubit 0 es el bit de la derecha de cada cadena.",
+     "level": 1,
+     "needs": "aer",
+     "hints": [
+      "Cada cadena contribuye según sus bits y cuántas veces apareció: `0` aporta `+1` y `1` aporta `-1`.",
+      "Recorre `cuentas.items()` y, dentro, cada qubit; normaliza al final por `n` y por los disparos.",
+      "La forma es `suma += veces * (1 - 2 * int(bits[___]))` y `return suma / (___ * disparos)`."
      ],
-     "title": "Proyecto Ising · Hito VI",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.primitives import SamplerV2\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef magnetizacion_medida(n, J, h, dt, pasos, disparos):\n    backend = AerSimulator.from_backend(FakeManilaV2())\n    pm = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1)\n    qc = trotter(n, J, h, dt, pasos)\n    qc.measure_all()\n    sampler = SamplerV2.from_backend(backend, options={\"backend_options\": {\"seed_simulator\": 3}})\n    cuentas = sampler.run([(pm.run(qc), None, disparos)]).result()[0].data.meas.get_counts()\n    return 0.0  # ✏️ ⟨M⟩ = (1/n) Σᵢ ⟨Zᵢ⟩ a partir de las cuentas; el qubit 0 es el bit de la derecha",
+     "cases": [
+      "3 espines y 2 pasos con el ruido de FakeManilaV2: la medida sale de las cuentas y el ruido la sesga"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-neat/hito6-trex",
+     "prompt": "Corrige `trex(n, J, h, dt, pasos, disparos)`: mide la cadena con cada patrón de volteos `X` antes de la lectura, y también un circuito vacío de calibración con los mismos volteos. Hoy devuelve la media medida sin corregir el sesgo de lectura.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "La calibración mide cuánto encoge la lectura una magnetización que vale exactamente `1`.",
+      "La lista `m_cal` ya tiene las medias de calibración; falta usarla en el `return`.",
+      "La forma es `float(np.mean(___) / np.mean(___))`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "import itertools\n\nimport numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit_aer import AerSimulator\nfrom qiskit_aer.noise import NoiseModel, ReadoutError\nfrom qiskit_aer.primitives import SamplerV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef lectura_ruidosa():\n    ruido = NoiseModel()\n    ruido.add_all_qubit_readout_error(ReadoutError([[0.95, 0.05], [0.15, 0.85]]))\n    return ruido\n\n\ndef medir(circuitos, disparos):\n    sampler = SamplerV2(options={\"backend_options\": {\"noise_model\": lectura_ruidosa(), \"seed_simulator\": 3}})\n    return [r.data.meas.get_counts() for r in sampler.run([(c, None, disparos) for c in circuitos]).result()]\n\n\ndef con_volteo(qc, volteo):\n    out = qc.copy()\n    for i, b in enumerate(volteo):\n        if b:\n            out.x(i)\n    out.measure_all()\n    return out\n\n\ndef magnetizacion(cuentas, n, volteo):\n    total = sum(cuentas.values())\n    suma = 0\n    for bits, veces in cuentas.items():\n        for i in range(n):\n            signo = 1 - 2 * int(bits[n - 1 - i])\n            suma += veces * (-signo if volteo[i] else signo)\n    return suma / (n * total)\n\n\ndef trex(n, J, h, dt, pasos, disparos):\n    volteos = list(itertools.product([0, 1], repeat=n))\n    base = trotter(n, J, h, dt, pasos)\n    cuentas_tw = medir([con_volteo(base, v) for v in volteos], disparos)\n    cuentas_cal = medir([con_volteo(QuantumCircuit(n), v) for v in volteos], disparos)\n    m_tw = [magnetizacion(c, n, v) for c, v in zip(cuentas_tw, volteos)]\n    m_cal = [magnetizacion(c, n, v) for c, v in zip(cuentas_cal, volteos)]\n    return float(np.mean(m_tw))",
+     "cases": [
+      "3 espines con error de lectura: TREX devuelve el valor de Trotter sin ruido"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p6-neat/hito6-zne",
+     "prompt": "Completa `plegar(qc, k)` y `extrapolar(factores, valores)`: `zne(n, J, h, dt, pasos, p)` mide ⟨M⟩ con ruido despolarizante en los factores 1, 3 y 5 y devuelve `(crudo, mitigado)`. `plegar` añade `k` veces `U† U` tras `U`; `extrapolar` ajusta una recta a `ln(valores)` y devuelve `e` elevado a la ordenada en el origen. La trampa: sin una barrera antes de cada mitad, el transpilador cancela `U† U` y los tres factores miden lo mismo.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Una exponencial se vuelve lineal al tomar logaritmos, y el plegado solo amplifica el ruido si sobrevive al transpilador.",
+      "En `plegar`, repite `k` veces: barrera, `qc.inverse()`, barrera, `qc`. En `extrapolar`, usa `np.polyfit` de grado 1.",
+      "Las formas son `out.compose(___, inplace=True)` tras cada `out.barrier()` y `np.polyfit(factores, np.log(___), 1)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer.noise import NoiseModel, depolarizing_error\nfrom qiskit_aer.primitives import EstimatorV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef plegar(qc, k):\n    return qc.copy()  # ✏️ U seguido de k veces U† U, con una barrera antes de cada mitad\n\n\ndef extrapolar(factores, valores):\n    return valores[0]  # ✏️ ajusta una recta a ln(valores) y devuelve e elevado a la ordenada en el origen\n\n\ndef zne(n, J, h, dt, pasos, p):\n    ruido = NoiseModel()\n    ruido.add_all_qubit_quantum_error(depolarizing_error(p, 2), [\"cx\"])\n    pm = generate_preset_pass_manager(1, basis_gates=[\"cx\", \"rz\", \"sx\", \"x\"])\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    base = trotter(n, J, h, dt, pasos)\n    circuitos = [pm.run(plegar(base, k)) for k in (0, 1, 2)]\n    estimator = EstimatorV2(options={\"backend_options\": {\"noise_model\": ruido}})\n    valores = [float(r.data.evs) for r in estimator.run([(c, M) for c in circuitos]).result()]\n    return valores[0], extrapolar([1, 3, 5], valores)",
+     "cases": [
+      "3 espines y p = 0.03: el valor crudo, la extrapolación a ruido cero y la mejora"
+     ]
     }
    ],
    "actions": [
@@ -694,8 +728,20 @@
     },
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "sim"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "sim",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "sim",
+     "t": 2
     }
    ]
   },

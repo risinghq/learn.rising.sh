@@ -8,66 +8,19 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { courseKey } from "@site/progress.ts";
-
 import type { CoursePage, Lesson, Part } from "../model.ts";
 import {
   lessonHref,
   lessonsOf,
   nextLesson,
-  notebookCommand,
-  pendingMission,
   splitTitle,
   stateOf,
 } from "../path.ts";
-import { save, useDone, useJson, useReady } from "../store.ts";
-import { Command, NotebookHelp } from "./Command.tsx";
+import { useDone, useReady } from "../store.ts";
 import { Layout } from "./Layout.tsx";
 import { ProjectTrack } from "./ProjectTrack.tsx";
 
-const NO_NOTEBOOKS: string[] = [];
-
 const label = (lesson: Lesson) => `${lesson.section} ${lesson.title}`;
-
-function Practice({
-  slug,
-  lessons,
-  done,
-}: {
-  slug: string;
-  lessons: Lesson[];
-  done: ReadonlySet<string>;
-}) {
-  const key = courseKey(slug, "misiones");
-  const stored = useJson<unknown>(key, NO_NOTEBOOKS);
-  const marked = Array.isArray(stored)
-    ? stored.filter((value): value is string => typeof value === "string")
-    : NO_NOTEBOOKS;
-  const pending = pendingMission(lessons, done, marked);
-  if (!pending) return null;
-  const { lesson, mission } = pending;
-  return (
-    <section className="card practice" aria-labelledby="t-practica">
-      <h2 id="t-practica">Práctica pendiente</h2>
-      <p>
-        <b>{label(lesson)}</b>
-      </p>
-      <p className="muted">
-        {mission.tasks === 1 ? "1 misión" : `${mission.tasks} misiones`} en el
-        cuaderno. Busca {mission.tasks === 1 ? "la ✅" : "las ✅"}.
-      </p>
-      <Command command={notebookCommand(mission.notebook)} />
-      <button
-        type="button"
-        className="btn"
-        onClick={() => save(key, [...marked, mission.notebook])}
-      >
-        Ya la hice
-      </button>
-      <NotebookHelp />
-    </section>
-  );
-}
 
 function ReviewCard({ slug }: { slug: string }) {
   return (
@@ -274,7 +227,6 @@ export function CoursePath({ page }: { page: CoursePage }) {
             {finished} de {lessons.length} lecciones
           </span>
         </div>
-        <Practice slug={course.slug} lessons={lessons} done={done} />
         <div className="units">
           {parts.map((part, index) => (
             <Unit

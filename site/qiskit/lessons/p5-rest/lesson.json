@@ -451,7 +451,7 @@
     "5.7",
     "Tu proyecto: hito V"
    ],
-   "say": "Y con esto llegas al hito cinco del proyecto: tu primera ejecución en un procesador cuántico real, con un presupuesto de como máximo un minuto de QPU. [[estimar]]Antes de enviar, estimas el tiempo de QPU con una fórmula que el propio cuaderno te explica. [[falso]]El cuaderno corre completo en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí. [[real]]Un interruptor, bien marcado, manda el mismo trabajo a hardware real con tu cuenta guardada, y solo se envía si pulsas el botón y la estimación cabe en el presupuesto.",
+   "say": "Y con esto llegas al hito cinco del proyecto: tu primera ejecución en un procesador cuántico real, con un presupuesto de como máximo un minuto de QPU. [[estimar]]Antes de enviar, estimas el tiempo de QPU con una fórmula que la lección te explica. [[falso]]La práctica corre en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí. [[real]]Un interruptor, bien marcado, manda el mismo trabajo a hardware real con tu cuenta guardada, y solo se envía si pulsas el botón y la estimación cabe en el presupuesto.",
    "scene": [
     {
      "type": "math",
@@ -459,32 +459,78 @@
      "size": 46
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito5.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Recalcula la referencia: Hamiltoniano, pasos de Trotter y magnetización exacta."
-      },
-      {
-       "level": 2,
-       "text": "Estima el uso de QPU antes de enviar y comprueba que cabe en 60 s."
-      },
-      {
-       "level": 3,
-       "text": "Ejecuta con `Estimator` sin mitigación; el interruptor ⚠️ lo envía a un QPU real."
-      }
+     "type": "exercise",
+     "exercise": "p5-rest/hito5-referencia",
+     "prompt": "Escribe `magnetizacion_referencia(n, J, h, dt, pasos)`: devuelve ⟨M⟩ ideal, sin ruido, tras 0, 1, …, `pasos` pasos de Trotter desde `|0…0⟩`. Cada paso aplica `rzz(2·J·dt)` en cada enlace y `rx(2·h·dt)` en cada espín.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "La lista necesita también el estado inicial.",
+      "Construye un circuito con el número de pasos de cada instante y calcula `⟨M_Z⟩`.",
+      "Recorre `range(pasos + 1)` y añade el valor esperado del observable."
      ],
-     "title": "Proyecto Ising · Hito V",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "def magnetizacion_referencia(n, J, h, dt, pasos):\n    return []",
+     "cases": [
+      "la referencia incluye el estado inicial y los valores posteriores"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/hito5-uso",
+     "prompt": "Corrige `estimar_uso(n, J, h, dt, pasos, disparos)`: transpila los circuitos de 1 a `pasos` pasos para `FakeManilaV2`, programa cada uno y estima los segundos de QPU. Hoy solo cuenta la duración de cada circuito por disparo.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Entre un disparo y el siguiente, el qubit se reinicia y espera; ese tiempo también es de QPU.",
+      "La variable `espera` ya suma el `reset` y `default_rep_delay`; falta usarla en la línea marcada.",
+      "La forma es `uso += (___ + ___) * disparos`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef estimar_uso(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    pm_t = generate_preset_pass_manager(target=backend.target, optimization_level=0, scheduling_method=\"alap\")\n    espera = backend.target[\"reset\"][(0,)].duration + backend.default_rep_delay\n    uso = 2.0\n    for isa in isas:\n        duracion = pm_t.run(isa).estimate_duration(backend.target, unit=\"s\")\n        uso += duracion * disparos\n    return uso",
+     "cases": [
+      "4 espines, 6 circuitos de 4096 disparos en FakeManilaV2: unos 8.4 s de QPU"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/hito5-estimator",
+     "prompt": "Completa `ejecutar(n, J, h, dt, pasos, disparos)`: ejecuta los circuitos ya transpilados con el `Estimator` de `qiskit_ibm_runtime` en modo `FakeManilaV2`, con `disparos` y `seed_simulator=5`, y devuelve ⟨M⟩ de cada circuito como `float`. La trampa: cada observable debe ir con el circuito cuyo `layout` ya aplicaste, un PUB por pareja.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Un PUB reúne un circuito y el observable que quieres medir.",
+      "Crea el `Estimator` con `mode=backend` y fija `default_shots` y `simulator.seed_simulator` en sus opciones.",
+      "La forma es `estimator.run(list(zip(___, ___))).result()` y después `float(pub.data.evs)` por resultado."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef ejecutar(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    observables = [M.apply_layout(isa.layout) for isa in isas]\n    return [0.0] * len(isas)  # ✏️ un Estimator sobre backend, disparos y seed_simulator=5, un PUB por circuito",
+     "cases": [
+      "3 espines y 4 circuitos con ruido de FakeManilaV2: la curva medida sigue a la ideal"
+     ]
     }
    ],
    "actions": [
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "estimar"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "estimar",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "estimar",
+     "t": 2
     }
    ]
   },

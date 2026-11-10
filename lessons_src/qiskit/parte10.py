@@ -8,7 +8,6 @@ from lib import (
     Flow,
     L,
     M,
-    Mission,
     Row,
     Sh,
     T,
@@ -1296,30 +1295,50 @@ comunidad = lesson(
              [[pasos]]Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado. [[informe]]Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU. Con las mismas semillas, cualquiera obtiene los mismos números.""",
             [
                 M(r"M(t) = \frac{1}{N}\sum_i \langle Z_i \rangle", size=46),
-                Mission(
-                    "practica/proyecto/hito10.py",
-                    [
-                        (1, "Recalcula la curva exacta y compárala con 20 pasos de Trotter."),
-                        (
-                            2,
-                            "Elige los pasos: error menor que 0.02 y profundidad transpilada de 200 o menos.",
-                        ),
-                        (
-                            3,
-                            "Escribe `informe(r, qpu, anio)` con parámetros, resultados, versiones y citas.",
-                        ),
-                    ],
-                    title="Proyecto Ising · Hito X",
-                    id="m",
+                Exercise(
+                    "p10-comunidad/hito10-referencia",
+                    "Completa `curvas(n, J, h, T, pasos)`: devuelve `(exacta, trotter)`, dos listas de ⟨M⟩ en `t = k·T/pasos` para `k = 0, …, pasos`. La curva de Trotter ya está; falta la exacta, que evoluciona `|0…0⟩` con `exp(-i H t)`.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
                     hidden=True,
-                    stagger=True,
+                    hints=[
+                        "Cada instante tiene su propia evolución `exp(-i H t)` desde el mismo estado inicial.",
+                        "Recorre `k` de 0 a `pasos`, evoluciona `psi0` con `expm` y mide `M` con su matriz.",
+                        "La forma es `psi = expm(-1j * H * ___) @ psi0` y `np.vdot(psi, M.to_matrix() @ psi)`.",
+                    ],
+                ),
+                Exercise(
+                    "p10-comunidad/hito10-curva",
+                    "Completa `evaluar(n, J, h, T, pasos)` y `elegir_pasos(n, J, h, T)`. `evaluar` devuelve el mayor error `|exacta − Trotter|` entre todos los instantes y la profundidad del circuito medido en `FakeFez`. `elegir_pasos` prueba pasos crecientes desde 1 y devuelve el primero con error menor que `0.02` y profundidad de como mucho `200`. La trampa: el error que cuenta es el peor de la curva, no el del último instante.",
+                    level=2,
+                    needs="qiskit",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Un número de pasos sirve si toda la curva queda cerca de la exacta y el circuito cabe en el hardware.",
+                        "En el bucle de `evaluar`, compara `exacta` con ⟨M⟩ del circuito de Trotter de `k` pasos y conserva el máximo.",
+                        "Las formas son `error = max(error, abs(exacta - ___))` y `if error < 0.02 and profundidad <= ___: return pasos`.",
+                    ],
+                ),
+                Exercise(
+                    "p10-comunidad/hito10-informe",
+                    "Completa `informe(n, J, h, T, pasos, disparos, semilla, qpu, anio)`: devuelve Markdown con parámetros, una tabla `| t | exacta | Trotter | Trotter con ruido |`, versiones y citas. Falta la columna con ruido: ⟨M⟩ desde los conteos simulados con el ruido de `FakeManilaV2`. Con un `qpu` añade la frase del procesador con sus datos; para `ibm_fez`, versión `1.2.8` y familia `Heron` es «In this paper we used `ibm_fez` (v1.2.8), an IBM Quantum Heron processor.». Con `None`, omítela.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "La columna con ruido viene de las cuentas, no del estado ideal; cada bit `0` suma `+1` y cada `1` resta `1`.",
+                        "En `resultados`, cambia `ruidosa` usando `cuentas`; en `informe`, añade la frase a `citas` solo si hay `qpu`.",
+                        "La forma es `sum(v * sum(1 - 2 * int(b) for b in s) for s, v in cuentas.items()) / (___ * ___)`.",
+                    ],
                 ),
             ],
             [
-                A("show", "m", at="recalcula"),
-                A("item", "m", at="recalcula", i=0),
-                A("item", "m", at="pasos", i=1),
-                A("item", "m", at="informe", i=2),
+                A("show", "e1", at="recalcula"),
+                A("show", "e2", at="pasos"),
+                A("show", "e3", at="informe"),
             ],
         ),
         beat(
@@ -1328,7 +1347,7 @@ comunidad = lesson(
             """Dos preguntas para cerrar el curso. Lo que escribas se guarda en tu navegador.""",
             [T("Un resultado que nadie puede reproducir es solo una anécdota.", "subtitle")],
             ask=reflect(
-                "¿Qué necesita una persona ajena para reproducir tu informe dentro de un año? Haz una lista y marca qué parte ya incluye tu cuaderno.",
+                "¿Qué necesita una persona ajena para reproducir tu informe dentro de un año? Haz una lista y marca qué parte ya incluye tu código.",
                 "Alguien te pide ayuda en Slack con un error. ¿Qué datos pondrías al preguntar, o al abrir un issue, para que la comunidad pueda reproducirlo?",
             ),
         ),

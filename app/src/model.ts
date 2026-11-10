@@ -1,18 +1,11 @@
 // What a page needs, read from site/courses.json and each course's files when the pages are built.
 
-export interface Mission {
-  notebook: string;
-  title: string;
-  tasks: number;
-}
-
 export interface Lesson {
   id: string;
   section: string;
   title: string;
   summary: string;
   minutes: number;
-  missions?: Mission[];
 }
 
 export interface Part {
@@ -40,7 +33,8 @@ export interface Milestone {
   part: number;
   title: string;
   desc: string;
-  notebook: string;
+  lesson: string;
+  exercise: string;
 }
 
 export interface Project {

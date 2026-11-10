@@ -87,16 +87,6 @@ const FAMILIES: Family[] = [
     merge: union,
   },
   {
-    key: /^[a-z0-9-]{1,40}:misiones$/,
-    valid: (value) =>
-      list(
-        value,
-        (item) =>
-          typeof item === "string" && /^[A-Za-z0-9_./-]{1,100}$/.test(item),
-      ),
-    merge: union,
-  },
-  {
     key: /^[a-z0-9-]{1,40}:pos:[a-z0-9-]{1,60}$/,
     valid: isInt,
     merge: (stored, incoming) => Math.max(stored as number, incoming as number),

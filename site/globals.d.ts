@@ -25,8 +25,6 @@ declare var QGAccount: {
 };
 /** engine.ts: the narration audio, for the automated tests. */
 declare var QGNarration: HTMLAudioElement;
-/** notebooks.ts: appends the "how to run the notebooks" line to `parent`. */
-declare var notebookHelp: (parent: Element) => HTMLParagraphElement;
 /** theme.ts: switches between the light and the dark theme. */
 declare var toggleTheme: () => void;
 

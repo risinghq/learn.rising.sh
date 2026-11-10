@@ -52,7 +52,7 @@ export function Privacy() {
           </li>
           <li>
             Tu avance en las lecciones: pasos escuchados, último paso, tus
-            apuestas, el repaso espaciado y los hitos y misiones que marcaste.
+            apuestas, el repaso espaciado y los hitos que marcaste.
           </li>
           <li>
             Tu XP: cada vez que ganas XP se guarda el momento, de dónde viene y

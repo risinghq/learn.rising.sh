@@ -145,8 +145,6 @@ interface Attempt {
   settled?: boolean;
 }
 
-const MARIMO = "Los cuadernos de marimo siguen funcionando en tu equipo.";
-
 // `entry` is the request's: it is completed with the time and the cost before it
 // is logged, also when the cap is hit on the retry.
 function overBudget(
@@ -166,7 +164,7 @@ function overBudget(
     return new Refusal(
       entry,
       reason,
-      `El corredor alcanzó su presupuesto de hoy y no ejecuta más código hasta mañana. Puedes volver a ejecutar en ${wait(retryAfter)}. ${MARIMO}`,
+      `El corredor alcanzó su presupuesto de hoy y no ejecuta más código hasta mañana. Puedes volver a ejecutar en ${wait(retryAfter)}.`,
       { "Retry-After": String(retryAfter) },
     );
   }
@@ -176,7 +174,7 @@ function overBudget(
   return new Refusal(
     entry,
     reason,
-    `El corredor alcanzó su presupuesto de este mes y no ejecuta más código hasta que empiece el siguiente. ${MARIMO}`,
+    `El corredor alcanzó su presupuesto de este mes y no ejecuta más código hasta que empiece el siguiente.`,
     { "Retry-After": String(retryAfter) },
   );
 }

@@ -11,7 +11,6 @@ from lib import (
     Hist,
     L,
     M,
-    Mission,
     Out,
     Row,
     T,
@@ -2309,27 +2308,54 @@ with Session(backend=backend) as session:
             ("", "Tu proyecto: hito VII"),
             """El hito siete del proyecto de espines junta lo de esta parte. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz.
              [[lote]]Después mides varios pasos de tiempo en un lote, cada uno en su trabajo. [[real]]Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar.
-             [[ojo]]El notebook recalcula los resultados de los hitos anteriores, así que no depende de ellos.""",
+             [[ojo]]La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos.""",
             [
-                Mission(
-                    "practica/proyecto/hito7.py",
-                    [
-                        (
-                            1,
-                            "Compara la cadena de Trotter en un backend con y sin `rx`/`rzz` nativas.",
-                        ),
-                        (2, "Mide los pasos 1 a 4 en un `Batch` sobre un backend simulado."),
-                        (
-                            3,
-                            "Escribe la guardia que estima el uso y respeta el presupuesto restante del plan Open.",
-                        ),
-                    ],
-                    title="Proyecto Ising · Hito VII",
-                    id="m",
+                Exercise(
+                    "p7-modos/hito7-cadena",
+                    "Completa `cadena(n, J, h, dt, pasos)` y `transpilar(n, J, h, dt, pasos, fraccional)`. Cada paso aplica `rzz(2·J·dt)` en los enlaces impares, después en los pares, y `rx(2·h·dt)` en cada espín. `transpilar` usa un `GenericBackendV2` que, con `fraccional`, también acepta `rx` y `rzz`. Con puertas fraccionarias el circuito no lleva ninguna `cz` y dura menos.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
                     hidden=True,
-                )
+                    hints=[
+                        "Cada paso tiene una fase de enlaces y otra de campos locales; los enlaces impares empiezan en el qubit 1.",
+                        "En `cadena`, cambia el `pass` por dos bucles de `rzz`. En `transpilar`, suma las dos puertas a `base` solo si `fraccional`.",
+                        'Las formas son `for q in range(___, n - 1, 2): qc.rzz(2 * J * dt, q, q + 1)` y `base = [...] + (["rx", "rzz"] if ___ else [])`.',
+                    ],
+                ),
+                Exercise(
+                    "p7-modos/hito7-lote",
+                    "Corrige `lote(n, J, h, dt, pasos)`: dentro de un `Batch` sobre `FakeBelemV2`, envía un trabajo del `Estimator` por cada número de pasos de 1 a `pasos` y devuelve ⟨M⟩ de cada uno, con ruido. Hoy solo envía el primer paso.",
+                    level=2,
+                    needs="aer",
+                    kind="fix",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Un trabajo por instante da la curva completa, en orden temporal.",
+                        "Solo cambia la lista del `for` que crea los trabajos.",
+                        "La forma es `for k in range(___, ___):`.",
+                    ],
+                ),
+                Exercise(
+                    "p7-modos/hito7-guardia",
+                    "Completa `guardia(n, J, h, dt, pasos, disparos, restante_s, activado)`: transpila y programa en `FakeFez` los circuitos de 1 a `pasos` pasos y devuelve `(permitido, uso_s)`. Cada circuito cuesta `ceil(2 + (duración + espera) · disparos)` segundos, y la espera es el `reset` del qubit 0 más el `default_rep_delay` del backend. La trampa: solo se permite el envío si el interruptor está activo y el uso cabe en `restante_s`.",
+                    level=3,
+                    needs="qiskit",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "La guardia calcula el coste aunque vaya a bloquear el envío, y cada disparo espera al reset.",
+                        "Lee la duración del reset en `backend.target`, y une las dos condiciones en el `return`.",
+                        'Las formas son `backend.target["reset"][(0,)].duration + backend.___` y `activado and uso_s <= ___`.',
+                    ],
+                ),
             ],
-            [A("show", "m", at="frac")],
+            [
+                A("show", "e1", at="frac"),
+                A("show", "e2", at="frac", t=1),
+                A("show", "e3", at="frac", t=2),
+            ],
         ),
         beat(
             "reflexion",

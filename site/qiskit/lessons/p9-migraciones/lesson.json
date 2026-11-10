@@ -614,7 +614,7 @@
     "9.5",
     "Tu proyecto: el hito IX"
    ],
-   "say": "Esta lección cierra la Parte nueve, y con ella llega el hito nueve del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice. [[hito]]El cuaderno recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro cuaderno.",
+   "say": "Esta lección cierra la Parte nueve, y con ella llega el hito nueve del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice. [[hito]]La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio.",
    "scene": [
     {
      "type": "row",
@@ -651,25 +651,59 @@
      "gap": 24
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito9.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Recalcula el Hamiltoniano, el circuito de Trotter y la curva exacta de los hitos anteriores."
-      },
-      {
-       "level": 2,
-       "text": "Cambia la importación al `Estimator` del lado del cliente y compara con la curva ideal."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `magnetizacion_conteos` y calcula la magnetización con el `Sampler`."
-      }
+     "type": "exercise",
+     "exercise": "p9-migraciones/hito9-referencia",
+     "prompt": "Escribe `curva_ideal(n, J, h, dt, pasos)`: calcula la magnetización exacta del modelo de Ising en cada instante, incluido el inicial.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Construye `H = J·sum(ZZ) + h·sum(X)` y `M = sum(Z) / n` como `SparsePauliOp`.",
+      "Usa `expm(-1j * H * dt)` y empieza con el estado `|0…0⟩`.",
+      "Evalúa `⟨M⟩` antes de cada evolución y devuelve `pasos + 1` valores."
      ],
-     "title": "Proyecto Ising · Hito IX",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "def curva_ideal(n, J, h, dt, pasos):\n    return []",
+     "cases": [
+      "la curva exacta contiene el instante inicial y los pasos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/hito9-estimator",
+     "prompt": "Migra `medir(n, J, h, dt, pasos)`: mide ⟨M⟩ tras 1, …, `pasos` pasos de Trotter en `FakeManilaV2`, con ruido. Corrige la importación de `Estimator` para usar la implementación del lado del cliente de `qiskit_ibm_runtime`; el resto del código no cambia.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "La migración cambia el módulo, no el nombre que usa el resto del código.",
+      "Busca la implementación `executor_estimator` del paquete de Runtime.",
+      "La forma es `from qiskit_ibm_runtime.___ import Estimator`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import EstimatorV2 as Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef medir(n, J, h, dt, pasos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1)\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    estimador = Estimator(mode=backend)\n    estimador.options.simulator.seed_simulator = 5\n    resultado = estimador.run([(isa, M.apply_layout(isa.layout)) for isa in isas]).result()\n    return [float(pub.data.evs) for pub in resultado]",
+     "cases": [
+      "4 espines y 3 pasos con el Estimator del lado del cliente en FakeManilaV2"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/hito9-conteos",
+     "prompt": "Completa `magnetizacion(conteos, n)`: `magnetizacion_conteos(n, J, h, dt, pasos, disparos)` ya mide la cadena con el `Sampler` del lado del cliente sobre `FakeManilaV2` y te pasa las cuentas. Convierte las cadenas de bits y sus frecuencias en ⟨M⟩ = (1/n) Σᵢ ⟨Zᵢ⟩, donde `0` aporta `+1` y `1` aporta `-1`. La trampa: normaliza por los disparos de las cuentas y por los `n` espines.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Cada bit cero suma uno y cada bit uno resta uno, ponderados por cuántas veces salió la cadena.",
+      "Suma los valores de `conteos` para saber los disparos totales y divide al final.",
+      "La forma es `sum(cuenta * sum(1 if bit == \"0\" else -1 for bit in ___) for cadena, cuenta in conteos.items()) / (___ * disparos)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef magnetizacion(conteos, n):\n    return 0.0  # ✏️ cada bit 0 vale +1 y cada 1 vale -1; promedia sobre los n bits y los disparos\n\n\ndef magnetizacion_conteos(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    qc = trotter(n, J, h, dt, pasos)\n    qc.measure_all()\n    isa = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1).run(qc)\n    sampler = Sampler(mode=backend)\n    sampler.options.simulator.seed_simulator = 3\n    conteos = sampler.run([isa], shots=disparos).result()[0].data.meas.get_counts()\n    return magnetizacion(conteos, n)",
+     "cases": [
+      "4 espines, 4 pasos y 4000 disparos: la magnetización desde los conteos del Sampler en FakeManilaV2"
+     ]
     }
    ],
    "actions": [
@@ -685,8 +719,20 @@
     },
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "hito"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "hito",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "hito",
+     "t": 2
     }
    ]
   },

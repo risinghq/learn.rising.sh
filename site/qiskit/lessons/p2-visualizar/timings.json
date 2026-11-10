@@ -313,7 +313,7 @@
   ]
  },
  "proyecto": {
-  "dur": 34.008,
+  "dur": 34.176,
   "marks": {
    "ham": 8.732,
    "circ": 14.96,
@@ -335,10 +335,10 @@
    ],
    [
     22.999,
-    "El hito dos recalcula lo del hito uno, así que no necesitas nada del cuaderno anterior."
+    "El hito dos recalcula lo del hito uno, así que no necesitas nada del ejercicio anterior."
    ],
    [
-    29.863,
+    30.033,
     "Al final comparas tu curva con la evolución exacta."
    ]
   ]

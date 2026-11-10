@@ -934,25 +934,58 @@
      "gap": 24
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito1.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Crea tu cuenta de IBM Quantum (plan Open) y escribe el Hamiltoniano de 2 espines."
-      },
-      {
-       "level": 2,
-       "text": "Construye un paso de Trotter con `rzz` y `rx`."
-      },
-      {
-       "level": 3,
-       "text": "Calcula la fidelidad frente a la evolución exacta y mira cómo cae al agrandar $dt$."
-      }
+     "type": "exercise",
+     "exercise": "p1-quickstart/hito1-hamiltoniano",
+     "prompt": "Escribe `hamiltoniano(J, h)`: devuelve el Hamiltoniano de dos espines como `SparsePauliOp`, con los términos `ZZ`, `IX` y `XI` y sus coeficientes.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Representa cada interacción como un término de Pauli con su coeficiente.",
+      "La función `from_list` recibe las etiquetas y los coeficientes en una lista.",
+      "Usa `SparsePauliOp.from_list([(...), (...), (...)])`."
      ],
-     "title": "Proyecto Ising · Hito I",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "def hamiltoniano(J, h):\n    return None",
+     "cases": [
+      "dos espines y tres términos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-quickstart/hito1-paso",
+     "prompt": "Completa `paso(J, h, dt)`: construye un circuito de dos qubits con `rzz` entre vecinos y una `rx` en cada qubit. El ángulo de cada puerta debe representar el paso de Trotter.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Qiskit define cada rotación con la mitad del ángulo que aparece en el exponente.",
+      "El ángulo de `rzz` depende de `J` y `dt`; los dos de `rx`, de `h` y `dt`.",
+      "Cambia cada `0.0` por la forma `2 * ___ * dt`, con `J` en la `rzz` y `h` en las dos `rx`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\n\n\ndef paso(J, h, dt):\n    qc = QuantumCircuit(2)\n    qc.rzz(0.0, 0, 1)\n    qc.rx(0.0, 0)\n    qc.rx(0.0, 1)\n    return qc",
+     "cases": [
+      "el circuito aplica exp(-i dt h X) · exp(-i dt J ZZ) a los dos espines"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p1-quickstart/hito1-fidelidad",
+     "prompt": "Escribe `fidelidad(J, h, dt)`: compara el estado exacto y el de Trotter partiendo de `|00⟩` y devuelve $|⟨\\psi_{exacta}|\\psi_{Trotter}⟩|^2$.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "Calcula ambos estados desde el mismo estado inicial y usa el producto interno.",
+      "La matriz exacta sale de `expm` y el estado aproximado de `Statevector.from_instruction`.",
+      "La forma es `abs(np.vdot(___, ___)) ** 2`, con los dos estados que calculaste."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\n\n\ndef fidelidad(J, h, dt):\n    return 0.0",
+     "cases": [
+      "la fidelidad coincide con la evolución exacta"
+     ]
     }
    ],
    "actions": [
@@ -969,8 +1002,20 @@
     },
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "hito"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "hito",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "hito",
+     "t": 2
     }
    ]
   },

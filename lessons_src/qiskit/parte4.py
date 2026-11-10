@@ -11,7 +11,6 @@ from lib import (
     Hist,
     L,
     M,
-    Mission,
     Out,
     Row,
     T,
@@ -2110,25 +2109,51 @@ for mitigation in (False, True):
              Ese instante te dirá cuántos pasos pedirle al QPU en la parte cinco.""",
             [
                 M(r"M(t)=\frac1N\sum_i\langle Z_i\rangle", size=46),
-                Mission(
-                    "practica/proyecto/hito4.py",
-                    [
-                        (
-                            1,
-                            "Recalcula la magnetización exacta y la del circuito de Trotter, sin ruido.",
-                        ),
-                        (2, "Añade un error despolarizante a cada CX y simula con `AerEstimator`."),
-                        (
-                            3,
-                            "Escribe `tiempo_de_validez`: el primer instante en que el ruido supera una tolerancia.",
-                        ),
-                    ],
-                    title="Proyecto Ising · Hito IV",
-                    id="m",
+                Exercise(
+                    "p4-local-testing/hito4-curva",
+                    "`curvas(n, J, h, dt, pasos)` ya calcula la curva de Trotter. Completa la lista `exacta`: ⟨M⟩ en `t = 0, dt, …, pasos·dt` con la evolución exacta `exp(-i H dt)` desde `|0…0⟩`. Las dos curvas deben tener `pasos + 1` puntos.",
+                    level=1,
+                    needs="qiskit",
+                    id="e1",
                     hidden=True,
+                    hints=[
+                        "La evolución exacta aplica la misma matriz `exp(-i H dt)` en cada paso.",
+                        "Calcula la matriz una vez con `expm`, parte de `Statevector.from_label` y anota ⟨M⟩ antes de cada evolución.",
+                        "La forma es `U = expm(-1j * dt * hamiltoniano(___).to_matrix())` y, en el bucle, `psi = psi.evolve(___)`.",
+                    ],
+                ),
+                Exercise(
+                    "p4-local-testing/hito4-ruido",
+                    "`curva_ruidosa(n, J, h, dt, pasos, p)` mide ⟨M⟩ con el `EstimatorV2` de Aer tras 0, 1, …, `pasos` pasos de Trotter. Completa el modelo de ruido: un error despolarizante de dos qubits, con probabilidad `p`, en cada `cx`.",
+                    level=2,
+                    needs="aer",
+                    id="e2",
+                    hidden=True,
+                    hints=[
+                        "Un modelo de ruido se construye vacío y después se registra un error en una puerta.",
+                        "El error despolarizante necesita saber que `cx` actúa sobre dos qubits.",
+                        'La forma es `ruido.add_all_qubit_quantum_error(depolarizing_error(___, ___), ["cx"])`.',
+                    ],
+                ),
+                Exercise(
+                    "p4-local-testing/hito4-validez",
+                    "Completa `tiempo_de_validez(n, J, h, dt, pasos, p, tol)`: calcula la curva exacta y la ruidosa, y devuelve el primer `t = k·dt` en que se separan más que `tol`, o `None` si nunca lo hacen. La trampa: compara con la evolución exacta, no con la curva de Trotter sin ruido.",
+                    level=3,
+                    needs="aer",
+                    id="e3",
+                    hidden=True,
+                    hints=[
+                        "La curva exacta usa `exp(-i H dt)` desde `|0…0⟩`, como en el primer ejercicio del hito.",
+                        "Completa `curva_exacta` y después recorre los instantes en `tiempo_de_validez`.",
+                        "La forma es `if abs(ruidosa[k] - exacta[k]) > ___: return k * ___`.",
+                    ],
                 ),
             ],
-            [A("show", "m", at="hito")],
+            [
+                A("show", "e1", at="hito"),
+                A("show", "e2", at="hito", t=1),
+                A("show", "e3", at="hito", t=2),
+            ],
         ),
         beat(
             "reflexion",

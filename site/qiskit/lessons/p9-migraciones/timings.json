@@ -296,7 +296,7 @@
   ]
  },
  "proyecto": {
-  "dur": 32.88,
+  "dur": 33.0,
   "marks": {
    "migrar": 7.643,
    "paquete": 17.281,
@@ -317,7 +317,7 @@
    ],
    [
     25.447,
-    "El cuaderno recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro cuaderno."
+    "La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio."
    ]
   ]
  },

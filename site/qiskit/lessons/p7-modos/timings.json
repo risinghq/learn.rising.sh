@@ -311,7 +311,7 @@
   ]
  },
  "proyecto": {
-  "dur": 40.488,
+  "dur": 40.128,
   "marks": {
    "frac": 4.883,
    "lote": 13.842,
@@ -337,7 +337,7 @@
    ],
    [
     33.104,
-    "El notebook recalcula los resultados de los hitos anteriores, así que no depende de ellos."
+    "La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos."
    ]
   ]
  },

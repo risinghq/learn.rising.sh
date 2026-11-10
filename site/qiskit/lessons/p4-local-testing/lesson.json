@@ -589,32 +589,77 @@
      "size": 46
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito4.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Recalcula la magnetización exacta y la del circuito de Trotter, sin ruido."
-      },
-      {
-       "level": 2,
-       "text": "Añade un error despolarizante a cada CX y simula con `AerEstimator`."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `tiempo_de_validez`: el primer instante en que el ruido supera una tolerancia."
-      }
+     "type": "exercise",
+     "exercise": "p4-local-testing/hito4-curva",
+     "prompt": "`curvas(n, J, h, dt, pasos)` ya calcula la curva de Trotter. Completa la lista `exacta`: ⟨M⟩ en `t = 0, dt, …, pasos·dt` con la evolución exacta `exp(-i H dt)` desde `|0…0⟩`. Las dos curvas deben tener `pasos + 1` puntos.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "La evolución exacta aplica la misma matriz `exp(-i H dt)` en cada paso.",
+      "Calcula la matriz una vez con `expm`, parte de `Statevector.from_label` y anota ⟨M⟩ antes de cada evolución.",
+      "La forma es `U = expm(-1j * dt * hamiltoniano(___).to_matrix())` y, en el bucle, `psi = psi.evolve(___)`."
      ],
-     "title": "Proyecto Ising · Hito IV",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom scipy.linalg import expm\n\n\ndef hamiltoniano(n, J, h):\n    terminos = [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)]\n    return SparsePauliOp.from_sparse_list(terminos, num_qubits=n)\n\n\ndef magnetizacion(n):\n    return SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n\n\ndef curvas(n, J, h, dt, pasos):\n    M = magnetizacion(n)\n    exacta = []  # ✏️ ⟨M⟩ en t = 0, dt, …, pasos·dt con la evolución exacta desde |0…0⟩\n\n    qc = QuantumCircuit(n)\n    trotter = [1.0]\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n        trotter.append(float(Statevector(qc).expectation_value(M).real))\n    return exacta, trotter",
+     "cases": [
+      "4 espines y 20 pasos: la curva exacta, la de Trotter y la distancia entre ellas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-local-testing/hito4-ruido",
+     "prompt": "`curva_ruidosa(n, J, h, dt, pasos, p)` mide ⟨M⟩ con el `EstimatorV2` de Aer tras 0, 1, …, `pasos` pasos de Trotter. Completa el modelo de ruido: un error despolarizante de dos qubits, con probabilidad `p`, en cada `cx`.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "Un modelo de ruido se construye vacío y después se registra un error en una puerta.",
+      "El error despolarizante necesita saber que `cx` actúa sobre dos qubits.",
+      "La forma es `ruido.add_all_qubit_quantum_error(depolarizing_error(___, ___), [\"cx\"])`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer.noise import NoiseModel, depolarizing_error\nfrom qiskit_aer.primitives import EstimatorV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef curva_ruidosa(n, J, h, dt, pasos, p):\n    ruido = NoiseModel()  # ✏️ añade un error despolarizante de dos qubits, con probabilidad p, a cada cx\n    pm = generate_preset_pass_manager(1, basis_gates=[\"cx\", \"rz\", \"sx\", \"x\"])\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    circuitos = [pm.run(trotter(n, J, h, dt, k)) for k in range(pasos + 1)]\n    estimator = EstimatorV2(options={\"backend_options\": {\"noise_model\": ruido}})\n    resultado = estimator.run([(c, M) for c in circuitos]).result()\n    return [float(r.data.evs) for r in resultado]",
+     "cases": [
+      "4 espines, 6 pasos y p = 0.02: la curva coincide con el modelo de ruido y se aparta de la ideal"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p4-local-testing/hito4-validez",
+     "prompt": "Completa `tiempo_de_validez(n, J, h, dt, pasos, p, tol)`: calcula la curva exacta y la ruidosa, y devuelve el primer `t = k·dt` en que se separan más que `tol`, o `None` si nunca lo hacen. La trampa: compara con la evolución exacta, no con la curva de Trotter sin ruido.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "La curva exacta usa `exp(-i H dt)` desde `|0…0⟩`, como en el primer ejercicio del hito.",
+      "Completa `curva_exacta` y después recorre los instantes en `tiempo_de_validez`.",
+      "La forma es `if abs(ruidosa[k] - exacta[k]) > ___: return k * ___`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_aer.noise import NoiseModel, depolarizing_error\nfrom qiskit_aer.primitives import EstimatorV2\nfrom scipy.linalg import expm\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef curva_ruidosa(n, J, h, dt, pasos, p):\n    ruido = NoiseModel()\n    ruido.add_all_qubit_quantum_error(depolarizing_error(p, 2), [\"cx\"])\n    pm = generate_preset_pass_manager(1, basis_gates=[\"cx\", \"rz\", \"sx\", \"x\"])\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    circuitos = [pm.run(trotter(n, J, h, dt, k)) for k in range(pasos + 1)]\n    estimator = EstimatorV2(options={\"backend_options\": {\"noise_model\": ruido}})\n    resultado = estimator.run([(c, M) for c in circuitos]).result()\n    return [float(r.data.evs) for r in resultado]\n\n\ndef curva_exacta(n, J, h, dt, pasos):\n    return []  # ✏️ ⟨M⟩ en t = 0, dt, …, pasos·dt con exp(-i H dt) desde |0…0⟩\n\n\ndef tiempo_de_validez(n, J, h, dt, pasos, p, tol):\n    ruidosa = curva_ruidosa(n, J, h, dt, pasos, p)\n    exacta = curva_exacta(n, J, h, dt, pasos)\n    # ✏️ devuelve el primer t = k·dt en que |ruidosa - exacta| supera tol, o None\n    return None",
+     "cases": [
+      "4 espines y p = 0.02: con tol = 0.05 la simulación ruidosa deja de valer en t = 0.1"
+     ]
     }
    ],
    "actions": [
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "hito"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "hito",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "hito",
+     "t": 2
     }
    ]
   },

@@ -233,14 +233,6 @@ export interface TableSpec extends SpecBase {
   size?: number;
 }
 
-export interface MissionSpec extends SpecBase {
-  type: "mission";
-  notebook: string;
-  tasks: { level: number; text: string }[];
-  title?: string;
-  stagger?: boolean;
-}
-
 export interface FlowSpec extends SpecBase {
   type: "flow";
   steps: { t: string; s?: string; n?: number | string; color?: string }[];
@@ -290,7 +282,6 @@ export type Spec =
   | CircuitSpec
   | HistSpec
   | TableSpec
-  | MissionSpec
   | FlowSpec
   | GraphSpec
   | ExerciseSpec;

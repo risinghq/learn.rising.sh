@@ -411,23 +411,6 @@ progress {
   text-wrap: pretty;
 }
 
-.cmd {
-  display: grid;
-  gap: var(--s2);
-}
-.cmd code {
-  display: block;
-  padding: var(--s3);
-  border-radius: var(--r2);
-  background: var(--code-bg);
-  overflow-wrap: anywhere;
-}
-.help {
-  margin: 0;
-  color: var(--muted);
-  font-size: var(--t-sm);
-}
-
 .review,
 .project {
   display: grid;

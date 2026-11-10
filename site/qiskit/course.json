@@ -30,14 +30,7 @@
      "section": "1.4",
      "title": "Tu primer circuito: el estado de Bell",
      "summary": "Construir, simular y graficar un estado entrelazado en pocas líneas, sin cuenta ni clave.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito1.py",
-       "title": "Proyecto Ising · Hito I",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     },
     {
      "id": "p1-composer",
@@ -120,14 +113,7 @@
      "section": "2.9",
      "title": "Visualizar circuitos, estados y resultados",
      "summary": "Dibujar circuitos, graficar estados (city, hinton, Pauli, q-esfera, Bloch), histogramas, valores esperados y líneas de tiempo.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito2.py",
-       "title": "Proyecto Ising · Hito II",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     },
     {
      "id": "p2-cierre",
@@ -189,14 +175,7 @@
      "section": "3.7",
      "title": "Plugins y transpilación con IA",
      "summary": "Los tres tipos de plugins del transpilador, cómo listarlos, usarlos y crearlos, y los pases de routing y síntesis con inteligencia artificial.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito3.py",
-       "title": "Proyecto Ising · Hito III",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     },
     {
      "id": "p3-cierre",
@@ -251,14 +230,7 @@
      "section": "4.6",
      "title": "Modo de prueba local y backends falsos",
      "summary": "Probar programas de IBM Quantum en tu computadora con backends falsos o Aer, los métodos de simulación, y probar mitigación de errores antes de usar un QPU.",
-     "minutes": 9,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito4.py",
-       "title": "Proyecto Ising · Hito IV",
-       "tasks": 3
-      }
-     ]
+     "minutes": 9
     },
     {
      "id": "p4-cierre",
@@ -320,14 +292,7 @@
      "section": "5.7",
      "title": "La API REST",
      "summary": "Usar IBM Quantum desde cualquier lenguaje: autenticación con tokens portadores, enviar trabajos de Estimator y Sampler con OpenQASM 3, opciones, resultados y sesiones.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito5.py",
-       "title": "Proyecto Ising · Hito V",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     }
    ]
   },
@@ -382,14 +347,7 @@
      "section": "6.7",
      "title": "Depurar trabajos con NEAT",
      "summary": "Usar Noisy Estimator Analyzer Tool para explorar el impacto del ruido y comparar opciones antes de enviar trabajos costosos.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito6.py",
-       "title": "Proyecto Ising · Hito VI",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     }
    ]
   },
@@ -444,14 +402,7 @@
      "section": "7.7",
      "title": "Modos de ejecución: job, batch y session",
      "summary": "Los tres modos de ejecución, cómo elegir, cómo abrir y cerrar lotes y sesiones, sus tiempos de vida, y las preguntas frecuentes.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito7.py",
-       "title": "Proyecto Ising · Hito VII",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     }
    ]
   },
@@ -499,14 +450,7 @@
      "section": "8.6",
      "title": "Plantillas de Qiskit Functions",
      "summary": "Plantillas de código abierto con flujos de investigación reales, y plantillas base para escribir tus propias funciones y desplegarlas en Serverless.",
-     "minutes": 7,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito8.py",
-       "title": "Proyecto Ising · Hito VIII",
-       "tasks": 3
-      }
-     ]
+     "minutes": 7
     }
    ]
   },
@@ -547,14 +491,7 @@
      "section": "9.5",
      "title": "Versiones y migraciones",
      "summary": "La estrategia de versiones de Qiskit, las migraciones a 1.0 y 2.0, el paso a las primitivas del lado del cliente y cómo seguir las novedades.",
-     "minutes": 10,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito9.py",
-       "title": "Proyecto Ising · Hito IX",
-       "tasks": 3
-      }
-     ]
+     "minutes": 10
     }
    ]
   },
@@ -588,14 +525,7 @@
      "section": "10.4",
      "title": "Soporte, preguntas frecuentes y código abierto",
      "summary": "Dónde pedir ayuda, las preguntas frecuentes, cómo citar Qiskit y los QPUs, y cómo participar en la comunidad de código abierto.",
-     "minutes": 8,
-     "missions": [
-      {
-       "notebook": "practica/proyecto/hito10.py",
-       "title": "Proyecto Ising · Hito X",
-       "tasks": 3
-      }
-     ]
+     "minutes": 8
     }
    ]
   }

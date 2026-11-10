@@ -659,25 +659,58 @@
      "stagger": true
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito3.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Transpila el circuito de Trotter para `FakeFez` y cuenta las `cz`."
-      },
-      {
-       "level": 2,
-       "text": "Compara la profundidad en los niveles 0 a 3."
-      },
-      {
-       "level": 3,
-       "text": "Mide la profundidad frente al número de pasos y calcula cuántos caben."
-      }
+     "type": "exercise",
+     "exercise": "p3-plugins/hito3-transpilado",
+     "prompt": "`circuito(n, J, h, dt, pasos)` ya construye la cadena de Trotter. Transpílala para `FakeFez` con nivel 3 y `seed_transpiler=1` y devuelve el circuito transpilado. Debe usar solo puertas de `FakeFez` y hacer la misma evolución que la cadena.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "El backend define las puertas y el mapa que puede ejecutar el circuito.",
+      "Antes del `return`, pasa `qc` al gestor de pases del backend falso.",
+      "La forma es `generate_preset_pass_manager(___, backend=___, seed_transpiler=___).run(qc)`."
      ],
-     "title": "Proyecto Ising · Hito III",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef circuito(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc  # ✏️ transpílalo para FakeFez con nivel 3 y seed_transpiler=1",
+     "cases": [
+      "4 espines y 2 pasos: solo puertas de FakeFez, 12 cz y la misma evolución"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p3-plugins/hito3-niveles",
+     "prompt": "Completa `profundidades(n, J, h, dt, pasos)`: transpila la misma cadena para `FakeFez` con los niveles 0, 1, 2 y 3, todos con `seed_transpiler=1`. Devuelve un diccionario `{\"0\": profundidad, ..., \"3\": profundidad}`.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Usa una sola semilla para que la comparación sea reproducible.",
+      "El nivel es el primer argumento de `generate_preset_pass_manager`; recórrelos en un bucle.",
+      "La forma es `resultado[str(___)] = generate_preset_pass_manager(___, backend=backend, seed_transpiler=1).run(qc).depth()`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef cadena(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef profundidades(n, J, h, dt, pasos):\n    qc = cadena(n, J, h, dt, pasos)\n    backend = FakeFez()\n    resultado = {}\n    # ✏️ transpila qc con cada nivel de 0 a 3 y guarda su profundidad\n    return resultado",
+     "cases": [
+      "6 espines y 4 pasos: una profundidad por nivel, y el nivel 3 queda por debajo del 0"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p3-plugins/hito3-presupuesto",
+     "prompt": "Completa `pasos_max(n, J, h, dt, presupuesto)`: devuelve el mayor número de pasos, de 1 a 10, cuya cadena transpilada para `FakeFez` (nivel 3, `seed_transpiler=1`) no supera `presupuesto` de profundidad, o `0` si no cabe ninguno. La trampa: la profundidad que cuenta es la del circuito transpilado, no la de la cadena lógica.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "El hardware ejecuta el circuito transpilado, y cada `rzz` se convierte en varias puertas.",
+      "Cambia solo la línea que mide `profundidad`: el gestor `pm` ya está creado.",
+      "La forma es `pm.run(cadena(___)).depth()`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef cadena(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef pasos_max(n, J, h, dt, presupuesto):\n    pm = generate_preset_pass_manager(3, backend=FakeFez(), seed_transpiler=1)\n    mejor = 0\n    for pasos in range(1, 11):\n        profundidad = cadena(n, J, h, dt, pasos).depth()  # ✏️ mide la profundidad que ejecutaría FakeFez\n        if profundidad <= presupuesto:\n            mejor = pasos\n    return mejor",
+     "cases": [
+      "6 espines con presupuesto 100: el último número de pasos que FakeFez deja por debajo de 100"
+     ]
     }
    ],
    "actions": [
@@ -701,8 +734,20 @@
     },
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "prof"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "prof",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "prof",
+     "t": 2
     }
    ]
   },

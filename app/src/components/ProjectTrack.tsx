@@ -4,9 +4,8 @@ import { useMemo } from "react";
 import { courseKey } from "@site/progress.ts";
 
 import type { Part, Project } from "../model.ts";
-import { splitTitle } from "../path.ts";
+import { lessonHref, splitTitle } from "../path.ts";
 import { save, useJson } from "../store.ts";
-import { Command, NotebookHelp } from "./Command.tsx";
 
 const NO_MILESTONES: number[] = [];
 
@@ -26,17 +25,11 @@ export function ProjectTrack({
     : NO_MILESTONES;
   const { milestones } = project;
   const linked = useMemo(
-    () =>
-      new Set(
-        parts
-          .flatMap((p) => p.lessons)
-          .flatMap((l) => l.missions ?? [])
-          .map((m) => m.notebook),
-      ),
+    () => new Set(parts.flatMap((p) => p.lessons).map((lesson) => lesson.id)),
     [parts],
   );
   const current = milestones.find((m) => !done.includes(m.n));
-  const open = current !== undefined && linked.has(current.notebook);
+  const open = current !== undefined && linked.has(current.lesson);
 
   return (
     <section className="project" aria-labelledby="t-proyecto">
@@ -54,7 +47,7 @@ export function ProjectTrack({
                   ? "done"
                   : m === current
                     ? "current"
-                    : linked.has(m.notebook)
+                    : linked.has(m.lesson)
                       ? "open"
                       : "locked"
               }
@@ -76,7 +69,9 @@ export function ProjectTrack({
           <p>{current.desc}</p>
           {open ? (
             <>
-              <Command command={`uv run marimo edit ${current.notebook}`} />
+              <a className="btn" href={lessonHref(slug, current.lesson)}>
+                Abrir la práctica
+              </a>
               <button
                 type="button"
                 className="btn"
@@ -84,7 +79,6 @@ export function ProjectTrack({
               >
                 Marcar como hecho
               </button>
-              <NotebookHelp />
             </>
           ) : (
             <p className="muted">

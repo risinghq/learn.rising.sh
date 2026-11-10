@@ -471,25 +471,58 @@
      "gap": 24
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito8.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Recalcula el Hamiltoniano, la magnetización de Trotter y la profundidad transpilada."
-      },
-      {
-       "level": 2,
-       "text": "Elige cuántas capas absorbe OBP: baja la profundidad un 25 % sin pasar de cien términos."
-      },
-      {
-       "level": 3,
-       "text": "Escribe `ahorro(pasos)` con un presupuesto de operador y mira cómo cambia el ahorro con los pasos."
-      }
+     "type": "exercise",
+     "exercise": "p8-plantillas/hito8-partida",
+     "prompt": "Completa `partida(n, J, h, dt, pasos)`: devuelve `{\"exacta\": …, \"trotter\": …, \"profundidad\": …}` con ⟨M⟩ exacta en `t = dt·pasos`, ⟨M⟩ de la cadena de Trotter y la profundidad de esa cadena transpilada para `FakeFez`. Solo falta la evolución exacta del estado `psi`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "La evolución exacta multiplica el estado inicial por `exp(-i H t)`.",
+      "Cambia la línea marcada por una asignación a `psi` con `expm` y la matriz de `H`.",
+      "La forma es `psi = expm(-1j * H.to_matrix() * ___) @ psi`."
      ],
-     "title": "Proyecto Ising · Hito VIII",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\nfrom scipy.linalg import expm\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for a in range(0, n - 1, 2):\n            qc.rzz(2 * J * dt, a, a + 1)\n        for a in range(1, n - 1, 2):\n            qc.rzz(2 * J * dt, a, a + 1)\n        for a in range(n):\n            qc.rx(2 * h * dt, a)\n    return qc\n\n\ndef partida(n, J, h, dt, pasos):\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    )\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi = np.zeros(2**n, dtype=complex)\n    psi[0] = 1\n    # ✏️ evoluciona psi con la exponencial de H durante el tiempo dt · pasos\n    circuito = trotter(n, J, h, dt, pasos)\n    pm = generate_preset_pass_manager(optimization_level=1, backend=FakeFez(), seed_transpiler=1)\n    return {\n        \"exacta\": float(np.real(np.vdot(psi, M.to_matrix() @ psi))),\n        \"trotter\": float(np.real(Statevector(circuito).expectation_value(M))),\n        \"profundidad\": pm.run(circuito).depth(),\n    }",
+     "cases": [
+      "6 espines y 4 pasos: la magnetización exacta, la de Trotter y la profundidad en FakeFez"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-plantillas/hito8-absorber",
+     "prompt": "Completa `recortar(n, J, h, dt, pasos, k)`: corta la cadena en capas y lleva las últimas `k` al observable con `backpropagate`. Devuelve el circuito que queda y el observable nuevo, que dan el mismo ⟨M⟩. `absorber` usa `recortar` para buscar el primer `k` que deja como mucho 100 términos y reduce la profundidad transpilada al 75 % o menos. La trampa: el circuito corto también lleva las capas que `backpropagate` no pudo absorber.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "El observable absorbe capas desde el final del circuito hacia atrás.",
+      "Pasa a `backpropagate` el observable `M` y las últimas `k` capas; devuelve tres cosas.",
+      "La forma es `observable, resto, _ = backpropagate(M, capas[___:])`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_addon_obp import backpropagate\nfrom qiskit_addon_utils.slicing import combine_slices, slice_by_gate_types\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for a in range(0, n - 1, 2):\n            qc.rzz(2 * J * dt, a, a + 1)\n        for a in range(1, n - 1, 2):\n            qc.rzz(2 * J * dt, a, a + 1)\n        for a in range(n):\n            qc.rx(2 * h * dt, a)\n    return qc\n\n\ndef unir(n, capas):\n    return combine_slices(capas, include_barriers=False) if capas else QuantumCircuit(n)\n\n\ndef recortar(n, J, h, dt, pasos, k):\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    capas = slice_by_gate_types(trotter(n, J, h, dt, pasos))\n    observable, resto = M, []  # ✏️ backpropagate lleva las últimas k capas al observable\n    return unir(n, capas[: len(capas) - k] + list(resto)), observable\n\n\ndef absorber(n, J, h, dt, pasos):\n    pm = generate_preset_pass_manager(optimization_level=1, backend=FakeFez(), seed_transpiler=1)\n    completa = pm.run(trotter(n, J, h, dt, pasos)).depth()\n    for k in range(1, 3 * pasos + 1):\n        corto, observable = recortar(n, J, h, dt, pasos, k)\n        if len(observable) <= 100 and pm.run(corto).depth() <= 0.75 * completa:\n            return k, corto, observable\n    return 0, *recortar(n, J, h, dt, pasos, 0)",
+     "cases": [
+      "6 espines y 4 pasos: OBP absorbe k capas finales sin cambiar el valor, con 100 términos o menos y 3/4 de la profundidad"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p8-plantillas/hito8-ahorro",
+     "prompt": "Completa `ahorro(n, J, h, dt, pasos, limite)`: lleva todas las capas al observable con `backpropagate`, pero con un `OperatorBudget` de como mucho `limite` términos. Devuelve el circuito corto y el observable, que dan el mismo ⟨M⟩ que la cadena entera. La trampa: sin presupuesto el observable crece hasta cientos de términos.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "El presupuesto detiene la retropropagación cuando el observable ya no cabe; las capas restantes quedan en el circuito.",
+      "Pasa el presupuesto como argumento con nombre `operator_budget` de `backpropagate`.",
+      "La forma es `observable, resto, _ = backpropagate(M, capas, operator_budget=OperatorBudget(max_paulis=___))`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit_addon_obp import backpropagate\nfrom qiskit_addon_obp.utils.simplify import OperatorBudget\nfrom qiskit_addon_utils.slicing import combine_slices, slice_by_gate_types\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for a in range(0, n - 1, 2):\n            qc.rzz(2 * J * dt, a, a + 1)\n        for a in range(1, n - 1, 2):\n            qc.rzz(2 * J * dt, a, a + 1)\n        for a in range(n):\n            qc.rx(2 * h * dt, a)\n    return qc\n\n\ndef ahorro(n, J, h, dt, pasos, limite):\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    capas = slice_by_gate_types(trotter(n, J, h, dt, pasos))\n    observable, resto = M, capas  # ✏️ backpropagate con todas las capas y un OperatorBudget de limite términos\n    corto = combine_slices(list(resto), include_barriers=False) if resto else QuantumCircuit(n)\n    return corto, observable",
+     "cases": [
+      "6 espines, 4 pasos y 100 términos: OBP se detiene solo, conserva el valor y baja la profundidad"
+     ]
     }
    ],
    "actions": [
@@ -505,8 +538,20 @@
     },
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "hito"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "hito",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "hito",
+     "t": 2
     }
    ]
   },

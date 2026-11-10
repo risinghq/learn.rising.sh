@@ -777,7 +777,7 @@
     "2.9",
     "Proyecto Ising: hito II"
    ],
-   "say": "Volvamos al proyecto de la cadena de espines. En el hito uno simulaste dos espines y un paso de tiempo. [[ham]]Hoy tienes todo para generalizarlo: el hamiltoniano de n espines como SparsePauliOp, [[circ]]un circuito de Trotter de varios pasos, [[mag]]y la magnetización como observable, que sigues a lo largo del tiempo. [[hito]]El hito dos recalcula lo del hito uno, así que no necesitas nada del cuaderno anterior. Al final comparas tu curva con la evolución exacta.",
+   "say": "Volvamos al proyecto de la cadena de espines. En el hito uno simulaste dos espines y un paso de tiempo. [[ham]]Hoy tienes todo para generalizarlo: el hamiltoniano de n espines como SparsePauliOp, [[circ]]un circuito de Trotter de varios pasos, [[mag]]y la magnetización como observable, que sigues a lo largo del tiempo. [[hito]]El hito dos recalcula lo del hito uno, así que no necesitas nada del ejercicio anterior. Al final comparas tu curva con la evolución exacta.",
    "scene": [
     {
      "type": "math",
@@ -804,25 +804,58 @@
      "hidden": true
     },
     {
-     "type": "mission",
-     "notebook": "practica/proyecto/hito2.py",
-     "tasks": [
-      {
-       "level": 1,
-       "text": "Escribe el Hamiltoniano de $N$ espines como `SparsePauliOp` y comprueba que con $N=2$ recuperas el hito I."
-      },
-      {
-       "level": 2,
-       "text": "Construye el circuito de Trotter de varios pasos con `compose`."
-      },
-      {
-       "level": 3,
-       "text": "Calcula la curva de magnetización y compárala con la evolución exacta."
-      }
+     "type": "exercise",
+     "exercise": "p2-visualizar/hito2-hamiltoniano",
+     "prompt": "Escribe `hamiltoniano(n, J, h)`: devuelve el Hamiltoniano de una cadena abierta de `n` espines, con un término `ZZ` por enlace y un término `X` por espín.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Separa los enlaces vecinos de los campos locales y recórrelos con bucles.",
+      "Para términos dispersos indica las posiciones con una lista de índices y el número total de qubits.",
+      "La forma es `SparsePauliOp.from_sparse_list(terminos, num_qubits=n)`, con tuplas `(\"ZZ\", [___, ___], J)` y `(\"X\", [___], h)` en `terminos`."
      ],
-     "title": "Proyecto Ising · Hito II",
-     "id": "m",
-     "hidden": true
+     "id": "e1",
+     "hidden": true,
+     "starter": "def hamiltoniano(n, J, h):\n    return None",
+     "cases": [
+      "con 5 espines, la matriz es J·ΣZᵢZᵢ₊₁ + h·ΣXᵢ de la cadena abierta"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p2-visualizar/hito2-trotter",
+     "prompt": "Completa `trotter(n, J, h, dt, pasos)` para componer el paso de Trotter exactamente `pasos` veces. Con cero pasos debe devolver un circuito vacío de `n` qubits.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "La repetición vive dentro de `trotter`; `paso` ya sabe construir una sola evolución.",
+      "Empieza un circuito de `n` qubits y compón el paso dentro de un bucle.",
+      "La forma es un `for` sobre `range(___)` con la línea `qc.compose(...)` dentro."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\n\n\ndef paso(n, J, h, dt):\n    qc = QuantumCircuit(n)\n    for i in range(n - 1):\n        qc.rzz(2 * J * dt, i, i + 1)\n    for i in range(n):\n        qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    qc.compose(paso(n, J, h, dt), inplace=True)\n    return qc",
+     "cases": [
+      "cinco pasos de 3 espines dan el operador (e^{-i dt hΣX} e^{-i dt JΣZZ})⁵"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p2-visualizar/hito2-curva",
+     "prompt": "Escribe `curva_trotter(n, J, h, dt, K)`: devuelve la lista de $M_Z = \\frac{1}{n}\\sum_i \\langle Z_i\\rangle$ tras 0, 1, …, `K` pasos de Trotter desde `|0...0⟩`. Cada paso pone `rzz` en cada enlace y `rx` en cada espín. Son `K + 1` números y el primero vale 1. Cuidado con el ángulo: Qiskit gira la mitad del ángulo que le pasas, así que cada puerta lleva el doble de `J · dt` o de `h · dt`. La curva debe quedar a menos de 0.02 de la evolución exacta.",
+     "level": 3,
+     "needs": "qiskit",
+     "hints": [
+      "La curva incluye el instante inicial, por eso tiene `K + 1` valores.",
+      "En cada instante construye el circuito de `k` pasos y calcula el valor esperado de la magnetización en su estado.",
+      "La forma es `float(Statevector(___).expectation_value(___).real)` dentro de un `for k in range(___)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "def curva_trotter(n, J, h, dt, K):\n    return []",
+     "cases": [
+      "la curva de Trotter sigue la referencia y tiene K + 1 puntos"
+     ]
     }
    ],
    "actions": [
@@ -833,8 +866,20 @@
     },
     {
      "do": "show",
-     "id": "m",
+     "id": "e1",
      "at": "hito"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "hito",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "hito",
+     "t": 2
     }
    ]
   },
