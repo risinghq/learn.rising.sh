@@ -411,6 +411,42 @@ WRONG += [
     ]
 ]
 
+WRONG += [
+    (eid, mutant(eid, "wrong"), f"`{name}`")
+    for eid, name in [
+        ("p1-quickstart/hito1-fidelidad", "fidelidad"),
+        ("p1-quickstart/hito1-hamiltoniano", "hamiltoniano"),
+        ("p1-quickstart/hito1-paso", "paso"),
+        ("p2-visualizar/hito2-curva", "curva_trotter"),
+        ("p2-visualizar/hito2-hamiltoniano", "hamiltoniano"),
+        ("p2-visualizar/hito2-trotter", "trotter"),
+        ("p3-plugins/hito3-niveles", "profundidades"),
+        ("p3-plugins/hito3-presupuesto", "pasos_max"),
+        ("p3-plugins/hito3-transpilado", "circuito"),
+        ("p4-local-testing/hito4-curva", "curvas"),
+        ("p4-local-testing/hito4-ruido", "curva_ruidosa"),
+        ("p4-local-testing/hito4-validez", "tiempo_de_validez"),
+        ("p5-rest/hito5-estimator", "ejecutar"),
+        ("p5-rest/hito5-referencia", "magnetizacion_referencia"),
+        ("p5-rest/hito5-uso", "estimar_uso"),
+        ("p6-neat/hito6-magnetizacion", "magnetizacion_medida"),
+        ("p6-neat/hito6-trex", "trex"),
+        ("p6-neat/hito6-zne", "zne"),
+        ("p7-modos/hito7-cadena", "transpilar"),
+        ("p7-modos/hito7-guardia", "guardia"),
+        ("p7-modos/hito7-lote", "lote"),
+        ("p8-plantillas/hito8-absorber", "absorber"),
+        ("p8-plantillas/hito8-ahorro", "ahorro"),
+        ("p8-plantillas/hito8-partida", "partida"),
+        ("p9-migraciones/hito9-conteos", "magnetizacion_conteos"),
+        ("p9-migraciones/hito9-estimator", "medir"),
+        ("p9-migraciones/hito9-referencia", "curva_ideal"),
+        ("p10-comunidad/hito10-curva", "evaluar"),
+        ("p10-comunidad/hito10-informe", "informe"),
+        ("p10-comunidad/hito10-referencia", "curvas"),
+    ]
+]
+
 # Part 5: (exercise, file name in tests/mutants/<exercise>/, text expected in some message).
 WRONG += [
     (eid, mutant(eid, name), expected)
@@ -972,6 +1008,11 @@ MUTANTS = [
             for e in REAL
             if e.startswith(("p1-", "p10-", "p3-", "p5-", "p6-", "p7-", "p8-", "p9-"))
         )
+        for m in mutants_of(eid)
+    ],
+    *[
+        m
+        for eid in sorted(e for e in REAL if e.startswith(("p2-visualizar/", "p4-local-testing/")))
         for m in mutants_of(eid)
     ],
 ]

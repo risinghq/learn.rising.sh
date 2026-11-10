@@ -374,7 +374,7 @@ async function malformedProgress(
     browser,
     [1366, 768],
     "light",
-    { "qiskit:misiones": "{}", "qiskit:hitos": "{}" },
+    { "qiskit:hitos": "{}" },
   );
   await page.goto(`${base}/qiskit/`);
   await page.waitForSelector(THEME_BUTTON);

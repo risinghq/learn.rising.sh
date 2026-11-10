@@ -15,33 +15,47 @@ interface Ask {
   kind: string;
   right?: number;
 }
+interface Block {
+  type?: string;
+  exercise?: string;
+  level?: number;
+  starter?: string;
+  items?: unknown[];
+  body?: unknown[];
+}
 interface Beat {
   id: string;
   ask?: Ask;
+  scene: Block[];
 }
 interface Lesson {
   title: string;
   next?: string;
   beats: Beat[];
 }
-interface Mission {
-  notebook: string;
-  tasks: number;
-}
 interface CourseLesson {
   id: string;
   section: string;
   title: string;
   minutes: number;
-  missions?: Mission[];
 }
 interface Course {
   parts: { lessons: CourseLesson[] }[];
+}
+interface Milestone {
+  n: number;
+  part: number;
+  lesson: string;
+  exercise: string;
 }
 
 const course: Course = JSON.parse(
   readFileSync(join(COURSE_DIR, "course.json"), "utf8"),
 );
+const { milestones }: { milestones: Milestone[] } = JSON.parse(
+  readFileSync(join(COURSE_DIR, "project.json"), "utf8"),
+);
+const LEVELS = ["", "Reproduce", "Modifica", "Crea"];
 const lessons = course.parts.flatMap((part) => part.lessons);
 const lessonData = new Map<string, Lesson>();
 function lessonOf(id: string): Lesson {
@@ -54,11 +68,15 @@ function lessonOf(id: string): Lesson {
   }
   return lesson;
 }
-const courseMissions = (lesson: CourseLesson) =>
-  (lesson.missions ?? []).filter((m) => !m.notebook.includes("proyecto/"));
+function exercisesOf(blocks: unknown[]): Block[] {
+  return (blocks as Block[]).flatMap((block) =>
+    (block.type === "exercise" ? [block] : []).concat(
+      exercisesOf((block.items ?? []).concat(block.body ?? [])),
+    ),
+  );
+}
 
 const done = new Set<string>();
-let missionsMarked = 0;
 
 let stepNo = 0;
 async function step(name: string, run: () => Promise<void>): Promise<void> {
@@ -163,34 +181,6 @@ async function checkProgress(page: Page): Promise<void> {
 }
 
 async function checkNext(page: Page): Promise<void> {
-  const card = page.locator(".practice");
-  const doneInOrder = lessons.filter((l) => done.has(l.id));
-  const queue = doneInOrder
-    .flatMap((l) => courseMissions(l).map((m) => ({ l, m })))
-    .slice(missionsMarked);
-  if (queue.length) {
-    const { l, m } = queue[0];
-    await see("practice title", text(card.locator("h2")), "Práctica pendiente");
-    await see(
-      "practice lesson",
-      text(card.locator("p b")),
-      `${l.section} ${l.title}`,
-    );
-    await see(
-      "practice detail",
-      text(card.locator("p.muted")),
-      new RegExp(
-        `^${m.tasks === 1 ? "1 misión" : `${m.tasks} misiones`} en el cuaderno`,
-      ),
-    );
-    await see(
-      "practice command",
-      text(card.locator("code")),
-      `uv run marimo edit ${m.notebook}`,
-    );
-  } else {
-    await same("no practice card", await card.count(), 0);
-  }
   const target = lessons.find((l) => !done.has(l.id));
   if (!target) {
     await see(
@@ -322,10 +312,45 @@ async function finishLesson(page: Page, id: string): Promise<void> {
   done.add(id);
 }
 
-async function markNextMission(page: Page): Promise<void> {
-  await page.locator(".practice .btn", { hasText: "Ya la hice" }).click();
-  missionsMarked += 1;
-  await checkNext(page);
+async function checkMilestoneExercises(
+  page: Page,
+  base: string,
+  milestone: Milestone,
+): Promise<void> {
+  const { beats } = lessonOf(milestone.lesson);
+  const beat = beats.findIndex((b) =>
+    exercisesOf(b.scene).some((x) => x.exercise === milestone.exercise),
+  );
+  const blocks = exercisesOf(beats[beat].scene);
+  await page.goto(
+    `${base}/qiskit/lesson.html?l=${milestone.lesson}&beat=${beat}`,
+  );
+  const panels = page.locator(".xpanel");
+  await panels
+    .nth(blocks.length - 1)
+    .locator(".cm-editor")
+    .waitFor();
+  await same("exercise panels", await panels.count(), blocks.length);
+  for (const [k, block] of blocks.entries()) {
+    const panel = panels.nth(k);
+    await see(
+      `${block.exercise} level`,
+      text(panel.locator(".xlevel")),
+      LEVELS[block.level!],
+    );
+    await same(
+      `${block.exercise} starter`,
+      await panel
+        .locator(".cm-line")
+        .evaluateAll((lines) => lines.map((l) => l.textContent).join("\n")),
+      block.starter,
+    );
+    await see(
+      `${block.exercise} check button`,
+      text(panel.locator("button.xbtn.primary")),
+      "Comprobar",
+    );
+  }
 }
 
 async function main(): Promise<void> {
@@ -432,17 +457,29 @@ async function main(): Promise<void> {
       );
     });
 
-    await step(
-      "the path shows one lesson done and the pending mission",
-      async () => {
-        await page.locator("#end a.cta", { hasText: "Índice" }).click();
-        await see("progress line", text(page.locator(METER)), /lecciones$/);
-        await checkHome(page);
-      },
-    );
+    await step("the path shows one lesson done", async () => {
+      await page.locator("#end a.cta", { hasText: "Índice" }).click();
+      await see("progress line", text(page.locator(METER)), /lecciones$/);
+      await checkHome(page);
+    });
 
-    await step("mark the mission and see the next lesson", async () => {
-      await markNextMission(page);
+    await step("open the code exercises of the first milestone", async () => {
+      const [milestone] = milestones;
+      await see(
+        "milestone",
+        text(page.locator(".hcur p").first()),
+        `Hito 1 de ${milestones.length}, parte ${milestone.part}`,
+      );
+      await page
+        .locator(".hcur a.btn", { hasText: "Abrir la práctica" })
+        .click();
+      await see(
+        "milestone lesson",
+        text(page.locator("#start-title")),
+        lessonOf(milestone.lesson).title,
+      );
+      await checkMilestoneExercises(page, base, milestone);
+      await openHome(page, base);
       await checkHome(page);
     });
 
@@ -561,14 +598,6 @@ async function main(): Promise<void> {
         true,
       );
     });
-
-    await step(
-      "mark the second mission and see the third come up",
-      async () => {
-        await markNextMission(page);
-        await checkHome(page);
-      },
-    );
 
     await same("page errors", errors, []);
   } finally {
