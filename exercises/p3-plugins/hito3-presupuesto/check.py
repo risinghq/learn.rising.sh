@@ -15,6 +15,7 @@ def cadena(n, J, h, dt, pasos):
     return qc
 
 
+# The level-3 depth differs by one across machines: messages omit it and budgets sit off a step's depth.
 def profundidad(n, J, h, dt, pasos):
     pm = generate_preset_pass_manager(3, backend=FakeFez(), seed_transpiler=1)
     return pm.run(cadena(n, J, h, dt, pasos)).depth()
@@ -34,16 +35,14 @@ def test_seis_espines():
     got = learner.pasos_max(6, 1.0, 0.5, 0.1, 100)
     assert isinstance(got, int) and 1 <= got <= 10, f"`pasos_max` devuelve {got!r}; debe ser un entero de 1 a 10."
     assert profundidad(6, 1.0, 0.5, 0.1, got) <= 100, (
-        f"Con {got} pasos, el circuito transpilado para FakeFez tiene profundidad {profundidad(6, 1.0, 0.5, 0.1, got)}, "
-        "más que el presupuesto de 100. Mide la profundidad después de transpilar."
+        f"Con {got} pasos, el circuito transpilado para FakeFez pasa del presupuesto de 100. "
+        "Mide la profundidad después de transpilar."
     )
-    assert cabe_justo(6, 1.0, 0.5, 0.1, 100, got), (
-        f"Con {got + 1} pasos la profundidad es {profundidad(6, 1.0, 0.5, 0.1, got + 1)} y todavía cabe en 100."
-    )
+    assert cabe_justo(6, 1.0, 0.5, 0.1, 100, got), f"Con {got + 1} pasos la profundidad todavía cabe en 100."
 
 
 def test_cuatro_espines():
-    got = learner.pasos_max(4, 0.8, 1.2, 0.2, 60)
-    assert cabe_justo(4, 0.8, 1.2, 0.2, 60, got), (
-        f"Con n = 4, J = 0.8, h = 1.2, dt = 0.2 y presupuesto = 60, `pasos_max` devuelve {got!r}."
+    got = learner.pasos_max(4, 0.8, 1.2, 0.2, 68)
+    assert cabe_justo(4, 0.8, 1.2, 0.2, 68, got), (
+        f"Con n = 4, J = 0.8, h = 1.2, dt = 0.2 y presupuesto = 68, `pasos_max` devuelve {got!r}."
     )
