@@ -13,7 +13,6 @@ dependencies = [
   "matplotlib",
   "pylatexenc",
   "samplomatic",
-  "marimo>=0.25.2",
   "nbformat>=5.11.1",
   "qiskit-addon-obp>=0.3.0",
   "ipython>=9.18.0",
@@ -45,7 +44,7 @@ package = false
 
 [tool.ruff]
 line-length = 100
-extend-exclude = ["exercises", "practica", "muestras", "tests/mutants"]
+extend-exclude = ["exercises", "muestras", "tests/mutants"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "B", "I", "UP", "SIM", "RUF"]
