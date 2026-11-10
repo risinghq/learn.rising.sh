@@ -37,8 +37,10 @@ async function readPages(): Promise<
           `${course.slug}/items.json is missing: run mise run generate:items`,
         );
       const projectFile = join(site, course.slug, "project.json");
-      const [{ parts }, project] = await Promise.all([
-        json<{ parts: Part[] }>(join(site, course.slug, "course.json")),
+      const [{ parts, guides = [] }, project] = await Promise.all([
+        json<{ parts: Part[]; guides?: Part["lessons"] }>(
+          join(site, course.slug, "course.json"),
+        ),
         exists(projectFile).then((found) =>
           found ? json<Project>(projectFile) : undefined,
         ),
@@ -48,7 +50,7 @@ async function readPages(): Promise<
           throw new Error(
             `${course.slug}/project.json: milestone ${m.n} names part ${m.part}`,
           );
-      return { kind: "course", course, parts, project };
+      return { kind: "course", course, parts, guides, project };
     }),
   );
   return [

@@ -14,6 +14,8 @@ export interface Part {
   lessons: Lesson[];
 }
 
+export type Guide = Lesson;
+
 export interface Source {
   label: string;
   url: string;
@@ -55,6 +57,7 @@ export interface CoursePage {
   kind: "course";
   course: Course;
   parts: Part[];
+  guides: Guide[];
   project?: Project;
 }
 

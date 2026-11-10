@@ -420,6 +420,45 @@ progress {
   text-wrap: pretty;
 }
 
+.guides {
+  display: grid;
+  gap: var(--s3);
+}
+.guides > * {
+  margin: 0;
+}
+.guides ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.guides li {
+  border-bottom: 1px solid var(--line);
+}
+.guides a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  min-height: var(--tap);
+  padding: var(--s2) 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+.guides a > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.guides a:hover > span:first-child {
+  color: var(--acc-text-hover);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+.guides a .meta {
+  flex: none;
+}
+
 .review,
 .project {
   display: grid;

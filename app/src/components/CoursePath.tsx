@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
-import type { CoursePage, Lesson, Part } from "../model.ts";
+import type { CoursePage, Guide, Lesson, Part } from "../model.ts";
 import {
   lessonHref,
   lessonsOf,
@@ -20,7 +20,7 @@ import { useDone, useReady } from "../store.ts";
 import { Layout } from "./Layout.tsx";
 import { ProjectTrack } from "./ProjectTrack.tsx";
 
-const label = (lesson: Lesson) => `${lesson.section} ${lesson.title}`;
+const label = (lesson: Lesson) => lesson.title;
 
 function ReviewCard({ slug }: { slug: string }) {
   return (
@@ -177,8 +177,27 @@ function Unit({
   );
 }
 
+function Guides({ slug, guides }: { slug: string; guides: Guide[] }) {
+  if (!guides.length) return null;
+  return (
+    <section className="guides" aria-labelledby="t-guias">
+      <h2 id="t-guias">Guías</h2>
+      <ul>
+        {guides.map((guide) => (
+          <li key={guide.id}>
+            <a href={lessonHref(slug, guide.id)}>
+              <span>{guide.title}</span>
+              <span className="meta num">{guide.minutes} min</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function CoursePath({ page }: { page: CoursePage }) {
-  const { course, parts, project } = page;
+  const { course, parts, guides, project } = page;
   const lessons = lessonsOf(parts);
   const done = useDone(course.slug);
   const next = nextLesson(lessons, done);
@@ -217,6 +236,10 @@ export function CoursePath({ page }: { page: CoursePage }) {
     >
       <div className="page" ref={root}>
         <h1>{course.title}</h1>
+        <p className="outcome">{course.outcome}</p>
+        {project ? (
+          <ProjectTrack slug={course.slug} project={project} parts={parts} />
+        ) : null}
         <div className="meter">
           <progress
             max={lessons.length}
@@ -239,16 +262,13 @@ export function CoursePath({ page }: { page: CoursePage }) {
             />
           ))}
         </div>
+        <Guides slug={course.slug} guides={guides} />
         {next ? null : (
           <p className="complete">
             Completaste el curso. Repasa cuando quieras.
           </p>
         )}
-        <p className="outcome">{course.outcome}</p>
         {finished > 0 ? <ReviewCard slug={course.slug} /> : null}
-        {project ? (
-          <ProjectTrack slug={course.slug} project={project} parts={parts} />
-        ) : null}
       </div>
     </Layout>
   );

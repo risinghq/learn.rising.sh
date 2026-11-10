@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { courseKey } from "@site/progress.ts";
 
 import type { Part, Project } from "../model.ts";
-import { lessonHref, splitTitle } from "../path.ts";
+import { lessonHref } from "../path.ts";
 import { save, useJson } from "../store.ts";
 
 const NO_MILESTONES: number[] = [];
@@ -63,14 +63,17 @@ export function ProjectTrack({
       {current ? (
         <div className="hcur">
           <p className="muted num">
-            Hito {current.n} de {milestones.length}, parte {current.part}
+            Hito {current.n} de {milestones.length} · Unidad {current.part}
           </p>
           <h3>{current.title}</h3>
           <p>{current.desc}</p>
           {open ? (
             <>
-              <a className="btn" href={lessonHref(slug, current.lesson)}>
-                Abrir la práctica
+              <a
+                className="btn primary"
+                href={lessonHref(slug, current.lesson)}
+              >
+                Continuar con el proyecto
               </a>
               <button
                 type="button"
@@ -81,10 +84,7 @@ export function ProjectTrack({
               </button>
             </>
           ) : (
-            <p className="muted">
-              Se abre cuando llegues a la parte {current.part} (
-              {splitTitle(parts[current.part - 1].title).name}).
-            </p>
+            <p className="muted">Se abre en la Unidad {current.part}.</p>
           )}
         </div>
       ) : (

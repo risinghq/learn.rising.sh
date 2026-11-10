@@ -398,6 +398,7 @@ export function standing(now = new Date()) {
 
 interface CourseIndex {
   parts: { lessons: { id: string }[] }[];
+  guides?: { id: string }[];
 }
 
 async function get<T>(url: string): Promise<T> {
@@ -418,8 +419,10 @@ export async function lessonOwners(): Promise<Map<string, string>> {
       })),
     ),
   );
-  for (const { c, index } of indexes)
+  for (const { c, index } of indexes) {
     for (const part of index.parts)
       for (const l of part.lessons) owner.set(l.id, c.slug);
+    for (const l of index.guides ?? []) owner.set(l.id, c.slug);
+  }
   return owner;
 }
