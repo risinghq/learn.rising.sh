@@ -147,14 +147,14 @@ Every duration and curve is a token in `theme.css`:
 - The shell is one `40rem` column under a sticky header. The header holds the
   way back (a back arrow on a course, the brand elsewhere), the streak and the
   XP of today, the account button and the theme button.
-- The path page opens on the title, the progress of the course and the pending
-  practice. Then come the units. Each unit is a `<details>`, open for the unit
-  with the current lesson, and its lessons are nodes on a vertical line: a check
-  for a lesson done, a lock for one locked and a lit, larger node with a play
-  icon for the current lesson. The current node is a link that starts the next
-  lesson in one tap. A locked node explains that it opens after the lesson
-  before it and offers "Abrir de todos modos". The outcome line, the review card
-  and the project track follow the map.
+- The path page opens on the title, the outcome and the current project
+  milestone. Its filled action continues the path. Units follow as `<details>`
+  tiles with a lesson count and progress bar; the unit with the current lesson
+  is open. A lesson node shows only its title: a check means done, a lock means
+  locked and a larger play node is current. A locked node explains that it opens
+  after the lesson before it and offers "Abrir de todos modos". Reference
+  lessons appear as unlocked, unnumbered links under "Guías" and do not enter
+  the path progress.
 - The catalog is one card per course. Each card has a button that opens the next
   lesson of its course. Only one is filled: the one of the course the learner
   was in last, or else the first course not finished.
@@ -168,8 +168,9 @@ Every duration and curve is a token in `theme.css`:
 ## Progress
 
 - On the path page and the catalog, a course shows a `<progress>` with its
-  completed lessons and the text "N de M lecciones". Each unit shows its count,
-  such as "2/5". The style of `<progress>` is in `theme.css`.
+  completed path lessons and the text "N de M lecciones". Each unit shows its
+  count and a progress bar. Guides do not enter either total. The style of
+  `<progress>` is in `theme.css`.
 - In the player, `#steps` is an `<input type="range">` with a label, "Paso N de
   M" and ", con pregunta" if the step has a question. Dragging it jumps to that
   step. Its fill follows `--p`, which `engine.ts` sets.

@@ -39,8 +39,9 @@ prerenders every page into `site/`, where Git ignores the result:
 
 - `/` is the catalog: one card per course, with its outcome, the progress if the
   learner started and one button that opens the next lesson.
-- `/<slug>/` is the path page of a course: a map of units and lessons, the
-  outcome line, the review card and, if the course has one, the project track.
+- `/<slug>/` is the path page of a course: the outcome, current project
+  milestone, units, path progress and optional guide links. It also has the
+  review card and, if the course has one, the project track.
 - `/<slug>/repaso/` is the drill session of a course ([drills.md](drills.md)).
   Its code loads in a chunk of its own, after the page, so the budget below does
   not count it.
@@ -115,8 +116,9 @@ A course is a folder `site/<slug>/` and a line in `courses.json`. It links the
 theme and `vendor/` with `../`, and calls the platform routes by their absolute
 path:
 
-- `course.json` is the index, generated: parts, lessons and minutes. The path
-  page draws one unit per part and one node per lesson.
+- `course.json` is the generated index of path units, lessons and minutes. It
+  may also have `guides`, which are lessons outside the path and its progress
+  count. The path page draws one unit per part and one node per path lesson.
 - `project.json` is optional: the milestones of a project track, each tied to a
   part, lesson and exercise. A course without it shows no track.
 - `index.html` is the path page, generated from the two files above.

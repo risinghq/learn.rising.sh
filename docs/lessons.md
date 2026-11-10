@@ -16,10 +16,11 @@ lesson.json + timings.json + audio -> engine.ts
 - A course is `site/<slug>/` and its source `lessons_src/<slug>/`, with the
   dashes of the slug written as underscores (`computational_physics`). See
   [Add a course](#add-a-course).
-- `plan.py` defines `PARTS`: the parts (`n`, `title`, `desc`), the order of
+- `plan.py` defines `PARTS`: the units (`n`, `title`, `desc`), the order of
   their lessons, and for each lesson `(id, title)`. A lesson id belongs to one
-  course. The Qiskit plan adds a third element, the original guides that the
-  lesson covers; a guide appears in exactly one lesson.
+  course. `GUIDES` is optional and lists unlocked reference lessons outside the
+  path. The Qiskit plan adds a third element, the original guides that each
+  lesson covers; a guide appears in exactly one lesson across both lists.
 - `parte*.py` define `LESSONS`, the list of lessons of each part, with the
   functions of `lessons_src/lib.py`: `lesson()`, `beat()`, the blocks (`Code`,
   `Out`, `Plot`, `Circ`, `Hist`…), the actions (`A`) and the questions
@@ -32,14 +33,14 @@ lesson.json + timings.json + audio -> engine.ts
   checks that every guide of the Qiskit/documentation index is in the plan and
   links each lesson to its guides.
 - `build.py <course>` joins the plan with the lessons and writes the JSON of
-  `site/<course>/`. It numbers the sections following `plan.PARTS` and completes
-  each `Exercise` block with what the site can show from `exercises/`.
-  `course.json` adds up the minutes: the duration from `timings.json` if it
-  exists, or an estimate by words if not, plus 45 seconds per question. It
-  checks that no `[[name]]` mark repeats in a narration and that every action
-  points at a mark and an object that exist. It fails if a lesson in the plan
-  has no module, if a module defines a lesson that the plan does not mention, or
-  if a lesson id is already in another course.
+  `site/<course>/`. It numbers path sections following `plan.PARTS` and marks
+  guide sections as unnumbered. It completes each `Exercise` block with what the
+  site can show from `exercises/`. `course.json` adds up the minutes: the
+  duration from `timings.json` if it exists, or an estimate by words if not,
+  plus 45 seconds per question. It checks that no `[[name]]` mark repeats in a
+  narration and that every action points at a mark and an object that exist. It
+  fails if a lesson in the plan has no module, if a module defines a lesson that
+  the plan does not mention, or if a lesson id is already in another course.
 - `tts.py` reads `lesson.json`. For each step it applies `pronunciacion.py` to
   the `say` text, synthesizes `audio/<step>.mp3` with Edge TTS and measures its
   duration with `ffprobe`. `timings.json` holds per step `dur` (seconds),
@@ -142,7 +143,7 @@ Each lesson leads the learner to act and to reflect, not only to watch:
 ## Project exercises
 
 The Qiskit course's Ising project uses the same code exercises as the rest of
-the course. Each part contributes three exercises, with level 1 for
+the course. Each milestone contributes three exercises, with level 1 for
 reproduction, level 2 for modification and level 3 for creation. The runner
 checks visible and hidden cases, so the learner gets the same verdicts locally
 and in the lesson.
@@ -154,14 +155,13 @@ separate local program.
 
 ## The spin chain project
 
-One experiment grows part by part in the Qiskit course: the magnetization of an
-Ising spin chain after a sudden change of the field. There is one milestone per
-part. The titles and descriptions of the milestones are in
-`site/qiskit/project.json` (`title`, `tagline` and `milestones`, each with `n`,
-`part`, `title`, `desc`, `lesson` and `exercise`). The path page of the course
-shows them as a track with the state of each milestone, saved in `qiskit:hitos`.
-Account setup is explained in the relevant lesson; the graded work runs through
-the exercises.
+One experiment grows unit by unit in the Qiskit course: the magnetization of an
+Ising spin chain after a sudden change of the field. The titles and descriptions
+of the milestones are in `site/qiskit/project.json` (`title`, `tagline` and
+`milestones`, each with `n`, `part`, `title`, `desc`, `lesson` and `exercise`).
+The path page shows the current milestone above the units and saves milestone
+state in `qiskit:hitos`. Account setup is explained in the relevant lesson; the
+graded work runs through the exercises.
 
 ## Spaced review
 
