@@ -7,7 +7,7 @@
       "code": "import qiskit\n\nprint(qiskit.___)",
       "options": ["__version__", "version", "__qiskit_version__", "__path__"],
       "right": 0,
-      "why": "`qiskit.__version__` es una cadena como `2.6.1`. `qiskit.version` es un módulo interno, no el número."
+      "why": "`qiskit.__version__` es una cadena como `2.6.2`. `qiskit.version` es un módulo interno, no el número."
     },
     {
       "kind": "parsons",
