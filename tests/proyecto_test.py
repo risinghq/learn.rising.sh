@@ -36,9 +36,31 @@ def milestones() -> list[dict[str, object]]:
     return cast(list[dict[str, object]], data["milestones"])
 
 
+def exercise_ids(lesson: str) -> set[str]:
+    data = json.loads((SITE / "qiskit" / "lessons" / lesson / "lesson.json").read_text())
+
+    def walk(blocks: list[dict[str, object]]) -> set[str]:
+        found: set[str] = set()
+        for block in blocks:
+            if block.get("type") == "exercise":
+                found.add(cast(str, block["exercise"]))
+            for child in (block.get("items", []), block.get("body", [])):
+                if isinstance(child, list):
+                    found.update(walk([value for value in child if isinstance(value, dict)]))
+        return found
+
+    return {
+        exercise
+        for beat in cast(list[dict[str, object]], data["beats"])
+        for exercise in walk(cast(list[dict[str, object]], beat["scene"]))
+    }
+
+
 def main() -> None:
     datos = milestones()
     assert len(datos) == HITOS
+    for milestone in datos:
+        assert cast(str, milestone["exercise"]) in exercise_ids(cast(str, milestone["lesson"]))
     fallos: list[str] = []
     srv, base = serve()
     with sync_playwright() as p:

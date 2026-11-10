@@ -196,11 +196,7 @@ async function checkNext(page: Page): Promise<void> {
     return;
   }
   const node = page.locator("a[data-current]");
-  await see(
-    "current node",
-    text(node.locator(".title")),
-    `${target.section} ${target.title}`,
-  );
+  await see("current node", text(node.locator(".title")), target.title);
   await see(
     "current node button",
     text(node.locator(".go")),
@@ -441,6 +437,7 @@ async function main(): Promise<void> {
     });
 
     await step("answer the second question at the first try", async () => {
+      if (q2 === undefined) return;
       for (let n = q1 + 3; n <= q2 + 1; n++) await next(page, n, firstLength);
       await answer(page, first.id, q2, false);
       await page.locator("#ask .next-row .primary").click();
@@ -448,12 +445,12 @@ async function main(): Promise<void> {
     });
 
     await step("finish the first lesson", async () => {
-      await playToEnd(page, q2 + 2, firstLength);
+      await playToEnd(page, (q2 ?? q1) + 2, firstLength);
       await finishLesson(page, first.id);
       await see(
         "score",
         text(page.locator("#end-score")),
-        "Preguntas acertadas al primer intento: 1 de 2.",
+        `Preguntas acertadas al primer intento: ${q2 === undefined ? 0 : 1} de ${q2 === undefined ? 1 : 2}.`,
       );
     });
 
@@ -468,10 +465,10 @@ async function main(): Promise<void> {
       await see(
         "milestone",
         text(page.locator(".hcur p").first()),
-        `Hito 1 de ${milestones.length}, parte ${milestone.part}`,
+        `Hito 1 de ${milestones.length} · Unidad ${milestone.part}`,
       );
       await page
-        .locator(".hcur a.btn", { hasText: "Abrir la práctica" })
+        .locator(".hcur a.btn", { hasText: "Continuar con el proyecto" })
         .click();
       await see(
         "milestone lesson",
@@ -487,7 +484,7 @@ async function main(): Promise<void> {
       await see(
         "milestone",
         text(page.locator(".hcur p").first()),
-        "Hito 1 de 10, parte 1",
+        "Hito 1 de 10 · Unidad 1",
       );
       await page
         .locator(".hcur .btn", { hasText: "Marcar como hecho" })
@@ -495,7 +492,7 @@ async function main(): Promise<void> {
       await see(
         "milestone",
         text(page.locator(".hcur p").first()),
-        "Hito 2 de 10, parte 2",
+        "Hito 2 de 10 · Unidad 2",
       );
       await same(
         "milestones done",
@@ -506,7 +503,7 @@ async function main(): Promise<void> {
       await see(
         "milestone after reload",
         text(page.locator(".hcur p").first()),
-        "Hito 2 de 10, parte 2",
+        "Hito 2 de 10 · Unidad 2",
       );
       await same(
         "milestones done after reload",

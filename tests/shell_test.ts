@@ -15,6 +15,7 @@ import { serveSite } from "./site.ts";
 const SITE = resolve(import.meta.dirname, "..", "site");
 interface Course {
   parts: { lessons: { id: string; title: string }[] }[];
+  guides?: { id: string; title: string }[];
 }
 const courseOf = (slug: string): Course =>
   JSON.parse(readFileSync(join(SITE, slug, "course.json"), "utf8")) as Course;
@@ -176,6 +177,50 @@ async function returningVisit(browser: Browser, base: string): Promise<void> {
     qiskit[2].id,
   );
   same("page errors", errors, []);
+  await context.close();
+}
+
+async function courseOpening(browser: Browser, base: string): Promise<void> {
+  const existing = qiskit[0].id;
+  const guide = courseOf("qiskit").guides?.[0];
+  if (!guide) throw new Error("qiskit has no guide links");
+  const { context, page, errors } = await visitor(browser, {
+    "qiskit:done": JSON.stringify([existing]),
+  });
+  await page.goto(`${base}/qiskit/`);
+  await page.locator(".outcome").waitFor();
+  check(
+    (await page.locator(".outcome").innerText()).includes("Programa circuitos"),
+    "the course opening shows its outcome",
+  );
+  same(
+    "an expanded unit has one progress count",
+    await page.locator(".unit[open] .count").count(),
+    1,
+  );
+  same(
+    "an expanded unit has no body progress",
+    await page.locator(".unit[open] .unit-progress").count(),
+    0,
+  );
+  check(
+    (await page.locator(".hcur").count()) === 1 &&
+      (await page.locator(".units").count()) === 1 &&
+      (await page.locator(".hcur").boundingBox())!.y <
+        (await page.locator(".units").boundingBox())!.y,
+    "the current milestone appears above the units",
+  );
+  same(
+    "existing lesson ids remain done",
+    await page.locator(`a.node[data-state="done"]`).count(),
+    1,
+  );
+  const guideLink = page.locator(`.guides a[href*="${guide.id}"]`);
+  same("guides are unlocked links", await guideLink.count(), 1);
+  await guideLink.tap();
+  await page.waitForURL(new RegExp(`l=${guide.id}$`));
+  same("a guide opens directly", lessonId(page), guide.id);
+  same("course opening page errors", errors, []);
   await context.close();
 }
 
@@ -344,6 +389,7 @@ try {
   await firstVisit(browser, base);
   await catalogStates(browser, base);
   await returningVisit(browser, base);
+  await courseOpening(browser, base);
   await migration(browser, base);
   await streak(browser, base);
   await offline(browser, base);

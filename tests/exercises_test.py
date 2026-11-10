@@ -22,6 +22,7 @@ import tempfile
 import textwrap
 import types
 from collections.abc import Iterable, Iterator, Mapping
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -1723,6 +1724,48 @@ def test_build_rejects_a_broken_exercise_reference(fixture_dir: Path) -> None:
     assert "leccion/falta has no starter.py, solution.py, check.py" in text
     assert "invalid exercise id" in text
     assert "leccion/uno is repeated" in text
+
+
+def test_qiskit_builder_rejects_a_project_exercise_in_the_wrong_lesson(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    qiskit_source = build.source_dir("qiskit")
+    monkeypatch.syspath_prepend(str(qiskit_source))
+    lessons = deepcopy(build.load_lessons(qiskit_source))
+    source = lessons["p5-hello-world"]
+    target = lessons["p8-app-functions"]
+
+    def take(blocks: list[dict[str, Any]]) -> dict[str, Any] | None:
+        for index, block in enumerate(blocks):
+            if block.get("exercise") == "p5-rest/hito5-uso":
+                return blocks.pop(index)
+            for key in ("items", "body"):
+                children = block.get(key)
+                if isinstance(children, list):
+                    moved = take([child for child in children if isinstance(child, dict)])
+                    if moved is not None:
+                        children.remove(moved)
+                        return moved
+        return None
+
+    moved = None
+    for beat in source["beats"]:
+        moved = take(beat["scene"])
+        if moved is not None:
+            beat["actions"] = [action for action in beat["actions"] if action.get("id") != "e2"]
+            break
+    assert moved is not None
+    target["beats"][0]["scene"].append(moved)
+    monkeypatch.setattr(build, "load_lessons", lambda _source: lessons)
+    monkeypatch.setattr(sys, "argv", ["build.py", "qiskit", "--check"])
+    build.ERRORS.clear()
+    try:
+        with pytest.raises(SystemExit) as error:
+            build.main("qiskit")
+        assert "p5-rest/hito5-uso" in str(error.value)
+        assert "must be in exercises/p8-app-functions/" in str(error.value)
+    finally:
+        build.ERRORS.clear()
 
 
 def test_exercise_rejects_unknown_level_and_needs() -> None:
