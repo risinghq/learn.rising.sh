@@ -21,8 +21,8 @@ lesson folder is the `id` of the lesson.
 ## Declare it in the lesson
 
 `Exercise()` from [`lib.py`](../lessons_src/lib.py) creates the block. It goes
-in the scene of a step, next to the `Mission` card, and is revealed with a
-`show` action like any hidden block:
+in the scene of a step and is revealed with a `show` action like any hidden
+block:
 
 ```python
 Exercise(
@@ -171,8 +171,7 @@ These rules hold for each exercise and for the lesson step that contains it.
    returns, and warns of the error that the hidden case does detect, or includes
    a worked example with values.
 5. **A step with `Exercise` does not mention a notebook or a "green mark".** The
-   exercise is checked with the **Comprobar** button of the page itself. Those
-   words belong to `Mission`, which points to a marimo notebook.
+   exercise is checked with the **Comprobar** button of the page itself.
 6. **A part with a project milestone in the browser ends in a `pN-cierre`
    lesson.** It has a short review, with `choice` and `numeric` questions from
    the lessons of the part, and a level 3 exercise taken from the milestone,

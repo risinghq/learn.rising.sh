@@ -11,7 +11,6 @@ document says what each folder holds and where a request goes.
 | `app/`         | The shell: catalog, course path pages and privacy page, as a React app prerendered into `site/`.    |
 | `site/`        | The static site: the shell, what the courses share and one folder per course. [Detail](#site)       |
 | `lessons_src/` | The lessons of each course as Python code, one folder per course, and the program that builds them. |
-| `practica/`    | The marimo notebooks of the missions, the project and their solutions.                              |
 | `exercises/`   | The code exercises: starter code, solution and cases of each.                                       |
 | `qgcheck/`     | The exercise grader: runs a learner's code and returns the result of each case.                     |
 | `runner/`      | The runner image (`server.py`, `sandbox.py`) and the Worker (`worker/`).                            |
@@ -25,7 +24,7 @@ Each part has its own document:
 
 | Part                             | Document                       |
 | -------------------------------- | ------------------------------ |
-| `lessons_src/`, `practica/`      | [lessons.md](lessons.md)       |
+| `lessons_src/`                   | [lessons.md](lessons.md)       |
 | `exercises/`, `qgcheck/`         | [exercises.md](exercises.md)   |
 | `runner/` (image)                | [runner.md](runner.md)         |
 | `runner/worker/` (accounts)      | [accounts.md](accounts.md)     |
@@ -96,10 +95,10 @@ The root holds the shell and what the courses share:
   it.
 - The page scripts are written in TypeScript. `mise run generate:scripts`
   bundles them with `bun build` into `theme.js`, `account.js`,
-  `player/engine.js`, `player/editor.js`, `player/pyodide-worker.js` and
-  `qiskit/notebooks.js`, which the pages load and Git ignores. The `install`,
-  `serve`, `deploy` and `test:ui` tasks run it. `tsconfig.json` types them and
-  `globals.d.ts` declares what they share through `window`.
+  `player/engine.js`, `player/editor.js` and `player/pyodide-worker.js`, which
+  the pages load and Git ignores. The `install`, `serve`, `deploy` and `test:ui`
+  tasks run it. `tsconfig.json` types them and `globals.d.ts` declares what they
+  share through `window`.
 
 `player/` is the lesson player, the same for every course. A lesson page loads
 it with `../player/`:
@@ -116,27 +115,22 @@ A course is a folder `site/<slug>/` and a line in `courses.json`. It links the
 theme and `vendor/` with `../`, and calls the platform routes by their absolute
 path:
 
-- `course.json` is the index, generated: parts, lessons, minutes and missions.
-  The path page draws one unit per part and one node per lesson.
+- `course.json` is the index, generated: parts, lessons and minutes. The path
+  page draws one unit per part and one node per lesson.
 - `project.json` is optional: the milestones of a project track, each tied to a
-  part and to a notebook. A course without it shows no track.
+  part, lesson and exercise. A course without it shows no track.
 - `index.html` is the path page, generated from the two files above.
 - `lesson.html` loads `../player/engine.js` and `../player/app.css`. KaTeX draws
   the formulas and the page loads it with `defer`, before its own scripts.
 - `lessons/<id>/` holds `lesson.json`, `timings.json` and `audio/<step>.mp3`,
   all generated ([lessons.md](lessons.md)).
 
-A course adds its own files beside those. `qiskit/` has `notebooks.ts`, which
-writes the "how to run the notebooks" line that goes with each `marimo` command.
-`computational-physics/` has none.
-
 ## Progress in the browser
 
 `progress.ts` defines the keys of `localStorage`. A course writes under its own
 slug: `<slug>:done`, `<slug>:pos:<lesson>`, `<slug>:heard:<lesson>`,
-`<slug>:exercise:<lesson>/<name>`, `<slug>:hitos`, `<slug>:misiones`,
-`<slug>:repaso` (the answers of the drill sessions) and so on. What belongs to
-no course uses `rising:`:
+`<slug>:exercise:<lesson>/<name>`, `<slug>:hitos`, `<slug>:repaso` (the answers
+of the drill sessions) and so on. What belongs to no course uses `rising:`:
 
 | Key               | Contents                                                  |
 | ----------------- | --------------------------------------------------------- |

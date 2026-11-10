@@ -310,6 +310,13 @@ weekly board and the once-per-day rule read, so that is all it loses:
 bunx cf d1 query <uuid> "--sql=DROP TABLE xp_events; CREATE TABLE xp_events (id INTEGER PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, at INTEGER NOT NULL, utc_day INTEGER NOT NULL, source TEXT NOT NULL CHECK (source IN ('drill', 'exercise', 'browser', 'lesson', 'cli')), ref TEXT NOT NULL, amount INTEGER NOT NULL CHECK (amount > 0)); CREATE UNIQUE INDEX xp_ref_day ON xp_events (user_id, utc_day, source, ref);"
 ```
 
+Milestones as code exercises. The lessons no longer have notebook missions, so
+the `<course>:misiones` keys that marked them go:
+
+```sh
+bunx cf d1 query <uuid> "--sql=DELETE FROM kv WHERE key LIKE '%:misiones';"
+```
+
 Run the statements before the deploy that needs them. The new Worker reads the
 new column, so a Worker deployed first fails its reminder sweep until they run.
 

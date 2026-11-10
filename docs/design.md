@@ -161,8 +161,8 @@ Every duration and curve is a token in `theme.css`:
 - The lesson is the stage, the subtitle and the controls. The subtitle is
   `42rem` wide and four lines of fixed height, so the text does not move the
   stage.
-- An exercise or a mission fills the stage with vertical scrolling; the editor
-  stays at 16 px or more.
+- An exercise fills the stage with vertical scrolling; the editor stays at 16 px
+  or more.
 - Inline code is `0.875em` on `--bg2`; the code block is on `--code-bg`.
 
 ## Progress

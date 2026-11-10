@@ -147,7 +147,6 @@ the course, 1 to 40 characters from `a-z`, `0-9` and `-`:
 | Key                                         | Value                         | When merging two values                                                          |
 | ------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
 | `<course>:heard:<lesson>`, `<course>:hitos` | list of integers              | the union                                                                        |
-| `<course>:misiones`                         | list of strings               | the union                                                                        |
 | `<course>:pos:<lesson>`                     | integer                       | the larger                                                                       |
 | `<course>:predict:<lesson>:<id>`            | integer                       | the one already there: a bet does not change                                     |
 | `<course>:repaso`                           | list of `{item, at, correct}` | the union by `item` and `at`, a miss beating a right answer; the latest 800 stay |

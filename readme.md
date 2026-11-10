@@ -5,9 +5,8 @@ are narrated and animated, with exercises you run on the page, and your progress
 is kept per account.
 
 There are two courses, both in Spanish: **Qiskit**, on quantum computing, with
-practice notebooks and a project that grows part by part, and **Física
-computacional**, on numerical methods, by simulating oscillators, pendulums and
-planets.
+project exercises that grow part by part, and **Física computacional**, on
+numerical methods, by simulating oscillators, pendulums and planets.
 
 ## Install
 
@@ -30,11 +29,7 @@ mise run serve
 This serves the courses at <http://localhost:8810/> and grades your code
 exercises on your machine, without accounts. It needs no internet.
 
-A project milestone opens its notebook with a command such as:
-
-```sh
-uv run marimo edit practica/proyecto/hito1.py
-```
+A project milestone opens its code exercises in the relevant Qiskit lesson.
 
 ## Check
 

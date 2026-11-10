@@ -181,11 +181,9 @@ All refusals are 503 with `Retry-After` in seconds. `budget` waits for day 1 of
 the next month and `budget_day` for UTC midnight. The learner sees:
 
 - `budget`: «El corredor alcanzó su presupuesto de este mes y no ejecuta más
-  código hasta que empiece el siguiente. Los cuadernos de marimo siguen
-  funcionando en tu equipo.»
+  código hasta que empiece el siguiente.»
 - `budget_day`: «El corredor alcanzó su presupuesto de hoy y no ejecuta más
-  código hasta mañana. Puedes volver a ejecutar en 5 h. Los cuadernos de marimo
-  siguen funcionando en tu equipo.»
+  código hasta mañana. Puedes volver a ejecutar en 5 h.»
 
 With the 2 USD budget, whoever does not maintain the site has 1.5 USD a month
 and 0.10 USD (1.5 over 15) a day.

@@ -1,10 +1,9 @@
-# Lessons and notebooks
+# Lessons and code exercises
 
 A lesson is a sequence of steps with voice, subtitles, animations, code and
 questions. It is written in Python (`lessons_src/<course>/`), turned into JSON
-and played by `site/player/engine.ts`, the same player for every course. The
-Qiskit course also has marimo notebooks for practice (`practica/`). Every course
-has code exercises ([exercises.md](exercises.md)).
+and played by `site/player/engine.ts`, the same player for every course. Every
+course has code exercises ([exercises.md](exercises.md)).
 
 ## From the source to the browser
 
@@ -111,18 +110,17 @@ its `pts` in the lesson source with the same method the lesson explains, and
 
 ## Programs in `tools/`
 
-| Program                                              | Function                                                                                                                            |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `fetch_docs.py`                                      | Downloads `docs/guides` of Qiskit/documentation to `.cache/qiskit-docs`.                                                            |
-| `extract.py`                                         | Converts those guides to plain text in `.cache/qiskit-docs/text`.                                                                   |
-| `tts.py`                                             | Synthesizes the narration of a lesson and writes `timings.json`.                                                                    |
-| `pronunciacion.py`                                   | Dictionary that rewrites English acronyms and names so the voice reads them well.                                                   |
-| `verify.py`                                          | Runs the Python of the lessons of every course, except `norun`, and compares the `Out(…, check=True)`.                              |
-| `practica.py`                                        | Runs each notebook with and without solutions. It also tests `mo.ui.slider`/`number` at minimum and maximum. A runtime error fails. |
-| `exercises.py`                                       | Runs the solution and the starter code of each exercise with `qgcheck` and checks its `needs`.                                      |
-| `serve.py`                                           | Serves `site/` locally and answers `POST /run`.                                                                                     |
-| `dashboard.ts`                                       | The operator dashboard ([accounts.md](accounts.md#where-learners-get-stuck)).                                                       |
-| `playtest.ts`, `seektest.ts`, `shot.ts`, `review.ts` | Playwright tests and screenshots of a lesson served on port 8810. The lesson id says which course opens.                            |
+| Program                                              | Function                                                                                                 |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `fetch_docs.py`                                      | Downloads `docs/guides` of Qiskit/documentation to `.cache/qiskit-docs`.                                 |
+| `extract.py`                                         | Converts those guides to plain text in `.cache/qiskit-docs/text`.                                        |
+| `tts.py`                                             | Synthesizes the narration of a lesson and writes `timings.json`.                                         |
+| `pronunciacion.py`                                   | Dictionary that rewrites English acronyms and names so the voice reads them well.                        |
+| `verify.py`                                          | Runs the Python of the lessons of every course, except `norun`, and compares the `Out(…, check=True)`.   |
+| `exercises.py`                                       | Runs the solution and the starter code of each exercise with `qgcheck` and checks its `needs`.           |
+| `serve.py`                                           | Serves `site/` locally and answers `POST /run`.                                                          |
+| `dashboard.ts`                                       | The operator dashboard ([accounts.md](accounts.md#where-learners-get-stuck)).                            |
+| `playtest.ts`, `seektest.ts`, `shot.ts`, `review.ts` | Playwright tests and screenshots of a lesson served on port 8810. The lesson id says which course opens. |
 
 The `.ts` programs run with Bun: `bun tools/shot.ts <lesson> <beats>`, for
 example `bun tools/shot.ts f1-euler-leapfrog 4,5 laptop`.
@@ -136,48 +134,34 @@ Each lesson leads the learner to act and to reflect, not only to watch:
 1. **Predict.** Before seeing a result, the learner bets an answer (`predict`).
    The bet does not change afterwards.
 2. **Watch.** The narrated animation.
-3. **Do.** A [code exercise](exercises.md) that is checked on the page or, in
-   the Qiskit course, a mission ([`Mission`](#missions-and-notebooks)) with the
-   lesson's notebook.
+3. **Do.** A [code exercise](exercises.md) that is checked on the page.
 4. **Reflect.** Open questions (`reflect`). The text is saved in the browser
    (`<course>:reflect`) and shows when the learner returns.
 5. **Recap.** The summary of the lesson.
 
-## Missions and notebooks
+## Project exercises
 
-Only the Qiskit course has them. A mission names a notebook in `practica/` and
-its tasks, each with a level: 🟢 1 reproduce, 🟡 2 modify, 🔴 3 create. Each
-task has its check in the notebook. A [code exercise](exercises.md) uses the
-same three levels in its `level` field.
+The Qiskit course's Ising project uses the same code exercises as the rest of
+the course. Each part contributes three exercises, with level 1 for
+reproduction, level 2 for modification and level 3 for creation. The runner
+checks visible and hidden cases, so the learner gets the same verdicts locally
+and in the lesson.
 
-The notebooks are the `.py` files of `practica/` that contain `marimo.App(`.
-They open with `uv run marimo edit practica/<id>.py`. Qiskit does not run in the
-browser, so the notebooks run on your machine, in the project's Python
-environment.
-
-marimo and not Jupyter because it is reactive: when you change something
-everything recomputes, so the checks say ✅ or ❌ at once, and the sliders suit
-exploring parameters. Its files are plain `.py`, easy to version and to check
-with `tools/practica.py`. The IBM guides and the community use Jupyter, so a
-mission in Part I teaches how to convert between the two formats with
-`marimo convert`.
-
-A notebook can import a module from its folder (`proyecto/ising.py`) because
-`tools/practica.py` puts that folder on `sys.path`.
-`practica/soluciones/<notebook>.json` (with `__` instead of `/` for notebooks in
-subfolders) holds the (text, replacement) pairs that `tools/practica.py` applies
-to check that all the verifications give ✅.
+Project exercises live beside the lesson that introduces them under
+`exercises/<lesson>/`. They are ordinary `starter.py`, `solution.py` and
+`check.py` folders. The project track links to the lesson rather than opening a
+separate local program.
 
 ## The spin chain project
 
 One experiment grows part by part in the Qiskit course: the magnetization of an
 Ising spin chain after a sudden change of the field. There is one milestone per
-part, in `practica/proyecto/hito<N>.py` (N from 1 to 10), and a shared module,
-`practica/proyecto/ising.py`. The titles and descriptions of the milestones are
-in `site/qiskit/project.json` (`title`, `tagline` and `milestones`, each with
-`n`, `part`, `title`, `desc` and `notebook`). The path page of the course shows
-them as a track with the state of each milestone, saved in `qiskit:hitos`. The
-milestones that run on a real QPU ask for an IBM Quantum account.
+part. The titles and descriptions of the milestones are in
+`site/qiskit/project.json` (`title`, `tagline` and `milestones`, each with `n`,
+`part`, `title`, `desc`, `lesson` and `exercise`). The path page of the course
+shows them as a track with the state of each milestone, saved in `qiskit:hitos`.
+Account setup is explained in the relevant lesson; the graded work runs through
+the exercises.
 
 ## Spaced review
 
