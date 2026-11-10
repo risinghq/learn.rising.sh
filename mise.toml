@@ -78,7 +78,7 @@ description = "Run the pytest suites that need no browser"
 # The grader tests time learner code against a 10 s limit. This suite runs only beside the exercise check,
 # each on its own core, and the browser, Worker and lesson suites wait for it.
 wait_for = ["lint", "typecheck", "build"]
-run ="uv run pytest tests/exercises_test.py"
+run = "uv run pytest tests/exercises_test.py tests/courses_test.py"
 
 [tasks."test:exercises"]
 description = "Grade every exercise: its solution passes, its starter fails, its hints and needs hold"

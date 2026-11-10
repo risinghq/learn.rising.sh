@@ -79,6 +79,10 @@ svg {
   padding: 0;
   list-style: none;
 }
+.stats:empty {
+  min-width: 5.5rem;
+  min-height: var(--tap);
+}
 .stat {
   display: inline-flex;
   align-items: center;
@@ -88,6 +92,11 @@ svg {
   font-weight: var(--w-strong);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+.stat > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
 }
 .stat svg {
   color: var(--muted);

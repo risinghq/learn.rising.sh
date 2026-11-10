@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react";
 
 import type { CatalogPage } from "../model.ts";
 import { hours, lessonHref, minutesOf, nextLesson } from "../path.ts";
-import { useDoneByCourse, useLastCourse } from "../store.ts";
+import { useDoneByCourse, useHasProgress, useLastCourse } from "../store.ts";
 import { Layout } from "./Layout.tsx";
 
 type Entry = CatalogPage["courses"][number];
@@ -79,10 +79,11 @@ export function Catalog({ page }: { page: CatalogPage }) {
   const drill = page.courses.find(
     (e) => e.course.slug === (last ?? primary) && done[e.course.slug]?.size,
   )?.course.slug;
+  const started = useHasProgress();
   return (
     <Layout stats drill={drill}>
       <div className="page">
-        <h1>Tus cursos</h1>
+        <h1>{started ? "Tus cursos" : "Cursos"}</h1>
         <ul className="courses">
           {page.courses.map((entry) => (
             <CourseCard
@@ -93,9 +94,6 @@ export function Catalog({ page }: { page: CatalogPage }) {
             />
           ))}
         </ul>
-        <p>
-          <a href="/amigos/">Amigos y tablero de la semana</a>
-        </p>
       </div>
     </Layout>
   );

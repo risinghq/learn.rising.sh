@@ -75,6 +75,71 @@ async function firstVisit(browser: Browser, base: string): Promise<void> {
   await context.close();
 }
 
+async function catalogStates(browser: Browser, base: string): Promise<void> {
+  const signedOut = await visitor(browser, {});
+  await signedOut.page.goto(`${base}/`);
+  await signedOut.page.locator("h1").waitFor();
+  same(
+    "signed out catalog has no friends link",
+    await signedOut.page.locator('a[href="/amigos/"]').count(),
+    0,
+  );
+  same(
+    "signed out empty header has no stats",
+    await signedOut.page.locator(".stats li").count(),
+    0,
+  );
+  same(
+    "signed out catalog heading",
+    await signedOut.page.locator("h1").innerText(),
+    "Cursos",
+  );
+  same("signed out page errors", signedOut.errors, []);
+  await signedOut.context.close();
+
+  const started = await visitor(browser, {
+    "qiskit:done": JSON.stringify([qiskit[0].id]),
+  });
+  await started.page.goto(`${base}/`);
+  await started.page.locator('.stats a[href="/qiskit/repaso/"]').waitFor();
+  same(
+    "signed out progress has a streak link without XP",
+    await started.page.locator('.stats a[href="/qiskit/repaso/"]').count(),
+    1,
+  );
+  await started.context.close();
+
+  const signedIn = await visitor(browser, { "rising:cuenta": "account-flag" });
+  await signedIn.page.goto(`${base}/`);
+  await signedIn.page.locator('.stats a[href="/amigos/"]').waitFor();
+  same(
+    "signed in catalog has one friends link",
+    await signedIn.page.locator('a[href="/amigos/"]').count(),
+    1,
+  );
+  same(
+    "signed in XP link labels friends",
+    await signedIn.page
+      .locator('a[href="/amigos/"]')
+      .getAttribute("aria-label"),
+    "0 XP hoy. Ver amigos y tablero",
+  );
+  await signedIn.context.close();
+
+  const completed = await visitor(browser, {
+    "qiskit:done": JSON.stringify([qiskit[0].id]),
+  });
+  await completed.page.goto(`${base}/`);
+  await completed.page.getByRole("heading", { name: "Tus cursos" }).waitFor();
+  same(
+    "completed lesson catalog heading",
+    await completed.page.locator("h1").innerText(),
+    "Tus cursos",
+  );
+  same("completed lesson page errors", completed.errors, []);
+  await completed.context.close();
+}
+
 async function returningVisit(browser: Browser, base: string): Promise<void> {
   const done = JSON.stringify(qiskit.slice(0, 2).map((l) => l.id));
   const { context, page, errors } = await visitor(browser, {
@@ -180,7 +245,7 @@ const days = (ago: number) => {
 };
 async function streak(browser: Browser, base: string): Promise<void> {
   const cases: [string, Record<string, number>, string, string][] = [
-    ["nothing earned", {}, "Racha: 0 días", "0 XP hoy"],
+    ["nothing earned", {}, "", ""],
     ["today only", { [days(0)]: 20 }, "Racha: 1 día", "20 XP hoy"],
     [
       "yesterday keeps it alive",
@@ -202,12 +267,16 @@ async function streak(browser: Browser, base: string): Promise<void> {
     });
     await page.goto(`${base}/qiskit/`);
     const items = page.locator(".stats li");
-    await page.waitForFunction(
-      (want) => document.querySelector(".stats li")?.textContent === want,
-      streakText,
-    );
-    same(`${name}: streak`, await items.nth(0).textContent(), streakText);
-    same(`${name}: xp`, await items.nth(1).textContent(), xpText);
+    if (!streakText) {
+      same(`${name}: stats`, await items.count(), 0);
+    } else {
+      await page.waitForFunction(
+        (want) => document.querySelector(".stats li")?.textContent === want,
+        streakText,
+      );
+      same(`${name}: streak`, await items.nth(0).textContent(), streakText);
+      same(`${name}: xp`, await items.nth(1).textContent(), xpText);
+    }
     await context.close();
   }
 }
@@ -273,6 +342,7 @@ const { base, stop } = serveSite();
 const browser = await chromium.launch();
 try {
   await firstVisit(browser, base);
+  await catalogStates(browser, base);
   await returningVisit(browser, base);
   await migration(browser, base);
   await streak(browser, base);

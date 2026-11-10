@@ -6,6 +6,7 @@ import {
   ACCOUNT_EVENT,
   addXp,
   courseKey,
+  hasProgress,
   PREF,
   read,
   standing,
@@ -35,6 +36,9 @@ const nothing = () => null;
 
 export const useStored = (key: string): string | null =>
   useSyncExternalStore(subscribe, () => read(key), nothing);
+
+export const useHasProgress = () =>
+  useSyncExternalStore(subscribe, hasProgress, () => false);
 
 function parse<T>(raw: string | null, fallback: T): T {
   try {

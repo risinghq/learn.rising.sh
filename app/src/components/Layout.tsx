@@ -1,7 +1,9 @@
 import { ArrowLeft, Flame, Moon, Sun, Zap } from "lucide-react";
 import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 
-import { useXp } from "../store.ts";
+import { PREF } from "@site/progress.ts";
+
+import { useHasProgress, useStored, useXp } from "../store.ts";
 
 const subscribeTheme = (listener: () => void) => {
   addEventListener("themechange", listener);
@@ -38,7 +40,11 @@ function AccountSlot() {
 }
 
 function Stats({ drill, here }: { drill?: string; here?: boolean }) {
+  const account = useStored(PREF.account);
   const { streak, today } = useXp();
+  const earned = useHasProgress();
+  const signedIn = account !== null;
+  if (!signedIn && !earned) return <ul className="stats" aria-hidden="true" />;
   const flame = (
     <>
       <Flame aria-hidden="true" />
@@ -48,7 +54,7 @@ function Stats({ drill, here }: { drill?: string; here?: boolean }) {
     </>
   );
   return (
-    <ul className="stats" aria-label="Tu racha">
+    <ul className="stats" aria-label="Tu progreso y tus amigos">
       <li className="stat" data-active={streak > 0}>
         {drill ? (
           <a href={`/${drill}/repaso/`}>
@@ -60,14 +66,21 @@ function Stats({ drill, here }: { drill?: string; here?: boolean }) {
         )}
       </li>
       <li className="stat">
-        <a
-          href="/amigos/"
-          aria-label={`${today} XP hoy. Ver amigos y tablero`}
-          aria-current={here ? "page" : undefined}
-        >
-          <Zap aria-hidden="true" />
-          {today} XP<span className="sr"> hoy</span>
-        </a>
+        {signedIn ? (
+          <a
+            href="/amigos/"
+            aria-label={`${today} XP hoy. Ver amigos y tablero`}
+            aria-current={here ? "page" : undefined}
+          >
+            <Zap aria-hidden="true" />
+            {today} XP<span className="sr"> hoy</span>
+          </a>
+        ) : (
+          <>
+            <Zap aria-hidden="true" />
+            {today} XP<span className="sr"> hoy</span>
+          </>
+        )}
       </li>
     </ul>
   );

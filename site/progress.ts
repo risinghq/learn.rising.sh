@@ -171,6 +171,14 @@ export const readXp = (): XpLog => {
     : {};
 };
 
+export function hasProgress(): boolean {
+  if (Object.values(readXp()).some((value) => value > 0)) return true;
+  return storedKeys().some(
+    (key) =>
+      key.endsWith(":done") && ids(readJson<unknown>(key, [])).length > 0,
+  );
+}
+
 export function addXp(amount: number, now = new Date()) {
   const log = readXp();
   const today = dayOf(now);
