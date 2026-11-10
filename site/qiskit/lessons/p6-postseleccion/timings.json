@@ -92,7 +92,7 @@
   ]
  },
  "circuito": {
-  "dur": 45.624,
+  "dur": 45.648,
   "marks": {
    "passes": 8.492,
    "run": 22.178,
@@ -118,7 +118,7 @@
    ],
    [
     37.506,
-    "Esta parte necesita una cuenta de IBM y un backend real, así que no la ejecutamos en la verificación."
+    "Esta unidad necesita una cuenta de IBM y un backend real, así que no la ejecutamos en la verificación."
    ]
   ]
  },

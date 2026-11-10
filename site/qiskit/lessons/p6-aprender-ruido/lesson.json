@@ -1,7 +1,7 @@
 {
  "id": "p6-aprender-ruido",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.5",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.7",
  "title": "Aprender el ruido",
  "summary": "Caracterizar el ruido por capas con NoiseLearner y NoiseLearnerV3 para alimentar técnicas de mitigación.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.5",
+    "5.7",
     "Medir el ruido que afecta a tus capas"
    ],
    "say": "Para usar PEA o PEC no basta con saber que existe ruido; hace falta estimar cómo afecta a las puertas del circuito. [[modelo]]El NoiseLearner ejecuta experimentos de caracterización y ajusta un modelo de ruido Pauli–Lindblad para las capas relevantes. [[no_corrige]]Aprender el modelo no corrige el resultado por sí solo. Es una medición auxiliar que otra técnica, como PEA o PEC, usa después.",
@@ -68,7 +68,7 @@
   {
    "id": "modelo",
    "tag": [
-    "6.5",
+    "5.7",
     "Un canal para cada capa"
    ],
    "say": "El modelo Pauli–Lindblad describe errores con generadores de Pauli y sus tasas. [[capas]]Se aprende por capas de puertas de dos qubits que el circuito realmente ejecutará, después de transpilarlo al conjunto de instrucciones del dispositivo. [[tasas]]Una tasa mayor indica que ese término pesa más en el modelo ajustado. Es una descripción aproximada del ruido en una calibración; no mide cada posible efecto físico ni permanece fija para siempre.",
@@ -121,7 +121,7 @@
   {
    "id": "predice_decae",
    "tag": [
-    "6.5",
+    "5.7",
     "Antes de medir la capa"
    ],
    "say": "¿Cómo se aprende una tasa? Repitiendo la capa y mirando cómo decae un valor esperado. [[capa]]Aquí la capa son dos CNOT seguidas, que sin ruido serían la identidad, con un tres por ciento de error despolarizante en cada una. [[medida]]Partimos de cero cero y medimos Z por Z tras una, dos, cuatro y ocho capas. [[apuesta]]Apuesta: ¿cómo baja el valor al repetir la capa?",
@@ -177,7 +177,7 @@
   {
    "id": "decae",
    "tag": [
-    "6.5",
+    "5.7",
     "Cada capa multiplica por lo mismo"
    ],
    "say": "El cálculo. [[canal]]Un canal despolarizante de dos qubits, convertido a canal cuántico, y una CNOT. [[bucle]]Cada capa aplica dos veces la CNOT y el canal sobre una matriz de densidad que parte de cero cero. [[obs]]Y al final se lee el valor esperado de Z por Z. [[res]]Los valores bajan de cero coma nueve cuatro a cero coma seis uno en ocho capas. El cociente entre capas consecutivas es constante: cero coma nueve cuatro cero nueve, que es uno menos cero coma cero tres, al cuadrado. Es una exponencial, y ese factor es la fidelidad de Pauli de la capa. [[ajuste]]Por eso se ajusta una recta al logaritmo: la pendiente da la fidelidad, y de la fidelidad sale la tasa del modelo Pauli–Lindblad.",
@@ -235,7 +235,7 @@
   {
    "id": "versiones",
    "tag": [
-    "6.5",
+    "5.7",
     "De NoiseLearner a NoiseLearnerV3"
    ],
    "say": "La versión anterior, NoiseLearner, recibe circuitos o PUBs y aplica su propia forma de encontrar capas. [[nuevo]]NoiseLearnerV3 recibe cajas anotadas que ya representan instrucciones ISA y permite que tú decidas qué capas caracterizar. [[estimador]]Con el Estimator nuevo del lado del cliente, puedes obtener esas capas con `find_unique_layers`. [[ejecutor]]Con Executor, se generan cajas con Samplomatic y se buscan instrucciones únicas. [[migrar]]La versión V3 es la opción para el modelo de ejecución dirigida y las primitivas del lado del cliente; no mezcles los dos formatos de entrada.",
@@ -302,7 +302,7 @@
   {
    "id": "flujo",
    "tag": [
-    "6.5",
+    "5.7",
     "El flujo con Estimator"
    ],
    "say": "Con client-side Estimator, primero transpila y prepara el PUB. [[capas]]Después `find_unique_layers` extrae las capas anotadas que necesita aprender. [[job]]NoiseLearnerV3 ejecuta un trabajo separado de aprendizaje. [[resultado]]Al recibir los mapas Pauli–Lindblad, los asocias con esas capas en `layer_noise_model`; luego ejecutas la mitigación. [[credenciales]]Este ejemplo envía trabajos a un backend real y requiere credenciales; lo omitimos en la verificación automática.",
@@ -340,7 +340,7 @@
   {
    "id": "limites",
    "tag": [
-    "6.5",
+    "5.7",
     "Qué significa y qué no"
    ],
    "say": "El modelo aprende ruido de las instrucciones y capas que le entregaste. [[sirve]]Sirve para comparar opciones y alimentar una mitigación que usa ese modelo. [[no]]No es una copia perfecta del QPU ni una garantía sobre ejecuciones futuras. [[vigencia]]Si cambia el backend, el circuito o la calibración, el modelo puede dejar de describir la situación actual; vuelve a aprender cuando cambie lo que importa.",
@@ -395,7 +395,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.5",
+    "5.7",
     "Comprueba"
    ],
    "say": "Sobre la entrada de NoiseLearnerV3.",
@@ -428,7 +428,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.5",
+    "5.7",
     "Comprueba"
    ],
    "say": "¿Qué hace el trabajo de NoiseLearner?",
@@ -474,7 +474,7 @@
   {
    "id": "mision",
    "tag": [
-    "6.5",
+    "5.7",
     "Tu turno"
    ],
    "say": "Ahora te toca. El modelo de ruido es una lista de Paulis con tasas, así que no hace falta cuenta. [[n1]]Primero construyes un modelo Pauli–Lindblad y calculas cuánto cuesta invertirlo. [[n2]]Después lo amplificas multiplicando sus tasas por tres, como hace PEA. [[n3]]Y por último aprendes tú una fidelidad: mides cómo decae un valor esperado con la profundidad y ajustas la tasa.",
@@ -557,7 +557,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.5",
+    "5.7",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma.",
@@ -581,7 +581,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.5",
+    "5.7",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]NoiseLearner ajusta un modelo Pauli–Lindblad por capas de puertas. [[r2]]NoiseLearnerV3 recibe cajas anotadas y se integra con Executor y el Estimator nuevo. [[r3]]En el cliente, el aprendizaje ocurre como un trabajo separado y se asigna a `layer_noise_model`. [[r4]]El modelo caracteriza; PEA o PEC realizan la mitigación.",

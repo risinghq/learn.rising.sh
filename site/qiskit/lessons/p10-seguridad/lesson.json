@@ -1,7 +1,7 @@
 {
  "id": "p10-seguridad",
- "part": "Parte X · Organizaciones, seguridad y comunidad",
- "section": "10.3",
+ "part": "Guías",
+ "section": "",
  "title": "Seguridad y cumplimiento",
  "summary": "Protección y retención de datos, responsabilidades compartidas, conexiones privadas, restricciones por contexto, alta disponibilidad, auditoría y políticas de seguridad.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "datos",
    "tag": [
-    "10.3",
+    "Guía",
     "Tus datos"
    ],
    "say": "Los datos que guardas en IBM Cloud están cifrados en reposo con una clave aleatoria. [[borrar]]Borrar una instancia elimina todo su contenido: trabajos, resultados, parámetros y programas. Con el rol Manager también puedes borrar un trabajo concreto. [[retencion]]Mientras sigas usando el servicio, IBM conserva tus datos no borrados durante tres años.",
@@ -60,7 +60,7 @@
   {
    "id": "responsabilidades",
    "tag": [
-    "10.3",
+    "Guía",
     "Responsabilidad compartida"
    ],
    "say": "La seguridad es compartida. [[ibm]]IBM opera la infraestructura, entrega actualizaciones, notifica mantenimientos e incidentes, cumple los acuerdos de nivel de servicio y versiona las API. [[tu]]Tú gestionas el acceso con IAM, proteges tus claves de API, configuras la auditoría, sigues las notificaciones, y migras a versiones soportadas antes de que termine el soporte de la anterior.",
@@ -178,7 +178,7 @@
   {
    "id": "red_pred",
    "tag": [
-    "10.3",
+    "Guía",
     "Antes de la red privada"
    ],
    "say": "Antes de verlo, apuesta. Has creado un punto de acceso privado virtual, VPE, desde tu nube privada virtual. [[cual]]Ahora abres la consola web en el navegador, ejecutas un script con el SDK de Python y haces una llamada a la API REST. ¿Cuáles de las tres van por la red privada?",
@@ -241,7 +241,7 @@
   {
    "id": "red",
    "tag": [
-    "10.3",
+    "Guía",
     "Conexiones privadas y restricciones"
    ],
    "say": "Dentro de la red de IBM, la comunicación siempre es privada. Pero tu conexión con la plataforma va por internet, salvo que uses un punto de acceso privado virtual, VPE, desde tu nube privada virtual: así el tráfico no sale a la red pública. Funciona con la API y el SDK, no con el sitio web. [[cbr]]Las restricciones basadas en contexto añaden una capa más: además de quién eres, comprueban desde dónde llega la petición, por ejemplo desde ciertas redes. No dan acceso; solo lo restringen.",
@@ -291,7 +291,7 @@
   {
    "id": "ha",
    "tag": [
-    "10.3",
+    "Guía",
     "Alta disponibilidad"
    ],
    "say": "El servicio está desplegado en tres zonas de cada región, sin punto único de fallo: si una zona cae, las peticiones siguen por las otras sin degradación notable. [[dr]]Ante un desastre regional, IBM reconstruye el servicio. Lo recomendado para ti: crear una instancia en la otra región y reenviar los trabajos afectados, salvo que necesites qubits concretos de esa región o tengas requisitos de residencia de datos; en ese caso, esperar la recuperación.",
@@ -348,7 +348,7 @@
   {
    "id": "auditoria",
    "tag": [
-    "10.3",
+    "Guía",
     "Auditoría y permisos"
    ],
    "say": "Para auditoría, el servicio genera eventos de actividad que IBM Cloud Activity Tracker Event Routing envía a donde configures, y que puedes ver y alertar con IBM Cloud Logs. [[acciones]]Cada evento corresponde a una acción, como crear o cancelar un trabajo; [[permisos]]y esas mismas acciones son los permisos que componen los roles: por ejemplo, job create para ejecutar un trabajo. Hay un catálogo equivalente para el acceso directo a sistemas.",
@@ -414,7 +414,7 @@
   {
    "id": "politicas",
    "tag": [
-    "10.3",
+    "Guía",
     "Políticas de seguridad del código"
    ],
    "say": "Y en tu propio entorno: mantén tus dependencias al día con herramientas como Dependabot, que te avisan cuando hay versiones vulnerables. Cada repositorio de Qiskit, el SDK, el cliente y los addons, publica su política de seguridad, con cómo reportar vulnerabilidades.",
@@ -442,7 +442,7 @@
   {
    "id": "q1",
    "tag": [
-    "10.3",
+    "Guía",
     "Comprueba"
    ],
    "say": "Sobre responsabilidades.",
@@ -475,7 +475,7 @@
   {
    "id": "mision",
    "tag": [
-    "10.3",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero lees una auditoría: conviertes eventos de actividad en los permisos que se ejercieron. [[n2]]Después amplías un detector de claves de API escritas en el código, sin marcar las que vienen del entorno. [[n3]]Y por último escribes qué hacer ante una caída regional, según tu plan, tus qubits y la residencia de tus datos. Todo con datos de ejemplo, sin cuenta. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -557,7 +557,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "10.3",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Lo que escribas se guarda en tu navegador.",
@@ -581,7 +581,7 @@
   {
    "id": "cierre",
    "tag": [
-    "10.3",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Tus datos están cifrados y se retienen tres años. [[r2]]La seguridad es compartida entre IBM y tú. [[r3]]Hay conexiones privadas, restricciones por contexto y alta disponibilidad en tres zonas. [[r4]]Y la auditoría registra cada acción.",

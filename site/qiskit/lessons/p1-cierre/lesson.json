@@ -1,9 +1,9 @@
 {
  "id": "p1-cierre",
- "part": "Parte I · Primeros pasos",
- "section": "1.6",
- "title": "Cierre de la Parte I: repaso y un paso de Trotter",
- "summary": "Un repaso corto de la Parte uno y el primer paso del proyecto Ising: el circuito de un paso de Trotter.",
+ "part": "Unidad 1 · Tu primer circuito",
+ "section": "1.5",
+ "title": "Repaso: de Bell a Ising",
+ "summary": "Un repaso corto y el primer paso del proyecto Ising: el circuito de un paso de Trotter.",
  "goals": [
   "recordar el patrón de cuatro pasos, qué es un circuito ISA y cómo se correlacionan los qubits de un GHZ",
   "escribir el circuito de un paso de Trotter para dos espines"
@@ -12,10 +12,10 @@
   {
    "id": "repaso1",
    "tag": [
-    "1.6",
+    "1.5",
     "Repaso: el patrón"
    ],
-   "say": "Tres preguntas rápidas de la Parte uno, y después una función del proyecto Ising. La primera, sobre el flujo de trabajo.",
+   "say": "Tres preguntas rápidas y después una función del proyecto Ising. La primera, sobre el flujo de trabajo.",
    "scene": [
     {
      "type": "text",
@@ -47,7 +47,7 @@
   {
    "id": "repaso2",
    "tag": [
-    "1.6",
+    "1.5",
     "Repaso: GHZ"
    ],
    "say": "Segunda pregunta, sobre el estado GHZ de tres qubits.",
@@ -120,7 +120,7 @@
   {
    "id": "repaso3",
    "tag": [
-    "1.6",
+    "1.5",
     "Repaso: Estimator"
    ],
    "say": "Tercera pregunta, sobre las primitivas.",
@@ -150,7 +150,7 @@
   {
    "id": "paso",
    "tag": [
-    "1.6",
+    "1.5",
     "Tu turno"
    ],
    "say": "Ahora el primer paso del proyecto Ising. [[ej]]Dos espines, un campo y un acoplamiento: te toca escribir el circuito de un solo paso de tiempo. [[n]]Se compara con el paso exacto de Trotter, calculado con matrices.",
@@ -186,10 +186,10 @@
   {
    "id": "cierre",
    "tag": [
-    "1.6",
+    "1.5",
     "Resumen"
    ],
-   "say": "Resumen de la parte. [[r1]]Todo programa sigue cuatro pasos. [[r2]]En hardware solo se ejecutan circuitos ISA. [[r3]]En un GHZ, los tres qubits coinciden siempre. [[r4]]Y un paso de Trotter aplica una rzz y después una rx por espín. Con esto cierras la Parte uno; en la siguiente, los circuitos a fondo.",
+   "say": "Resumen de la unidad. [[r1]]Todo programa sigue cuatro pasos. [[r2]]En hardware solo se ejecutan circuitos ISA. [[r3]]En un GHZ, los tres qubits coinciden siempre. [[r4]]Y un paso de Trotter aplica una rzz y después una rx por espín. Con esto cierras la primera unidad; en la siguiente, trabajarás con operadores y observables.",
    "scene": [
     {
      "type": "list",
@@ -236,7 +236,7 @@
   "Ejecuta `paso_trotter(1.0, 0.5, 0.1)` con `Statevector` y compara su estado con el de la evolución exacta de $H$.",
   "Guías originales: "
  ],
- "next": "p2-circuitos",
+ "next": "p1-patrones",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -1,7 +1,7 @@
 {
  "id": "p8-addons",
- "part": "Parte VIII · Serverless, addons y Qiskit Functions",
- "section": "8.2",
+ "part": "Unidad 7 · Escalar",
+ "section": "7.2",
  "title": "Qiskit addons",
  "summary": "El catálogo de herramientas de investigación de Qiskit: qué hace cada addon y en qué paso del patrón encaja.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "que",
    "tag": [
-    "8.2",
+    "7.2",
     "¿Qué son los addons?"
    ],
    "say": "Los addons de Qiskit son componentes de investigación para descubrir algoritmos a escala de utilidad. Son paquetes modulares que se instalan aparte y encajan en algún paso del patrón de Qiskit. [[cats]]Se agrupan en seis categorías: mapear problemas; optimizar circuitos para el hardware; aprender modelos de ruido; gestionar el ruido al estimar valores esperados; gestionar el ruido al muestrear; y herramientas de apoyo.",
@@ -79,7 +79,7 @@
   {
    "id": "mapear",
    "tag": [
-    "8.2",
+    "7.2",
     "Mapear problemas"
    ],
    "say": "Para el primer paso, mapear. [[opt]]Optimization mapper modela problemas de optimización y los traduce a algo que entiende un computador cuántico. [[ferm]]Qiskit Fermions trabaja con sistemas fermiónicos: operadores, circuitos y codificaciones de fermiones a qubits. [[aqc]]AQC-Tensor construye circuitos menos profundos y de alta fidelidad con compilación aproximada mediante redes de tensores. [[mpf]]Y las fórmulas multiproducto, MPF, reducen el error de Trotter combinando con pesos varias ejecuciones.",
@@ -143,7 +143,7 @@
   {
    "id": "optimizar",
    "tag": [
-    "8.2",
+    "7.2",
     "Optimizar circuitos"
    ],
    "say": "Para el segundo paso hay dos herramientas que reducen la profundidad, normalmente a cambio de más muestras. [[obp]]La retropropagación de operadores, OBP, hace pasar el observable hacia atrás por el final del circuito: el circuito que se ejecuta es más corto, a cambio de un observable con más términos. [[cut]]Y el corte de circuitos descompone puertas entre qubits lejanos, o parte el circuito en trozos más pequeños, y recombina los resultados.",
@@ -199,10 +199,10 @@
   {
    "id": "ruido",
    "tag": [
-    "8.2",
+    "7.2",
     "Ruido"
    ],
-   "say": "Para aprender el ruido, noise learning construye experimentos de caracterización y su análisis. Shaded lightcones, SLC, abarata la cancelación probabilística de errores quitando del modelo los términos de ruido que apenas afectan al observable. [[ev]]Para valores esperados: PNA, la absorción de ruido propagado, que viste en la Parte seis, y Qiskit Mitigation, para construir tus propios flujos de mitigación con Samplomatic. [[muestreo]]Para resultados de muestreo: SQD, la diagonalización cuántica basada en muestras, también en versión para HPC en C más más; la postselección con comprobaciones de inversión de bits; M3, mitigación de lectura en un subespacio reducido; y Paulice, comprobaciones de Pauli basadas en códigos de espacio-tiempo.",
+   "say": "Para aprender el ruido, noise learning construye experimentos de caracterización y su análisis. Shaded lightcones, SLC, abarata la cancelación probabilística de errores quitando del modelo los términos de ruido que apenas afectan al observable. [[ev]]Para valores esperados: PNA, la absorción de ruido propagado, que viste en la unidad de ruido, y Qiskit Mitigation, para construir tus propios flujos de mitigación con Samplomatic. [[muestreo]]Para resultados de muestreo: SQD, la diagonalización cuántica basada en muestras, también en versión para HPC en C más más; la postselección con comprobaciones de inversión de bits; M3, mitigación de lectura en un subespacio reducido; y Paulice, comprobaciones de Pauli basadas en códigos de espacio-tiempo.",
    "scene": [
     {
      "type": "table",
@@ -252,7 +252,7 @@
   {
    "id": "utils",
    "tag": [
-    "8.2",
+    "7.2",
     "Herramientas de apoyo"
    ],
    "say": "Por último, dos herramientas de apoyo: Pauli propagation, para aproximar la evolución de operadores, base de PNA y de SLC; y addon utilities, con utilidades para construir Hamiltonianos, circuitos de Trotter y mitigación. [[ej]]Probemos addon utilities: generamos un Hamiltoniano de Ising con campo transversal en una cadena de seis qubits, cinco términos ZZ y seis X, once en total. [[trotter]]Y su circuito de evolución temporal con dos pasos de Trotter: veinte CNOT, y rotaciones.",
@@ -297,7 +297,7 @@
   {
    "id": "predice",
    "tag": [
-    "8.2",
+    "7.2",
     "Antes de absorber capas"
    ],
    "say": "Veamos la retropropagación en acción, y antes apuesta. [[circ]]Usaremos la misma cadena de seis espines de Ising, con cuatro pasos de Trotter: doce capas de puertas. [[obs]]El observable es la magnetización media: seis términos, uno por espín. [[abs]]Vamos a absorber las cuatro últimas capas en el observable. ¿Cuántos términos tendrá el observable nuevo? No hace falta que sepas la respuesta: equivocarse en una predicción enseña más que acertar por memoria.",
@@ -367,7 +367,7 @@
   {
    "id": "obp",
    "tag": [
-    "8.2",
+    "7.2",
     "Retropropagar el observable"
    ],
    "say": "Este es el código. [[ej]]Construimos el circuito y lo cortamos en capas: cada capa es una columna de puertas del mismo tipo. [[bp]]backpropagate recibe el observable y las capas que quieres absorber, de la última a la primera, y devuelve el observable nuevo y las capas que no absorbió. [[res]]El resultado: de seis a sesenta y cuatro términos. El circuito pasa de profundidad doce a ocho. Y el valor esperado es el mismo, cero punto ocho dos cuatro nueve. Si apostaste por sesenta y cuatro, acertaste. [[costo]]Ese es el intercambio de OBP: un circuito más corto a cambio de un observable más grande, con más términos que medir.",
@@ -418,7 +418,7 @@
   {
    "id": "q1",
    "tag": [
-    "8.2",
+    "7.2",
     "Comprueba"
    ],
    "say": "Elige el addon.",
@@ -451,7 +451,7 @@
   {
    "id": "mision",
    "tag": [
-    "8.2",
+    "7.2",
     "Tu turno"
    ],
    "say": "Ahora practicas la retropropagación de operadores con una cadena local de seis espines. [[n1]]Primero escribe `retropropaga(capas_absorbidas)` y comprueba cómo cambian los términos y la profundidad. [[n2]]Después corrige el presupuesto para que OBP se detenga antes de superar el límite. [[n3]]Y por último escribe `mejor_k(limite)`, que elige cuántas capas finales caben.",
@@ -533,7 +533,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "8.2",
+    "7.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda y lo verás al volver a esta lección.",
@@ -557,7 +557,7 @@
   {
    "id": "cierre",
    "tag": [
-    "8.2",
+    "7.2",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Para mapear: Fermions, AQC-Tensor, MPF. [[r2]]Para optimizar: OBP y corte de circuitos. [[r3]]Para el ruido: noise learning, PNA, Mitigation, SQD, M3 y Paulice. [[r4]]Y de apoyo, addon utilities y Pauli propagation.",

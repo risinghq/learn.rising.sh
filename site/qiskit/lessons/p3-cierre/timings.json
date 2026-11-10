@@ -1,14 +1,14 @@
 {
  "repaso1": {
-  "dur": 9.816,
+  "dur": 8.448,
   "marks": {},
   "cues": [
    [
     0.107,
-    "Tres preguntas rápidas de la Parte tres, y después una pregunta del proyecto Ising."
+    "Tres preguntas rápidas y después una pregunta del proyecto Ising."
    ],
    [
-    6.525,
+    5.152,
     "La primera, sobre las etapas."
    ]
   ]
@@ -55,37 +55,37 @@
   ]
  },
  "cierre": {
-  "dur": 24.216,
+  "dur": 23.664,
   "marks": {
-   "r1": 2.406,
-   "r2": 5.081,
-   "r3": 8.506,
-   "r4": 12.511
+   "r1": 2.533,
+   "r2": 5.208,
+   "r3": 8.633,
+   "r4": 12.639
   },
   "cues": [
    [
     0.107,
-    "Resumen de la parte."
+    "Resumen de la unidad."
    ],
    [
-    2.406,
+    2.533,
     "El routing inserta SWAP."
    ],
    [
-    5.081,
+    5.208,
     "Cada SWAP cuesta tres CX."
    ],
    [
-    8.506,
+    8.633,
     "Fija seed transpiler para repetir un resultado."
    ],
    [
-    12.511,
+    12.639,
     "Y la profundidad transpilada decide cuántos pasos de Trotter caben."
    ],
    [
-    17.734,
-    "Con esto cierras la Parte tres; en la siguiente, las primitivas y la simulación."
+    17.861,
+    "Con esto cierras la cuarta unidad; en la siguiente, estudiarás el ruido."
    ]
   ]
  }

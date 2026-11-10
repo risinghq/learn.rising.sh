@@ -1,7 +1,7 @@
 {
  "id": "p7-colas-costos",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.5",
+ "part": "Guías",
+ "section": "",
  "title": "Colas, tiempos y costos",
  "summary": "Cómo decide el planificador, qué cuenta como uso, cómo estimarlo, cómo reducirlo, el tiempo máximo de ejecución y los límites de cada trabajo.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "fairshare",
    "tag": [
-    "7.5",
+    "Guía",
     "El planificador de reparto justo"
    ],
    "say": "Cuando envías un trabajo, entra en la cola del procesador junto con los de todos los usuarios. El orden lo decide un planificador de reparto justo, fair share. [[instancia]]Su unidad es la instancia: cada una recibe una asignación de tiempo, y se cuenta su uso en una ventana móvil de veintiocho días; en el plan Flex, en cambio, se compara el uso total con la asignación. [[como]]Cuando el QPU queda libre, el planificador elige la instancia que menos ha usado en proporción a su asignación. Así nadie monopoliza el equipo: con el doble de minutos asignados, una instancia ejecuta el doble de trabajos.",
@@ -75,7 +75,7 @@
   {
    "id": "uso",
    "tag": [
-    "7.5",
+    "Guía",
     "Qué cuenta como uso"
    ],
    "say": "El uso es el tiempo durante el cual el QPU está bloqueado para tus trabajos. [[job]]En un trabajo suelto, el tiempo bloqueado para ese trabajo. [[batch]]En un lote, la suma de esos tiempos. [[session]]En una sesión, el tiempo de reloj mientras la sesión está activa, se esté ejecutando algo o no, porque el equipo está reservado para ti. [[fallos]]Los trabajos fallidos o cancelados: si falló por un error del sistema, no cuentan; si falló por un error tuyo o lo cancelaste, cuenta lo consumido hasta entonces. En sesiones, siempre cuenta el tiempo activo. [[ver]]job punto usage, batch punto usage o session punto usage te dicen el consumo real.",
@@ -141,7 +141,7 @@
   {
    "id": "estimar",
    "tag": [
-    "7.5",
+    "Guía",
     "Estimar el uso"
    ],
    "say": "Antes de enviar, puedes aproximar el uso con una fórmula. [[formula]]Unos dos segundos de sobrecarga por subtrabajo, más el rep delay sumado a la duración del circuito, multiplicado por el número de ejecuciones: circuitos por disparos, contando los que genera el broadcasting. [[rapido]]Sin mitigación avanzada ni rep delay propio, una regla rápida es dos más cero coma cero cero cero tres cinco por el número de ejecuciones. [[ojo]]La mitigación añade circuitos: PEA y PEC, muchos más, por el aprendizaje de ruido.",
@@ -177,7 +177,7 @@
   {
    "id": "pred_bell",
    "tag": [
-    "7.5",
+    "Guía",
     "Antes de calcular"
    ],
    "say": "Pongamos la fórmula a prueba con el circuito más pequeño que conocemos: un estado de Bell, con una Hadamard, una CNOT y la medición. [[disp]]Lo ejecutamos con cuatro mil noventa y seis disparos en Fez, que es un procesador rápido. [[apuesta]]¿Cuántos segundos de QPU crees que usará?",
@@ -253,7 +253,7 @@
   {
    "id": "estimar_ej",
    "tag": [
-    "7.5",
+    "Guía",
     "Estimar el uso: el cálculo"
    ],
    "say": "[[ej]]Un estado de Bell con cuatro mil noventa y seis disparos en Fez: algo más de tres segundos, que redondeamos hacia arriba a cuatro. Si apostaste por unos cuatro segundos, acertaste. Lo calculamos con la duración del circuito programado y la del reset. [[porque]]La sobrecarga de dos segundos pesa el doble que las cuatro mil ejecuciones juntas, que duran cerca de un cuarto de milisegundo cada una.",
@@ -292,7 +292,7 @@
   {
    "id": "minimizar",
    "tag": [
-    "7.5",
+    "Guía",
     "Reducir el uso"
    ],
    "say": "Cómo gastar menos. [[shots]]Ejecuta solo los disparos que necesitas: el costo crece con ellos; en Estimator, más precisión significa más disparos. [[limites]]Fija límites de tiempo. [[mit]]Usa solo la supresión y mitigación necesarias. [[nl]]Y si repites los mismos circuitos con PEA o PEC, aprende el modelo de ruido una vez y reutilízalo, aunque caduca cuando el equipo deriva.",
@@ -339,10 +339,10 @@
   {
    "id": "maxtime",
    "tag": [
-    "7.5",
+    "Guía",
     "Tiempo máximo de ejecución"
    ],
-   "say": "El servicio impone un máximo de tres horas por trabajo; si se supera, el trabajo se cancela con RuntimeJobMaxTimeoutError. [[propio]]Puedes fijar uno menor con max execution time, en segundos. Gana el menor de los dos. [[qpu]]Ese límite se mide en uso de QPU, no en tiempo de reloj. [[metrics]]Y job punto metrics te dice cuántos segundos cuánticos consumió un trabajo terminado. [[ttl]]Lotes y sesiones tienen además un tiempo de vida máximo, el TTL, que verás en la última lección de esta parte.",
+   "say": "El servicio impone un máximo de tres horas por trabajo; si se supera, el trabajo se cancela con RuntimeJobMaxTimeoutError. [[propio]]Puedes fijar uno menor con max execution time, en segundos. Gana el menor de los dos. [[qpu]]Ese límite se mide en uso de QPU, no en tiempo de reloj. [[metrics]]Y job punto metrics te dice cuántos segundos cuánticos consumió un trabajo terminado. [[ttl]]Lotes y sesiones tienen además un tiempo de vida máximo, el TTL, que verás en la última lección de esta unidad.",
    "scene": [
     {
      "type": "code",
@@ -378,7 +378,7 @@
   {
    "id": "limites",
    "tag": [
-    "7.5",
+    "Guía",
     "Límites de cada trabajo"
    ],
    "say": "Antes de entrar en la cola, cada trabajo se valida contra unos límites, para que no falle después de esperar. Se aplican por trabajo, no por PUB, y después de contar lo que añaden opciones como el desacoplamiento dinámico o ZNE. [[ejec]]Como máximo diez millones de ejecuciones en Sampler. [[instr]]Hasta veintiséis coma ocho millones de instrucciones de control por qubit, con pesos: una RZ cuenta uno, una SX dos, una CZ cinco, una medición diez, un reset diecisiete. [[puertas]]Y por circuito, como máximo treinta millones de RZ, veinte millones de SX y cinco millones de puertas de dos qubits. [[zne]]Ojo con ZNE por plegado: multiplica las puertas de dos qubits por la suma de los factores de ruido.",
@@ -432,7 +432,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.5",
+    "Guía",
     "Comprueba"
    ],
    "say": "Calcula ejecuciones.",
@@ -457,7 +457,7 @@
   {
    "id": "costo",
    "tag": [
-    "7.5",
+    "Guía",
     "Ver el costo"
    ],
    "say": "Para ver cuánto has gastado: en la página de instancias, el uso de cada instancia. [[planes]]Su significado depende del plan: en Premium y Open, el uso de los últimos veintiocho días; en Pay As You Go, desde que se creó la instancia; en Flex, desde el inicio del contrato. [[trabajo]]Y en la página Workloads, la columna Usage muestra el consumo de cada trabajo.",
@@ -513,7 +513,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.5",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora estimas el costo antes de enviar un trabajo. [[n1]]Calcula el uso de un Bell. [[n2]]Cuenta todas las ejecuciones de un PUB con broadcasting. [[n3]]Y por último convierte la fórmula en una función para cualquier circuito.",
@@ -592,7 +592,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.5",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -616,7 +616,7 @@
   {
    "id": "cierre",
    "tag": [
-    "7.5",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]El reparto justo ordena la cola por instancia. [[r2]]El uso es tiempo de QPU bloqueado, salvo en sesiones, que cuentan el tiempo activo. [[r3]]Se estima con una fórmula sencilla. [[r4]]Y hay límites de tiempo, de ejecuciones y de instrucciones por trabajo.",
@@ -674,7 +674,7 @@
   "Calcula las instrucciones de control por qubit de un GHZ de 50 qubits transpilado para `FakeFez`.",
   "Guías originales: [fair-share-scheduler](https://quantum.cloud.ibm.com/docs/en/guides/fair-share-scheduler) · [view-cost](https://quantum.cloud.ibm.com/docs/en/guides/view-cost) · [estimate-job-run-time](https://quantum.cloud.ibm.com/docs/en/guides/estimate-job-run-time) · [minimize-time](https://quantum.cloud.ibm.com/docs/en/guides/minimize-time) · [max-execution-time](https://quantum.cloud.ibm.com/docs/en/guides/max-execution-time) · [job-limits](https://quantum.cloud.ibm.com/docs/en/guides/job-limits)"
  ],
- "next": "p7-trabajos",
+ "next": "p9-proveedores",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

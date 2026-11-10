@@ -1,7 +1,7 @@
 {
  "id": "p1-que-es-qiskit",
- "part": "Parte I · Primeros pasos",
- "section": "1.1",
+ "part": "Guías",
+ "section": "",
  "title": "Qué es Qiskit",
  "summary": "El SDK, el servicio de cómputo de IBM, el ecosistema, los addons, Serverless y Functions: el mapa de todo lo que vas a aprender.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "1.1",
+    "Guía",
     "Qiskit no es un solo paquete"
    ],
    "say": "Cuando alguien dice Qiskit, puede referirse a varias cosas. [[col]]Qiskit es un nombre general para una colección de software que sirve para ejecutar programas en computadores cuánticos. [[sdk]]En el centro está el SDK, de código abierto, que se instala con el paquete qiskit. [[rt]]Luego está el servicio de IBM para ejecutar en sus procesadores cuánticos, que antes se llamaba Qiskit Runtime y hoy se llama IBM Quantum Compute Service. [[eco]]Y alrededor hay un ecosistema de proyectos que se conectan con Qiskit sin ser parte de él.",
@@ -76,7 +76,7 @@
   {
    "id": "sdk",
    "tag": [
-    "1.1",
+    "Guía",
     "Los módulos del SDK"
    ],
    "say": "El SDK trabaja con circuitos extendidos, operadores y primitivas. Tiene cinco piezas que usarás todo el tiempo. [[c]]qiskit punto circuit, para construir circuitos: registros, instrucciones, puertas, parámetros y control de flujo. [[lib]]La biblioteca de circuitos, con una enorme colección de puertas y circuitos ya hechos. [[qi]]quantum info, para trabajar con estados, operadores y canales de forma exacta, sin ruido de muestreo. [[tr]]El transpilador, que adapta un circuito a la topología y a las puertas de un dispositivo real, y lo optimiza. [[pr]]Y las primitivas, Sampler y Estimator, la forma estándar de ejecutar circuitos.",
@@ -149,7 +149,7 @@
   {
    "id": "q1",
    "tag": [
-    "1.1",
+    "Guía",
     "Comprueba"
    ],
    "say": "Una pregunta rápida sobre los módulos.",
@@ -184,7 +184,7 @@
   {
    "id": "ecosistema",
    "tag": [
-    "1.1",
+    "Guía",
     "Ecosistema, addons y Benchpress"
    ],
    "say": "Fuera del SDK hay proyectos que extienden Qiskit. [[aer]]Qiskit Aer es un paquete de simuladores, con modelos de ruido realistas; lo mantiene IBM. [[m3]]mthree implementa una técnica de mitigación de errores de lectura. [[qb]]Y qBraid gestiona trabajos cuánticos en distintas plataformas. [[add]]Los addons de Qiskit son otra cosa: herramientas de investigación, modulares, para diseñar algoritmos a escala de utilidad. [[bp]]Y para comparar el rendimiento del software, IBM publica Benchpress, el paquete con más de mil pruebas que usa para medir el SDK.",
@@ -247,7 +247,7 @@
   {
    "id": "pred_modos",
    "tag": [
-    "1.1",
+    "Guía",
     "Antes de seguir"
    ],
    "say": "Antes de ver el servicio, una apuesta. IBM ofrece tres maneras de enviar trabajo: un trabajo suelto, una sesión, para cargas iterativas, y un lote, para enviar todo de una vez. [[cual]]Una de ellas no está disponible con el plan gratuito, el plan Open. ¿Cuál crees que es?",
@@ -298,7 +298,7 @@
   {
    "id": "servicio",
    "tag": [
-    "1.1",
+    "Guía",
     "IBM Quantum Compute Service"
    ],
    "say": "El servicio de cómputo de IBM ejecuta tus circuitos en sus procesadores cuánticos, en la nube. [[cli]]Tu programa habla con él a través del paquete qiskit ibm runtime. [[mas]]No solo ejecuta: añade recursos clásicos y cuánticos para devolver mejores resultados, con supresión de errores, como el desacoplamiento dinámico, y mitigación, como la extrapolación a ruido cero. [[modos]]Y ofrece tres modos de ejecución: un trabajo suelto, una sesión para cargas iterativas, o un lote para enviar todo de una vez. [[open]]Ojo: con el plan Open, el gratuito, no se pueden usar sesiones. Si apostaste por la sesión, acertaste.",
@@ -393,7 +393,7 @@
   {
    "id": "abierto",
    "tag": [
-    "1.1",
+    "Guía",
     "¿Es de código abierto?"
    ],
    "say": "¿Es todo esto de código abierto? No todo. [[no]]El software que, en los servidores de IBM, se encarga de ejecutar tu programa en el dispositivo, incluida la mitigación de errores, es cerrado. [[si]]Pero el cliente, qiskit ibm runtime, el SDK que corre en el servidor y parte del software de mitigación sí son abiertos. [[plat]]Todo se administra desde IBM Quantum Platform: usuarios, planes, trabajos. [[crn]]Para ejecutar creas una instancia, y cada instancia tiene un identificador, el CRN, que necesitas para enviar trabajos.",
@@ -473,7 +473,7 @@
   {
    "id": "serverless",
    "tag": [
-    "1.1",
+    "Guía",
     "Serverless y Functions"
    ],
    "say": "Dos servicios más. [[sl]]Qiskit Serverless ejecuta cargas de trabajo que mezclan recursos clásicos y cuánticos: paraleliza el pre y el posprocesamiento, mantiene trabajos largos en la nube aunque apagues tu laptop, y despliega programas reutilizables. [[fn]]Y las Qiskit Functions son servicios ya armados. [[cf]]Las funciones de circuito reciben circuitos abstractos y observables, y se encargan de transpilar, suprimir y mitigar errores. [[af]]Las funciones de aplicación cubren el flujo entero, con entradas y salidas del dominio, como un problema de optimización. [[planes]]Están disponibles para los planes Premium, Flex y On-Prem.",
@@ -575,7 +575,7 @@
   {
    "id": "q2",
    "tag": [
-    "1.1",
+    "Guía",
     "Comprueba"
    ],
    "say": "Una pregunta para ordenar el mapa.",
@@ -610,7 +610,7 @@
   {
    "id": "mision",
    "tag": [
-    "1.1",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero pasas un estado de Bell por tres módulos del SDK. [[n2]]Después escribes un observable y calculas su valor exacto, sin simular mediciones. [[n3]]Y por último escribes tu propia función de valor esperado, que se comprueba contra la primitiva del SDK. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -693,7 +693,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "1.1",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. No hay respuesta automática: escribe con tus palabras. Lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -717,7 +717,7 @@
   {
    "id": "cierre",
    "tag": [
-    "1.1",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]El SDK, de código abierto, construye, transforma y ejecuta circuitos. [[r2]]IBM Quantum Compute Service ejecuta en hardware real, con mitigación de errores y tres modos de ejecución. [[r3]]El ecosistema y los addons amplían lo que puedes hacer. [[r4]]Y Serverless y Functions llevan flujos completos a la nube. En la próxima lección veremos el flujo de trabajo que une todas estas piezas.",
@@ -772,7 +772,7 @@
   "Lee los principios de computación cuántica responsable de IBM ([Responsible quantum computing](https://quantum.cloud.ibm.com/docs/en/responsible-quantum-computing)).",
   "Guías originales: [index](https://quantum.cloud.ibm.com/docs/en/guides/) · [tools-intro](https://quantum.cloud.ibm.com/docs/en/guides/tools-intro) · [compute-services](https://quantum.cloud.ibm.com/docs/en/guides/compute-services)"
  ],
- "next": "p1-patrones",
+ "next": "p1-instalar",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -1,9 +1,9 @@
 {
  "id": "p4-cierre",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.7",
- "title": "Cierre de la Parte IV: repaso y tiempo de validez",
- "summary": "Un repaso corto de la Parte cuatro y una pregunta del proyecto Ising: hasta qué instante una simulación con ruido sigue la curva exacta.",
+ "part": "Unidad 3 · Simular",
+ "section": "3.5",
+ "title": "Repaso: cuándo fiarte de una simulación",
+ "summary": "Un repaso corto y una pregunta del proyecto Ising: hasta qué instante una simulación con ruido sigue la curva exacta.",
  "goals": [
   "recordar qué primitiva usar, cómo crece el efecto del ruido y cuándo sirve el método `stabilizer`",
   "calcular el primer instante en que una medida se aleja de la referencia más que una tolerancia"
@@ -12,10 +12,10 @@
   {
    "id": "repaso1",
    "tag": [
-    "4.7",
+    "3.5",
     "Repaso: primitivas"
    ],
-   "say": "Tres preguntas rápidas de la Parte cuatro, y después una pregunta del proyecto Ising. La primera, sobre las primitivas.",
+   "say": "Tres preguntas rápidas y después una pregunta del proyecto Ising. La primera, sobre las primitivas.",
    "scene": [
     {
      "type": "text",
@@ -43,7 +43,7 @@
   {
    "id": "repaso2",
    "tag": [
-    "4.7",
+    "3.5",
     "Repaso: ruido"
    ],
    "say": "Segunda pregunta, sobre el efecto del ruido.",
@@ -68,7 +68,7 @@
   {
    "id": "repaso3",
    "tag": [
-    "4.7",
+    "3.5",
     "Repaso: simulación de Clifford"
    ],
    "say": "Tercera pregunta, sobre qué método de simulación elegir.",
@@ -101,7 +101,7 @@
   {
    "id": "validez",
    "tag": [
-    "4.7",
+    "3.5",
     "Tu turno"
    ],
    "say": "Ahora la pregunta del proyecto Ising. [[ej]]Simulaste la magnetización con y sin ruido. Para saber cuántos pasos pedirle a un QPU, necesitas el instante en que la versión ruidosa se aleja demasiado de la exacta. [[n]]Escribe esa función.",
@@ -137,10 +137,10 @@
   {
    "id": "cierre",
    "tag": [
-    "4.7",
+    "3.5",
     "Resumen"
    ],
-   "say": "Resumen de la parte. [[r1]]Estimator da valores esperados; Sampler, cadenas de bits. [[r2]]El error de cada puerta multiplica la supervivencia. [[r3]]El método stabilizer simula circuitos de Clifford grandes. [[r4]]Y el tiempo de validez dice hasta cuándo te puedes fiar de una simulación con ruido. Con esto cierras la Parte cuatro; en la siguiente, ejecutar en IBM Quantum.",
+   "say": "Resumen de la unidad. [[r1]]Estimator da valores esperados; Sampler, cadenas de bits. [[r2]]El error de cada puerta multiplica la supervivencia. [[r3]]El método stabilizer simula circuitos de Clifford grandes. [[r4]]Y el tiempo de validez dice hasta cuándo te puedes fiar de una simulación con ruido. Con esto cierras la tercera unidad; el camino continúa con la transpilación y el ruido.",
    "scene": [
     {
      "type": "list",
@@ -187,7 +187,7 @@
   "Calcula `tiempo_de_validez` para tolerancias de 0.02, 0.05 y 0.1 sobre la misma curva ruidosa. ¿Cómo cambia el instante?",
   "Guías originales: "
  ],
- "next": "p5-cuenta",
+ "next": "p3-transpilar",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

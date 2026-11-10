@@ -1,7 +1,7 @@
 {
  "id": "p6-supresion",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.2",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.4",
  "title": "Supresión: desacoplamiento dinámico y twirling",
  "summary": "Reducir el efecto del ruido durante la ejecución con pulsos de desacoplamiento dinámico y twirling de Pauli.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.2",
+    "5.4",
     "Reducir antes de medir"
    ],
    "say": "La supresión intenta que el circuito sufra menos ruido antes de leer el resultado. [[dos]]Veremos dos técnicas que el servicio puede aplicar al ejecutar: desacoplamiento dinámico y twirling de Pauli. [[limite]]No son puertas mágicas que se agregan sin costo. Introducen pulsos o variantes de circuito; pueden ayudar en el caso adecuado y empeorar un circuito que ya está muy ocupado.",
@@ -68,7 +68,7 @@
   {
    "id": "esperas",
    "tag": [
-    "6.2",
+    "5.4",
     "Desacoplamiento dinámico"
    ],
    "say": "Al programar el circuito, un qubit puede pasar un rato sin puertas mientras otros siguen trabajando. [[idle]]Durante esa espera, interacciones no deseadas pueden acumular un error de fase. [[pulsos]]El desacoplamiento dinámico inserta una secuencia de pulsos en ese hueco. La secuencia está construida para que, en el caso ideal, el conjunto equivalga a identidad; físicamente, ayuda a cancelar parte de la interacción no deseada.",
@@ -115,7 +115,7 @@
   {
    "id": "predice_dd",
    "tag": [
-    "6.2",
+    "5.4",
     "Antes de rellenar los huecos"
    ],
    "say": "Probémoslo en un circuito de tres qubits, transpilado para un backend falso de cinco qubits. [[circ]]Hay una H, tres CNOT entre los qubits cero y uno, una CNOT entre uno y dos, y una H final. Mientras los qubits cero y uno trabajan, el dos espera; y al final, espera el cero. [[apuesta]]Rellenaremos los huecos con la secuencia XX. Apuesta: ¿cuántos pulsos X se añaden en total, y cambia la operación del circuito?",
@@ -184,7 +184,7 @@
   {
    "id": "dd_codigo",
    "tag": [
-    "6.2",
+    "5.4",
     "Programar y rellenar"
    ],
    "say": "El código. [[isa]]Transpilamos el circuito con el layout fijo, sin optimizar, para que las esperas sean las del circuito original. [[pm]]El gestor de pases programa el circuito con ALAPScheduleAnalysis y PadDynamicalDecoupling rellena los huecos con la secuencia de dos puertas X. [[res]]Se añaden dos pulsos X, y la operación es la misma: Operator equiv da verdadero. El desacoplamiento solo rellena esperas con una identidad; que sirva en un dispositivo real depende de lo bien calibrados que estén esos pulsos.",
@@ -236,7 +236,7 @@
   {
    "id": "secuencias",
    "tag": [
-    "6.2",
+    "5.4",
     "La secuencia depende del dispositivo"
    ],
    "say": "No hay una única secuencia mejor para todos los circuitos. [[xx]]La secuencia XX inserta dos pulsos X durante la espera. [[xp]]La secuencia XpXm usa dos rotaciones X de signos opuestos. [[opciones]]En la opción `sequence_type` puedes elegir la secuencia que admita el servicio. La duración y la calibración de los pulsos importan: la identidad matemática no convierte pulsos imperfectos en pulsos perfectos.",
@@ -290,7 +290,7 @@
   {
    "id": "cuando",
    "tag": [
-    "6.2",
+    "5.4",
     "No sirve igual para todo circuito"
    ],
    "say": "El desacoplamiento dinámico es más prometedor cuando hay huecos largos y qubits inactivos. [[huecos]]Si las operaciones ya llenan casi todo el tiempo, puede no haber nada que proteger. [[peor]]Y si los pulsos insertados tienen errores importantes, añadirlos puede empeorar el resultado. Por eso conviene comparar en un problema pequeño y mirar tanto la calidad como el tiempo de ejecución.",
@@ -345,7 +345,7 @@
   {
    "id": "twirling",
    "tag": [
-    "6.2",
+    "5.4",
     "Twirling de Pauli"
    ],
    "say": "El twirling agrega puertas de Pauli elegidas al azar antes y después de ciertas puertas, normalmente de dos qubits. [[igual]]Las Paulis se eligen en pares para que la operación ideal total se conserve. [[canal]]En cambio, cambia la representación del ruido: al promediar las variantes, un error coherente difícil puede comportarse como un canal de Pauli. [[promedio]]La salida reúne muestras de muchos circuitos aleatorizados; el promedio reduce sensibilidad a algunas coherencias, con el costo de más variantes.",
@@ -394,7 +394,7 @@
   {
    "id": "predice_tw",
    "tag": [
-    "6.2",
+    "5.4",
     "Antes de aleatorizar"
    ],
    "say": "Comprobemos que el twirling conserva la operación ideal. [[idea]]Para cada variante elegimos una Pauli al azar, la ponemos antes de la CNOT, y ponemos después la Pauli que resulta de empujarla a través de la CNOT. [[apuesta]]Generamos cuarenta variantes. Apuesta: ¿cuántas implementan exactamente la misma operación que una CNOT sola?",
@@ -446,7 +446,7 @@
   {
    "id": "tw_codigo",
    "tag": [
-    "6.2",
+    "5.4",
     "Cuarenta variantes, una sola operación"
    ],
    "say": "Cada variante es un circuito de dos qubits. [[antes]]Elegimos la Pauli de antes con un generador aleatorio con semilla. [[despues]]Pauli punto evolve con la CNOT calcula la Pauli que hay que poner después. [[res]]Las cuarenta variantes equivalen a la CNOT, y usan quince Paulis distintas antes de ella. Si dijiste «ninguna», acabas de ver la clave: los circuitos son distintos, pero la operación es la misma. Lo que cambia es cómo se reparte el ruido de la puerta.",
@@ -500,7 +500,7 @@
   {
    "id": "activar",
    "tag": [
-    "6.2",
+    "5.4",
     "Activar las opciones"
    ],
    "say": "Las primitivas del lado del cliente exponen las dos opciones. [[dd]]En Sampler o Estimator puedes activar el desacoplamiento y elegir su secuencia. [[tw]]También puedes pedir twirling de puertas con `enable_gates`. [[aclaracion]]El siguiente bloque necesita un backend de IBM y credenciales, así que no lo ejecutamos durante la verificación local.",
@@ -532,7 +532,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.2",
+    "5.4",
     "Comprueba"
    ],
    "say": "Sobre el desacoplamiento dinámico.",
@@ -565,7 +565,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.2",
+    "5.4",
     "Comprueba"
    ],
    "say": "Una pregunta sobre twirling.",
@@ -598,7 +598,7 @@
   {
    "id": "mision",
    "tag": [
-    "6.2",
+    "5.4",
     "Tu turno"
    ],
    "say": "Ahora te toca. Todo corre con un backend falso, sin cuenta. [[n1]]Primero rellenas los huecos de un circuito con la secuencia XX y apuestas cuántos pulsos se añaden. [[n2]]Después la alargas a cuatro pulsos X y cuentas el doble. [[n3]]Y por último escribes tú una variante de twirling de la CNOT: la Pauli de después que mantiene la operación.",
@@ -680,7 +680,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.2",
+    "5.4",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Ninguna tiene respuesta automática.",
@@ -704,7 +704,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.2",
+    "5.4",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]El desacoplamiento dinámico inserta secuencias de pulsos en intervalos inactivos. [[r2]]Ayuda sobre todo cuando hay esperas; en un circuito denso puede no ayudar. [[r3]]El twirling usa pares de Paulis para conservar la operación ideal y aleatorizar cómo se presenta el ruido. [[r4]]Ambas opciones añaden recursos: compara su efecto en tu circuito.",

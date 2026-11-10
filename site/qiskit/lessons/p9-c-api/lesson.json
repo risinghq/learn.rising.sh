@@ -1,7 +1,7 @@
 {
  "id": "p9-c-api",
- "part": "Parte IX · Extender e integrar Qiskit",
- "section": "9.2",
+ "part": "Guías",
+ "section": "",
  "title": "La API de C de Qiskit",
  "summary": "Usar Qiskit desde C: compilar la biblioteca independiente, construir observables, y escribir extensiones de Python en C para acelerar pases del transpilador.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "por_que",
    "tag": [
-    "9.2",
+    "Guía",
     "¿Por qué C?"
    ],
    "say": "El núcleo de Qiskit está escrito en Rust, y desde hace poco expone una API de C. Sirve para dos cosas: usar Qiskit desde programas en C, por ejemplo en entornos de supercomputación; [[ext]]y escribir en C las partes críticas de tus extensiones de Python, como un pase de transpilador, para acelerarlas. [[exp]]Es experimental: no hay todavía una interfaz binaria estable. Una extensión compilada con la versión dos punto cuatro punto cero funciona con la dos punto cuatro punto uno, pero puede fallar con la dos punto cinco.",
@@ -75,7 +75,7 @@
   {
    "id": "observable",
    "tag": [
-    "9.2",
+    "Guía",
     "Un observable en C"
    ],
    "say": "Este programa en C construye un observable de cien qubits. Empieza con un observable cero, [[termino]]y le añade el término dos por X cero, Y uno, Z dos: un coeficiente complejo, los tres operadores de Pauli y los índices de los qubits. [[imprimir]]Imprime sus propiedades [[liberar]]y, como en todo programa en C, libera la memoria al final.",
@@ -119,7 +119,7 @@
   {
    "id": "predice",
    "tag": [
-    "9.2",
+    "Guía",
     "Antes de compilar"
    ],
    "say": "Antes de compilarlo, apuesta. Mira el fragmento. [[qubits]]El observable se creó con cien qubits. [[term]]Pero solo le añadimos un término, y ese término toca tres qubits. [[cual]]¿Qué número de términos crees que imprimirá el programa?",
@@ -172,7 +172,7 @@
   {
    "id": "compilar",
    "tag": [
-    "9.2",
+    "Guía",
     "Compilar y ejecutar"
    ],
    "say": "Para compilar la biblioteca independiente necesitas un compilador de Rust, un compilador de C compatible con C once, cbindgen para generar la cabecera, y la biblioteca de Python, que solo se usa al enlazar. [[make]]En la raíz del código de Qiskit, make c genera la biblioteca compartida y la cabecera qiskit punto h. [[gcc]]Luego compilas tu programa enlazando con ella, [[path]]y añades su carpeta a la ruta de bibliotecas antes de ejecutar. [[res]]Imprime cien qubits y un solo término: un término de Pauli es el producto de operadores sobre varios qubits, y no cuenta uno por operador. [[win]]En Windows hay dos caminos: para extensiones de Python basta con el compilador de Visual C++, porque las cabeceras vienen con el paquete qiskit; para la biblioteca independiente, se siguen pasos adicionales.",
@@ -224,7 +224,7 @@
   {
    "id": "extension",
    "tag": [
-    "9.2",
+    "Guía",
     "Una extensión de Python en C"
    ],
    "say": "La guía construye una extensión real: una versión en C del pase AddSpectatorMeasures, que viste en la postselección. La estructura: un pyproject y un setup punto py para compilar, un init punto py con la interfaz de Python, y un archivo C con el código rápido. [[include]]Desde Qiskit dos punto cuatro, las cabeceras de C vienen con el paquete de Python, y qiskit punto capi punto get include te da su carpeta, que pasas a setuptools. [[ver]]Aquí ves que en este entorno están instaladas.",
@@ -269,7 +269,7 @@
   {
    "id": "capas",
    "tag": [
-    "9.2",
+    "Guía",
     "Dos capas: Python y C"
    ],
    "say": "En Python, el pase hereda de TransformationPass y su run delega en la función de C. [[macro]]En C, se define la macro QISKIT PYTHON EXTENSION antes de incluir qiskit punto h, y Python punto h va primero. [[logica]]La lógica se escribe con tipos de la API de C, QkDag y QkTarget, sin tocar el intérprete. [[puente]]Y una función puente convierte los argumentos de Python con los conversores qk convert from python. [[uso]]Al final, pip install punto, y el pase se usa como cualquier otro.",
@@ -325,7 +325,7 @@
   {
    "id": "q1",
    "tag": [
-    "9.2",
+    "Guía",
     "Comprueba"
    ],
    "say": "Sobre compatibilidad.",
@@ -358,7 +358,7 @@
   {
    "id": "mision",
    "tag": [
-    "9.2",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. No necesitas compilador de C: usas el mismo observable desde Python. [[n1]]Primero resumes un observable de cien qubits. [[n2]]Después escribes sus etiquetas de Pauli y ves en qué posición queda cada qubit. [[n3]]Y por último escribes la función que da la restricción de versión para una extensión. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -439,7 +439,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "9.2",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -463,7 +463,7 @@
   {
    "id": "cierre",
    "tag": [
-    "9.2",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]La API de C permite usar Qiskit desde C y acelerar extensiones. [[r2]]La biblioteca se compila con make c. [[r3]]Las extensiones usan get include y la macro QISKIT PYTHON EXTENSION. [[r4]]Y por ser experimental, fija la versión menor.",

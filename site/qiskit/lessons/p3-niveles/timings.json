@@ -93,11 +93,11 @@
   ]
  },
  "aprox": {
-  "dur": 37.992,
+  "dur": 38.904,
   "marks": {
    "ej": 13.969,
-   "fid": 19.857,
-   "qv": 32.014
+   "fid": 20.777,
+   "qv": 32.934
   },
   "cues": [
    [
@@ -110,14 +110,14 @@
    ],
    [
     13.969,
-    "Con cero coma noventa y nueve, el nivel tres usa solo dos ECR."
+    "Con esta unitaria y cero coma noventa y nueve, el nivel tres usa solo dos ECR."
    ],
    [
-    19.857,
+    20.777,
     "La fidelidad de esa síntesis baja a cero coma noventa y nueve dos: introduces un error pequeño a cambio de una puerta ruidosa menos, que en hardware real puede costar más."
    ],
    [
-    32.014,
+    32.934,
     "Esta técnica se usó para aumentar el volumen cuántico de los equipos de IBM."
    ]
   ]
@@ -321,11 +321,11 @@
   ]
  },
  "mision": {
-  "dur": 23.448,
+  "dur": 22.32,
   "marks": {
    "n1": 2.137,
-   "n2": 7.812,
-   "n3": 13.785
+   "n2": 9.2,
+   "n3": 15.172
   },
   "cues": [
    [
@@ -334,15 +334,15 @@
    ],
    [
     2.137,
-    "Primero, cuenta las ECR de la unitaria con SWAP en cada nivel."
+    "Primero, escribe la función que cuenta las ECR de la unitaria con SWAP en cada nivel."
    ],
    [
-    7.812,
+    9.2,
     "Después, usa el grado de aproximación para quitar una ECR de más."
    ],
    [
-    13.785,
-    "Y por último, escribe una función que pruebe los cuatro niveles y te devuelva el más bajo que logre el menor número de puertas de dos qubits."
+    15.172,
+    "Y por último, simula con ruido el algoritmo de Grover y mide cuánta fidelidad gana cada nivel."
    ]
   ]
  },

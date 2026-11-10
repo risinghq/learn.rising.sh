@@ -1,77 +1,70 @@
 {
  "parts": [
   {
-   "title": "Parte I · Primeros pasos",
-   "desc": "Qué es Qiskit, el flujo de trabajo de cuatro pasos, cómo instalarlo y tu primer circuito.",
+   "title": "Unidad 1 · Tu primer circuito",
+   "desc": "Construye, mide y lee un circuito de Bell; después prepara el primer paso del proyecto Ising.",
    "lessons": [
     {
-     "id": "p1-que-es-qiskit",
-     "section": "1.1",
-     "title": "Qué es Qiskit",
-     "summary": "El SDK, el servicio de cómputo de IBM, el ecosistema, los addons, Serverless y Functions: el mapa de todo lo que vas a aprender.",
-     "minutes": 9
-    },
-    {
-     "id": "p1-patrones",
-     "section": "1.2",
-     "title": "El flujo de trabajo: patrones de Qiskit",
-     "summary": "Mapear, optimizar, ejecutar y posprocesar: los cuatro pasos de todo programa cuántico, con un ejemplo completo.",
-     "minutes": 9
-    },
-    {
-     "id": "p1-instalar",
-     "section": "1.3",
-     "title": "Instalar y configurar Qiskit",
-     "summary": "Entornos virtuales, pip, Jupyter, sistemas soportados, instalación desde el código fuente, configuración local y entornos en línea.",
-     "minutes": 11
-    },
-    {
      "id": "p1-quickstart",
-     "section": "1.4",
+     "section": "1.1",
      "title": "Tu primer circuito: el estado de Bell",
      "summary": "Construir, simular y graficar un estado entrelazado en pocas líneas, sin cuenta ni clave.",
      "minutes": 10
     },
     {
-     "id": "p1-composer",
-     "section": "1.5",
-     "title": "IBM Quantum Composer",
-     "summary": "La herramienta gráfica de IBM: construir con arrastrar y soltar o con OpenQASM, inspeccionar paso a paso, ejecutar en QPUs y leer sus visualizaciones.",
-     "minutes": 11
-    },
-    {
-     "id": "p1-cierre",
-     "section": "1.6",
-     "title": "Cierre de la Parte I: repaso y un paso de Trotter",
-     "summary": "Un repaso corto de la Parte uno y el primer paso del proyecto Ising: el circuito de un paso de Trotter.",
-     "minutes": 3
-    }
-   ]
-  },
-  {
-   "title": "Parte II · Circuitos y operadores",
-   "desc": "QuantumCircuit a fondo: registros, composición, medición, orden de bits, la biblioteca de circuitos, operadores y OpenQASM.",
-   "lessons": [
-    {
      "id": "p2-circuitos",
-     "section": "2.1",
+     "section": "1.2",
      "title": "Construir circuitos",
      "summary": "QuantumCircuit por dentro: qubits, registros, instrucciones, composición, puertas controladas, profundidad y circuitos con parámetros.",
      "minutes": 8
     },
     {
      "id": "p2-medir",
-     "section": "2.2",
+     "section": "1.3",
      "title": "Medir qubits",
      "summary": "La medición en la base computacional y las cuatro formas de añadirla a un circuito: measure, Measure, measure_all y measure_active.",
      "minutes": 7
     },
     {
      "id": "p2-orden-bits",
-     "section": "2.3",
+     "section": "1.4",
      "title": "El orden de los bits",
      "summary": "Little-endian en Qiskit: cómo se ordenan los qubits en diagramas, enteros, cadenas, vectores de estado y matrices de puertas.",
      "minutes": 7
+    },
+    {
+     "id": "p1-cierre",
+     "section": "1.5",
+     "title": "Repaso: de Bell a Ising",
+     "summary": "Un repaso corto y el primer paso del proyecto Ising: el circuito de un paso de Trotter.",
+     "minutes": 3
+    }
+   ]
+  },
+  {
+   "title": "Unidad 2 · Operadores y observables",
+   "desc": "Pasa de circuitos a operadores, observables y gráficos para interpretar lo que calculas.",
+   "lessons": [
+    {
+     "id": "p1-patrones",
+     "section": "2.1",
+     "title": "El flujo de trabajo: patrones de Qiskit",
+     "summary": "Mapear, optimizar, ejecutar y posprocesar: los cuatro pasos de todo programa cuántico, con un ejemplo completo.",
+     "minutes": 9
+    },
+    {
+     "id": "p2-operadores",
+     "section": "2.2",
+     "title": "Operadores: Operator, Pauli y SparsePauliOp",
+     "summary": "Las tres clases de operadores de quantum_info: cómo construirlas, combinarlas, compararlas y usarlas en circuitos.",
+     "minutes": 9
+    },
+    {
+     "id": "p2-observables",
+     "section": "2.3",
+     "title": "Observables en la base de Pauli y síntesis de unitarios",
+     "summary": "Escribir observables como sumas de Pauli, descomponer matrices, medir en otras bases y sintetizar matrices unitarias en puertas.",
+     "minutes": 9
     },
     {
      "id": "p2-biblioteca",
@@ -81,270 +74,187 @@
      "minutes": 10
     },
     {
-     "id": "p2-operadores",
-     "section": "2.5",
-     "title": "Operadores: Operator, Pauli y SparsePauliOp",
-     "summary": "Las tres clases de operadores de quantum_info: cómo construirlas, combinarlas, compararlas y usarlas en circuitos.",
-     "minutes": 9
-    },
-    {
-     "id": "p2-observables",
-     "section": "2.6",
-     "title": "Observables en la base de Pauli y síntesis de unitarios",
-     "summary": "Escribir observables como sumas de Pauli, descomponer matrices, medir en otras bases y sintetizar matrices unitarias en puertas.",
-     "minutes": 9
-    },
-    {
-     "id": "p2-control-clasico",
-     "section": "2.7",
-     "title": "Control clásico, feedforward y stretch",
-     "summary": "Circuitos dinámicos: if, switch, for y while dentro del circuito, expresiones clásicas, store y tiempos relativos con stretch.",
-     "minutes": 10
-    },
-    {
-     "id": "p2-qasm",
-     "section": "2.8",
-     "title": "OpenQASM y guardar circuitos",
-     "summary": "El lenguaje OpenQASM 2 y 3, cómo importar y exportar circuitos, qué funciones admite el hardware, y cómo guardarlos con QPY.",
-     "minutes": 10
-    },
-    {
      "id": "p2-visualizar",
-     "section": "2.9",
+     "section": "2.5",
      "title": "Visualizar circuitos, estados y resultados",
      "summary": "Dibujar circuitos, graficar estados (city, hinton, Pauli, q-esfera, Bloch), histogramas, valores esperados y líneas de tiempo.",
      "minutes": 10
     },
     {
      "id": "p2-cierre",
-     "section": "2.10",
-     "title": "Cierre de la Parte II: repaso y magnetización",
-     "summary": "Un repaso corto de la Parte dos y una última función del proyecto Ising: la curva de magnetización de una cadena.",
+     "section": "2.6",
+     "title": "Repaso: medir la cadena",
+     "summary": "Un repaso corto y una función del proyecto Ising: la curva de magnetización de una cadena.",
      "minutes": 4
     }
    ]
   },
   {
-   "title": "Parte III · Transpilación",
-   "desc": "Cómo un circuito abstracto se convierte en uno que el hardware puede ejecutar, y cómo controlar ese proceso.",
-   "lessons": [
-    {
-     "id": "p3-transpilar",
-     "section": "3.1",
-     "title": "Por qué hay que transpilar",
-     "summary": "Qué es la transpilación, qué exige un circuito ISA, qué son los pases y pass managers, y las dos formas de transpilar.",
-     "minutes": 8
-    },
-    {
-     "id": "p3-etapas",
-     "section": "3.2",
-     "title": "Las seis etapas del transpilador",
-     "summary": "Init, layout, routing, translation, optimization y scheduling: qué pases usa cada etapa y qué efectos tiene sobre el circuito.",
-     "minutes": 9
-    },
-    {
-     "id": "p3-niveles",
-     "section": "3.3",
-     "title": "Niveles de optimización y parámetros",
-     "summary": "Qué hace cada nivel, aproximación, semilla, layout inicial, métodos de etapa, todos los parámetros por defecto y cómo comparar configuraciones.",
-     "minutes": 10
-    },
-    {
-     "id": "p3-target",
-     "section": "3.4",
-     "title": "Representar un computador cuántico: Target",
-     "summary": "Qué información necesita el transpilador: Backend y Target, mapa de acoplamiento, instrucciones soportadas, errores, y cómo crear un backend propio.",
-     "minutes": 9
-    },
-    {
-     "id": "p3-pass-managers",
-     "section": "3.5",
-     "title": "Pass managers y desacoplamiento dinámico",
-     "summary": "Crear pass managers propios, pass managers por etapas, modificar uno prediseñado y construir un pass manager de desacoplamiento dinámico.",
-     "minutes": 7
-    },
-    {
-     "id": "p3-pases-propios",
-     "section": "3.6",
-     "title": "Escribir pases propios: el DAG",
-     "summary": "La representación DAG de un circuito, sus operaciones básicas y dos pases escritos desde cero: twirling de Pauli y un mapeador básico con SWAP.",
-     "minutes": 7
-    },
-    {
-     "id": "p3-plugins",
-     "section": "3.7",
-     "title": "Plugins y transpilación con IA",
-     "summary": "Los tres tipos de plugins del transpilador, cómo listarlos, usarlos y crearlos, y los pases de routing y síntesis con inteligencia artificial.",
-     "minutes": 10
-    },
-    {
-     "id": "p3-cierre",
-     "section": "3.8",
-     "title": "Cierre de la Parte III: repaso y cuántos pasos caben",
-     "summary": "Un repaso corto de la Parte tres y una pregunta del proyecto Ising: cuántos pasos de Trotter caben en un presupuesto de profundidad.",
-     "minutes": 3
-    }
-   ]
-  },
-  {
-   "title": "Parte IV · Primitivas y simulación",
-   "desc": "Sampler y Estimator, sus entradas (PUBs) y salidas, y cómo simular con y sin ruido antes de usar hardware.",
+   "title": "Unidad 3 · Simular",
+   "desc": "Usa las primitivas y los simuladores para comparar una evolución exacta con sus aproximaciones.",
    "lessons": [
     {
      "id": "p4-primitivas",
-     "section": "4.1",
+     "section": "3.1",
      "title": "Las primitivas: Sampler y Estimator",
      "summary": "Por qué existen las primitivas, qué hacen Estimator y Sampler, y qué implementaciones hay: de referencia, de IBM, de backend y de Aer.",
      "minutes": 8
     },
     {
      "id": "p4-pubs",
-     "section": "4.2",
+     "section": "3.2",
      "title": "Entradas y salidas: PUBs y broadcasting",
      "summary": "Los Primitive Unified Blocs, las reglas de broadcasting, la estructura de los resultados y el procesamiento eficiente con BitArray.",
      "minutes": 9
     },
     {
      "id": "p4-simular-exacto",
-     "section": "4.3",
+     "section": "3.3",
      "title": "Simulación exacta con las primitivas del SDK",
      "summary": "Cuándo y cómo simular: límites de memoria, StatevectorEstimator y StatevectorSampler, precisión, disparos y lectura de resultados.",
      "minutes": 7
     },
     {
-     "id": "p4-aer-ruido",
-     "section": "4.4",
-     "title": "Qiskit Aer y modelos de ruido",
-     "summary": "Simulación exacta y con ruido con las primitivas de Aer, el canal despolarizante, y cómo construir modelos de ruido a medida.",
-     "minutes": 9
-    },
-    {
      "id": "p4-estabilizadores",
-     "section": "4.5",
+     "section": "3.4",
      "title": "Simular circuitos de Clifford",
      "summary": "Qué son los circuitos de estabilizadores, por qué se simulan eficientemente y cómo usarlos con Aer, incluso con 500 qubits y ruido de Pauli.",
      "minutes": 6
     },
     {
-     "id": "p4-local-testing",
-     "section": "4.6",
-     "title": "Modo de prueba local y backends falsos",
-     "summary": "Probar programas de IBM Quantum en tu computadora con backends falsos o Aer, los métodos de simulación, y probar mitigación de errores antes de usar un QPU.",
-     "minutes": 9
-    },
-    {
      "id": "p4-cierre",
-     "section": "4.7",
-     "title": "Cierre de la Parte IV: repaso y tiempo de validez",
-     "summary": "Un repaso corto de la Parte cuatro y una pregunta del proyecto Ising: hasta qué instante una simulación con ruido sigue la curva exacta.",
+     "section": "3.5",
+     "title": "Repaso: cuándo fiarte de una simulación",
+     "summary": "Un repaso corto y una pregunta del proyecto Ising: hasta qué instante una simulación con ruido sigue la curva exacta.",
      "minutes": 3
     }
    ]
   },
   {
-   "title": "Parte V · Ejecutar en IBM Quantum",
-   "desc": "Cuenta, credenciales, el primer programa en hardware real y las primitivas Estimator, Sampler y Executor de IBM.",
+   "title": "Unidad 4 · Transpilar",
+   "desc": "Convierte el circuito abstracto en uno que respeta las puertas y la conectividad del procesador.",
    "lessons": [
     {
-     "id": "p5-cuenta",
-     "section": "5.1",
-     "title": "Cuenta de IBM Cloud, planes y credenciales",
-     "summary": "Crear la cuenta y una instancia, guardar y cargar credenciales de forma segura, elegir instancia, los planes de acceso y cómo limitar el gasto.",
-     "minutes": 11
-    },
-    {
-     "id": "p5-hello-world",
-     "section": "5.2",
-     "title": "Hola mundo en un QPU",
-     "summary": "El primer programa en hardware real: un estado de Bell medido con Estimator, y su versión a escala de utilidad con un GHZ de 100 qubits.",
+     "id": "p3-transpilar",
+     "section": "4.1",
+     "title": "Por qué hay que transpilar",
+     "summary": "Qué es la transpilación, qué exige un circuito ISA, qué son los pases y pass managers, y las dos formas de transpilar.",
      "minutes": 8
     },
     {
-     "id": "p5-opciones",
-     "section": "5.3",
-     "title": "Primitivas de IBM y sus opciones",
-     "summary": "Estimator, Sampler y Executor; el paso a primitivas del lado del cliente; cómo funcionan las opciones; y el modelo de ejecución dirigida.",
-     "minutes": 8
+     "id": "p3-etapas",
+     "section": "4.2",
+     "title": "Las seis etapas del transpilador",
+     "summary": "Init, layout, routing, translation, optimization y scheduling: qué pases usa cada etapa y qué efectos tiene sobre el circuito.",
+     "minutes": 9
     },
     {
-     "id": "p5-estimator",
-     "section": "5.4",
-     "title": "Estimator en IBM Quantum",
-     "summary": "Usar Estimator en hardware: inicialización, entradas y salidas, cómo calcula los errores, la precedencia de la precisión, sus opciones y ejemplos.",
+     "id": "p3-niveles",
+     "section": "4.3",
+     "title": "Niveles de optimización y parámetros",
+     "summary": "Qué hace cada nivel, aproximación, semilla, layout inicial, métodos de etapa, todos los parámetros por defecto y cómo comparar configuraciones.",
      "minutes": 10
     },
     {
-     "id": "p5-sampler",
-     "section": "5.5",
-     "title": "Sampler en IBM Quantum",
-     "summary": "Usar Sampler en hardware: entradas y salidas, intervalos de ejecución, precedencia de los disparos, opciones e incompatibilidades.",
+     "id": "p3-target",
+     "section": "4.4",
+     "title": "Representar un computador cuántico: Target",
+     "summary": "Qué información necesita el transpilador: Backend y Target, mapa de acoplamiento, instrucciones soportadas, errores, y cómo crear un backend propio.",
+     "minutes": 9
+    },
+    {
+     "id": "p3-pass-managers",
+     "section": "4.5",
+     "title": "Pass managers y desacoplamiento dinámico",
+     "summary": "Crear pass managers propios, pass managers por etapas, modificar uno prediseñado y construir un pass manager de desacoplamiento dinámico.",
      "minutes": 7
     },
     {
-     "id": "p5-executor",
-     "section": "5.6",
-     "title": "Executor",
-     "summary": "La primitiva de bajo nivel: programas cuánticos, elementos de circuito y de samplex, broadcasting con ejes intrínsecos y extrínsecos, PEC y cómo migrar desde Sampler.",
-     "minutes": 11
+     "id": "p3-pases-propios",
+     "section": "4.6",
+     "title": "Escribir pases propios: el DAG",
+     "summary": "La representación DAG de un circuito, sus operaciones básicas y dos pases escritos desde cero: twirling de Pauli y un mapeador básico con SWAP.",
+     "minutes": 7
     },
     {
-     "id": "p5-rest",
-     "section": "5.7",
-     "title": "La API REST",
-     "summary": "Usar IBM Quantum desde cualquier lenguaje: autenticación con tokens portadores, enviar trabajos de Estimator y Sampler con OpenQASM 3, opciones, resultados y sesiones.",
-     "minutes": 8
+     "id": "p3-plugins",
+     "section": "4.7",
+     "title": "Plugins y transpilación con IA",
+     "summary": "Los tres tipos de plugins del transpilador, cómo listarlos, usarlos y crearlos, y los pases de routing y síntesis con inteligencia artificial.",
+     "minutes": 10
+    },
+    {
+     "id": "p3-cierre",
+     "section": "4.8",
+     "title": "Repaso: presupuesto de profundidad",
+     "summary": "Un repaso corto y una pregunta del proyecto Ising: cuántos pasos de Trotter caben en un presupuesto de profundidad.",
+     "minutes": 3
     }
    ]
   },
   {
-   "title": "Parte VI · Ruido: supresión y mitigación",
-   "desc": "De dónde vienen los errores y qué técnicas ofrece IBM para suprimirlos y mitigarlos.",
+   "title": "Unidad 5 · Ruido",
+   "desc": "Mide el ruido, prueba modelos locales y aplica supresión y mitigación antes de volver al hardware.",
    "lessons": [
     {
+     "id": "p4-aer-ruido",
+     "section": "5.1",
+     "title": "Qiskit Aer y modelos de ruido",
+     "summary": "Simulación exacta y con ruido con las primitivas de Aer, el canal despolarizante, y cómo construir modelos de ruido a medida.",
+     "minutes": 9
+    },
+    {
+     "id": "p4-local-testing",
+     "section": "5.2",
+     "title": "Modo de prueba local y backends falsos",
+     "summary": "Probar programas de IBM Quantum en tu computadora con backends falsos o Aer, los métodos de simulación, y probar mitigación de errores antes de usar un QPU.",
+     "minutes": 9
+    },
+    {
      "id": "p6-panorama",
-     "section": "6.1",
+     "section": "5.3",
      "title": "Panorama de la gestión del ruido",
      "summary": "De dónde vienen los errores y cómo elegir entre supresión, mitigación, aprendizaje del ruido y postselección.",
      "minutes": 8
     },
     {
      "id": "p6-supresion",
-     "section": "6.2",
+     "section": "5.4",
      "title": "Supresión: desacoplamiento dinámico y twirling",
      "summary": "Reducir el efecto del ruido durante la ejecución con pulsos de desacoplamiento dinámico y twirling de Pauli.",
      "minutes": 10
     },
     {
      "id": "p6-mitigacion",
-     "section": "6.3",
+     "section": "5.5",
      "title": "Mitigación: TREX, ZNE, PEA, PEC y PNA",
      "summary": "Qué corrigen TREX, ZNE, PEA y PEC en IBM Quantum Compute, y dónde encaja PNA en el ecosistema de addons.",
      "minutes": 9
     },
     {
      "id": "p6-configurar",
-     "section": "6.4",
+     "section": "5.6",
      "title": "Configurar el ruido en Estimator y Sampler",
      "summary": "Ajustar niveles de resiliencia y opciones de supresión en las primitivas nuevas del lado del cliente.",
      "minutes": 7
     },
     {
      "id": "p6-aprender-ruido",
-     "section": "6.5",
+     "section": "5.7",
      "title": "Aprender el ruido",
      "summary": "Caracterizar el ruido por capas con NoiseLearner y NoiseLearnerV3 para alimentar técnicas de mitigación.",
      "minutes": 8
     },
     {
      "id": "p6-postseleccion",
-     "section": "6.6",
+     "section": "5.8",
      "title": "Postselección",
      "summary": "Añadir controles de error no Markoviano y filtrar muestras con verificaciones sobre qubits activos y espectadores.",
      "minutes": 9
     },
     {
      "id": "p6-neat",
-     "section": "6.7",
+     "section": "5.9",
      "title": "Depurar trabajos con NEAT",
      "summary": "Usar Noisy Estimator Analyzer Tool para explorar el impacto del ruido y comparar opciones antes de enviar trabajos costosos.",
      "minutes": 10
@@ -352,182 +262,256 @@
    ]
   },
   {
-   "title": "Parte VII · Ejecución avanzada y gestión de trabajos",
-   "desc": "Circuitos dinámicos, puertas fraccionales, los procesadores de IBM, colas, costos y modos de ejecución.",
+   "title": "Unidad 6 · Al hardware",
+   "desc": "Lleva el experimento a IBM Quantum, controla la ejecución y organiza trabajos reales.",
    "lessons": [
     {
+     "id": "p5-hello-world",
+     "section": "6.1",
+     "title": "Hola mundo en un QPU",
+     "summary": "El primer programa en hardware real: un estado de Bell medido con Estimator, y su versión a escala de utilidad con un GHZ de 100 qubits.",
+     "minutes": 8
+    },
+    {
+     "id": "p5-opciones",
+     "section": "6.2",
+     "title": "Primitivas de IBM y sus opciones",
+     "summary": "Estimator, Sampler y Executor; el paso a primitivas del lado del cliente; cómo funcionan las opciones; y el modelo de ejecución dirigida.",
+     "minutes": 8
+    },
+    {
+     "id": "p5-estimator",
+     "section": "6.3",
+     "title": "Estimator en IBM Quantum",
+     "summary": "Usar Estimator en hardware: inicialización, entradas y salidas, cómo calcula los errores, la precedencia de la precisión, sus opciones y ejemplos.",
+     "minutes": 10
+    },
+    {
+     "id": "p5-sampler",
+     "section": "6.4",
+     "title": "Sampler en IBM Quantum",
+     "summary": "Usar Sampler en hardware: entradas y salidas, intervalos de ejecución, precedencia de los disparos, opciones e incompatibilidades.",
+     "minutes": 7
+    },
+    {
+     "id": "p5-executor",
+     "section": "6.5",
+     "title": "Executor",
+     "summary": "La primitiva de bajo nivel: programas cuánticos, elementos de circuito y de samplex, broadcasting con ejes intrínsecos y extrínsecos, PEC y cómo migrar desde Sampler.",
+     "minutes": 11
+    },
+    {
+     "id": "p2-control-clasico",
+     "section": "6.6",
+     "title": "Control clásico, feedforward y stretch",
+     "summary": "Circuitos dinámicos: if, switch, for y while dentro del circuito, expresiones clásicas, store y tiempos relativos con stretch.",
+     "minutes": 10
+    },
+    {
      "id": "p7-dinamicos",
-     "section": "7.1",
+     "section": "6.7",
      "title": "Circuitos dinámicos en hardware",
      "summary": "Qué parte del control de flujo admite el hardware de IBM, la medición a mitad de circuito, store, sus límites y cómo estimar valores esperados.",
      "minutes": 8
     },
     {
      "id": "p7-fraccionales",
-     "section": "7.2",
+     "section": "6.8",
      "title": "Puertas fraccionales",
      "summary": "Rotaciones RX y RZZ ejecutadas directamente en procesadores Heron: cuándo convienen, cómo activarlas, sus límites, y el reemplazo de Qiskit Pulse.",
      "minutes": 8
     },
     {
      "id": "p7-temporizacion",
-     "section": "7.3",
+     "section": "6.9",
      "title": "Temporización de circuitos",
      "summary": "Obtener del servicio la programación real de un circuito, sobre todo dinámico, interpretar sus datos y visualizarla.",
      "minutes": 6
     },
     {
-     "id": "p7-procesadores",
-     "section": "7.4",
-     "title": "Los procesadores de IBM",
-     "summary": "Familias de procesadores, cómo listar backends y leer sus propiedades estáticas y dinámicas, cómo se calibran, la inicialización de qubits y los procesadores retirados.",
-     "minutes": 10
-    },
-    {
-     "id": "p7-colas-costos",
-     "section": "7.5",
-     "title": "Colas, tiempos y costos",
-     "summary": "Cómo decide el planificador, qué cuenta como uso, cómo estimarlo, cómo reducirlo, el tiempo máximo de ejecución y los límites de cada trabajo.",
-     "minutes": 9
-    },
-    {
-     "id": "p7-trabajos",
-     "section": "7.6",
-     "title": "Monitorear, etiquetar y guardar trabajos",
-     "summary": "Seguir el estado de un trabajo, entender por qué tarda, cancelarlo, consultar uso y métricas, etiquetarlo y guardar o recuperar sus resultados.",
-     "minutes": 6
-    },
-    {
      "id": "p7-modos",
-     "section": "7.7",
+     "section": "6.10",
      "title": "Modos de ejecución: job, batch y session",
      "summary": "Los tres modos de ejecución, cómo elegir, cómo abrir y cerrar lotes y sesiones, sus tiempos de vida, y las preguntas frecuentes.",
      "minutes": 10
+    },
+    {
+     "id": "p7-trabajos",
+     "section": "6.11",
+     "title": "Monitorear, etiquetar y guardar trabajos",
+     "summary": "Seguir el estado de un trabajo, entender por qué tarda, cancelarlo, consultar uso y métricas, etiquetarlo y guardar o recuperar sus resultados.",
+     "minutes": 6
     }
    ]
   },
   {
-   "title": "Parte VIII · Serverless, addons y Qiskit Functions",
-   "desc": "Ejecutar flujos completos en la nube, las herramientas de investigación (addons) y el catálogo de funciones.",
+   "title": "Unidad 7 · Escalar",
+   "desc": "Empaqueta el trabajo y usa Serverless, addons y Functions para llevarlo más lejos.",
    "lessons": [
     {
      "id": "p8-serverless",
-     "section": "8.1",
+     "section": "7.1",
      "title": "Qiskit Serverless",
      "summary": "Ejecutar flujos cuánticos-clásicos completos en la nube de IBM: escribir un programa, subirlo, ejecutarlo, paralelizar tareas, gestionar datos y portar código existente.",
      "minutes": 9
     },
     {
      "id": "p8-addons",
-     "section": "8.2",
+     "section": "7.2",
      "title": "Qiskit addons",
      "summary": "El catálogo de herramientas de investigación de Qiskit: qué hace cada addon y en qué paso del patrón encaja.",
      "minutes": 8
     },
     {
      "id": "p8-functions",
-     "section": "8.3",
+     "section": "7.3",
      "title": "Qiskit Functions",
      "summary": "El catálogo de funciones de IBM y sus socios: qué tipos hay, cómo acceder, ejecutarlas y seguir sus trabajos.",
      "minutes": 7
     },
     {
      "id": "p8-circuit-functions",
-     "section": "8.4",
+     "section": "7.4",
      "title": "Funciones de circuito",
      "summary": "Las cuatro funciones de circuito del catálogo: TEM, QESEM, Performance Management y Orbit: qué hacen, cuándo convienen y cómo se llaman.",
      "minutes": 7
     },
     {
      "id": "p8-app-functions",
-     "section": "8.5",
+     "section": "7.5",
      "title": "Funciones de aplicación",
      "summary": "Las funciones de aplicación del catálogo: optimización, finanzas, química, ecuaciones diferenciales y aprendizaje automático.",
      "minutes": 7
     },
     {
      "id": "p8-plantillas",
-     "section": "8.6",
+     "section": "7.6",
      "title": "Plantillas de Qiskit Functions",
      "summary": "Plantillas de código abierto con flujos de investigación reales, y plantillas base para escribir tus propias funciones y desplegarlas en Serverless.",
-     "minutes": 7
-    }
-   ]
-  },
-  {
-   "title": "Parte IX · Extender e integrar Qiskit",
-   "desc": "Proveedores propios, la API de C, computación de alto rendimiento, herramientas de IA y cómo migrar entre versiones.",
-   "lessons": [
-    {
-     "id": "p9-proveedores",
-     "section": "9.1",
-     "title": "Integrar recursos cuánticos externos",
-     "summary": "Cómo un proveedor externo integra su hardware en Qiskit: un BackendV2 con su Target, implementaciones de las primitivas, y la migración de BackendV1 a BackendV2.",
-     "minutes": 7
-    },
-    {
-     "id": "p9-c-api",
-     "section": "9.2",
-     "title": "La API de C de Qiskit",
-     "summary": "Usar Qiskit desde C: compilar la biblioteca independiente, construir observables, y escribir extensiones de Python en C para acelerar pases del transpilador.",
-     "minutes": 7
-    },
-    {
-     "id": "p9-hpc",
-     "section": "9.3",
-     "title": "HPC: QRMI y Slurm",
-     "summary": "Integrar computadores cuánticos en centros de supercomputación: la interfaz QRMI, el plugin SPANK para Slurm y cómo lo usan administradores, usuarios y aplicaciones.",
-     "minutes": 7
-    },
-    {
-     "id": "p9-ia",
-     "section": "9.4",
-     "title": "IA para programar con Qiskit",
-     "summary": "Modelos de lenguaje especializados en Qiskit, servidores MCP para asistentes de IA y skills reutilizables.",
-     "minutes": 7
-    },
-    {
-     "id": "p9-migraciones",
-     "section": "9.5",
-     "title": "Versiones y migraciones",
-     "summary": "La estrategia de versiones de Qiskit, las migraciones a 1.0 y 2.0, el paso a las primitivas del lado del cliente y cómo seguir las novedades.",
-     "minutes": 10
-    }
-   ]
-  },
-  {
-   "title": "Parte X · Organizaciones, seguridad y comunidad",
-   "desc": "Administrar instancias, usuarios y permisos; seguridad y cumplimiento; soporte y código abierto.",
-   "lessons": [
-    {
-     "id": "p10-organizaciones",
-     "section": "10.1",
-     "title": "Organizaciones e instancias",
-     "summary": "Planificar IBM Quantum Platform para una organización: instancias, planes, regiones, asignaciones y límites, la API de gestión y los registros de plataforma.",
-     "minutes": 8
-    },
-    {
-     "id": "p10-acceso",
-     "section": "10.2",
-     "title": "Cuentas, grupos de acceso y usuarios",
-     "summary": "La estructura de una cuenta de IBM Cloud, los roles de plataforma y de servicio, los grupos de acceso, los roles personalizados y la gestión de usuarios.",
-     "minutes": 7
-    },
-    {
-     "id": "p10-seguridad",
-     "section": "10.3",
-     "title": "Seguridad y cumplimiento",
-     "summary": "Protección y retención de datos, responsabilidades compartidas, conexiones privadas, restricciones por contexto, alta disponibilidad, auditoría y políticas de seguridad.",
-     "minutes": 7
-    },
-    {
-     "id": "p10-comunidad",
-     "section": "10.4",
-     "title": "Soporte, preguntas frecuentes y código abierto",
-     "summary": "Dónde pedir ayuda, las preguntas frecuentes, cómo citar Qiskit y los QPUs, y cómo participar en la comunidad de código abierto.",
      "minutes": 8
     }
    ]
+  }
+ ],
+ "guides": [
+  {
+   "id": "p1-que-es-qiskit",
+   "section": "",
+   "title": "Qué es Qiskit",
+   "summary": "El SDK, el servicio de cómputo de IBM, el ecosistema, los addons, Serverless y Functions: el mapa de todo lo que vas a aprender.",
+   "minutes": 9
+  },
+  {
+   "id": "p1-instalar",
+   "section": "",
+   "title": "Instalar y configurar Qiskit",
+   "summary": "Entornos virtuales, pip, Jupyter, sistemas soportados, instalación desde el código fuente, configuración local y entornos en línea.",
+   "minutes": 11
+  },
+  {
+   "id": "p1-composer",
+   "section": "",
+   "title": "IBM Quantum Composer",
+   "summary": "La herramienta gráfica de IBM: construir con arrastrar y soltar o con OpenQASM, inspeccionar paso a paso, ejecutar en QPUs y leer sus visualizaciones.",
+   "minutes": 11
+  },
+  {
+   "id": "p2-qasm",
+   "section": "",
+   "title": "OpenQASM y guardar circuitos",
+   "summary": "El lenguaje OpenQASM 2 y 3, cómo importar y exportar circuitos, qué funciones admite el hardware, y cómo guardarlos con QPY.",
+   "minutes": 10
+  },
+  {
+   "id": "p5-cuenta",
+   "section": "",
+   "title": "Cuenta de IBM Cloud, planes y credenciales",
+   "summary": "Crear la cuenta y una instancia, guardar y cargar credenciales de forma segura, elegir instancia, los planes de acceso y cómo limitar el gasto.",
+   "minutes": 11
+  },
+  {
+   "id": "p5-rest",
+   "section": "",
+   "title": "La API REST",
+   "summary": "Usar IBM Quantum desde cualquier lenguaje: autenticación con tokens portadores, enviar trabajos de Estimator y Sampler con OpenQASM 3, opciones, resultados y sesiones.",
+   "minutes": 8
+  },
+  {
+   "id": "p7-procesadores",
+   "section": "",
+   "title": "Los procesadores de IBM",
+   "summary": "Familias de procesadores, cómo listar backends y leer sus propiedades estáticas y dinámicas, cómo se calibran, la inicialización de qubits y los procesadores retirados.",
+   "minutes": 10
+  },
+  {
+   "id": "p7-colas-costos",
+   "section": "",
+   "title": "Colas, tiempos y costos",
+   "summary": "Cómo decide el planificador, qué cuenta como uso, cómo estimarlo, cómo reducirlo, el tiempo máximo de ejecución y los límites de cada trabajo.",
+   "minutes": 9
+  },
+  {
+   "id": "p9-proveedores",
+   "section": "",
+   "title": "Integrar recursos cuánticos externos",
+   "summary": "Cómo un proveedor externo integra su hardware en Qiskit: un BackendV2 con su Target, implementaciones de las primitivas, y la migración de BackendV1 a BackendV2.",
+   "minutes": 7
+  },
+  {
+   "id": "p9-c-api",
+   "section": "",
+   "title": "La API de C de Qiskit",
+   "summary": "Usar Qiskit desde C: compilar la biblioteca independiente, construir observables, y escribir extensiones de Python en C para acelerar pases del transpilador.",
+   "minutes": 7
+  },
+  {
+   "id": "p9-hpc",
+   "section": "",
+   "title": "HPC: QRMI y Slurm",
+   "summary": "Integrar computadores cuánticos en centros de supercomputación: la interfaz QRMI, el plugin SPANK para Slurm y cómo lo usan administradores, usuarios y aplicaciones.",
+   "minutes": 7
+  },
+  {
+   "id": "p9-ia",
+   "section": "",
+   "title": "IA para programar con Qiskit",
+   "summary": "Modelos de lenguaje especializados en Qiskit, servidores MCP para asistentes de IA y skills reutilizables.",
+   "minutes": 7
+  },
+  {
+   "id": "p9-migraciones",
+   "section": "",
+   "title": "Versiones y migraciones",
+   "summary": "La estrategia de versiones de Qiskit, las migraciones a 1.0 y 2.0, el paso a las primitivas del lado del cliente y cómo seguir las novedades.",
+   "minutes": 10
+  },
+  {
+   "id": "p10-organizaciones",
+   "section": "",
+   "title": "Organizaciones e instancias",
+   "summary": "Planificar IBM Quantum Platform para una organización: instancias, planes, regiones, asignaciones y límites, la API de gestión y los registros de plataforma.",
+   "minutes": 8
+  },
+  {
+   "id": "p10-acceso",
+   "section": "",
+   "title": "Cuentas, grupos de acceso y usuarios",
+   "summary": "La estructura de una cuenta de IBM Cloud, los roles de plataforma y de servicio, los grupos de acceso, los roles personalizados y la gestión de usuarios.",
+   "minutes": 7
+  },
+  {
+   "id": "p10-seguridad",
+   "section": "",
+   "title": "Seguridad y cumplimiento",
+   "summary": "Protección y retención de datos, responsabilidades compartidas, conexiones privadas, restricciones por contexto, alta disponibilidad, auditoría y políticas de seguridad.",
+   "minutes": 7
+  },
+  {
+   "id": "p10-comunidad",
+   "section": "",
+   "title": "Soporte, preguntas frecuentes y código abierto",
+   "summary": "Dónde pedir ayuda, las preguntas frecuentes, cómo citar Qiskit y los QPUs, y cómo participar en la comunidad de código abierto.",
+   "minutes": 8
   }
  ]
 }

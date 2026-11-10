@@ -1,7 +1,7 @@
 {
  "id": "p2-circuitos",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.1",
+ "part": "Unidad 1 · Tu primer circuito",
+ "section": "1.2",
  "title": "Construir circuitos",
  "summary": "QuantumCircuit por dentro: qubits, registros, instrucciones, composición, puertas controladas, profundidad y circuitos con parámetros.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "que_es",
    "tag": [
-    "2.1",
+    "1.2",
     "Qué es un circuito"
    ],
    "say": "Un circuito cuántico simple es una colección de qubits y una lista de instrucciones que actúan sobre ellos. [[qb]]Al crear QuantumCircuit de dos, obtienes dos qubits, ordenados del menos significativo, q cero, al más significativo. [[reg]]También puedes agrupar qubits y bits clásicos en registros con nombre, y combinar varios en un mismo circuito. [[find]]find bit te dice el índice global de un qubit y a qué registro pertenece. Aquí, el único qubit de qreg2 es el qubit dos del circuito.",
@@ -65,7 +65,7 @@
   {
    "id": "data",
    "tag": [
-    "2.1",
+    "1.2",
     "La lista de instrucciones"
    ],
    "say": "Cada vez que añades una puerta, se agrega una instrucción al atributo data del circuito. [[ci]]Cada elemento es un CircuitInstruction, con una operación y los qubits sobre los que actúa. [[def]]Las instrucciones pueden traer una definición en términos de operaciones más básicas. La X, por ejemplo, se define como un caso particular de la puerta U: U de pi, cero, pi. [[dif]]Una diferencia importante de diseño: las instrucciones se tratan como fijas, y sus métodos devuelven instrucciones nuevas; los circuitos, en cambio, se construyen a lo largo de muchas líneas y sus métodos suelen modificarlos.",
@@ -149,7 +149,7 @@
   {
    "id": "append",
    "tag": [
-    "2.1",
+    "1.2",
     "append y compose"
    ],
    "say": "Métodos como h o cx añaden puertas concretas. Para añadir cualquier instrucción usa append, con la instrucción y la lista de qubits. [[comp]]Para unir dos circuitos usa compose. Aquí el circuito b, con una Y y una Z, se coloca sobre los qubits uno y tres de un circuito de cuatro. [[nuevo]]Atención: compose devuelve un circuito nuevo y no modifica ninguno de los dos, salvo que pases inplace igual a True.",
@@ -229,7 +229,7 @@
   {
    "id": "gate",
    "tag": [
-    "2.1",
+    "1.2",
     "Instrucciones y puertas propias"
    ],
    "say": "Para organizar circuitos grandes puedes convertir un circuito en una instrucción, con to instruction, y añadirla a otro como una sola caja. [[gate]]Si el circuito es unitario, to gate lo convierte en una puerta, que tiene métodos extra. [[ctrl]]Por ejemplo, control, que le añade un qubit de control: la caja qc b solo actúa si el qubit cero vale uno. [[dec]]Para ver qué hay dentro, decompose expande cada instrucción en su definición, y devuelve un circuito nuevo.",
@@ -316,7 +316,7 @@
   {
    "id": "depth_pred",
    "tag": [
-    "2.1",
+    "1.2",
     "Profundidad"
    ],
    "say": "La profundidad de un circuito cuenta cuántas capas de puertas, ejecutadas en paralelo, hacen falta para completarlo. Dos puertas sobre qubits distintos pueden ir en la misma capa; sobre el mismo qubit, una detrás de otra. [[apuesta]]Con esa regla, apuesta: ¿qué profundidad tiene este circuito de seis puertas?",
@@ -382,7 +382,7 @@
   {
    "id": "depth",
    "tag": [
-    "2.1",
+    "1.2",
     "Contar capas"
    ],
    "say": "Contemos. [[cap]]Puertas sobre qubits distintos van en la misma capa. [[seq]]Puertas sobre el mismo qubit, una detrás de otra. [[tiempo]]Tres capas: si dijiste seis, contaste puertas, no capas. Como cada puerta tarda, la profundidad se parece al tiempo de ejecución, y es una de las cantidades que deciden si un circuito se puede ejecutar bien en un dispositivo ruidoso.",
@@ -476,7 +476,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.1",
+    "1.2",
     "Comprueba"
    ],
    "say": "Calcula la profundidad de este circuito.",
@@ -531,7 +531,7 @@
   {
    "id": "parametros",
    "tag": [
-    "2.1",
+    "1.2",
     "Circuitos con parámetros"
    ],
    "say": "Muchos algoritmos ejecutan muchísimas variaciones del mismo circuito. Construir y optimizar cada una saldría caro. [[par]]Por eso Qiskit admite parámetros: un Parameter es un número aún sin definir. [[opt]]Construyes y optimizas el circuito una sola vez, con el parámetro dentro. [[asig]]Y justo antes de ejecutar, assign parameters le da un valor concreto. Puedes generar cien variantes en un bucle sin volver a optimizar. [[lista]]El atributo parameters lista los parámetros sin asignar.",
@@ -593,7 +593,7 @@
   {
    "id": "nombres",
    "tag": [
-    "2.1",
+    "1.2",
     "Cambiar el nombre de los parámetros"
    ],
    "say": "Los circuitos de la biblioteca traen parámetros con nombres por defecto, como x de cero. [[vec]]Para renombrarlos, crea un ParameterVector con el prefijo que quieras [[asig]]y asígnalo con assign parameters: ahora se llaman hi de cero, hi de uno, y así.",
@@ -640,7 +640,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.1",
+    "1.2",
     "Comprueba"
    ],
    "say": "Una pregunta sobre compose.",
@@ -676,7 +676,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.1",
+    "1.2",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, inspecciona la lista de instrucciones de un circuito y predice su profundidad antes de calcularla. [[n2]]Después, reordena un estado GHZ de seis qubits para que tenga menos capas sin cambiar el estado: la escalera de CNOTs tiene profundidad seis, y se puede bajar a cuatro. [[n3]]Y por último, construye una familia de veintiún circuitos a partir de uno solo con un parámetro, y comprueba que siguen la curva teórica.",
@@ -759,7 +759,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.1",
+    "1.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -783,7 +783,7 @@
   {
    "id": "cierre",
    "tag": [
-    "2.1",
+    "1.2",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un circuito es una colección de qubits y una lista de instrucciones. [[r2]]append, compose, to instruction, to gate y decompose te dejan combinar y organizar circuitos. [[r3]]La profundidad cuenta capas en paralelo. [[r4]]Y los parámetros permiten optimizar una vez y ejecutar muchas variantes.",

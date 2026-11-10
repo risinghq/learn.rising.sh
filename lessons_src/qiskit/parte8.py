@@ -21,6 +21,9 @@ from lib import (
     reflect,
 )
 from parte2 import resumen
+from parte9 import migraciones
+from parte10 import comunidad
+from project import move_project_exercises
 
 # ------------------------------------------------------------------ 8.1 Qiskit Serverless
 s_cierre, a_cierre = resumen(
@@ -519,7 +522,7 @@ addons = lesson(
             "ruido",
             ("", "Ruido"),
             """Para aprender el ruido, noise learning construye experimentos de caracterización y su análisis. Shaded lightcones, SLC, abarata la cancelación probabilística de errores quitando del modelo los términos de ruido que apenas afectan al observable.
-             [[ev]]Para valores esperados: PNA, la absorción de ruido propagado, que viste en la Parte seis, y Qiskit Mitigation, para construir tus propios flujos de mitigación con Samplomatic.
+             [[ev]]Para valores esperados: PNA, la absorción de ruido propagado, que viste en la unidad de ruido, y Qiskit Mitigation, para construir tus propios flujos de mitigación con Samplomatic.
              [[muestreo]]Para resultados de muestreo: SQD, la diagonalización cuántica basada en muestras, también en versión para HPC en C más más; la postselección con comprobaciones de inversión de bits; M3, mitigación de lectura en un subespacio reducido; y Paulice, comprobaciones de Pauli basadas en códigos de espacio-tiempo.""",
             [
                 Table(
@@ -1744,7 +1747,7 @@ plantillas = lesson(
         beat(
             "desplegar",
             ("", "Desplegar una plantilla"),
-            """Para desplegar una plantilla, descargas su carpeta source files del repositorio, y la subes con QiskitFunction, como en la primera lección de esta parte, declarando sus dependencias de pip.
+            """Para desplegar una plantilla, descargas su carpeta source files del repositorio, y la subes con QiskitFunction, como en la primera lección de esta unidad, declarando sus dependencias de pip.
              [[run]]La de AQC más Trotter solo exige tres entradas: el Hamiltoniano, una cadena unidimensional con vecinos cercanos, el número de pasos de Trotter y el plan de compresión. Esta es la respuesta a tu apuesta: seis. Dos capas del ansatz, más los cuatro pasos que no se comprimen.
              [[backends]]Y se puede ejecutar en tres sitios con el mismo código: statevector, exacto; fake, simulación ruidosa; y runtime, en un QPU real. Prueba primero en los simuladores: no gastan tiempo de QPU.""",
             [
@@ -1857,7 +1860,7 @@ job = fn.run(hamiltonian=H, t_steps=10,
         beat(
             "proyecto",
             ("", "Proyecto Ising: hito VIII"),
-            """Con esto llegamos al hito ocho del proyecto Ising. [[obp]]En esta parte conociste los addons, y OBP en particular: llevar las últimas capas del circuito al observable. [[aqc]]AQC-Tensor, la técnica de la plantilla que acabas de ver, persigue lo mismo desde otro lado: comprimir las primeras capas en un circuito más corto.
+            """Con esto llegamos al hito ocho del proyecto Ising. [[obp]]En esta unidad conociste los addons, y OBP en particular: llevar las últimas capas del circuito al observable. [[aqc]]AQC-Tensor, la técnica de la plantilla que acabas de ver, persigue lo mismo desde otro lado: comprimir las primeras capas en un circuito más corto.
              [[hito]]El hito ocho recalcula tu cadena de espines, reduce su profundidad con OBP, y te hace pensar en un presupuesto: cuántos términos estás dispuesto a medir a cambio de un circuito más corto.""",
             [
                 Row(
@@ -1939,7 +1942,7 @@ job = fn.run(hamiltonian=H, t_steps=10,
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]Plantillas de implementación de química y física. [[r2]]Plantillas base con buenas prácticas para tus funciones. [[r3]]Se despliegan en tu cuenta de Serverless.
-             [[r4]]Valida pronto y prueba en simuladores antes del QPU. Con esto termina la Parte ocho.""",
+             [[r4]]Valida pronto y prueba en simuladores antes del QPU. Con esto termina la séptima unidad.""",
             s_cierre,
             a_cierre,
         ),
@@ -1955,5 +1958,9 @@ job = fn.run(hamiltonian=H, t_steps=10,
         "Sigue el tutorial de [dispersión de neutrones](https://quantum.cloud.ibm.com/docs/en/tutorials/simulate-neutron-scattering-with-a-serverless-workflow) que usa la plantilla AQC + Trotter.",
     ],
 )
+
+
+move_project_exercises(migraciones, app_functions, "hito9")
+move_project_exercises(comunidad, plantillas, "hito10")
 
 LESSONS = [serverless, addons, functions, circuit_functions, app_functions, plantillas]

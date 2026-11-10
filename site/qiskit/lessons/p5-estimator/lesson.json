@@ -1,7 +1,7 @@
 {
  "id": "p5-estimator",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.4",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.3",
  "title": "Estimator en IBM Quantum",
  "summary": "Usar Estimator en hardware: inicialización, entradas y salidas, cómo calcula los errores, la precedencia de la precisión, sus opciones y ejemplos.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "pasos",
    "tag": [
-    "5.4",
+    "6.3",
     "Cuatro pasos"
    ],
    "say": "Usar Estimator tiene cuatro pasos. [[serv]]Inicializar la cuenta y elegir un procesador. Para puertas fraccionales, pide el backend con use fractional gates igual a True. [[circ]]Crear circuito y observable, y transpilarlos a ISA. [[init]]Crear el Estimator con un modo: un backend, para un trabajo suelto; un batch, para un lote; o una sesión. [[run]]Y llamar a run con los PUBs.",
@@ -59,7 +59,7 @@
   {
    "id": "entradas",
    "tag": [
-    "5.4",
+    "6.3",
     "Entradas"
    ],
    "say": "Las entradas son PUBs, como ya sabes: circuito, observables, parámetros y precisión. Si el circuito trae mediciones, se ignoran. [[agrupar]]Los observables que conmutan dentro del mismo PUB se agrupan para medirse juntos, por conmutación qubit a qubit. En PUBs distintos, no. [[ej]]El ejemplo de la guía: un circuito con dos parámetros, cien juegos de valores y tres observables en forma tres por uno, todo en una sola llamada.",
@@ -93,7 +93,7 @@
   {
    "id": "pred_forma",
    "tag": [
-    "5.4",
+    "6.3",
     "Antes de ejecutar"
    ],
    "say": "Cuenta bien las formas de lo que entra. [[par]]Los parámetros tienen forma cien por dos: cien juegos de dos valores, así que el barrido es de cien. [[obs]]Los observables, tres por uno. [[cual]]Apuesta: ¿qué forma tendrá el arreglo de valores esperados, evs?",
@@ -137,7 +137,7 @@
   {
    "id": "forma",
    "tag": [
-    "5.4",
+    "6.3",
     "Broadcasting de PUBs"
    ],
    "say": "Resultado: tres por cien. [[bc]]Los observables, de forma tres por uno, y el barrido de parámetros, de forma cien, se alinean por la derecha y se combinan por broadcasting: tres filas, una por observable, y cien columnas, una por juego de parámetros. [[tot]]Son trescientos valores esperados en una sola llamada.",
@@ -192,7 +192,7 @@
   {
    "id": "salidas",
    "tag": [
-    "5.4",
+    "6.3",
     "Salidas"
    ],
    "say": "La salida es la misma estructura que ya conoces: un PubResult por PUB, con data y metadata. [[data]]En data están evs, los valores esperados; stds, sus desviaciones; y ensemble standard error. Según la mitigación, puede haber más. [[meta]]La metadata del PrimitiveResult recoge las opciones usadas: desacoplamiento dinámico, twirling, resiliencia. La de cada PUB, los disparos, la precisión objetivo y el número de aleatorizaciones. [[local]]Estas son las claves reales del resultado del trabajo anterior, ejecutado en local.",
@@ -235,7 +235,7 @@
   {
    "id": "errores",
    "tag": [
-    "5.4",
+    "6.3",
     "Cómo calcula el error"
    ],
    "say": "Además del valor medio, Estimator estima su error. Sin extrapolación a ruido cero, cada disparo es una estimación puntual; stds es la desviación estándar de esas estimaciones dividida entre la raíz del número de disparos. [[twirl]]Si hay twirling de puertas, las estimaciones se agrupan por cada twirl, y ensemble standard error divide la desviación entre esos grupos por la raíz del número de twirls. Sin twirling, las dos cantidades coinciden. [[zne]]Con ZNE, el error que se reporta es la incertidumbre del ajuste evaluado en ruido cero; si el ajuste es malo, puede ser enorme.",
@@ -296,7 +296,7 @@
   {
    "id": "precision",
    "tag": [
-    "5.4",
+    "6.3",
     "¿Cuántos disparos?"
    ],
    "say": "La precisión se puede indicar en varios sitios, y gana el primero de esta lista. [[pub]]Uno: la precisión dentro del PUB. [[run]]Dos: el argumento precision de run. [[tw]]Tres: si el twirling está activo, que lo está por defecto, el número de aleatorizaciones por los disparos de cada una. [[shots]]Cuatro: default shots. [[prec]]Cinco: default precision, que por defecto es uno sobre la raíz de cuatro mil noventa y seis. [[falla]]Cuidado: si pides una precisión que necesita más disparos de los que permite la configuración de twirling, el trabajo falla. Y recuerda: más precisión, más tiempo de QPU. [[uno]]Y un detalle de la cero punto cincuenta: todos los PUBs de un mismo trabajo deben tener la misma precisión; si mezclas, da error.",
@@ -389,7 +389,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.4",
+    "6.3",
     "Comprueba"
    ],
    "say": "Aplica la precedencia.",
@@ -423,7 +423,7 @@
   {
    "id": "opciones",
    "tag": [
-    "5.4",
+    "6.3",
     "Opciones de Estimator"
    ],
    "say": "Las opciones principales de Estimator. [[res]]resilience level: cero, uno o dos; uno es el valor por defecto, y cero desactiva toda mitigación y supresión, útil si investigas tus propias técnicas. [[dd]]dynamical decoupling: activar, y elegir la secuencia, XX, XpXm o XY4. [[tw]]twirling: de puertas y de mediciones, número de aleatorizaciones y estrategia. [[resil]]resilience: mitigación de lectura, ZNE, PEC y sus parámetros, como los factores de ruido o el extrapolador. [[exec]]Y execution, environment y max execution time, de uno a diez mil ochocientos segundos, tres horas.",
@@ -508,7 +508,7 @@
   {
    "id": "compat",
    "tag": [
-    "5.4",
+    "6.3",
     "Técnicas incompatibles"
    ],
    "say": "No todas las técnicas se combinan en un mismo trabajo. [[dd]]El desacoplamiento dinámico es incompatible con las puertas fraccionales y con stretch. [[tw]]El twirling de puertas no funciona con entrelazadores que no sean de Clifford, y el de mediciones solo se aplica a mediciones finales. [[pea]]PEA no se combina con puertas fraccionales, ZNE por plegado de puertas ni PEC. [[pec]]Y PEC tampoco con fraccionales, ZNE por plegado ni PEA.",
@@ -572,7 +572,7 @@
   {
    "id": "chsh",
    "tag": [
-    "5.4",
+    "6.3",
     "Ejemplo: la desigualdad CHSH"
    ],
    "say": "Un ejemplo de la guía: el experimento CHSH. Un circuito de Bell con una rotación RY de ángulo theta, veintiún valores de theta entre cero y dos pi, y cuatro observables, ZZ, ZX, XZ y XX. [[forma]]Los observables en forma cuatro por uno y los ángulos en forma veintiuno por uno dan ochenta y cuatro valores esperados en un solo trabajo. [[res]]En el hardware, las cuatro curvas oscilan entre menos uno y uno, desfasadas: con ellas se demuestra la violación de la desigualdad de Bell.",
@@ -610,7 +610,7 @@
   {
    "id": "q2",
    "tag": [
-    "5.4",
+    "6.3",
     "Comprueba"
    ],
    "say": "Sobre resiliencia.",
@@ -643,7 +643,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.4",
+    "6.3",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Todo corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el barrido de trescientos valores esperados. [[n2]]Después cambias una sola línea para bajar el error estándar de Z Z. [[n3]]Y por último escribes la función que combina los cuatro observables del experimento CHSH en el valor S.",
@@ -725,7 +725,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "5.4",
+    "6.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -749,7 +749,7 @@
   {
    "id": "cierre",
    "tag": [
-    "5.4",
+    "6.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Estimator recibe PUBs y un modo. [[r2]]Devuelve evs, stds y ensemble standard error, más metadata. [[r3]]La precisión sigue una cadena de prioridades. [[r4]]Y resilience level resume la mitigación, aunque no todas las técnicas se combinan.",

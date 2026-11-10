@@ -1,7 +1,7 @@
 {
  "id": "p6-configurar",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.4",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.6",
  "title": "Configurar el ruido en Estimator y Sampler",
  "summary": "Ajustar niveles de resiliencia y opciones de supresión en las primitivas nuevas del lado del cliente.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.4",
+    "5.6",
     "Un nivel no es una promesa"
    ],
    "say": "Las opciones permiten elegir un intercambio entre costo y reducción de sesgo. [[resilience]]En Estimator, `resilience_level` resume un paquete de técnicas. [[beta]]Estos niveles siguen en beta: el overhead y la calidad varían por circuito, y no se garantiza que cada técnica se aplique en todos los casos. [[detalle]]Si necesitas controlar una técnica concreta, usa sus opciones individuales y consulta la tabla de compatibilidad del tipo de circuito.",
@@ -55,7 +55,7 @@
   {
    "id": "predice_nivel",
    "tag": [
-    "6.4",
+    "5.6",
     "¿Y si no pides ningún nivel?"
    ],
    "say": "Antes de ver la tabla de niveles, una apuesta. [[crear]]Creas un Estimator y no tocas ninguna opción. [[apuesta]]¿Qué valor de resilience level tendrá? Cero significa sin mitigación; uno, TREX; dos, TREX más extrapolación a ruido cero.",
@@ -94,7 +94,7 @@
   {
    "id": "niveles",
    "tag": [
-    "6.4",
+    "5.6",
     "Los niveles de Estimator"
    ],
    "say": "En la tabla documentada, nivel cero desactiva la mitigación. [[cero]]Nivel uno aplica TREX para reducir errores de lectura. [[uno]]Nivel dos añade extrapolación a ruido cero y twirling de puertas. [[defecto]]Y la respuesta a la apuesta: el nivel uno es el valor por defecto. Un Estimator sin opciones ya mitiga el error de lectura. Las opciones se validan en local, sin cuenta: con un backend falso puedes leerlas. [[costo]]El nivel dos suele consumir más muestreo que el uno. El nombre ‘resilience’ no significa que el resultado sea inmune al ruido.",
@@ -175,7 +175,7 @@
   {
    "id": "estimator",
    "tag": [
-    "6.4",
+    "5.6",
     "Elegir un nivel"
    ],
    "say": "El código usa el Estimator nuevo del lado del cliente, incluido en `qiskit-ibm-runtime` cero punto cincuenta o posterior. [[importar]]Se importa desde `executor_estimator`, se conecta al backend y recibe `resilience_level` en sus opciones. [[auth]]Necesitas credenciales y un backend real para enviar este trabajo; la verificación local del curso no lo ejecuta.",
@@ -213,7 +213,7 @@
   {
    "id": "custom",
    "tag": [
-    "6.4",
+    "5.6",
     "Ajustes individuales"
    ],
    "say": "Puedes activar una opción específica sin depender solo del nivel. [[medir]]Por ejemplo, TREX se configura con `measure_mitigation`; ZNE, con `zne_mitigation`. [[combinar]]Las opciones que escribes se agregan al paquete base del nivel y pueden reemplazar sus valores. [[compat]]No todas las combinaciones son compatibles con todos los circuitos, así que la tabla de compatibilidad es parte de la configuración, no una nota al pie.",
@@ -264,7 +264,7 @@
   {
    "id": "sampler",
    "tag": [
-    "6.4",
+    "5.6",
     "Sampler prioriza supresión"
    ],
    "say": "Sampler devuelve muestras, así que sus opciones de gestión del ruido son distintas. [[tiene]]La documentación presenta desacoplamiento dinámico y twirling de puertas para Sampler. [[no_trex]]TREX y ZNE se aplican a expectativas de Estimator; no elijas un nivel de Estimator para corregir una distribución de Sampler. [[code]]El ejemplo activa una secuencia de desacoplamiento y el twirling. Las opciones se escriben igual con un backend real o con uno falso; solo el backend real exige credenciales.",
@@ -311,7 +311,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.4",
+    "5.6",
     "Comprueba"
    ],
    "say": "Sobre las opciones de Sampler.",
@@ -344,7 +344,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.4",
+    "5.6",
     "Comprueba"
    ],
    "say": "Sobre niveles y opciones explícitas.",
@@ -377,7 +377,7 @@
   {
    "id": "mision",
    "tag": [
-    "6.4",
+    "5.6",
     "Tu turno"
    ],
    "say": "Ahora te toca. Las opciones se validan en tu equipo, sin enviar nada, así que todo corre con un backend falso y sin cuenta. [[n1]]Primero lees lo que trae por defecto un Estimator y apuestas qué nivel es. [[n2]]Después partes del nivel cero y activas TREX y ZNE a mano. [[n3]]Y por último escribes una función que prepara cualquiera de las dos primitivas y rechaza TREX o ZNE para el Sampler.",
@@ -461,7 +461,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.4",
+    "5.6",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma.",
@@ -485,7 +485,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.4",
+    "5.6",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Estimator ofrece niveles cero, uno y dos; el uno es el de por defecto, y el dos añade ZNE y twirling. [[r2]]Puedes fijar técnicas individuales, respetando las compatibilidades. [[r3]]Sampler se centra en desacoplamiento dinámico y twirling; no ofrece la mitigación de expectativas de Estimator. [[r4]]Los niveles están en beta: compara calidad, overhead y circuito real.",

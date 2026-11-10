@@ -273,42 +273,42 @@
   ]
  },
  "proyecto": {
-  "dur": 53.856,
+  "dur": 54.264,
   "marks": {
-   "mide": 4.77,
-   "trex": 11.931,
-   "zne": 18.456,
-   "sim": 26.523,
-   "res": 36.218
+   "mide": 5.123,
+   "trex": 12.285,
+   "zne": 18.809,
+   "sim": 26.877,
+   "res": 36.572
   },
   "cues": [
    [
     0.107,
-    "Cierras la parte VI con el hito seis de tu proyecto Ising."
+    "Cierras la unidad de ruido con el hito seis de tu proyecto Ising."
    ],
    [
-    4.77,
+    5.123,
     "Recalculas la magnetización exacta y la de Trotter, y mides cuánto sesga el ruido sin mitigar."
    ],
    [
-    11.931,
+    12.285,
     "Después aplicas TREX a mano, dividiendo por una calibración con el circuito vacío."
    ],
    [
-    18.456,
+    18.809,
     "Y por último extrapolas con ZNE, plegando el circuito, y comparas los tres con el valor exacto."
    ],
    [
-    26.523,
+    26.877,
     "Todo corre por defecto en un simulador con el ruido de un backend falso; un interruptor te deja usar un QPU real si tienes tu cuenta."
    ],
    [
-    36.218,
+    36.572,
     "Con el simulador, ZNE queda más cerca del exacto que TREX, y TREX más cerca que no mitigar."
    ],
    [
-    44.073,
-    "La mitigación apunta al valor de Trotter sin ruido: la diferencia restante es error de Trotter, y ninguna técnica de esta parte la toca."
+    44.426,
+    "La mitigación apunta al valor de Trotter sin ruido: la diferencia restante es error de Trotter, y ninguna técnica de esta unidad la toca."
    ]
   ]
  },

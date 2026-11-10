@@ -1,9 +1,9 @@
 {
  "id": "p3-cierre",
- "part": "Parte III · Transpilación",
- "section": "3.8",
- "title": "Cierre de la Parte III: repaso y cuántos pasos caben",
- "summary": "Un repaso corto de la Parte tres y una pregunta del proyecto Ising: cuántos pasos de Trotter caben en un presupuesto de profundidad.",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.8",
+ "title": "Repaso: presupuesto de profundidad",
+ "summary": "Un repaso corto y una pregunta del proyecto Ising: cuántos pasos de Trotter caben en un presupuesto de profundidad.",
  "goals": [
   "recordar qué etapa inserta SWAP, cuánto cuesta cada uno y cómo reproducir una transpilación",
   "medir la profundidad transpilada de un circuito de Trotter para `FakeFez` y decidir cuántos pasos caben"
@@ -12,10 +12,10 @@
   {
    "id": "repaso1",
    "tag": [
-    "3.8",
+    "4.8",
     "Repaso: las etapas"
    ],
-   "say": "Tres preguntas rápidas de la Parte tres, y después una pregunta del proyecto Ising. La primera, sobre las etapas.",
+   "say": "Tres preguntas rápidas y después una pregunta del proyecto Ising. La primera, sobre las etapas.",
    "scene": [
     {
      "type": "flow",
@@ -79,7 +79,7 @@
   {
    "id": "repaso2",
    "tag": [
-    "3.8",
+    "4.8",
     "Repaso: coste de un SWAP"
    ],
    "say": "Segunda pregunta, sobre el coste de esos SWAP.",
@@ -104,7 +104,7 @@
   {
    "id": "repaso3",
    "tag": [
-    "3.8",
+    "4.8",
     "Repaso: semilla"
    ],
    "say": "Tercera pregunta, sobre reproducir resultados.",
@@ -137,7 +137,7 @@
   {
    "id": "pasos",
    "tag": [
-    "3.8",
+    "4.8",
     "Tu turno"
    ],
    "say": "Ahora la pregunta del proyecto Ising. [[ej]]Cada paso de Trotter añade profundidad al circuito transpilado, y un chip real solo aguanta cierta profundidad. [[n]]Escribe una función que diga cuántos pasos caben dentro de un presupuesto.",
@@ -173,10 +173,10 @@
   {
    "id": "cierre",
    "tag": [
-    "3.8",
+    "4.8",
     "Resumen"
    ],
-   "say": "Resumen de la parte. [[r1]]El routing inserta SWAP. [[r2]]Cada SWAP cuesta tres CX. [[r3]]Fija seed transpiler para repetir un resultado. [[r4]]Y la profundidad transpilada decide cuántos pasos de Trotter caben. Con esto cierras la Parte tres; en la siguiente, las primitivas y la simulación.",
+   "say": "Resumen de la unidad. [[r1]]El routing inserta SWAP. [[r2]]Cada SWAP cuesta tres CX. [[r3]]Fija seed transpiler para repetir un resultado. [[r4]]Y la profundidad transpilada decide cuántos pasos de Trotter caben. Con esto cierras la cuarta unidad; en la siguiente, estudiarás el ruido.",
    "scene": [
     {
      "type": "list",
@@ -223,7 +223,7 @@
   "Repite `pasos_max` con `FakeSherbrooke` y compara con `FakeFez`: ¿cuántos pasos caben en un presupuesto de 150?",
   "Guías originales: "
  ],
- "next": "p4-primitivas",
+ "next": "p4-aer-ruido",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

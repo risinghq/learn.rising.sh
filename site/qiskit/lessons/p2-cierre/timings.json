@@ -1,14 +1,14 @@
 {
  "repaso1": {
-  "dur": 8.904,
+  "dur": 9.264,
   "marks": {},
   "cues": [
    [
     0.107,
-    "Empezamos con cuatro preguntas rápidas de lo que viste en esta parte."
+    "Empezamos con cuatro preguntas rápidas de lo que viste en estas lecciones."
    ],
    [
-    5.152,
+    5.506,
     "La primera, sobre el orden de los bits."
    ]
   ]
@@ -69,37 +69,37 @@
   ]
  },
  "cierre": {
-  "dur": 25.392,
+  "dur": 25.632,
   "marks": {
-   "r1": 2.406,
-   "r2": 5.718,
-   "r3": 11.478,
-   "r4": 16.205
+   "r1": 2.533,
+   "r2": 5.845,
+   "r3": 11.606,
+   "r4": 16.333
   },
   "cues": [
    [
     0.107,
-    "Resumen de la parte."
+    "Resumen de la unidad."
    ],
    [
-    2.406,
+    2.533,
     "El qubit cero es el bit de la derecha."
    ],
    [
-    5.718,
+    5.845,
     "Los circuitos N-local tienen una capa de rotaciones más que repeticiones."
    ],
    [
-    11.478,
+    11.606,
     "Un observable promedio lleva uno entre n en cada término."
    ],
    [
-    16.205,
+    16.333,
     "Y QPY guarda un circuito en memoria."
    ],
    [
-    19.956,
-    "Con esto cierras la Parte dos; en la siguiente, la transpilación."
+    20.083,
+    "Con esto cierras la segunda unidad; después simularás y transpilarás."
    ]
   ]
  }

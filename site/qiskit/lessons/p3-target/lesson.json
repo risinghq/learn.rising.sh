@@ -1,7 +1,7 @@
 {
  "id": "p3-target",
- "part": "Parte III · Transpilación",
- "section": "3.4",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.4",
  "title": "Representar un computador cuántico: Target",
  "summary": "Qué información necesita el transpilador: Backend y Target, mapa de acoplamiento, instrucciones soportadas, errores, y cómo crear un backend propio.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "3.4",
+    "4.4",
     "Backend y Target"
    ],
    "say": "Para producir un circuito ISA, el transpilador necesita saber cómo es el procesador. Esa información vive en dos lugares. [[target]]El Target guarda todas las restricciones del dispositivo: sus instrucciones, la conectividad de sus qubits, y la información de tiempos y errores. [[backend]]El Backend contiene un Target, más la interfaz para enviar trabajos. [[mas]]Cuanta más información tenga el Target, mejor puede trabajar el transpilador, aunque como muchos algoritmos son estocásticos, no hay garantía de encontrar el mejor circuito.",
@@ -77,7 +77,7 @@
   {
    "id": "anillo",
    "tag": [
-    "3.4",
+    "4.4",
     "Un anillo en un chip"
    ],
    "say": "El mapa de acoplamiento es un grafo: dice qué qubits están conectados y pueden hacer puertas de dos qubits entre sí. A veces es dirigido, pero el transpilador siempre puede invertir una puerta añadiendo puertas de un qubit. [[ej]]Tomemos un circuito efficient su2 de doce qubits, con entrelazamiento circular: cada qubit habla con el siguiente, y el último con el primero. Necesita un anillo. Con el nivel cero, el layout trivial pone los qubits uno, dos, tres... en línea sobre el chip. Apuesta: ¿cuántos SWAP hacen falta?",
@@ -206,7 +206,7 @@
   {
    "id": "cm",
    "tag": [
-    "3.4",
+    "4.4",
     "El mapa de acoplamiento"
    ],
    "say": "Ejecutemos el ejemplo. [[ej]]El circuito efficient su2 de doce qubits, con entrelazamiento circular, necesita un anillo. [[n0]]Con el nivel cero y solo el mapa de acoplamiento de Sherbrooke, el layout trivial pone los qubits en línea y hacen falta veintidós SWAP; si apostaste por unos veintidós, acertaste. [[n1]]Con el nivel uno, VF2 y Sabre encuentran un layout casi en anillo: solo dos SWAP.",
@@ -252,7 +252,7 @@
   {
    "id": "base",
    "tag": [
-    "3.4",
+    "4.4",
     "Instrucciones soportadas"
    ],
    "say": "Cada computador soporta un conjunto limitado de instrucciones, que debe ser universal: cualquier operación se puede descomponer en ellas. El pase BasisTranslator hace la traducción. [[sb]]Sherbrooke usa rz, sx y x en un qubit, y ECR, la puerta de resonancia cruzada con eco, en dos qubits: es la parte que entrelaza dentro de una CX. [[mas]]También admite delay, medición, reset y control de flujo. [[otros]]Otros procesadores usan CZ, como Fez, Torino o Heron. Puedes pasar basis gates como argumento, y las CX se descompondrán en ECR más puertas de un qubit.",
@@ -320,7 +320,7 @@
   {
    "id": "errores",
    "tag": [
-    "3.4",
+    "4.4",
     "Errores del dispositivo"
    ],
    "say": "El Target también guarda las propiedades de cada instrucción en cada qubit o par de qubits. [[ecr]]Para la ECR entre los qubits uno y cero: dura unos quinientos treinta y tres nanosegundos y tiene un error de cero coma siete por ciento. La ECR es direccional: uno cero no es lo mismo que cero uno. [[uso]]Con esa información, el pase VF2PostLayout elige los qubits físicos con menos error. [[from]]Puedes construir un Target desde una configuración, con from configuration, y copiarle los errores de otro.",
@@ -365,7 +365,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.4",
+    "4.4",
     "Comprueba"
    ],
    "say": "Una pregunta sobre el Target.",
@@ -398,7 +398,7 @@
   {
    "id": "propio",
    "tag": [
-    "3.4",
+    "4.4",
     "Un backend propio"
    ],
    "say": "Qiskit no depende del fabricante: cualquiera puede describir su propio dispositivo. Las piezas son tres. [[prov]]Un Provider, que entrega objetos backend y se ocupa de credenciales. [[backend]]Un BackendV2, con cuatro partes: un Target, max circuits, el máximo de circuitos por trabajo, un método run, y unas opciones por defecto. [[target]]Y el Target, que se llena con add instruction: para cada puerta, un diccionario de los qubits donde está disponible, con su error y su duración. [[res]]Una CX entre los qubits cero y dos, que no son vecinos en esta cadena: el transpilador los coloca en dos qubits contiguos, así que no hacen falta SWAP, y traduce la CX a una CZ y puertas de un qubit. La X está en el Target, pero el transpilador solo la usa cuando una secuencia de puertas de un qubit equivale, salvo rotaciones Z, a una X; aquí ninguna lo hace, y por eso no aparece. Todo salió de la información del Target.",
@@ -454,7 +454,7 @@
   {
    "id": "multichip",
    "tag": [
-    "3.4",
+    "4.4",
     "Un backend de varios chips"
    ],
    "say": "La guía original construye un backend más ambicioso: tres chips, cada uno con conectividad heavy hex, generada con la biblioteca rustworkx. [[dentro]]Dentro de cada chip, la puerta de dos qubits es CZ; [[entre]]entre chips, ECR, en un solo enlace. [[ghz]]Al transpilar un GHZ de cincuenta qubits, el resultado mezcla las dos puertas: doscientas cuatro CZ y ocho ECR, con muchos SWAP para cruzar entre chips. [[vis]]plot gate map y plot circuit layout dibujan estos dispositivos y qué qubits usó el circuito. Y con rustworkx puedes inventar cualquier geometría, como un toro de veinte por veinte.",
@@ -648,7 +648,7 @@
   {
    "id": "q2",
    "tag": [
-    "3.4",
+    "4.4",
     "Comprueba"
    ],
    "say": "Una pregunta sobre backends.",
@@ -681,7 +681,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.4",
+    "4.4",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, completa el backend de tres qubits de la lección para que traduzca una CX entre los extremos sin SWAP. [[n2]]Después, en un anillo de cuatro qubits, quita del Target el par averiado para que el transpilador lo esquive. [[n3]]Y por último, escribe una función que construye un Target para una cadena de cualquier tamaño.",
@@ -763,7 +763,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.4",
+    "4.4",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -787,7 +787,7 @@
   {
    "id": "cierre",
    "tag": [
-    "3.4",
+    "4.4",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un backend es un Target más la forma de ejecutar. [[r2]]El Target describe instrucciones, conectividad, errores y tiempos. [[r3]]El mapa de acoplamiento decide cuántos SWAP harán falta. [[r4]]Y con add instruction puedes describir cualquier dispositivo, real o imaginario.",

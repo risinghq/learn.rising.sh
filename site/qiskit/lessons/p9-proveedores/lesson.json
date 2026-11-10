@@ -1,7 +1,7 @@
 {
  "id": "p9-proveedores",
- "part": "Parte IX · Extender e integrar Qiskit",
- "section": "9.1",
+ "part": "Guías",
+ "section": "",
  "title": "Integrar recursos cuánticos externos",
  "summary": "Cómo un proveedor externo integra su hardware en Qiskit: un BackendV2 con su Target, implementaciones de las primitivas, y la migración de BackendV1 a BackendV2.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "idea",
    "tag": [
-    "9.1",
+    "Guía",
     "Proveedores de Qiskit"
    ],
    "say": "Qiskit no es solo para el hardware de IBM. Cualquier organización que ofrezca recursos cuánticos puede integrarlos en Qiskit, y llegar así a todos sus usuarios. [[dos]]Para eso necesita dos cosas: [[backends]]un servicio que dé acceso a los backends, con un objeto Target que describa conectividad, puertas base y número de qubits, para que los usuarios puedan transpilar; [[prim]]y una interfaz de ejecución, que implemente las primitivas de Qiskit.",
@@ -64,7 +64,7 @@
   {
    "id": "backend",
    "tag": [
-    "9.1",
+    "Guía",
     "Un BackendV2 mínimo"
    ],
    "say": "El núcleo de un BackendV2 es su Target. Construyamos uno para un QPU imaginario de tres qubits en línea. [[target]]Añadimos las puertas de un qubit, RZ, raíz de X y X, y la medición, en los tres qubits, con su error; y la CZ solo entre los pares cero uno y uno dos. [[metodos]]La clase debe ofrecer el target, el máximo de circuitos por trabajo, las opciones por defecto y run, que en un proveedor real enviaría el trabajo a su servicio. [[usar]]Con eso, el backend ya informa sus qubits, sus operaciones y su mapa de acoplamiento: tres qubits, cinco operaciones y solo dos pares conectados.",
@@ -115,7 +115,7 @@
   {
    "id": "predice",
    "tag": [
-    "9.1",
+    "Guía",
     "Antes de transpilar"
    ],
    "say": "Antes de transpilar, apuesta. Este circuito aplica una Hadamard al qubit cero y una CNOT entre el qubit cero y el dos. Pero en nuestro QPU esos dos qubits no están conectados: solo hay enlaces entre cero y uno, y entre uno y dos. ¿Cuántas puertas CZ crees que tendrá el circuito transpilado? Piensa en lo que el transpilador tiene que hacer para llegar de un extremo al otro de la línea.",
@@ -157,7 +157,7 @@
   {
    "id": "transpilar",
    "tag": [
-    "9.1",
+    "Guía",
     "Transpilar para MiQPU"
    ],
    "say": "Transpilamos con el gestor de pases preestablecido, nivel uno, apuntando a nuestro backend. [[res]]Sale una sola CZ, junto con seis rotaciones RZ y tres raíces de X. No hizo falta ningún SWAP: el transpilador colocó los qubits lógicos cero y dos en los físicos uno y cero, que sí son vecinos. [[cx]]La CNOT se tradujo a una CZ rodeada de puertas de un qubit, porque la CZ es la única de dos qubits que el Target declara.",
@@ -206,7 +206,7 @@
   {
    "id": "primitivas",
    "tag": [
-    "9.1",
+    "Guía",
     "Implementar las primitivas"
    ],
    "say": "Para ejecutar, el proveedor implementa las clases base de las primitivas. Un Estimator propio hereda de BaseEstimatorV2 y su run recibe PUBs y una precisión. [[pasos]]Los pasos: fijar una precisión por defecto si no se da; validar el formato de los PUBs; crear un trabajo que herede de BasePrimitiveJob; y enviarlo al servicio. [[datos]]Los resultados se devuelven con las estructuras de Qiskit: DataBin, PubResult y PrimitiveResult. [[ref]]Como referencia, Qiskit incluye BackendSamplerV2 y BackendEstimatorV2, que convierten cualquier backend con run en primitivas.",
@@ -248,7 +248,7 @@
   {
    "id": "v1v2",
    "tag": [
-    "9.1",
+    "Guía",
     "De BackendV1 a BackendV2"
    ],
    "say": "BackendV1 está obsoleto. Si usas solo qiskit ibm runtime y Aer, no tienes que hacer nada: ya usan BackendV2. Si usas otro proveedor que se actualizó, cambian algunos accesos. [[tabla]]La idea: BackendV1 guardaba la información en configuration y properties; BackendV2 la concentra en el Target, con atributos planos. [[cmap]]Un detalle: coupling map ahora devuelve un objeto CouplingMap, no una lista de aristas, y es solo una vista parcial del Target.",
@@ -336,7 +336,7 @@
   {
    "id": "q1",
    "tag": [
-    "9.1",
+    "Guía",
     "Comprueba"
    ],
    "say": "Migra una línea.",
@@ -370,7 +370,7 @@
   {
    "id": "mision",
    "tag": [
-    "9.1",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero completas el Target de MiQPU, con sus puertas y los pares donde vive la CZ. [[n2]]Después le añades duraciones al Target, para estimar cuánto dura un circuito. [[n3]]Y por último implementas run con un simulador local, para que MiQPU funcione con las primitivas. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos. Todo corre en tu equipo: no hace falta cuenta.",
@@ -452,7 +452,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "9.1",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -476,7 +476,7 @@
   {
    "id": "cierre",
    "tag": [
-    "9.1",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un proveedor ofrece un BackendV2 con su Target. [[r2]]La ejecución se expone implementando las primitivas. [[r3]]Los resultados usan las estructuras de Qiskit. [[r4]]Y al migrar de BackendV1, casi todo pasa al Target.",

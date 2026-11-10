@@ -1,7 +1,7 @@
 {
  "id": "p2-medir",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.2",
+ "part": "Unidad 1 · Tu primer circuito",
+ "section": "1.3",
  "title": "Medir qubits",
  "summary": "La medición en la base computacional y las cuatro formas de añadirla a un circuito: measure, Measure, measure_all y measure_active.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "base",
    "tag": [
-    "2.2",
+    "1.3",
     "Medir en la base Z"
    ],
    "say": "Para obtener información de un qubit hay que medirlo y guardar el resultado en un bit clásico. [[z]]En Qiskit se mide en la base computacional, la de la matriz de Pauli Z. [[res]]El resultado es cero, con probabilidad igual al módulo al cuadrado del solapamiento con el estado cero, o uno, con la probabilidad del estado uno. [[val]]Los autovalores de Z son más uno y menos uno: el bit cero corresponde al resultado más uno, y el bit uno al menos uno.",
@@ -49,7 +49,7 @@
   {
    "id": "measure",
    "tag": [
-    "2.2",
+    "1.3",
     "measure"
    ],
    "say": "La forma más directa es el método measure: el primer argumento son los qubits y el segundo, los bits clásicos donde se guarda cada resultado. [[todos]]Con range de cinco en ambos, cada qubit va a su bit. [[uno]]Pero puedes elegir: aquí se mide solo el qubit uno y se guarda en el bit cero. [[clase]]También existe la clase Measure, que se añade con append como cualquier otra instrucción, indicando qubits y bits.",
@@ -119,7 +119,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.2",
+    "1.3",
     "Comprueba"
    ],
    "say": "El primer circuito de la escena anterior pone X en los qubits cero, uno y cuatro, y mide los cinco en sus bits.",
@@ -154,7 +154,7 @@
   {
    "id": "all_pred",
    "tag": [
-    "2.2",
+    "1.3",
     "Antes de medir todo"
    ],
    "say": "Una apuesta. Este circuito de tres qubits ya tiene un bit clásico, y ponemos una X en los qubits cero y dos. [[cual]]Ahora llamamos a measure all. ¿Cuántos bits clásicos tendrá el circuito cuando termine?",
@@ -193,7 +193,7 @@
   {
    "id": "all",
    "tag": [
-    "2.2",
+    "1.3",
     "measure_all"
    ],
    "say": "measure all no necesita argumentos y sirve para circuitos sin bits clásicos. [[reg]]Crea un registro nuevo llamado meas, con un bit por qubit, y guarda el qubit i en el bit i. [[bar]]Además añade una barrera antes de medir. [[nuevo]]Ojo: si el circuito ya tenía bits clásicos, measure all añade otro registro aparte. Aquí, el registro c original se queda vacío, en cero, y los resultados van a meas. En total son cuatro bits: uno de c y tres de meas.",
@@ -295,7 +295,7 @@
   {
    "id": "active",
    "tag": [
-    "2.2",
+    "1.3",
     "measure_active"
    ],
    "say": "measure active es parecido, pero mide solo los qubits que tienen alguna operación, los que no están ociosos. [[ej]]Aquí, los qubits cero y dos; el uno no se toca. [[reg]]El registro nuevo tiene tantos bits como qubits medidos: dos.",
@@ -368,7 +368,7 @@
   {
    "id": "primitivas",
    "tag": [
-    "2.2",
+    "1.3",
     "¿Medir o no medir?"
    ],
    "say": "Una regla práctica que usarás todo el tiempo. [[s]]Los circuitos que envías a Sampler deben llevar mediciones: Sampler devuelve precisamente esos bits. [[e]]Los circuitos que envías a Estimator no deben llevarlas: Estimator añade por su cuenta lo necesario para medir los observables que le pidas. [[mid]]Y en el hardware de IBM también se puede medir en medio del circuito; lo verás con los circuitos dinámicos.",
@@ -409,7 +409,7 @@
     },
     {
      "type": "text",
-     "text": "medición a mitad de circuito → circuitos dinámicos (Parte VII)",
+     "text": "medición a mitad de circuito → circuitos dinámicos (Unidad 6)",
      "style": "note",
      "id": "n",
      "hidden": true
@@ -436,7 +436,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.2",
+    "1.3",
     "Comprueba"
    ],
    "say": "Una última pregunta.",
@@ -461,7 +461,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.2",
+    "1.3",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, predice cuántos bits clásicos tiene un circuito después de measure all y compruébalo. [[n2]]Después, cambia los argumentos de measure para que el qubit dos se guarde en el bit cero. [[n3]]Y por último, entrelaza los qubits uno y tres de un circuito de cinco, mídelos con measure active, y prepara su copia sin mediciones para Estimator.",
@@ -543,7 +543,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.2",
+    "1.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras; lo que escribas se guarda en el navegador.",
@@ -567,7 +567,7 @@
   {
    "id": "cierre",
    "tag": [
-    "2.2",
+    "1.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Se mide en la base Z.[[r2]]measure te da control total, y Measure es la misma operación como instrucción. [[r3]]measure all mide todo en un registro nuevo y measure active, solo lo que se usó. [[r4]]Y recuerda: Sampler con mediciones, Estimator sin ellas.",

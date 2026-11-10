@@ -1,7 +1,7 @@
 {
  "id": "p5-hello-world",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.2",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.1",
  "title": "Hola mundo en un QPU",
  "summary": "El primer programa en hardware real: un estado de Bell medido con Estimator, y su versión a escala de utilidad con un GHZ de 100 qubits.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "5.2",
+    "6.1",
     "Del simulador al hardware"
    ],
    "say": "Ya sabes construir, transpilar y simular. Ahora, el primer programa en un procesador cuántico real, con los cuatro pasos de siempre. [[auth]]Solo hace falta instalar el cliente, guardar tus credenciales una vez, [[serv]]y crear el servicio. [[proxy]]Si te conectas a través de un proxy, necesitas la versión cero punto cuarenta y cuatro o superior del cliente.",
@@ -43,7 +43,7 @@
   {
    "id": "mapear",
    "tag": [
-    "5.2",
+    "6.1",
     "1 · Mapear: circuito y observables"
    ],
    "say": "Paso uno: el circuito de Bell, y seis observables de dos qubits: I Z, I X, Z I, X I, Z Z y X X. [[zz]]Z Z es una abreviatura del producto tensorial Z por Z: mide Z en los dos qubits a la vez y da información de la correlación entre ellos. [[ent]]Si el estado está entrelazado, el valor esperado de Z Z no es el producto de los valores de cada qubit por separado. Cuánto vale cada uno en el estado de Bell lo vas a predecir enseguida.",
@@ -79,7 +79,7 @@
   {
    "id": "optimizar",
    "tag": [
-    "5.2",
+    "6.1",
     "2 · Optimizar"
    ],
    "say": "Paso dos: elegimos el procesador. En hardware, service punto least busy, con simulator igual a False y operational igual a True, devuelve el procesador real menos ocupado. [[fake]]Para no esperar en la cola, aquí usamos un backend falso, FakeBelem, con el modo de prueba local; cuando funcione, solo cambias esa línea. [[isa]]Transpilamos a un circuito ISA [[layout]]y adaptamos los observables a los qubits físicos que eligió el layout.",
@@ -117,7 +117,7 @@
   {
    "id": "ejecutar",
    "tag": [
-    "5.2",
+    "6.1",
     "3 · Ejecutar"
    ],
    "say": "Paso tres: creamos un Estimator con el backend como modo, [[res]]pedimos nivel de resiliencia uno, que activa mitigación de errores de lectura, [[shots]]y cinco mil disparos. [[run]]run devuelve un trabajo. En hardware, job id te da su identificador, para recuperar los resultados más tarde aunque cierres Python: el trabajo espera en una cola.",
@@ -165,7 +165,7 @@
   {
    "id": "predice",
    "tag": [
-    "5.2",
+    "6.1",
     "Antes de leer el resultado"
    ],
    "say": "El trabajo terminó. Antes de mirar los números, apuesta. [[zz]]Para el estado de Bell, ¿cuánto crees que vale el valor esperado de Z Z, [[iz]]y cuánto el de I Z, un solo qubit? Recuerda que Z vale más uno si el qubit sale cero, y menos uno si sale uno.",
@@ -253,7 +253,7 @@
   {
    "id": "resultado",
    "tag": [
-    "5.2",
+    "6.1",
     "4 · Posprocesar"
    ],
    "say": "Paso cuatro: leemos los valores esperados. Así queda el programa completo, que se ejecuta de verdad en el modo local. [[val]]Los cuatro observables de un solo qubit dan cero: cada qubit, por separado, es completamente aleatorio. [[corr]]Pero X X y Z Z dan casi uno: las correlaciones son perfectas, salvo por el ruido. Esa es la firma del entrelazamiento, y la respuesta a tu apuesta.",
@@ -339,7 +339,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.2",
+    "6.1",
     "Comprueba"
    ],
    "say": "Interpreta un resultado.",
@@ -372,7 +372,7 @@
   {
    "id": "escala",
    "tag": [
-    "5.2",
+    "6.1",
     "A escala de utilidad"
    ],
    "say": "La investigación real necesita mucho más: circuitos de más de cien qubits y más de mil puertas. La guía repite el experimento con un estado GHZ de cien qubits. [[ops]]Los observables son Z cero Z i, para i de uno a noventa y nueve: la correlación entre el qubit cero y cada uno de los demás, cada vez más lejos. [[opc]]Se ejecuta con resiliencia uno y desacoplamiento dinámico XY4, configurado con EstimatorOptions. [[dec]]Idealmente, todas las correlaciones valen uno. En el hardware, decaen con la distancia: el ruido se acumula a lo largo de la cadena de CNOT.",
@@ -450,7 +450,7 @@
   {
    "id": "q2",
    "tag": [
-    "5.2",
+    "6.1",
     "Comprueba"
    ],
    "say": "Sobre el decaimiento.",
@@ -483,7 +483,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.2",
+    "6.1",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Todo corre en un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero reproduces el estado de Bell con sus seis observables. [[n2]]Después subes los disparos hasta que el error estándar de Z Z baje de cuatro milésimas. [[n3]]Y por último escribes una función que mide las correlaciones de un GHZ de dos a cinco qubits, los que caben en el procesador falso.",
@@ -565,7 +565,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "5.2",
+    "6.1",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -589,7 +589,7 @@
   {
    "id": "cierre",
    "tag": [
-    "5.2",
+    "6.1",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]least busy elige un procesador real. [[r2]]Estimator, con resiliencia y disparos, ejecuta el trabajo. [[r3]]El estado de Bell muestra correlaciones perfectas con qubits individuales aleatorios. [[r4]]Y a gran escala, el ruido hace decaer las correlaciones con la distancia.",
@@ -630,6 +630,95 @@
      "i": 3,
      "id": "r",
      "at": "r4"
+    }
+   ]
+  },
+  {
+   "id": "hito5",
+   "tag": [
+    "6.1",
+    "Tu proyecto: hito V"
+   ],
+   "say": "Y con esto llegas al hito cinco del proyecto: tu primera ejecución en un procesador cuántico real, con un presupuesto de como máximo un minuto de QPU. [[estimar]]Antes de enviar, estimas el tiempo de QPU con una fórmula que la lección te explica. [[falso]]La práctica corre en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí. [[real]]Un interruptor, bien marcado, manda el mismo trabajo a hardware real con tu cuenta guardada, y solo se envía si pulsas el botón y la estimación cabe en el presupuesto.",
+   "scene": [
+    {
+     "type": "math",
+     "tex": "M(t)=\\frac1N\\sum_i\\langle Z_i\\rangle",
+     "size": 46
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/hito5-referencia",
+     "prompt": "Escribe `magnetizacion_referencia(n, J, h, dt, pasos)`: devuelve ⟨M⟩ ideal, sin ruido, tras 0, 1, …, `pasos` pasos de Trotter desde `|0…0⟩`. Cada paso aplica `rzz(2·J·dt)` en cada enlace y `rx(2·h·dt)` en cada espín.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "La lista necesita también el estado inicial.",
+      "Construye un circuito con el número de pasos de cada instante y calcula `⟨M_Z⟩`.",
+      "Recorre `range(pasos + 1)` y añade el valor esperado del observable."
+     ],
+     "id": "e1",
+     "hidden": true,
+     "starter": "def magnetizacion_referencia(n, J, h, dt, pasos):\n    return []",
+     "cases": [
+      "la referencia incluye el estado inicial y los valores posteriores"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/hito5-uso",
+     "prompt": "Corrige `estimar_uso(n, J, h, dt, pasos, disparos)`: transpila los circuitos de 1 a `pasos` pasos para `FakeManilaV2`, programa cada uno y estima los segundos de QPU. Hoy solo cuenta la duración de cada circuito por disparo.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Entre un disparo y el siguiente, el qubit se reinicia y espera; ese tiempo también es de QPU.",
+      "La variable `espera` ya suma el `reset` y `default_rep_delay`; falta usarla en la línea marcada.",
+      "La forma es `uso += (___ + ___) * disparos`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef estimar_uso(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    pm_t = generate_preset_pass_manager(target=backend.target, optimization_level=0, scheduling_method=\"alap\")\n    espera = backend.target[\"reset\"][(0,)].duration + backend.default_rep_delay\n    uso = 2.0\n    for isa in isas:\n        duracion = pm_t.run(isa).estimate_duration(backend.target, unit=\"s\")\n        uso += duracion * disparos\n    return uso",
+     "cases": [
+      "4 espines, 6 circuitos de 4096 disparos en FakeManilaV2: unos 8.4 s de QPU"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p5-rest/hito5-estimator",
+     "prompt": "Completa `ejecutar(n, J, h, dt, pasos, disparos)`: ejecuta los circuitos ya transpilados con el `Estimator` de `qiskit_ibm_runtime` en modo `FakeManilaV2`, con `disparos` y `seed_simulator=5`, y devuelve ⟨M⟩ de cada circuito como `float`. La trampa: cada observable debe ir con el circuito cuyo `layout` ya aplicaste, un PUB por pareja.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Un PUB reúne un circuito y el observable que quieres medir.",
+      "Crea el `Estimator` con `mode=backend` y fija `default_shots` y `simulator.seed_simulator` en sus opciones.",
+      "La forma es `estimator.run(list(zip(___, ___))).result()` y después `float(pub.data.evs)` por resultado."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef ejecutar(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    observables = [M.apply_layout(isa.layout) for isa in isas]\n    return [0.0] * len(isas)  # ✏️ un Estimator sobre backend, disparos y seed_simulator=5, un PUB por circuito",
+     "cases": [
+      "3 espines y 4 circuitos con ruido de FakeManilaV2: la curva medida sigue a la ideal"
+     ]
+    }
+   ],
+   "actions": [
+    {
+     "do": "show",
+     "id": "e1",
+     "at": "estimar"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "estimar",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "estimar",
+     "t": 2
     }
    ]
   }

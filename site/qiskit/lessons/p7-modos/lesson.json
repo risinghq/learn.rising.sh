@@ -1,7 +1,7 @@
 {
  "id": "p7-modos",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.7",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.10",
  "title": "Modos de ejecución: job, batch y session",
  "summary": "Los tres modos de ejecución, cómo elegir, cómo abrir y cerrar lotes y sesiones, sus tiempos de vida, y las preguntas frecuentes.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "tres",
    "tag": [
-    "7.7",
+    "6.10",
     "Tres modos"
    ],
    "say": "Los modos de ejecución deciden cómo se programan tus trabajos. [[job]]Job: una sola petición a una primitiva, sin gestor de contexto; mode igual al backend. [[batch]]Batch: varios trabajos independientes enviados a la vez. El sistema paraleliza su preprocesamiento clásico y ejecuta las partes cuánticas seguidas. No garantiza el orden ni da acceso exclusivo. [[session]]Session: una ventana dedicada para cargas de varios trabajos. Durante ella tienes el equipo en exclusiva; ni siquiera corren calibraciones. [[cola]]En lotes y sesiones, el primer trabajo hace la cola normal: con un solo trabajo no ganas nada. Y el plan Open no admite sesiones.",
@@ -83,7 +83,7 @@
   {
    "id": "ttl",
    "tag": [
-    "7.7",
+    "6.10",
     "Tiempos de vida"
    ],
    "say": "Lotes y sesiones tienen dos temporizadores. [[max]]El tiempo de vida máximo, TTL, empieza cuando arranca el primer trabajo y no se detiene. Al llegar a su fin, el lote o la sesión termina: lo que se está ejecutando acaba, lo que está en cola falla. [[inter]]El TTL interactivo empieza al terminar cada trabajo. Si no llega otro trabajo a tiempo, la carga se desactiva temporalmente y la cola vuelve a la normalidad; un nuevo trabajo puede reactivarla, haciendo cola, mientras no se alcance el máximo. [[valores]]Por defecto: máximo de ocho horas en planes de pago, diez minutos para lotes en el plan Open; interactivo de un minuto en lotes y sesenta segundos en sesiones Premium. El interactivo no se puede cambiar; el máximo sí, con max time.",
@@ -180,7 +180,7 @@
   {
    "id": "elegir",
    "tag": [
-    "7.7",
+    "6.10",
     "Cómo elegir"
    ],
    "say": "La recomendación general: usa batch, salvo que tu carga no tenga todas las entradas listas al principio. [[batch]]Batch: sin cola extra para cada trabajo, compilación en paralelo, poca deriva entre trabajos, resultados parciales si algo falla, y más barato que una sesión. [[session]]Session: todo lo del lote, más acceso exclusivo; ideal para cargas iterativas que necesitan posprocesar antes del siguiente paso, pero más cara, porque cuenta el tiempo activo. [[job]]Job: para una sola petición. [[tamano]]Y un consejo: si cada trabajo usa menos de un minuto de QPU, júntalos en uno más grande; hay una sobrecarga fija por trabajo. El preprocesamiento clásico admite hasta cinco trabajos en paralelo.",
@@ -244,7 +244,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.7",
+    "6.10",
     "Comprueba"
    ],
    "say": "Elige el modo.",
@@ -277,7 +277,7 @@
   {
    "id": "pred_batch",
    "tag": [
-    "7.7",
+    "6.10",
     "Antes de ejecutar"
    ],
    "say": "Vamos a abrir un lote y a pedirle sus detalles. [[local]]Pero con un backend simulado, en el modo de prueba local, no hay servicio detrás. [[apuesta]]Apuesta: al llamar a details en el lote, ¿qué crees que imprime?",
@@ -329,7 +329,7 @@
   {
    "id": "batch",
    "tag": [
-    "7.7",
+    "6.10",
     "Usar un lote"
    ],
    "say": "Un lote se abre con el gestor de contexto with Batch, pasando el backend; dentro, las primitivas se crean sin modo y lo heredan. [[clase]]O creando un objeto Batch y pasándolo como mode; entonces hay que cerrarlo con close. [[cerrar]]Al cerrar, el lote deja de aceptar trabajos, pero los enviados terminan. Si lo dejas abierto y envías más tarde, puede alcanzarse el TTL antes de que corran. [[particion]]Un patrón útil: partir una lista larga de circuitos en varios trabajos dentro de un lote, para aprovechar el preprocesamiento en paralelo. [[local]]En el modo de prueba local la sintaxis funciona, pero los modos se ignoran: details imprime None. Si apostaste por eso, acertaste.",
@@ -389,7 +389,7 @@
   {
    "id": "session",
    "tag": [
-    "7.7",
+    "6.10",
     "Usar una sesión"
    ],
    "say": "Con sesiones es igual: with Session, o un objeto Session que se cierra a mano. Si abres una y no envías trabajos en treinta minutos, se cierra sola. [[fin]]Una sesión termina al alcanzar el TTL máximo o al cancelarla, y entonces se cancelan los trabajos en cola; o al cerrarla, y entonces los trabajos en cola se ejecutan con prioridad. [[estado]]session punto status te dice si está pendiente, aceptando trabajos, sin aceptar trabajos, o cerrada. [[vqe]]El uso típico: un optimizador de SciPy que llama a Estimator en cada iteración. Y dentro de una misma sesión puedes ejecutar dos optimizaciones a la vez, con hilos y etiquetas distintas.",
@@ -457,7 +457,7 @@
   {
    "id": "faq",
    "tag": [
-    "7.7",
+    "6.10",
     "Preguntas frecuentes"
    ],
    "say": "Algunas preguntas frecuentes. [[paralelo]]¿Cuántos trabajos corren en paralelo en un lote? Tantos como carriles de ejecución tenga el backend, normalmente cinco, menos los ocupados por otros usuarios. [[cola]]¿Los trabajos de un lote esperan cada uno en la cola? No: cuando arranca el primero, los demás pasan a tener prioridad. [[interrup]]¿Las calibraciones interrumpen? Los lotes, sí; las sesiones, no. [[usosesion]]¿Una sesión cobra aunque no haga nada? Sí: cuenta desde que arranca el primer trabajo hasta que se desactiva, se cierra o termina el último trabajo, lo que ocurra más tarde. Por eso conviene cerrarlas siempre.",
@@ -521,7 +521,7 @@
   {
    "id": "q2",
    "tag": [
-    "7.7",
+    "6.10",
     "Comprueba"
    ],
    "say": "Sobre el cierre.",
@@ -554,7 +554,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.7",
+    "6.10",
     "Tu turno"
    ],
    "say": "Ahora eliges cómo ejecutar una carga. [[n1]]Abre un lote y recoge tres resultados. [[n2]]Después reparte veinte circuitos en cinco trabajos. [[n3]]Y por último decide entre `job`, `batch` y `session` según la carga y el plan.",
@@ -633,10 +633,10 @@
   {
    "id": "proyecto",
    "tag": [
-    "7.7",
+    "6.10",
     "Tu proyecto: hito VII"
    ],
-   "say": "El hito siete del proyecto de espines junta lo de esta parte. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz. [[lote]]Después mides varios pasos de tiempo en un lote, cada uno en su trabajo. [[real]]Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar. [[ojo]]La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos.",
+   "say": "El hito siete del proyecto de espines junta lo de esta unidad. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz. [[lote]]Después mides varios pasos de tiempo en un lote, cada uno en su trabajo. [[real]]Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar. [[ojo]]La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos.",
    "scene": [
     {
      "type": "exercise",
@@ -717,7 +717,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.7",
+    "6.10",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -741,10 +741,10 @@
   {
    "id": "cierre",
    "tag": [
-    "7.7",
+    "6.10",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]Job, batch y session. [[r2]]Batch por defecto; session para cargas iterativas; job para una petición. [[r3]]Lotes y sesiones tienen un TTL máximo y otro interactivo. [[r4]]En local los modos se ignoran, y el plan Open no admite sesiones. Con esto termina la Parte siete.",
+   "say": "Resumen. [[r1]]Job, batch y session. [[r2]]Batch por defecto; session para cargas iterativas; job para una petición. [[r3]]Lotes y sesiones tienen un TTL máximo y otro interactivo. [[r4]]En local los modos se ignoran, y el plan Open no admite sesiones. Con esto termina la sexta unidad.",
    "scene": [
     {
      "type": "list",
@@ -798,7 +798,7 @@
   "Si tienes plan de pago, ejecuta un VQE pequeño en una `Session` y compara su uso con el mismo VQE en modo job.",
   "Guías originales: [execution-modes](https://quantum.cloud.ibm.com/docs/en/guides/execution-modes) · [choose-execution-mode](https://quantum.cloud.ibm.com/docs/en/guides/choose-execution-mode) · [run-jobs-batch](https://quantum.cloud.ibm.com/docs/en/guides/run-jobs-batch) · [run-jobs-session](https://quantum.cloud.ibm.com/docs/en/guides/run-jobs-session) · [execution-modes-faq](https://quantum.cloud.ibm.com/docs/en/guides/execution-modes-faq)"
  ],
- "next": "p8-serverless",
+ "next": "p7-trabajos",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -1290,8 +1290,8 @@ comunidad = lesson(
         ),
         beat(
             "proyecto",
-            ("", "Tu proyecto: el informe final"),
-            """Y el proyecto llega a su final. [[recalcula]]El hito diez es un informe reproducible. Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez.
+            ("", "Referencia: el informe final"),
+            """La referencia final reúne lo que necesitas para escribir un informe reproducible. [[recalcula]]Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez.
              [[pasos]]Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado. [[informe]]Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU. Con las mismas semillas, cualquiera obtiene los mismos números.""",
             [
                 M(r"M(t) = \frac{1}{N}\sum_i \langle Z_i \rangle", size=46),

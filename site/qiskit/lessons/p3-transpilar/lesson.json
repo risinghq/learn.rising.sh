@@ -1,7 +1,7 @@
 {
  "id": "p3-transpilar",
- "part": "Parte III · Transpilación",
- "section": "3.1",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.1",
  "title": "Por qué hay que transpilar",
  "summary": "Qué es la transpilación, qué exige un circuito ISA, qué son los pases y pass managers, y las dos formas de transpilar.",
  "goals": [
@@ -13,10 +13,10 @@
   {
    "id": "intro",
    "tag": [
-    "3.1",
+    "4.1",
     "Reescribir para un chip concreto"
    ],
-   "say": "Transpilar es reescribir un circuito para que encaje en la topología de un dispositivo concreto, y optimizar sus instrucciones para ejecutarlas en un computador ruidoso. [[antes]]Partes de un circuito con tus instrucciones, las que te resulten cómodas. [[despues]]Y terminas con uno que solo usa las instrucciones disponibles en el backend elegido, organizadas para sufrir lo menos posible el ruido. [[local]]Esta parte del curso trata de la transpilación local, que puede hacer cualquier usuario. Si solo usas las opciones por defecto del servicio de IBM, verás más en la parte de ruido.",
+   "say": "Transpilar es reescribir un circuito para que encaje en la topología de un dispositivo concreto, y optimizar sus instrucciones para ejecutarlas en un computador ruidoso. [[antes]]Partes de un circuito con tus instrucciones, las que te resulten cómodas. [[despues]]Y terminas con uno que solo usa las instrucciones disponibles en el backend elegido, organizadas para sufrir lo menos posible el ruido. [[local]]Esta unidad trata de la transpilación local, que puede hacer cualquier usuario. Si solo usas las opciones por defecto del servicio de IBM, verás más en la unidad de ruido.",
    "scene": [
     {
      "type": "text",
@@ -154,7 +154,7 @@
   {
    "id": "isa",
    "tag": [
-    "3.1",
+    "4.1",
     "La arquitectura del conjunto de instrucciones"
    ],
    "say": "El objetivo es un circuito ISA. Un circuito ISA solo contiene instrucciones que el Target del backend admite: [[base]]sus puertas base, mediciones, resets y operaciones de control de flujo. [[mapa]]Y respeta la conectividad del hardware, el CouplingMap: aquí, un chip de juguete en forma de T, donde el qubit uno está conectado a tres vecinos y el cuatro solo a uno. [[ibm]]Al enviar un trabajo a un backend de IBM, el servicio exige que el circuito sea ISA.",
@@ -268,7 +268,7 @@
   {
    "id": "pases",
    "tag": [
-    "3.1",
+    "4.1",
     "Pases y pass managers"
    ],
    "say": "El transpilador está pensado para ser modular y extensible. [[pase]]Cada transformación es un pase, por ejemplo, unir puertas de un qubit seguidas en una sola. [[pm]]Un PassManager guarda una lista de pases y los aplica en orden: la salida de uno es la entrada del siguiente. [[spm]]Y un StagedPassManager organiza varios pass managers en etapas. [[orden]]Qué pases se encadenan, y en qué orden, cambia muchísimo el resultado final.",
@@ -327,7 +327,7 @@
   {
    "id": "etapas",
    "tag": [
-    "3.1",
+    "4.1",
     "Seis etapas"
    ],
    "say": "El transpilador prediseñado de Qiskit tiene seis etapas. [[init]]Init: prepara el circuito, por ejemplo convirtiendo puertas de tres o más qubits en puertas de uno y dos. [[lay]]Layout: asigna cada qubit virtual de tu circuito a un qubit físico del chip. [[rou]]Routing: inserta SWAP para que las puertas de dos qubits caigan entre vecinos. [[tra]]Translation: traduce a las puertas base. [[opt]]Optimization: busca descomposiciones más eficientes. [[sch]]Y scheduling: tiene en cuenta los tiempos de espera de cada qubit.",
@@ -413,7 +413,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.1",
+    "4.1",
     "Comprueba"
    ],
    "say": "Una pregunta sobre las etapas.",
@@ -492,7 +492,7 @@
   {
    "id": "predice",
    "tag": [
-    "3.1",
+    "4.1",
     "Antes de ejecutar"
    ],
    "say": "Vamos a transpilar el circuito del principio, una Hadamard y una Toffoli, para FakeFez, un simulador con las puertas base de un chip de IBM. [[apuesta]]Antes de verlo, apuesta: ¿qué puertas quedan en el resultado?",
@@ -535,7 +535,7 @@
   {
    "id": "como",
    "tag": [
-    "3.1",
+    "4.1",
     "Cómo transpilar"
    ],
    "say": "La forma recomendada es crear un pass manager por etapas con generate preset pass manager, que trae valores razonables, y llamar a su método run con el circuito. [[nivel]]El único argumento obligatorio es el nivel de optimización: cero, uno, dos o tres. Más alto, circuitos mejores, pero más tiempo de transpilación. [[trans]]La alternativa más simple es la función transpile, que por dentro hace exactamente lo mismo. [[custom]]Y si necesitas más, puedes armar tus propios pass managers: un flujo a medida a menudo suprime errores mejor que el de serie. [[res]]Ahora el resultado de tu apuesta: solo cz, rz y sx, las puertas base de FakeFez. Si apostaste por la tercera opción, acertaste. La Hadamard y la Toffoli desaparecieron: ninguna es instrucción del chip.",
@@ -596,7 +596,7 @@
   {
    "id": "q2",
    "tag": [
-    "3.1",
+    "4.1",
     "Comprueba"
    ],
    "say": "Una pregunta sobre los niveles.",
@@ -629,7 +629,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.1",
+    "4.1",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, escribe la función que transpila el circuito de la lección con un nivel dado, y compara las cz de los cuatro niveles. [[n2]]Después, arregla un pass manager al que le falta el backend, y por eso no produce un circuito ISA. [[n3]]Y por último, escribe tú mismo la función que decide si un circuito es ISA, consultando el Target.",
@@ -713,7 +713,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.1",
+    "4.1",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -737,7 +737,7 @@
   {
    "id": "cierre",
    "tag": [
-    "3.1",
+    "4.1",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Transpilar adapta el circuito a un chip y lo optimiza. [[r2]]El resultado debe ser ISA. [[r3]]Los pases se organizan en pass managers y estos en seis etapas. [[r4]]Y lo habitual es generate preset pass manager con un nivel y un backend. En la próxima lección, las seis etapas por dentro.",

@@ -321,7 +321,7 @@
   ]
  },
  "proyecto": {
-  "dur": 42.672,
+  "dur": 42.312,
   "marks": {
    "terminos": 15.979,
    "hito": 29.99
@@ -341,10 +341,10 @@
    ],
    [
     29.99,
-    "Hoy empieza el hito uno: crea tu cuenta gratuita de IBM Quantum, y construye un paso de tiempo para dos espines."
+    "Hoy empieza el hito uno: construye en tu computadora un paso de tiempo para dos espines, sin cuenta de IBM."
    ],
    [
-    39.006,
+    38.638,
     "Comprobarás qué tan buena es la aproximación."
    ]
   ]
@@ -368,7 +368,7 @@
   ]
  },
  "cierre": {
-  "dur": 33.048,
+  "dur": 30.648,
   "marks": {
    "r1": 1.868,
    "r2": 7.728,
@@ -398,7 +398,7 @@
    ],
    [
     26.056,
-    "En la próxima lección, una herramienta gráfica para hacer lo mismo sin código: Composer."
+    "En la próxima lección, construirás circuitos a fondo."
    ]
   ]
  }

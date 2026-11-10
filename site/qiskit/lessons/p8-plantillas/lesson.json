@@ -1,7 +1,7 @@
 {
  "id": "p8-plantillas",
- "part": "Parte VIII · Serverless, addons y Qiskit Functions",
- "section": "8.6",
+ "part": "Unidad 7 · Escalar",
+ "section": "7.6",
  "title": "Plantillas de Qiskit Functions",
  "summary": "Plantillas de código abierto con flujos de investigación reales, y plantillas base para escribir tus propias funciones y desplegarlas en Serverless.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "que",
    "tag": [
-    "8.6",
+    "7.6",
     "¿Qué son las plantillas?"
    ],
    "say": "Las plantillas de Qiskit Functions son ejemplos de código abierto que empaquetan flujos de investigación reales para que los ejecutes en tu cuenta de Serverless. [[impl]]Las plantillas de implementación aplican técnicas avanzadas de experimentos reales: hoy, una de química y dos de física. [[base]]Las plantillas base son referencias para escribir tu propia función, de circuito o de aplicación: diseño de la interfaz, entradas y salidas, mensajes de error, puntos de control y pruebas unitarias.",
@@ -69,7 +69,7 @@
   {
    "id": "quimica",
    "tag": [
-    "8.6",
+    "7.6",
     "Química con solvente implícito"
    ],
    "say": "La plantilla de química, desarrollada con la Cleveland Clinic, calcula la energía del estado fundamental y la energía libre de solvatación de una molécula en un solvente, modelado como un medio dieléctrico continuo, el modelo IEF-PCM. Por ejemplo, metanol en agua. [[pasos]]Sigue el patrón de Qiskit: prepara los datos con PySCF y construye un circuito LUCJ con amplitudes de un cálculo CCSD; lo transpila; lo ejecuta con Sampler; y posprocesa los bits con SQD.",
@@ -135,7 +135,7 @@
   {
    "id": "hamiltoniano",
    "tag": [
-    "8.6",
+    "7.6",
     "Simulación Hamiltoniana con AQC-Tensor"
    ],
    "say": "La plantilla de simulación Hamiltoniana muestra cómo construir una función. Recibe un Hamiltoniano, un estado inicial y observables, y devuelve valores esperados tras la evolución temporal. [[validar]]Primero lee y valida todas las entradas, al principio, para fallar pronto si falta algo. [[aqc]]Después usa AQC-Tensor: comprime las primeras capas del circuito de Trotter en un ansatz más corto, optimizado con estados de producto de matrices hasta una fidelidad objetivo. [[ejec]]Por último, añade el resto de la evolución, transpila y ejecuta con Estimator y mitigación.",
@@ -196,7 +196,7 @@
   {
    "id": "predice",
    "tag": [
-    "8.6",
+    "7.6",
     "Antes de desplegar"
    ],
    "say": "Una apuesta sobre la plantilla de AQC más Trotter. [[total]]Pides diez pasos de Trotter en total. [[plan]]Y un plan de compresión: seis de esos pasos se comprimen en un ansatz de dos capas. Los pasos que quedan se ejecutan sin comprimir. [[pregunta]]¿Cuántas capas de Trotter tendrá el circuito del último paso?",
@@ -244,10 +244,10 @@
   {
    "id": "desplegar",
    "tag": [
-    "8.6",
+    "7.6",
     "Desplegar una plantilla"
    ],
-   "say": "Para desplegar una plantilla, descargas su carpeta source files del repositorio, y la subes con QiskitFunction, como en la primera lección de esta parte, declarando sus dependencias de pip. [[run]]La de AQC más Trotter solo exige tres entradas: el Hamiltoniano, una cadena unidimensional con vecinos cercanos, el número de pasos de Trotter y el plan de compresión. Esta es la respuesta a tu apuesta: seis. Dos capas del ansatz, más los cuatro pasos que no se comprimen. [[backends]]Y se puede ejecutar en tres sitios con el mismo código: statevector, exacto; fake, simulación ruidosa; y runtime, en un QPU real. Prueba primero en los simuladores: no gastan tiempo de QPU.",
+   "say": "Para desplegar una plantilla, descargas su carpeta source files del repositorio, y la subes con QiskitFunction, como en la primera lección de esta unidad, declarando sus dependencias de pip. [[run]]La de AQC más Trotter solo exige tres entradas: el Hamiltoniano, una cadena unidimensional con vecinos cercanos, el número de pasos de Trotter y el plan de compresión. Esta es la respuesta a tu apuesta: seis. Dos capas del ansatz, más los cuatro pasos que no se comprimen. [[backends]]Y se puede ejecutar en tres sitios con el mismo código: statevector, exacto; fake, simulación ruidosa; y runtime, en un QPU real. Prueba primero en los simuladores: no gastan tiempo de QPU.",
    "scene": [
     {
      "type": "code",
@@ -316,7 +316,7 @@
   {
    "id": "q1",
    "tag": [
-    "8.6",
+    "7.6",
     "Comprueba"
    ],
    "say": "Buenas prácticas.",
@@ -349,7 +349,7 @@
   {
    "id": "mision",
    "tag": [
-    "8.6",
+    "7.6",
     "Tu turno"
    ],
    "say": "Ahora practicas el patrón de una plantilla de función con simuladores locales. [[n1]]Primero ejecuta la misma cadena en `statevector` y `fake` y compara sus resultados. [[n2]]Después corrige la función para validar antes de construir. [[n3]]Y por último escribe `pasos_en_qpu(t_steps, plan)` con validación del plan.",
@@ -431,10 +431,10 @@
   {
    "id": "proyecto",
    "tag": [
-    "8.6",
+    "7.6",
     "Proyecto Ising: hito VIII"
    ],
-   "say": "Con esto llegamos al hito ocho del proyecto Ising. [[obp]]En esta parte conociste los addons, y OBP en particular: llevar las últimas capas del circuito al observable. [[aqc]]AQC-Tensor, la técnica de la plantilla que acabas de ver, persigue lo mismo desde otro lado: comprimir las primeras capas en un circuito más corto. [[hito]]El hito ocho recalcula tu cadena de espines, reduce su profundidad con OBP, y te hace pensar en un presupuesto: cuántos términos estás dispuesto a medir a cambio de un circuito más corto.",
+   "say": "Con esto llegamos al hito ocho del proyecto Ising. [[obp]]En esta unidad conociste los addons, y OBP en particular: llevar las últimas capas del circuito al observable. [[aqc]]AQC-Tensor, la técnica de la plantilla que acabas de ver, persigue lo mismo desde otro lado: comprimir las primeras capas en un circuito más corto. [[hito]]El hito ocho recalcula tu cadena de espines, reduce su profundidad con OBP, y te hace pensar en un presupuesto: cuántos términos estás dispuesto a medir a cambio de un circuito más corto.",
    "scene": [
     {
      "type": "row",
@@ -558,7 +558,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "8.6",
+    "7.6",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda y lo verás al volver a esta lección.",
@@ -582,10 +582,10 @@
   {
    "id": "cierre",
    "tag": [
-    "8.6",
+    "7.6",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]Plantillas de implementación de química y física. [[r2]]Plantillas base con buenas prácticas para tus funciones. [[r3]]Se despliegan en tu cuenta de Serverless. [[r4]]Valida pronto y prueba en simuladores antes del QPU. Con esto termina la Parte ocho.",
+   "say": "Resumen. [[r1]]Plantillas de implementación de química y física. [[r2]]Plantillas base con buenas prácticas para tus funciones. [[r3]]Se despliegan en tu cuenta de Serverless. [[r4]]Valida pronto y prueba en simuladores antes del QPU. Con esto termina la séptima unidad.",
    "scene": [
     {
      "type": "list",
@@ -625,6 +625,92 @@
      "at": "r4"
     }
    ]
+  },
+  {
+   "id": "hito10",
+   "tag": [
+    "7.6",
+    "Referencia: el informe final"
+   ],
+   "say": "La referencia final reúne lo que necesitas para escribir un informe reproducible. [[recalcula]]Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez. [[pasos]]Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado. [[informe]]Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU. Con las mismas semillas, cualquiera obtiene los mismos números.",
+   "scene": [
+    {
+     "type": "math",
+     "tex": "M(t) = \\frac{1}{N}\\sum_i \\langle Z_i \\rangle",
+     "size": 46
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-comunidad/hito10-referencia",
+     "prompt": "Completa `curvas(n, J, h, T, pasos)`: devuelve `(exacta, trotter)`, dos listas de ⟨M⟩ en `t = k·T/pasos` para `k = 0, …, pasos`. La curva de Trotter ya está; falta la exacta, que evoluciona `|0…0⟩` con `exp(-i H t)`.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Cada instante tiene su propia evolución `exp(-i H t)` desde el mismo estado inicial.",
+      "Recorre `k` de 0 a `pasos`, evoluciona `psi0` con `expm` y mide `M` con su matriz.",
+      "La forma es `psi = expm(-1j * H * ___) @ psi0` y `np.vdot(psi, M.to_matrix() @ psi)`."
+     ],
+     "id": "e1",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom scipy.linalg import expm\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef curvas(n, J, h, T, pasos):\n    dt = T / pasos\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    ).to_matrix()\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi0 = np.zeros(2**n, dtype=complex)\n    psi0[0] = 1\n    exacta = []  # ✏️ en cada t = k · dt, evoluciona psi0 con e^(-iHt) y mide M\n    trot = [float(np.real(Statevector(trotter(n, J, h, dt, k)).expectation_value(M))) for k in range(pasos + 1)]\n    return exacta, trot",
+     "cases": [
+      "4 espines, T = 2 y 20 pasos: M(0) = 1, las dos curvas y menos de 0.01 entre ellas"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-comunidad/hito10-curva",
+     "prompt": "Completa `evaluar(n, J, h, T, pasos)` y `elegir_pasos(n, J, h, T)`. `evaluar` devuelve el mayor error `|exacta − Trotter|` entre todos los instantes y la profundidad del circuito medido en `FakeFez`. `elegir_pasos` prueba pasos crecientes desde 1 y devuelve el primero con error menor que `0.02` y profundidad de como mucho `200`. La trampa: el error que cuenta es el peor de la curva, no el del último instante.",
+     "level": 2,
+     "needs": "qiskit",
+     "hints": [
+      "Un número de pasos sirve si toda la curva queda cerca de la exacta y el circuito cabe en el hardware.",
+      "En el bucle de `evaluar`, compara `exacta` con ⟨M⟩ del circuito de Trotter de `k` pasos y conserva el máximo.",
+      "Las formas son `error = max(error, abs(exacta - ___))` y `if error < 0.02 and profundidad <= ___: return pasos`."
+     ],
+     "id": "e2",
+     "hidden": true,
+     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit, transpile\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\nfrom scipy.linalg import expm\n\nFEZ = FakeFez()\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef evaluar(n, J, h, T, pasos):\n    dt = T / pasos\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    ).to_matrix()\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi0 = np.zeros(2**n, dtype=complex)\n    psi0[0] = 1\n    error = 0.0\n    for k in range(pasos + 1):\n        psi = expm(-1j * H * k * dt) @ psi0\n        exacta = float(np.real(np.vdot(psi, M.to_matrix() @ psi)))\n        error = 0.0  # ✏️ el mayor |exacta - Trotter| entre todos los instantes\n    qc = trotter(n, J, h, dt, pasos)\n    qc.measure_all()\n    return error, transpile(qc, FEZ, optimization_level=1, seed_transpiler=7).depth()\n\n\ndef elegir_pasos(n, J, h, T):\n    return 2  # ✏️ prueba pasos crecientes con evaluar y quédate con el primero que cumpla las dos cotas",
+     "cases": [
+      "4 espines y T = 2: el error máximo y la profundidad con 6 pasos, y unos pasos con error < 0.02 y profundidad ≤ 200"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p10-comunidad/hito10-informe",
+     "prompt": "Completa `informe(n, J, h, T, pasos, disparos, semilla, qpu, anio)`: devuelve Markdown con parámetros, una tabla `| t | exacta | Trotter | Trotter con ruido |`, versiones y citas. Falta la columna con ruido: ⟨M⟩ desde los conteos simulados con el ruido de `FakeManilaV2`. Con un `qpu` añade la frase del procesador con sus datos; para `ibm_fez`, versión `1.2.8` y familia `Heron` es «In this paper we used `ibm_fez` (v1.2.8), an IBM Quantum Heron processor.». Con `None`, omítela.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "La columna con ruido viene de las cuentas, no del estado ideal; cada bit `0` suma `+1` y cada `1` resta `1`.",
+      "En `resultados`, cambia `ruidosa` usando `cuentas`; en `informe`, añade la frase a `citas` solo si hay `qpu`.",
+      "La forma es `sum(v * sum(1 - 2 * int(b) for b in s) for s, v in cuentas.items()) / (___ * ___)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from importlib.metadata import version\n\nimport numpy as np\nfrom qiskit import QuantumCircuit, transpile\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit_aer import AerSimulator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\nfrom scipy.linalg import expm\n\nAGRADECIMIENTO = (\n    \"We acknowledge the use of IBM Quantum services for this work. The views expressed are those of the \"\n    \"authors, and do not reflect the official policy or position of IBM or the IBM Quantum team.\"\n)\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef resultados(n, J, h, T, pasos, disparos, semilla):\n    dt = T / pasos\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    ).to_matrix()\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi0 = np.zeros(2**n, dtype=complex)\n    psi0[0] = 1\n    backend = FakeManilaV2()\n    simulador = AerSimulator.from_backend(backend)\n    circuitos = [trotter(n, J, h, dt, k) for k in range(pasos + 1)]\n    medidos = [qc.measure_all(inplace=False) for qc in circuitos]\n    isas = transpile(medidos, backend, optimization_level=1, seed_transpiler=semilla)\n    conteos = simulador.run(isas, shots=disparos, seed_simulator=semilla).result().get_counts()\n    filas = []\n    for k, (qc, cuentas) in enumerate(zip(circuitos, conteos)):\n        psi = expm(-1j * H * k * dt) @ psi0\n        exacta = float(np.real(np.vdot(psi, M.to_matrix() @ psi)))\n        ideal = float(np.real(Statevector(qc).expectation_value(M)))\n        ruidosa = ideal  # ✏️ M desde los conteos de FakeManilaV2: cada bit 0 suma +1 y cada 1 resta 1\n        filas.append((k * dt, exacta, ideal, ruidosa))\n    return filas\n\n\ndef informe(n, J, h, T, pasos, disparos, semilla, qpu, anio):\n    filas = resultados(n, J, h, T, pasos, disparos, semilla)\n    citas = [AGRADECIMIENTO]\n    # ✏️ con un qpu, añade la frase del procesador\n    citas.append(f\"IBM Quantum. https://quantum.cloud.ibm.com/, {anio}\")\n    return \"\\n\".join(\n        [\n            \"# Magnetización de una cadena de Ising tras un cambio brusco del campo\",\n            \"\",\n            \"## Parámetros\",\n            f\"N = {n} espines, J = {J}, h = {h}, T = {T}, {pasos} pasos de Trotter, {disparos} disparos, \"\n            f\"semilla {semilla}, ruido simulado con el modelo de FakeManilaV2.\",\n            \"\",\n            \"## Resultados\",\n            \"| t | exacta | Trotter | Trotter con ruido |\",\n            \"| --- | --- | --- | --- |\",\n            *(f\"| {t:.2f} | {e:.4f} | {tr:.4f} | {ru:.4f} |\" for t, e, tr, ru in filas),\n            \"\",\n            \"## Software\",\n            f\"qiskit {version('qiskit')}, qiskit-aer {version('qiskit-aer')}, qiskit-ibm-runtime {version('qiskit-ibm-runtime')}.\",\n            \"\",\n            \"## Citas\",\n            \"\\n\\n\".join(citas),\n        ]\n    )",
+     "cases": [
+      "4 espines, T = 2, 8 pasos y un QPU: parámetros, tabla con las tres curvas, versiones y citas"
+     ]
+    }
+   ],
+   "actions": [
+    {
+     "do": "show",
+     "id": "e1",
+     "at": "recalcula"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "pasos"
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "informe"
+    }
+   ]
   }
  ],
  "sources": [
@@ -638,7 +724,7 @@
   "Sigue el tutorial de [dispersión de neutrones](https://quantum.cloud.ibm.com/docs/en/tutorials/simulate-neutron-scattering-with-a-serverless-workflow) que usa la plantilla AQC + Trotter.",
   "Guías originales: [qiskit-function-templates](https://quantum.cloud.ibm.com/docs/en/guides/qiskit-function-templates) · [function-template-chemistry-workflow](https://quantum.cloud.ibm.com/docs/en/guides/function-template-chemistry-workflow) · [function-template-hamiltonian-simulation](https://quantum.cloud.ibm.com/docs/en/guides/function-template-hamiltonian-simulation) · [function-template-aqc-trotter](https://quantum.cloud.ibm.com/docs/en/guides/function-template-aqc-trotter)"
  ],
- "next": "p9-proveedores",
+ "next": null,
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -1,7 +1,7 @@
 {
  "id": "p2-control-clasico",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.7",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.6",
  "title": "Control clásico, feedforward y stretch",
  "summary": "Circuitos dinámicos: if, switch, for y while dentro del circuito, expresiones clásicas, store y tiempos relativos con stretch.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "2.7",
+    "6.6",
     "Circuitos dinámicos"
    ],
    "say": "Hasta ahora los circuitos eran fijos: puertas y, al final, mediciones. Los circuitos dinámicos miden qubits a mitad de la ejecución y, según el resultado, deciden qué hacer después, dentro del propio circuito. A eso se le llama feedforward clásico. [[usos]]Ya se conocen usos concretos: preparar estados como GHZ o W con circuitos poco profundos, entrelazar qubits lejanos en el mismo chip, o muestrear circuitos tipo IQP. [[cuatro]]Qiskit ofrece cuatro construcciones, cada una como un método del circuito que se usa con la palabra with.",
@@ -103,7 +103,7 @@
   {
    "id": "if_pred",
    "tag": [
-    "2.7",
+    "6.6",
     "Antes del primer if"
    ],
    "say": "Primer ejemplo: una Hadamard y una medición; sale cero o uno al azar. [[if]]Si salió uno, aplicamos una X. [[med]]Y medimos otra vez. [[cual]]¿Qué crees que sale en la segunda medición?",
@@ -148,7 +148,7 @@
   {
    "id": "if",
    "tag": [
-    "2.7",
+    "6.6",
     "if"
    ],
    "say": "Lo ejecutamos completo. [[if]]Si la primera medición dio uno, la X devuelve el qubit a cero. Y si dio cero, no hacemos nada. [[aer]]Para simular circuitos dinámicos usamos el Sampler de Qiskit Aer. [[res]]El resultado final es cero con probabilidad uno: corregimos el azar con feedforward. Si apostaste por azar, olvidaste que el if actúa antes de la segunda medición.",
@@ -195,7 +195,7 @@
   {
    "id": "else",
    "tag": [
-    "2.7",
+    "6.6",
     "else y condiciones sobre registros"
    ],
    "say": "El with de if test puede guardar un objeto, else, que abre el bloque contrario. [[ej]]Si el qubit cero midió uno, Hadamard al qubit uno; si no, una X. [[reg]]También se puede condicionar sobre un registro completo. Aquí, si los bits valen cero cero uno en binario, se aplica una X al tercer qubit. [[circ]]En el dibujo de Qiskit, la condición aparece como círculos sobre los bits clásicos: lleno para uno, vacío para cero.",
@@ -256,7 +256,7 @@
   {
    "id": "switch",
    "tag": [
-    "2.7",
+    "6.6",
     "switch"
    ],
    "say": "switch elige entre varios casos según el valor de un bit o de un registro. [[cases]]Cada caso se abre con case; un caso puede cubrir varios valores, como cero y tres. [[def]]case punto DEFAULT se ejecuta si ningún otro coincide. [[nofall]]Y a diferencia de otros lenguajes, solo se ejecuta un bloque: no hay caída al siguiente caso.",
@@ -287,7 +287,7 @@
   {
    "id": "loops_pred",
    "tag": [
-    "2.7",
+    "6.6",
     "Antes del while"
    ],
    "say": "while loop repite mientras se cumpla una condición. [[while]]Aquí, Hadamard a dos qubits y medir, y repetir mientras salga uno uno. [[cual]]Al terminar, ¿con qué frecuencia crees que aparecerá el resultado uno uno?",
@@ -324,7 +324,7 @@
   {
    "id": "loops",
    "tag": [
-    "2.7",
+    "6.6",
     "for y while"
    ],
    "say": "for loop repite operaciones sobre una secuencia de valores. [[for]]Cinco X sobre un qubit: como cinco es impar, termina en uno. [[while]]Y el while que acabamos de ver repite mientras salga uno uno. [[res]]Al final, uno uno no aparece nunca: el bucle solo termina cuando sale otra cosa. Los otros tres resultados salen con frecuencias parecidas.",
@@ -390,7 +390,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.7",
+    "6.6",
     "Comprueba"
    ],
    "say": "Piensa en el ejemplo del switch.",
@@ -424,7 +424,7 @@
   {
    "id": "expr",
    "tag": [
-    "2.7",
+    "6.6",
     "Expresiones clásicas"
    ],
    "say": "El módulo qiskit punto circuit punto classical permite calcular con bits durante la ejecución. [[lift]]expr punto lift convierte un bit en una expresión, [[xor]]y bit xor calcula la paridad de varios bits. [[ghz]]Con esto se prepara un estado GHZ de muchos qubits con un circuito poco profundo: se crean pares de Bell, se miden los qubits que los unen, y cada qubit se corrige con una X si la paridad de las mediciones anteriores es impar. [[store]]store guarda el resultado de una expresión para reutilizarlo: aquí guarda el NOT de un registro entero de una vez, en paralelo, en lugar de negar bit por bit dentro de la expresión.",
@@ -471,7 +471,7 @@
   {
    "id": "stretch",
    "tag": [
-    "2.7",
+    "6.6",
     "stretch: tiempos relativos"
    ],
    "say": "En hardware importan los tiempos. Desde Qiskit dos punto cero, los retrasos, delay, pueden tener una duración stretch: relativa en vez de absoluta. Su valor concreto se resuelve al compilar, cuando ya se conoce cuánto dura cada puerta calibrada. [[dd]]Un uso típico: mientras el qubit cero ejecuta un bloque condicional, el qubit uno espera ocioso y acumula errores. Le aplicamos desacoplamiento dinámico: retraso s, X, retraso dos s, X, retraso s. [[bar]]Un par de barreras marca el intervalo, y el compilador elige s para que todo llene exactamente ese tiempo.",
@@ -534,7 +534,7 @@
   {
    "id": "resto",
    "tag": [
-    "2.7",
+    "6.6",
     "Cómo se resuelve un stretch"
    ],
    "say": "Un ejemplo numérico. El qubit cero espera cien unidades de tiempo; en el uno hay tres retrasos a y tres X de ocho unidades cada una. [[ec]]La ecuación es tres a más veinticuatro igual a cien: a vale veinticinco, con un resto de uno. [[resto]]En el servicio de IBM, el resto se suma al primer retraso que usa el stretch: veintiséis, veinticinco, veinticinco. [[lim]]El soporte en hardware es experimental, con límites: un stretch por conjunto de qubits entre barreras, cada stretch en una sola región entre barreras, expresiones de la forma X por stretch más Y, y nunca retrasos negativos.",
@@ -586,7 +586,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.7",
+    "6.6",
     "Comprueba"
    ],
    "say": "Resuelve un stretch.",
@@ -616,7 +616,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.7",
+    "6.6",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, predice qué sale al corregir con if test una moneda al azar. [[n2]]Después, cambia la condición del if para que el resultado final sea siempre uno. [[n3]]Y por último, escribe una función que repita un experimento con while loop hasta que el bit clásico valga uno.",
@@ -700,7 +700,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.7",
+    "6.6",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras; lo que escribas se guarda en el navegador.",
@@ -724,10 +724,10 @@
   {
    "id": "cierre",
    "tag": [
-    "2.7",
+    "6.6",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]Un circuito dinámico mide a mitad de camino y decide. [[r2]]if test, switch, for loop y while loop, siempre con with. [[r3]]Las expresiones clásicas calculan paridades y store las guarda. [[r4]]Y stretch deja que el compilador fije los tiempos. En la Parte siete veremos qué de esto se puede ejecutar en el hardware de IBM.",
+   "say": "Resumen. [[r1]]Un circuito dinámico mide a mitad de camino y decide. [[r2]]if test, switch, for loop y while loop, siempre con with. [[r3]]Las expresiones clásicas calculan paridades y store las guarda. [[r4]]Y stretch deja que el compilador fije los tiempos. En la unidad de hardware veremos qué de esto se puede ejecutar en el procesador de IBM.",
    "scene": [
     {
      "type": "list",
@@ -778,7 +778,7 @@
   "Construye el GHZ de 8 qubits con paridades de la guía original y compara su profundidad con el GHZ en cadena de CNOT.",
   "Guías originales: [classical-feedforward-and-control-flow](https://quantum.cloud.ibm.com/docs/en/guides/classical-feedforward-and-control-flow) · [stretch](https://quantum.cloud.ibm.com/docs/en/guides/stretch)"
  ],
- "next": "p2-qasm",
+ "next": "p7-dinamicos",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

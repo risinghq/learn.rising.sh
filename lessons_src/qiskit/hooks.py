@@ -10,7 +10,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from plan import PARTS
+from plan import GUIDES, PARTS
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 GUIDE = "https://quantum.cloud.ibm.com/docs/en/guides/"
@@ -38,6 +38,7 @@ def toc_pages() -> list[str]:
 
 def check() -> str:
     planned = [g for p in PARTS for _, _, gs in p["lessons"] for g in gs]
+    planned.extend(g for _, _, gs in GUIDES for g in gs)
     dup = {g for g in planned if planned.count(g) > 1}
     missing = [g for g in toc_pages() if g not in planned]
     extra = [g for g in planned if g not in toc_pages()]

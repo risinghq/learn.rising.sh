@@ -1,7 +1,7 @@
 {
  "id": "p2-orden-bits",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.3",
+ "part": "Unidad 1 · Tu primer circuito",
+ "section": "1.4",
  "title": "El orden de los bits",
  "summary": "Little-endian en Qiskit: cómo se ordenan los qubits en diagramas, enteros, cadenas, vectores de estado y matrices de puertas.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "2.3",
+    "1.4",
     "Un detalle que confunde a todos"
    ],
    "say": "Con n qubits, los numeramos de cero a n menos uno. La pregunta es en qué orden se escriben, en memoria y en pantalla. Cada programa elige una convención, y Qiskit usa la llamada little endian. [[lista]]Un circuito guarda sus qubits en una lista, y el índice en esa lista es la etiqueta del qubit. [[diag]]En los diagramas, el qubit cero está arriba y el último, abajo.",
@@ -62,7 +62,7 @@
   {
    "id": "cadena_pred",
    "tag": [
-    "2.3",
+    "1.4",
     "Antes de leer la cadena"
    ],
    "say": "Una apuesta. Ponemos una X en el qubit uno, el de abajo, y medimos los dos qubits. [[cual]]Qiskit nos devuelve una cadena de dos bits. ¿Cuál crees que será?",
@@ -117,7 +117,7 @@
   {
    "id": "enteros",
    "tag": [
-    "2.3",
+    "1.4",
     "Enteros y cadenas"
    ],
    "say": "Al leer los bits como un número, el bit cero es el menos significativo: cada bit k vale dos a la k. [[ej]]Si ponemos una X en el qubit uno y medimos, el bit cero vale cero y el bit uno vale uno: el número dos. [[cad]]Y al escribirlos como cadena, el bit n menos uno va a la izquierda y el bit cero a la derecha, como escribimos los números: el dígito más significativo primero. [[asi]]Por eso Qiskit imprime uno cero, aunque el qubit que cambiamos sea el uno. Si apostaste por cero uno, es el error más común: leer la cadena con el qubit cero a la izquierda.",
@@ -165,7 +165,7 @@
   {
    "id": "estados",
    "tag": [
-    "2.3",
+    "1.4",
     "Estados desde una cadena"
    ],
    "say": "Lo mismo vale al crear estados a partir de una cadena. [[mas]]Statevector from label cero más pone el qubit cero en más y el qubit uno en cero, porque la etiqueta de la derecha es la del qubit cero. [[prob]]Sus probabilidades: mitad cero cero, mitad cero uno. [[amp]]Y en el vector de estado, la amplitud en el índice x corresponde al estado de la base x escrito en binario: el índice uno es cero uno; el índice dos es uno cero.",
@@ -213,7 +213,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.3",
+    "1.4",
     "Comprueba"
    ],
    "say": "Un vector de estado de tres qubits.",
@@ -248,7 +248,7 @@
   {
    "id": "cx",
    "tag": [
-    "2.3",
+    "1.4",
     "La matriz de la CX"
    ],
    "say": "Las puertas interpretan su lista de qubits a su manera, pero las controladas suelen seguir el orden control, objetivo. cx de cero, uno: control en el qubit cero, objetivo en el uno. [[trans]]Con las convenciones de Qiskit, esta CX intercambia cero uno con uno uno: es decir, cuando el qubit cero, el de la derecha, vale uno, invierte el de la izquierda. [[mat]]Su matriz, en el orden cero cero, cero uno, uno cero, uno uno, no es la que aparece en muchos libros: allí el control suele ser el qubit de la izquierda.",
@@ -317,7 +317,7 @@
   {
    "id": "reverse",
    "tag": [
-    "2.3",
+    "1.4",
     "Cambiar el orden"
    ],
    "say": "Si prefieres ver el qubit cero abajo, draw acepta reverse bits igual a True. [[dib]]Eso solo cambia el dibujo; el circuito es el mismo y la X sigue actuando sobre el qubit cero. [[met]]En cambio, el método reverse bits del circuito devuelve un circuito nuevo con las etiquetas invertidas: ahí la X sí actúa sobre el qubit uno. [[prim]]Y una nota sobre las primitivas: los resultados en bits de Sampler y Estimator de IBM vienen en orden big endian por defecto, mientras que Executor usa little endian.",
@@ -411,7 +411,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.3",
+    "1.4",
     "Comprueba"
    ],
    "say": "Un circuito con tres qubits.",
@@ -470,7 +470,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.3",
+    "1.4",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, predice la cadena de bits de un circuito con X en los qubits cero y dos. [[n2]]Después, cambia las X de un circuito para preparar el estado cero uno uno. [[n3]]Y por último, escribe una función que prepare el estado de la base con el índice que le pidas, para cualquier número de qubits.",
@@ -578,7 +578,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.3",
+    "1.4",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras; lo que escribas se guarda en el navegador.",
@@ -602,7 +602,7 @@
   {
    "id": "cierre",
    "tag": [
-    "2.3",
+    "1.4",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]En los diagramas, el qubit cero está arriba. [[r2]]Como número, el bit cero es el menos significativo. [[r3]]Como cadena, el bit cero va a la derecha. [[r4]]Y en el vector de estado, el índice x es el estado x en binario. reverse bits en draw solo cambia el dibujo.",
@@ -655,7 +655,7 @@
   "Prepara $|q_2q_1q_0\\rangle=|110\\rangle$ con puertas X y verifica con `Statevector(qc).probabilities_dict()`.",
   "Guías originales: [bit-ordering](https://quantum.cloud.ibm.com/docs/en/guides/bit-ordering)"
  ],
- "next": "p2-biblioteca",
+ "next": "p1-cierre",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

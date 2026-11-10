@@ -1,7 +1,7 @@
 {
  "id": "p9-hpc",
- "part": "Parte IX · Extender e integrar Qiskit",
- "section": "9.3",
+ "part": "Guías",
+ "section": "",
  "title": "HPC: QRMI y Slurm",
  "summary": "Integrar computadores cuánticos en centros de supercomputación: la interfaz QRMI, el plugin SPANK para Slurm y cómo lo usan administradores, usuarios y aplicaciones.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "qrmi",
    "tag": [
-    "9.3",
+    "Guía",
     "QRMI"
    ],
    "say": "En un centro de supercomputación, los trabajos se reparten con gestores como Slurm. La interfaz QRMI permite tratar a los QPUs como un recurso más. [[que]]Es una biblioteca independiente del fabricante, una capa intermedia ligera que oculta la complejidad de controlar un recurso cuántico con un conjunto simple de operaciones: adquirir, ejecutar, consultar y liberar. [[lenguajes]]Está escrita en Rust, con interfaces de C y de Python, y funciona en varias distribuciones de Linux y en macOS. Incluye task runner, una herramienta de línea de comandos para ejecutar cargas cuánticas.",
@@ -64,7 +64,7 @@
   {
    "id": "construir",
    "tag": [
-    "9.3",
+    "Guía",
     "Construir y depurar"
    ],
    "say": "Para construirla: cargo build release para la biblioteca de Rust y C, y maturin para las ruedas de Python, que luego se instalan en los nodos con pip. [[log]]Para depurar, la variable de entorno RUST LOG controla los registros: error, warn, que es el valor por defecto, info, debug y trace, que muestra hasta las transacciones HTTP.",
@@ -95,7 +95,7 @@
   {
    "id": "spank",
    "tag": [
-    "9.3",
+    "Guía",
     "El plugin SPANK para Slurm"
    ],
    "say": "El plugin SPANK conecta QRMI con Slurm. Añade una opción a los trabajos: qpu, con la lista de recursos cuánticos que usará. [[admin]]El administrador define los recursos en qrmi config punto json: nombre, tipo, que puede ser acceso directo, el servicio de IBM o Pasqal, y las variables de entorno con los puntos de acceso y credenciales. Y en slurm punto conf asigna los QPUs a los nodos como recursos genéricos. [[open]]Un detalle: con el servicio de IBM se abre una sesión; si tu plan no las admite, como Open, se configura el modo lote.",
@@ -132,7 +132,7 @@
   {
    "id": "usuario",
    "tag": [
-    "9.3",
+    "Guía",
     "Pedir QPUs en un trabajo"
    ],
    "say": "Como usuario, pides QPUs en tu script de Slurm igual que pides CPUs: con gres igual a qpu y la cantidad, y la opción qpu con los nombres. [[varios]]Puedes pedir varios, incluso de distintos tipos: uno local y dos de IBM. [[app]]La idea es que tu código no dependa de un backend concreto: la elección del QPU queda en la definición del recurso, y el trabajo recibe lo que el plugin le deja en el entorno.",
@@ -175,7 +175,7 @@
   {
    "id": "predice",
    "tag": [
-    "9.3",
+    "Guía",
     "Antes de lanzar el trabajo"
    ],
    "say": "Antes de lanzarlo, apuesta. [[pide]]El script pide tres QPUs. [[admin]]Pero el administrador solo definió dos en qrmi config punto json: my local qpu, de acceso directo, e ibm fez, del servicio de IBM. No hay ninguna entrada para ibm marrakesh. [[cual]]Dentro del trabajo, ¿qué valdrá la variable SLURM JOB QPU RESOURCES?",
@@ -213,7 +213,7 @@
   {
    "id": "entorno",
    "tag": [
-    "9.3",
+    "Guía",
     "Lo que ve el trabajo"
    ],
    "say": "Dentro del trabajo, el plugin deja dos variables. [[recursos]]SLURM JOB QPU RESOURCES lista los recursos que sí están definidos, en el orden pedido: ibm marrakesh desapareció, sin error. [[tipos]]Y SLURM JOB QPU TYPES da el tipo de cada uno, en el mismo orden. [[ig]]Es la misma regla de la pregunta anterior: lo que no está en la configuración se ignora. Por eso conviene que tu programa lea la variable en lugar de fijar el nombre del QPU.",
@@ -259,7 +259,7 @@
   {
    "id": "aplicacion",
    "tag": [
-    "9.3",
+    "Guía",
     "La aplicación"
    ],
    "say": "En la aplicación, QRMIService te da los recursos asignados. Tomas uno, obtienes su backend para transpilar, [[sampler]]y ejecutas con la primitiva SamplerV2 de QRMI, igual que con las de IBM. [[logs]]Si algo falla, task logs da los registros de la tarea.",
@@ -298,7 +298,7 @@
   {
    "id": "q1",
    "tag": [
-    "9.3",
+    "Guía",
     "Comprueba"
    ],
    "say": "Sobre Slurm.",
@@ -331,7 +331,7 @@
   {
    "id": "mision",
    "tag": [
-    "9.3",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. No necesitas Slurm ni cuenta: repites en Python lo que hace el plugin. [[n1]]Primero escribes el cruce entre lo que pide el script y lo que define el administrador. [[n2]]Después añades un recurso nuevo a la configuración, con el modo lote. [[n3]]Y por último escribes la función que calcula las variables de entorno del trabajo. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -412,7 +412,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "9.3",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -436,7 +436,7 @@
   {
    "id": "cierre",
    "tag": [
-    "9.3",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]QRMI da acceso a QPUs desde HPC, sin depender del fabricante. [[r2]]El plugin SPANK lo integra en Slurm. [[r3]]El administrador define recursos; el usuario los pide con qpu. [[r4]]Y la aplicación los usa con QRMIService y las primitivas de QRMI.",

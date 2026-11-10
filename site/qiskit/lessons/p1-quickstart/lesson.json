@@ -1,7 +1,7 @@
 {
  "id": "p1-quickstart",
- "part": "Parte I · Primeros pasos",
- "section": "1.4",
+ "part": "Unidad 1 · Tu primer circuito",
+ "section": "1.1",
  "title": "Tu primer circuito: el estado de Bell",
  "summary": "Construir, simular y graficar un estado entrelazado en pocas líneas, sin cuenta ni clave.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "1.4",
+    "1.1",
     "En menos de dos minutos"
    ],
    "say": "Vamos a construir tu primer circuito cuántico, en tu computadora, sin cuenta ni clave de acceso. [[que]]Será un estado de Bell: dos qubits entrelazados. [[req]]Solo necesitas qiskit, matplotlib y el extra de visualización.",
@@ -54,7 +54,7 @@
   {
    "id": "construir",
    "tag": [
-    "1.4",
+    "1.1",
     "Construir el circuito"
    ],
    "say": "Importamos QuantumCircuit [[nuevo]]y creamos un circuito con dos qubits. Ambos empiezan en el estado cero. [[h]]Aplicamos una Hadamard al qubit cero, [[cx]]luego una CNOT con el qubit cero como control y el uno como objetivo, [[m]]y medimos todos los qubits con measure all, que además añade una barrera y un registro clásico llamado meas.",
@@ -179,7 +179,7 @@
   {
    "id": "predice",
    "tag": [
-    "1.4",
+    "1.1",
     "Antes de ejecutar"
    ],
    "say": "Antes de ejecutarlo, apuesta. Mediremos los dos qubits mil veinticuatro veces. [[cual]]¿Qué cadenas de bits crees que aparecerán? No hace falta que sepas la respuesta: equivocarse en una predicción enseña más que acertar por memoria.",
@@ -241,7 +241,7 @@
   {
    "id": "ejecutar",
    "tag": [
-    "1.4",
+    "1.1",
     "Ejecutar con un Sampler"
    ],
    "say": "Para ejecutarlo usamos una primitiva. StatevectorSampler simula el circuito de forma exacta y luego toma muestras, como si fuera un computador cuántico ideal. [[run]]run recibe una lista de circuitos, aquí uno solo, y el número de disparos: mil veinticuatro. result espera a que termine. [[leer]]Leer el resultado es una cadena: el primer elemento de la lista, punto data, [[meas]]punto meas, que es el registro creado por measure all, [[counts]]y get counts, que cuenta cuántas veces salió cada cadena de bits.",
@@ -326,7 +326,7 @@
   {
    "id": "resultado",
    "tag": [
-    "1.4",
+    "1.1",
     "El resultado"
    ],
    "say": "Esto es lo que imprime. [[mitad]]Casi la mitad de las veces sale cero cero, y la otra mitad, uno uno. [[nunca]]Nunca sale cero uno ni uno cero. Si apostaste por la opción b, acertaste; si no, mejor todavía: ahora vale la pena entender por qué. [[azar]]Los números exactos cambian en cada ejecución, porque son muestras aleatorias.",
@@ -387,7 +387,7 @@
   {
    "id": "estado",
    "tag": [
-    "1.4",
+    "1.1",
     "Qué estado se prepara"
    ],
    "say": "¿Por qué solo cero cero y uno uno? Sigamos el estado paso a paso. [[ini]]Al principio, cero cero. [[h]]La Hadamard pone al qubit cero en superposición: cero más uno, sobre raíz de dos. [[cx]]La CNOT invierte el qubit uno solo cuando el qubit cero vale uno. El término con el cero se queda igual y el término con el uno se convierte en uno uno. [[bell]]El resultado es el estado de Bell: cero cero más uno uno, sobre raíz de dos. Ninguno de los dos qubits tiene un valor propio; solo están perfectamente correlacionados. [[orden]]Un detalle de notación: Qiskit escribe el qubit cero a la derecha. Lo verás en una lección propia.",
@@ -479,7 +479,7 @@
   {
    "id": "q1",
    "tag": [
-    "1.4",
+    "1.1",
     "Comprueba"
    ],
    "say": "Piensa en el estado de Bell.",
@@ -507,7 +507,7 @@
   {
    "id": "entrelazamiento",
    "tag": [
-    "1.4",
+    "1.1",
     "La firma del entrelazamiento"
    ],
    "say": "Este resultado es una firma del entrelazamiento. [[cada]]Cada qubit por separado es una moneda perfecta: cero o uno, mitad y mitad. [[juntos]]Pero los dos siempre coinciden. Si sabes lo que salió en uno, sabes lo que saldrá en el otro. [[clas]]Una correlación así podría imitarse con monedas trucadas. Lo que no se puede imitar clásicamente aparece cuando se mide en otras bases, y lo verás con Estimator.",
@@ -575,7 +575,7 @@
   {
    "id": "histograma",
    "tag": [
-    "1.4",
+    "1.1",
     "Graficar"
    ],
    "say": "Para ver un histograma, importa plot histogram de qiskit punto visualization y pásale los conteos. [[plt]]En un cuaderno aparece solo; en un programa normal, necesitas además matplotlib punto pyplot y plt punto show.",
@@ -599,7 +599,7 @@
   {
    "id": "ghz_pred",
    "tag": [
-    "1.4",
+    "1.1",
     "Tres qubits"
    ],
    "say": "Un paso más. Con tres qubits, añadimos una segunda CNOT, del qubit uno al dos.",
@@ -648,7 +648,7 @@
   {
    "id": "ghz",
    "tag": [
-    "1.4",
+    "1.1",
     "Experimenta: tres qubits"
    ],
    "say": "Este es el código. [[cx]]La única diferencia es la segunda CNOT. [[res]]Las mediciones dan solo cero cero cero y uno uno uno: la CNOT copia la correlación al tercer qubit, y los tres quedan entrelazados. Es un estado GHZ.",
@@ -720,7 +720,7 @@
   {
    "id": "q2",
    "tag": [
-    "1.4",
+    "1.1",
     "Comprueba"
    ],
    "say": "Piensa en el circuito de tres qubits que acabamos de medir.",
@@ -803,7 +803,7 @@
   {
    "id": "mision",
    "tag": [
-    "1.4",
+    "1.1",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero modificas el estado de Bell para que los qubits salgan siempre distintos. [[n2]]Después creas una función que prepara un estado GHZ de cualquier tamaño. [[n3]]Y por último corriges un Bell que tiene la CNOT al revés. [[check]]Escribe tu código en el editor y pulsa Comprobar: los casos se corren en esta misma página.",
@@ -889,10 +889,10 @@
   {
    "id": "proyecto",
    "tag": [
-    "1.4",
+    "1.1",
     "Tu proyecto: una cadena de espines"
    ],
-   "say": "Además de las misiones de cada lección, a lo largo del curso vas a construir un solo proyecto: simular una cadena de espines, el modelo de Ising con campo transversal, y terminar ejecutándolo en un computador cuántico real. [[terminos]]El término Z Z quiere alinear a los vecinos; el término X los hace girar. La pregunta que vas a responder: cómo evoluciona la magnetización cuando se enciende el campo de golpe. [[hito]]Hoy empieza el hito uno: crea tu cuenta gratuita de IBM Quantum, y construye un paso de tiempo para dos espines. Comprobarás qué tan buena es la aproximación.",
+   "say": "Además de las misiones de cada lección, a lo largo del curso vas a construir un solo proyecto: simular una cadena de espines, el modelo de Ising con campo transversal, y terminar ejecutándolo en un computador cuántico real. [[terminos]]El término Z Z quiere alinear a los vecinos; el término X los hace girar. La pregunta que vas a responder: cómo evoluciona la magnetización cuando se enciende el campo de golpe. [[hito]]Hoy empieza el hito uno: construye en tu computadora un paso de tiempo para dos espines, sin cuenta de IBM. Comprobarás qué tan buena es la aproximación.",
    "scene": [
     {
      "type": "math",
@@ -1022,7 +1022,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "1.4",
+    "1.1",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. No hay respuesta automática: escribe con tus palabras. Lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -1046,10 +1046,10 @@
   {
    "id": "cierre",
    "tag": [
-    "1.4",
+    "1.1",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]QuantumCircuit con h, cx y measure all construye un estado de Bell. [[r2]]StatevectorSampler lo ejecuta localmente, sin cuenta. [[r3]]Los conteos se leen con result, data, el nombre del registro y get counts. [[r4]]Y la correlación perfecta, cero cero o uno uno, es la firma del entrelazamiento. En la próxima lección, una herramienta gráfica para hacer lo mismo sin código: Composer.",
+   "say": "Resumen. [[r1]]QuantumCircuit con h, cx y measure all construye un estado de Bell. [[r2]]StatevectorSampler lo ejecuta localmente, sin cuenta. [[r3]]Los conteos se leen con result, data, el nombre del registro y get counts. [[r4]]Y la correlación perfecta, cero cero o uno uno, es la firma del entrelazamiento. En la próxima lección, construirás circuitos a fondo.",
    "scene": [
     {
      "type": "list",
@@ -1099,7 +1099,7 @@
   "Generaliza a $n$ qubits con un bucle `for` y mide hasta $n=10$. ¿Cambia el tiempo de simulación?",
   "Guías originales: [quick-start](https://quantum.cloud.ibm.com/docs/en/guides/quick-start)"
  ],
- "next": "p1-composer",
+ "next": "p2-circuitos",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -1,7 +1,7 @@
 {
  "id": "p5-cuenta",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.1",
+ "part": "Guías",
+ "section": "",
  "title": "Cuenta de IBM Cloud, planes y credenciales",
  "summary": "Crear la cuenta y una instancia, guardar y cargar credenciales de forma segura, elegir instancia, los planes de acceso y cómo limitar el gasto.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "piezas",
    "tag": [
-    "5.1",
+    "Guía",
     "Las piezas del acceso"
    ],
    "say": "Para ejecutar en los procesadores de IBM necesitas una cuenta de IBM Cloud. Dentro de ella creas instancias: cada instancia da acceso a los servicios cuánticos y se identifica con un CRN, un Cloud Resource Name. [[clave]]Además, tu cuenta tiene una clave API, también llamada token, de cuarenta y cuatro caracteres: es la que usa Qiskit para autenticarse. [[login]]Entras a IBM Quantum Platform con un IBMid o una cuenta de Google; esas credenciales no son las de la cuenta de IBM Cloud. [[region]]Y en la cabecera eliges cuenta y región: us east o eu de. La región decide dónde corren tus trabajos y dónde se guardan sus datos. Con la misma clave accedes a las dos, pero solo ves las instancias de la región en la que estás.",
@@ -104,7 +104,7 @@
   {
    "id": "guardar",
    "tag": [
-    "5.1",
+    "Guía",
     "Guardar las credenciales"
    ],
    "say": "En un equipo de confianza, como tu laptop, lo recomendable es guardar las credenciales una vez con save account. [[campos]]token es la clave API. instance, opcional, el CRN o el nombre de la instancia. name da un nombre a este juego de credenciales, set as default lo marca como predeterminado y overwrite permite reemplazarlo. [[auto]]Si no das instancia, puedes poner filtros para la selección automática: plans preference, region y tags. [[donde]]Se guardan en un archivo, qiskit ibm punto json, en la carpeta punto qiskit de tu usuario; no lo edites a mano.",
@@ -148,7 +148,7 @@
   {
    "id": "cargar",
    "tag": [
-    "5.1",
+    "Guía",
     "Cargar el servicio"
    ],
    "say": "Después, cada vez que lo necesites, basta con QiskitRuntimeService sin argumentos: carga las credenciales por defecto. [[nombre]]Con name eliges otro juego guardado. [[reglas]]Hay reglas sutiles. Si das token y name a la vez, se ignora el token y se usa la cuenta guardada. Si das name e instance, intenta esa instancia con esa cuenta. Y si guardaste varias sin marcar ninguna por defecto, se usa la que va última en orden alfabético. [[local]]Para pruebas locales existe channel igual a local, que no necesita credenciales. [[401]]Y un error frecuente: si recibes cuatrocientos uno, no autorizado, probablemente estás usando un token portador, de la API REST, en lugar de tu clave API.",
@@ -210,7 +210,7 @@
   {
    "id": "pred_instancia",
    "tag": [
-    "5.1",
+    "Guía",
     "Antes de elegir instancia"
    ],
    "say": "Imagina que tienes dos instancias con la misma clave y no das ninguna al crear el servicio. [[una]]La primera es del plan Open, gratuita. [[otra]]La segunda es de pago, Pay As You Go. [[cual]]Pides un procesador al que solo la instancia de pago tiene acceso. Apuesta: ¿qué instancia elegirá el servicio?",
@@ -269,7 +269,7 @@
   {
    "id": "instancia",
    "tag": [
-    "5.1",
+    "Guía",
     "Selección automática de instancia"
    ],
    "say": "Si das la clave pero no la instancia, el servicio elige la más adecuada para lo que pides. [[orden]]El orden es este: si solo tienes acceso a una instancia, esa. [[guard]]Si las credenciales guardadas traen instancia, esa. [[varias]]Si varias instancias pueden usar el procesador pedido, decide tu preferencia de planes; por defecto, las gratuitas primero. [[una]]Y si solo una puede usarlo, se elige esa, aunque sea de pago: ojo, eso tiene costo. Esa es la respuesta de tu apuesta: la instancia B. [[cual]]La instancia elegida aparece en un aviso, y active instance te la muestra.",
@@ -328,7 +328,7 @@
   {
    "id": "seguridad",
    "tag": [
-    "5.1",
+    "Guía",
     "Equipos públicos"
    ],
    "say": "En un equipo que no es tuyo, una computadora pública por ejemplo, lo mejor es no ejecutar código. Si debes hacerlo, pasa la clave directamente al crear el servicio, sin guardarla, [[borrar]]y al terminar bórrala en la página de claves API y crea una nueva. [[nunca]]Regla de oro: nunca pongas tu clave en el código fuente, en un cuaderno o en un repositorio. Si se filtra, revócala de inmediato.",
@@ -370,7 +370,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.1",
+    "Guía",
     "Comprueba"
    ],
    "say": "Una pregunta sobre credenciales.",
@@ -404,7 +404,7 @@
   {
    "id": "planes",
    "tag": [
-    "5.1",
+    "Guía",
     "Los planes"
    ],
    "say": "IBM Quantum Platform tiene un plan gratuito y varios de pago. [[open]]El plan Open es gratis: hasta diez minutos de procesador cuántico por cada ventana móvil de veintiocho días, solo en la región us east. Desde marzo de dos mil veintiséis, los usuarios activos pueden sumar ciento ochenta minutos más durante un año. [[payg]]Pay As You Go: pagas solo lo que consumes. [[flex]]Flex: compras al menos cuatrocientos minutos por adelantado, para usar en un año, y los repartes entre instancias. [[prem]]Premium: una suscripción empresarial, con acceso, por ejemplo, a las Qiskit Functions. [[onprem]]Y On Prem: un sistema cuántico dedicado, instalado en tus instalaciones y mantenido por IBM.",
@@ -478,7 +478,7 @@
   {
    "id": "pred_limite",
    "tag": [
-    "5.1",
+    "Guía",
     "Antes de gastar"
    ],
    "say": "[[lim]]Supón que ya pagas por uso y fijaste un límite de costo en la instancia. [[corre]]Tienes un trabajo largo en ejecución. [[llega]]A mitad de camino, el gasto llega al límite. Apuesta: ¿qué pasa con ese trabajo?",
@@ -537,7 +537,7 @@
   {
    "id": "costo",
    "tag": [
-    "5.1",
+    "Guía",
     "Controlar el gasto"
    ],
    "say": "Para pasar del plan Open a Pay As You Go, actualizas tu cuenta de IBM Cloud con una tarjeta y creas una instancia de ese plan. No se cobra nada hasta que envíes trabajos con ella. [[limite]]Lo primero que conviene hacer es fijar un límite de costo en la instancia: desde la página de instancias, la API o la línea de comandos de IBM Cloud. Se fija en dólares y se convierte a segundos de ejecución. [[alcanza]]Cuando se alcanza, los trabajos en curso se cancelan con el motivo ran too long, y no empieza ninguno más hasta subir el límite: esa es la respuesta correcta de tu apuesta. Ojo: el uso se reporta cada cierto tiempo, así que un trabajo puede pasarse un poco, y eso también se factura. [[aulas]]Para docentes existen las cuentas Classroom: plan Open para cada estudiante, sin tarjeta, gestionadas por el profesor.",
@@ -602,7 +602,7 @@
   {
    "id": "q2",
    "tag": [
-    "5.1",
+    "Guía",
     "Comprueba"
    ],
    "say": "Una pregunta sobre planes.",
@@ -635,7 +635,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.1",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Trabajas con un archivo local y una clave falsa, sin cuenta. [[n1]]Primero guardas una cuenta con save account y apuestas cómo queda la clave en el archivo. [[n2]]Después arreglas el código que guarda una segunda cuenta para que sea la predeterminada. [[n3]]Y por último escribes una función que calcula cuántos minutos libres te quedan en la ventana móvil de veintiocho días.",
@@ -718,7 +718,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "5.1",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -742,7 +742,7 @@
   {
    "id": "cierre",
    "tag": [
-    "5.1",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Cuenta, instancia con su CRN y clave API. [[r2]]save account en tu equipo; en uno público, la clave a mano y luego se borra. [[r3]]Sin instancia, el servicio elige con tus preferencias. [[r4]]Y hay cinco planes; si pagas, fija un límite de costo.",
@@ -803,7 +803,7 @@
   "Ejecuta `QiskitRuntimeService().backends()` y anota qué procesadores tienes disponibles.",
   "Guías originales: [cloud-setup](https://quantum.cloud.ibm.com/docs/en/guides/cloud-setup) · [cloud-setup-invited](https://quantum.cloud.ibm.com/docs/en/guides/cloud-setup-invited) · [cloud-setup-untrusted](https://quantum.cloud.ibm.com/docs/en/guides/cloud-setup-untrusted) · [save-credentials](https://quantum.cloud.ibm.com/docs/en/guides/save-credentials) · [initialize-account](https://quantum.cloud.ibm.com/docs/en/guides/initialize-account) · [classroom-accounts](https://quantum.cloud.ibm.com/docs/en/guides/classroom-accounts) · [plans-overview](https://quantum.cloud.ibm.com/docs/en/guides/plans-overview) · [upgrade-from-open](https://quantum.cloud.ibm.com/docs/en/guides/upgrade-from-open) · [manage-cost](https://quantum.cloud.ibm.com/docs/en/guides/manage-cost)"
  ],
- "next": "p5-hello-world",
+ "next": "p5-rest",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

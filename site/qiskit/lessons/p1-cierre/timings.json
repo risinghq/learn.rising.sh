@@ -1,14 +1,14 @@
 {
  "repaso1": {
-  "dur": 10.104,
+  "dur": 8.712,
   "marks": {},
   "cues": [
    [
     0.107,
-    "Tres preguntas rápidas de la Parte uno, y después una función del proyecto Ising."
+    "Tres preguntas rápidas y después una función del proyecto Ising."
    ],
    [
-    6.454,
+    5.081,
     "La primera, sobre el flujo de trabajo."
    ]
   ]
@@ -55,37 +55,37 @@
   ]
  },
  "cierre": {
-  "dur": 26.616,
+  "dur": 28.128,
   "marks": {
-   "r1": 2.406,
-   "r2": 5.647,
-   "r3": 10.035,
-   "r4": 14.903
+   "r1": 2.533,
+   "r2": 5.774,
+   "r3": 10.162,
+   "r4": 15.031
   },
   "cues": [
    [
     0.107,
-    "Resumen de la parte."
+    "Resumen de la unidad."
    ],
    [
-    2.406,
+    2.533,
     "Todo programa sigue cuatro pasos."
    ],
    [
-    5.647,
+    5.774,
     "En hardware solo se ejecutan circuitos ISA."
    ],
    [
-    10.035,
+    10.162,
     "En un GHZ, los tres qubits coinciden siempre."
    ],
    [
-    14.903,
+    15.031,
     "Y un paso de Trotter aplica una rzz y después una rx por espín."
    ],
    [
-    20.833,
-    "Con esto cierras la Parte uno; en la siguiente, los circuitos a fondo."
+    20.961,
+    "Con esto cierras la primera unidad; en la siguiente, trabajarás con operadores y observables."
    ]
   ]
  }

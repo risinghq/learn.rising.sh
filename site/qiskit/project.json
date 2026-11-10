@@ -6,7 +6,7 @@
       "n": 1,
       "part": 1,
       "title": "Dos espines y un paso de tiempo",
-      "desc": "Crea tu cuenta de IBM Quantum, escribe el Hamiltoniano y construye un paso de Trotter.",
+      "desc": "Escribe el Hamiltoniano y construye un paso de Trotter en tu computadora, sin cuenta de IBM.",
       "lesson": "p1-quickstart",
       "exercise": "p1-quickstart/hito1-hamiltoniano"
     },
@@ -20,7 +20,7 @@
     },
     {
       "n": 3,
-      "part": 3,
+      "part": 4,
       "title": "Transpilar para un procesador",
       "desc": "Lleva el circuito a FakeFez y mide cómo crece la profundidad con el tiempo.",
       "lesson": "p3-plugins",
@@ -28,7 +28,7 @@
     },
     {
       "n": 4,
-      "part": 4,
+      "part": 5,
       "title": "Exacto frente a ruidoso",
       "desc": "Magnetización en el tiempo: simulación exacta y con el modelo de ruido de Aer.",
       "lesson": "p4-local-testing",
@@ -36,15 +36,15 @@
     },
     {
       "n": 5,
-      "part": 5,
+      "part": 6,
       "title": "Primera ejecución real",
       "desc": "Tu cadena en un QPU de IBM, con un presupuesto de un minuto.",
-      "lesson": "p5-rest",
+      "lesson": "p5-hello-world",
       "exercise": "p5-rest/hito5-referencia"
     },
     {
       "n": 6,
-      "part": 6,
+      "part": 5,
       "title": "Mitigar el ruido",
       "desc": "Sin mitigación, TREX y ZNE: ¿cuánto te acercas al valor exacto?",
       "lesson": "p6-neat",
@@ -52,7 +52,7 @@
     },
     {
       "n": 7,
-      "part": 7,
+      "part": 6,
       "title": "Puertas fraccionales",
       "desc": "RZZ nativas y modo batch; segunda ejecución real.",
       "lesson": "p7-modos",
@@ -60,7 +60,7 @@
     },
     {
       "n": 8,
-      "part": 8,
+      "part": 7,
       "title": "Menos profundidad",
       "desc": "Recorta el circuito con un addon (OBP o AQC-Tensor).",
       "lesson": "p8-plantillas",
@@ -68,18 +68,18 @@
     },
     {
       "n": 9,
-      "part": 9,
+      "part": 7,
       "title": "Código moderno",
       "desc": "Migra a las primitivas del lado del cliente y empaqueta el experimento.",
-      "lesson": "p9-migraciones",
+      "lesson": "p8-app-functions",
       "exercise": "p9-migraciones/hito9-referencia"
     },
     {
       "n": 10,
-      "part": 10,
+      "part": 7,
       "title": "Informe final",
       "desc": "Gráficas, conclusiones y citas, listo para compartir.",
-      "lesson": "p10-comunidad",
+      "lesson": "p8-plantillas",
       "exercise": "p10-comunidad/hito10-referencia"
     }
   ]

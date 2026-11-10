@@ -1,7 +1,7 @@
 {
  "id": "p7-trabajos",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.6",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.11",
  "title": "Monitorear, etiquetar y guardar trabajos",
  "summary": "Seguir el estado de un trabajo, entender por qué tarda, cancelarlo, consultar uso y métricas, etiquetarlo y guardar o recuperar sus resultados.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "estado",
    "tag": [
-    "7.6",
+    "6.11",
     "El estado de un trabajo"
    ],
    "say": "Un trabajo pasa por varios estados: pendiente, en curso, completado, fallido o cancelado. [[metodos]]Desde Qiskit: status te da el estado, job id el identificador, result espera y devuelve los resultados, y wait for final state espera sin devolverlos. [[recuperar]]Con service punto job y el identificador lo recuperas en cualquier momento, incluso días después.",
@@ -90,7 +90,7 @@
   {
    "id": "progreso",
    "tag": [
-    "7.6",
+    "6.11",
     "¿Por qué sigue «en curso»?"
    ],
    "say": "A veces un trabajo que debería tardar segundos se queda mucho rato en curso. Es normal. [[pre]]Un trabajo pasa a en curso en cuanto empieza su preprocesamiento clásico, no cuando entra al QPU. [[paralelo]]Ese preprocesamiento corre en paralelo para varios trabajos, pero el QPU solo ejecuta uno a la vez: esperan su turno. Es la contención del QPU; también ocurre durante una calibración. [[uso]]Por eso el tiempo en curso no es tu uso: el uso y el tiempo máximo solo cuentan el tiempo que el QPU está bloqueado para ti. [[sesion]]En una sesión es distinto: durante su ventana activa tienes el equipo en exclusiva.",
@@ -163,7 +163,7 @@
   {
    "id": "metricas",
    "tag": [
-    "7.6",
+    "6.11",
     "Uso y métricas"
    ],
    "say": "service punto usage te dice cuánto te queda en la instancia activa. [[jobs]]service punto jobs, con filtros como created after o session id, lista tus trabajos: puedes sumar su uso, por ejemplo, de los últimos siete días. [[props]]Y job punto properties devuelve las propiedades del backend, T uno, T dos o errores de lectura, en el momento en que se ejecutó tu trabajo; también se ven en Workloads, en el historial de calibración.",
@@ -202,7 +202,7 @@
   {
    "id": "tags",
    "tag": [
-    "7.6",
+    "6.11",
     "Etiquetas"
    ],
    "say": "Para organizar experimentos, etiqueta tus trabajos: por ejemplo, con la configuración de mitigación o los parámetros usados. [[asignar]]Se asignan antes de ejecutar, en options punto environment punto job tags. [[update]]update tags las cambia después, pero sobrescribe: si quieres añadir una, vuelve a incluir las anteriores. [[buscar]]Y service punto jobs con job tags filtra por ellas.",
@@ -246,7 +246,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.6",
+    "6.11",
     "Comprueba"
    ],
    "say": "Sobre etiquetas.",
@@ -280,7 +280,7 @@
   {
    "id": "pred_guardar",
    "tag": [
-    "7.6",
+    "6.11",
     "Antes de guardar"
    ],
    "say": "Vamos a guardar un resultado en disco y a leerlo de vuelta. [[ida]]Para escribirlo, json punto dump con el codificador RuntimeEncoder. [[vuelta]]Para leerlo, json punto load con el decodificador RuntimeDecoder. [[apuesta]]¿Qué objeto crees que obtendremos al final, y qué pasará con los conteos?",
@@ -362,7 +362,7 @@
   {
    "id": "guardar",
    "tag": [
-    "7.6",
+    "6.11",
     "Recuperar y guardar resultados"
    ],
    "say": "IBM guarda los resultados de todos tus trabajos, así que puedes recuperarlos tras reiniciar Python. [[buscar]]service punto jobs filtra por fecha, backend, estado o sesión, y service punto job recupera uno por su identificador. [[disco]]Para guardarlos en disco, usa el módulo json de Python con el codificador RuntimeEncoder, [[leer]]y léelos con RuntimeDecoder. Aquí lo probamos con un resultado local: vuelve a ser un PrimitiveResult con los mismos conteos. Si apostaste por esa opción, acertaste; no hace falta el servicio para leerlo.",
@@ -415,7 +415,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.6",
+    "6.11",
     "Tu turno"
    ],
    "say": "Ahora guardas, etiquetas y recuperas resultados. [[n1]]Serializa un resultado y léelo de vuelta. [[n2]]Añade una etiqueta conservando las anteriores. [[n3]]Y por último guarda todos los trabajos que coincidan con unas etiquetas.",
@@ -494,7 +494,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.6",
+    "6.11",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -518,7 +518,7 @@
   {
    "id": "cierre",
    "tag": [
-    "7.6",
+    "6.11",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]status, result, wait for final state y cancel controlan un trabajo. [[r2]]En curso no es lo mismo que uso: incluye preprocesamiento y espera. [[r3]]Las etiquetas organizan experimentos. [[r4]]Y los resultados se recuperan del servicio o se guardan con RuntimeEncoder.",
@@ -573,7 +573,7 @@
   "Guarda el resultado de un trabajo real con `RuntimeEncoder` y cárgalo en otro cuaderno.",
   "Guías originales: [monitor-job](https://quantum.cloud.ibm.com/docs/en/guides/monitor-job) · [add-job-tags](https://quantum.cloud.ibm.com/docs/en/guides/add-job-tags) · [save-jobs](https://quantum.cloud.ibm.com/docs/en/guides/save-jobs)"
  ],
- "next": "p7-modos",
+ "next": "p8-serverless",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

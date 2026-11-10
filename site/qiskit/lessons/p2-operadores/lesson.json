@@ -1,7 +1,7 @@
 {
  "id": "p2-operadores",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.5",
+ "part": "Unidad 2 · Operadores y observables",
+ "section": "2.2",
  "title": "Operadores: Operator, Pauli y SparsePauliOp",
  "summary": "Las tres clases de operadores de quantum_info: cómo construirlas, combinarlas, compararlas y usarlas en circuitos.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "2.5",
+    "2.2",
     "Tres clases de operadores"
    ],
    "say": "En Qiskit, los operadores viven en el módulo quantum info. Hay tres clases principales. [[spo]]SparsePauliOp representa un operador como combinación lineal de cadenas de Pauli: es la clase que más usarás para observables. [[p]]Pauli representa una sola cadena de Pauli, con una fase. [[op]]Y Operator guarda la matriz completa, densa: muy general, pero su memoria crece exponencialmente con los qubits.",
@@ -70,7 +70,7 @@
   {
    "id": "sparse",
    "tag": [
-    "2.5",
+    "2.2",
     "SparsePauliOp"
    ],
    "say": "La forma más flexible de crear un SparsePauliOp es from sparse list. Recibe tripletas: la cadena de Pauli, los índices de los qubits donde actúa y el coeficiente. [[ej]]Aquí, Z X sobre los qubits uno y cuatro, con coeficiente uno; e Y Y sobre los qubits cero y tres, con coeficiente menos uno más i. [[cad]]En la salida, cada cadena tiene cinco letras, con el qubit cero a la derecha. Fíjate: la Z va al qubit uno y la X al cuatro.",
@@ -122,7 +122,7 @@
   {
    "id": "aritmetica",
    "tag": [
-    "2.5",
+    "2.2",
     "Aritmética de operadores"
    ],
    "say": "Los SparsePauliOp se suman, se multiplican por escalares, se componen y se combinan en producto tensorial. [[suma]]La suma junta los términos. [[esc]]El escalar multiplica los coeficientes. [[comp]]La arroba es el producto de operadores: multiplica cada par de cadenas usando el álgebra de Pauli. [[tens]]Y tensor forma el producto tensorial: el resultado vive en diez qubits.",
@@ -184,7 +184,7 @@
   {
    "id": "pauli",
    "tag": [
-    "2.5",
+    "2.2",
     "Pauli"
    ],
    "say": "Pauli representa una sola cadena, con una fase que puede ser uno, i, menos uno o menos i. Se escribe como texto, con un prefijo opcional para la fase: i X X, por ejemplo. [[fase]]Internamente la fase se guarda como un entero: la potencia de menos i. Para i X X vale tres, porque menos i al cubo es i. [[met]]Pauli tiene métodos útiles: el adjunto, si conmuta o anticonmuta con otra, el producto con otra cadena, y su matriz.",
@@ -227,7 +227,7 @@
   {
    "id": "operator",
    "tag": [
-    "2.5",
+    "2.2",
     "Operator"
    ],
    "say": "Operator guarda la matriz completa. Lo puedes crear desde un arreglo de NumPy, desde un Pauli, desde una puerta, o desde un circuito completo. [[circ]]Esto último es muy útil: Operator de un circuito calcula su matriz unitaria sin necesidad de un simulador. Falla si hay mediciones, resets u operaciones condicionales. [[dims]]Además guarda las dimensiones de los subsistemas: una matriz de dos a la N por dos a la M se interpreta como un operador de M qubits de entrada y N de salida. [[raro]]Si la dimensión no es potencia de dos, como seis, se toma como un solo subsistema, aunque puedes indicar, por ejemplo, un qubit y un qutrit.",
@@ -281,7 +281,7 @@
   {
    "id": "combinar",
    "tag": [
-    "2.5",
+    "2.2",
     "Combinar operadores"
    ],
    "say": "Los Operator se combinan de varias formas, y el orden importa. [[tens]]A punto tensor de B es A producto tensorial B: B queda en el subsistema cero y A en el uno. [[exp]]expand hace lo mismo al revés: A expand B es B producto tensorial A. [[comp]]A compose B es la multiplicación de matrices, pero con B aplicado después de A: B por A. [[front]]Con front igual a True se invierte: A por B. [[qargs]]Y con qargs puedes componer un operador pequeño sobre algunos qubits de uno grande.",
@@ -355,7 +355,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.5",
+    "2.2",
     "Comprueba"
    ],
    "say": "Calcula con matrices de Pauli.",
@@ -395,7 +395,7 @@
   {
    "id": "lineal",
    "tag": [
-    "2.5",
+    "2.2",
     "Sumas y unitariedad"
    ],
    "say": "Los Operator también se suman y se multiplican por escalares. [[ej]]Por ejemplo, un medio de XX más YY menos tres ZZ. [[unit]]Pero cuidado: tensor, expand y compose conservan la unitariedad; las combinaciones lineales no. Este operador no es unitario. [[circ]]Los operadores unitarios se insertan en un circuito con append, como una UnitaryGate. Un Pauli también se puede añadir directamente y se convierte en puertas de Pauli.",
@@ -440,7 +440,7 @@
   {
    "id": "fase_pred",
    "tag": [
-    "2.5",
+    "2.2",
     "Antes de comparar"
    ],
    "say": "Dos Operator se comparan con doble igual, que revisa cada elemento de la matriz. Multiplicar una puerta por e elevado a i medio es solo una fase global: físicamente es la misma operación. [[cual]]¿Qué crees que responde el doble igual?",
@@ -477,7 +477,7 @@
   {
    "id": "comparar",
    "tag": [
-    "2.5",
+    "2.2",
     "Comparar operadores"
    ],
    "say": "Comparemos. [[fase]]Imprime falso: dos unitarias que solo difieren en una fase global no son iguales para doble igual, aunque físicamente sean la misma operación. Si apostaste por verdadero, pensaste como físico; el doble igual piensa como matemático. [[fid]]Para eso está process fidelity, una medida de qué tan parecidos son dos canales cuánticos. Para unitarias, no depende de la fase global: aquí da exactamente uno.",
@@ -524,7 +524,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.5",
+    "2.2",
     "Comprueba"
    ],
    "say": "Una pregunta práctica.",
@@ -557,7 +557,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.5",
+    "2.2",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, predice el resultado de componer una X y una Z en cada orden. [[n2]]Después, usa el argumento qargs para colocar un operador sobre los qubits que tú elijas. [[n3]]Y por último, escribe una función que construya la cadena de Heisenberg para cualquier número de espines.",
@@ -639,7 +639,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.5",
+    "2.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras; lo que escribas se guarda en el navegador.",
@@ -663,7 +663,7 @@
   {
    "id": "cierre",
    "tag": [
-    "2.5",
+    "2.2",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]SparsePauliOp para observables. [[r2]]Pauli para una sola cadena con fase. [[r3]]Operator para matrices densas pequeñas, con tensor, expand, compose y sumas. [[r4]]Y para comparar unitarias sin importar la fase global, process fidelity.",

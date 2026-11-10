@@ -1,7 +1,7 @@
 {
  "id": "p4-estabilizadores",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.5",
+ "part": "Unidad 3 · Simular",
+ "section": "3.4",
  "title": "Simular circuitos de Clifford",
  "summary": "Qué son los circuitos de estabilizadores, por qué se simulan eficientemente y cómo usarlos con Aer, incluso con 500 qubits y ruido de Pauli.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "def",
    "tag": [
-    "4.5",
+    "3.4",
     "Circuitos de estabilizadores"
    ],
    "say": "Los circuitos de estabilizadores, o de Clifford, son una clase restringida que se puede simular eficientemente en una computadora clásica. [[puertas]]Una definición: los que solo usan CX, Hadamard, S y mediciones. [[rot]]Con H y S se construyen las rotaciones de Pauli con ángulos múltiplos de pi medios, salvo una fase global, así que también cuentan. [[import]]Son centrales en la corrección de errores cuánticos.",
@@ -97,7 +97,7 @@
   {
    "id": "verificar",
    "tag": [
-    "4.5",
+    "3.4",
     "Para qué sirven"
    ],
    "say": "Supón que ejecutas un circuito de cien qubits en un computador cuántico. ¿Cómo sabes si se comportó bien? Un circuito así está fuera del alcance de la simulación por fuerza bruta. [[cliff]]Pero si lo modificas para que sea de Clifford, puedes simularlo y comparar. [[conf]]Si el hardware reproduce bien la versión de Clifford, ganas confianza en el experimento original.",
@@ -145,7 +145,7 @@
   {
    "id": "q500_pred",
    "tag": [
-    "4.5",
+    "3.4",
     "Antes de simular"
    ],
    "say": "Un efficient su2 de quinientos qubits es imposible de simular en general. Pero tiene parámetros: si todos los ángulos son múltiplos de pi medios, el circuito es de Clifford. [[datos]]Lo muestrearemos mil veinticuatro veces. [[apuesta]]Apuesta: entre esas mil veinticuatro cadenas de quinientos bits, ¿cuántas serán distintas?",
@@ -198,7 +198,7 @@
   {
    "id": "q500",
    "tag": [
-    "4.5",
+    "3.4",
     "Quinientos qubits"
    ],
    "say": "[[sampler]]Creamos un Sampler de Aer con el método stabilizer [[tr]]y transpilamos para el simulador en ese modo. [[res]]Resultado: mil veinticuatro cadenas de quinientos bits, en unos segundos. Si apostaste por la opción c, acertaste: las mil veinticuatro son distintas. Un estado de Clifford puede tener una distribución enorme, no solo dos cadenas como un GHZ.",
@@ -251,7 +251,7 @@
   {
    "id": "ruido",
    "tag": [
-    "4.5",
+    "3.4",
     "Ruido de Pauli"
    ],
    "say": "El simulador de estabilizadores también admite ruido, pero solo de un tipo: canales de error de Pauli. El despolarizante es uno de ellos, y también se admiten errores de lectura. [[ej]]Este modelo añade un dos por ciento de despolarizante a cada CX y un cinco por ciento de inversión en cada bit medido. [[no]]En cambio, la relajación térmica no es un canal de Pauli, así que no se puede usar aquí.",
@@ -313,7 +313,7 @@
   {
    "id": "estimator",
    "tag": [
-    "4.5",
+    "3.4",
     "Estimator de estabilizadores"
    ],
    "say": "Con Estimator funciona igual. Calculamos el valor esperado de Z en los quinientos qubits. [[cero]]Por la estructura especial de los estados de estabilizadores, el resultado casi siempre es cero: cada valor esperado de un Pauli vale más uno, menos uno o cero.",
@@ -357,7 +357,7 @@
   {
    "id": "q1",
    "tag": [
-    "4.5",
+    "3.4",
     "Comprueba"
    ],
    "say": "¿Es de Clifford?",
@@ -408,7 +408,7 @@
   {
    "id": "mision",
    "tag": [
-    "4.5",
+    "3.4",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero simulas un GHZ de cien qubits, algo imposible con un vector de estado, y apuestas cuántas cadenas distintas verás. [[n2]]Después arreglas un circuito que el simulador rechaza, cambiando solo el ángulo de una rotación. [[n3]]Y por último escribes la función que redondea los ángulos de un circuito a múltiplos de pi medios, para obtener su versión de Clifford.",
@@ -491,7 +491,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "4.5",
+    "3.4",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; se guardan en tu navegador.",
@@ -515,7 +515,7 @@
   {
    "id": "cierre",
    "tag": [
-    "4.5",
+    "3.4",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Los circuitos de Clifford usan H, S, CX y mediciones. [[r2]]Se simulan eficientemente, con cientos de qubits. [[r3]]En Aer se piden con method igual a stabilizer, y solo admiten ruido de Pauli. [[r4]]Y son una gran herramienta para verificar hardware.",
@@ -568,7 +568,7 @@
   "Añade una puerta T al circuito y prueba `method=\"extended_stabilizer\"`.",
   "Guías originales: [simulate-stabilizer-circuits](https://quantum.cloud.ibm.com/docs/en/guides/simulate-stabilizer-circuits)"
  ],
- "next": "p4-local-testing",
+ "next": "p4-cierre",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

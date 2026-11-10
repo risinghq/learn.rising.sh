@@ -1,14 +1,14 @@
 {
  "repaso1": {
-  "dur": 10.032,
+  "dur": 8.616,
   "marks": {},
   "cues": [
    [
     0.107,
-    "Tres preguntas rápidas de la Parte cuatro, y después una pregunta del proyecto Ising."
+    "Tres preguntas rápidas y después una pregunta del proyecto Ising."
    ],
    [
-    6.567,
+    5.152,
     "La primera, sobre las primitivas."
    ]
   ]
@@ -59,37 +59,37 @@
   ]
  },
  "cierre": {
-  "dur": 29.496,
+  "dur": 29.784,
   "marks": {
-   "r1": 2.406,
-   "r2": 7.968,
-   "r3": 12.2,
-   "r4": 17.154
+   "r1": 2.533,
+   "r2": 8.096,
+   "r3": 12.327,
+   "r4": 17.281
   },
   "cues": [
    [
     0.107,
-    "Resumen de la parte."
+    "Resumen de la unidad."
    ],
    [
-    2.406,
+    2.533,
     "Estimator da valores esperados; Sampler, cadenas de bits."
    ],
    [
-    7.968,
+    8.096,
     "El error de cada puerta multiplica la supervivencia."
    ],
    [
-    12.2,
+    12.327,
     "El método stabilizer simula circuitos de Clifford grandes."
    ],
    [
-    17.154,
+    17.281,
     "Y el tiempo de validez dice hasta cuándo te puedes fiar de una simulación con ruido."
    ],
    [
-    23.084,
-    "Con esto cierras la Parte cuatro; en la siguiente, ejecutar en IBM Quantum."
+    23.211,
+    "Con esto cierras la tercera unidad; el camino continúa con la transpilación y el ruido."
    ]
   ]
  }

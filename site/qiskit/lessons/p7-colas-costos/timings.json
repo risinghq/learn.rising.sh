@@ -172,7 +172,7 @@
   ]
  },
  "maxtime": {
-  "dur": 37.728,
+  "dur": 37.8,
   "marks": {
    "propio": 9.483,
    "qpu": 17.182,
@@ -202,7 +202,7 @@
    ],
    [
     28.858,
-    "Lotes y sesiones tienen además un tiempo de vida máximo, el TTL, que verás en la última lección de esta parte."
+    "Lotes y sesiones tienen además un tiempo de vida máximo, el TTL, que verás en la última lección de esta unidad."
    ]
   ]
  },

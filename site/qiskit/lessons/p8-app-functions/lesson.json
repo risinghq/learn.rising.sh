@@ -1,7 +1,7 @@
 {
  "id": "p8-app-functions",
- "part": "Parte VIII · Serverless, addons y Qiskit Functions",
- "section": "8.5",
+ "part": "Unidad 7 · Escalar",
+ "section": "7.5",
  "title": "Funciones de aplicación",
  "summary": "Las funciones de aplicación del catálogo: optimización, finanzas, química, ecuaciones diferenciales y aprendizaje automático.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "panorama",
    "tag": [
-    "8.5",
+    "7.5",
     "Panorama"
    ],
    "say": "Las funciones de aplicación reciben datos del dominio y devuelven soluciones del dominio. Hay ocho en el catálogo. La mitad se dedica a optimización.",
@@ -125,7 +125,7 @@
   {
    "id": "optim",
    "tag": [
-    "8.5",
+    "7.5",
     "Optimización"
    ],
    "say": "Cuatro optimizadores. [[iskay]]Iskay, de Kipu, usa el algoritmo bf-DCQO, no variacional: términos contradiabáticos que comprimen el circuito, un campo de sesgo que se actualiza en cada iteración y una búsqueda local clásica al final. Admite problemas cuadráticos y de orden superior, HUBO. [[qctrl]]El Optimization Solver de Q-CTRL acepta una función objetivo polinómica, un grafo de networkx o un SparsePauliOp, y automatiza todo, con supresión de errores incluida; por ejemplo, máximo corte en un grafo de ciento cincuenta y seis nodos. [[parity]]Parity Twine usa la arquitectura de paridad para implementar interacciones no locales sin puertas SWAP, reduciendo la profundidad de QAOA. [[aqarios]]Y el de Aqarios resuelve problemas con restricciones, dados como archivos LP o MPS: impone las restricciones one-hot con mezcladores XY, en lugar de penalizaciones. Solo variables discretas.",
@@ -171,7 +171,7 @@
   {
    "id": "predice",
    "tag": [
-    "8.5",
+    "7.5",
     "Antes de finanzas"
    ],
    "say": "Una apuesta antes de pasar a finanzas. El Quantum Portfolio Optimizer codifica cada decisión de inversión con varios qubits. [[datos]]En el ejemplo de la guía hay siete activos, [[pasos]]cuatro pasos de tiempo, [[res]]y cuatro qubits de resolución por cada decisión. [[pregunta]]¿Cuántos qubits necesita el problema entero?",
@@ -247,7 +247,7 @@
   {
    "id": "finanzas",
    "tag": [
-    "8.5",
+    "7.5",
     "Finanzas"
    ],
    "say": "El Quantum Portfolio Optimizer resuelve la optimización dinámica de carteras: redistribuir periódicamente una inversión entre varios activos para maximizar el rendimiento y minimizar el riesgo. [[como]]Formula el problema como QUBO, lo convierte en un Hamiltoniano de Ising y lo resuelve con VQE. [[ej]]Esta es la respuesta a tu apuesta: siete activos por cuatro pasos de tiempo por cuatro qubits de resolución son ciento doce qubits. Se multiplican, no se suman.",
@@ -317,7 +317,7 @@
   {
    "id": "ciencia",
    "tag": [
-    "8.5",
+    "7.5",
     "Química y ecuaciones diferenciales"
    ],
    "say": "HI-VQE, de Qunova, estima el estado fundamental de moléculas. Usa el circuito cuántico para encontrar las configuraciones electrónicas más relevantes, y diagonaliza el Hamiltoniano clásicamente en ese subespacio, que se refina en cada iteración. Recibe la geometría de la molécula. [[pde]]QUICK-PDE, de ColibriTD, resuelve ecuaciones en derivadas parciales con un algoritmo variacional: codifica la solución como combinación de polinomios de Chebyshev, dos a la n para n qubits. Incluye casos de dinámica de fluidos, como la ecuación de Burgers, y de dinámica de materiales.",
@@ -361,7 +361,7 @@
   {
    "id": "ml",
    "tag": [
-    "8.5",
+    "7.5",
     "Aprendizaje automático"
    ],
    "say": "Singularity, de Multiverse Computing, es un clasificador híbrido de conjunto. Entrena clásicamente muchos clasificadores, como árboles de decisión o vecinos cercanos, y usa optimización cuántica para elegir la combinación más diversa y que mejor generaliza. [[escala]]El número de qubits solo limita el tamaño del conjunto, no el del conjunto de datos, que puede tener millones de ejemplos. [[acciones]]Se usa con acciones: create, fit, predict, y list.",
@@ -387,7 +387,7 @@
   {
    "id": "q1",
    "tag": [
-    "8.5",
+    "7.5",
     "Comprueba"
    ],
    "say": "Elige la función.",
@@ -420,7 +420,7 @@
   {
    "id": "mision",
    "tag": [
-    "8.5",
+    "7.5",
     "Tu turno"
    ],
    "say": "Ahora practicas tres transformaciones que usan las funciones de aplicación. [[n1]]Primero escribe un QUBO de máximo corte y encuentra el mejor corte. [[n2]]Después corrige la penalización de una cartera que debe elegir exactamente dos activos. [[n3]]Y por último escribe `qubo_a_ising(qubo, n)` y comprueba sus energías.",
@@ -502,7 +502,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "8.5",
+    "7.5",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda y lo verás al volver a esta lección.",
@@ -526,7 +526,7 @@
   {
    "id": "cierre",
    "tag": [
-    "8.5",
+    "7.5",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Cuatro optimizadores: Iskay, Q-CTRL, Parity Twine y Aqarios. [[r2]]Finanzas con el Portfolio Optimizer. [[r3]]Química con HI-VQE y ecuaciones diferenciales con QUICK-PDE. [[r4]]Y clasificación con Singularity.",
@@ -567,6 +567,134 @@
      "i": 3,
      "id": "r",
      "at": "r4"
+    }
+   ]
+  },
+  {
+   "id": "hito9",
+   "tag": [
+    "7.5",
+    "Referencia: migrar el proyecto"
+   ],
+   "say": "Esta guía reúne una migración importante del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice. [[hito]]La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio.",
+   "scene": [
+    {
+     "type": "row",
+     "items": [
+      {
+       "type": "box",
+       "kind": "warn",
+       "title": "Antes",
+       "body": [
+        {
+         "type": "text",
+         "text": "`StatevectorEstimator` · funciones sueltas",
+         "style": "body"
+        }
+       ],
+       "id": "a",
+       "hidden": true
+      },
+      {
+       "type": "box",
+       "kind": "idea",
+       "title": "Ahora",
+       "body": [
+        {
+         "type": "text",
+         "text": "`executor_estimator.Estimator` · módulo `ising`",
+         "style": "body"
+        }
+       ],
+       "id": "b",
+       "hidden": true
+      }
+     ],
+     "gap": 24
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/hito9-referencia",
+     "prompt": "Escribe `curva_ideal(n, J, h, dt, pasos)`: calcula la magnetización exacta del modelo de Ising en cada instante, incluido el inicial.",
+     "level": 1,
+     "needs": "qiskit",
+     "hints": [
+      "Construye `H = J·sum(ZZ) + h·sum(X)` y `M = sum(Z) / n` como `SparsePauliOp`.",
+      "Usa `expm(-1j * H * dt)` y empieza con el estado `|0…0⟩`.",
+      "Evalúa `⟨M⟩` antes de cada evolución y devuelve `pasos + 1` valores."
+     ],
+     "id": "e1",
+     "hidden": true,
+     "starter": "def curva_ideal(n, J, h, dt, pasos):\n    return []",
+     "cases": [
+      "la curva exacta contiene el instante inicial y los pasos"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/hito9-estimator",
+     "prompt": "Migra `medir(n, J, h, dt, pasos)`: mide ⟨M⟩ tras 1, …, `pasos` pasos de Trotter en `FakeManilaV2`, con ruido. Corrige la importación de `Estimator` para usar la implementación del lado del cliente de `qiskit_ibm_runtime`; el resto del código no cambia.",
+     "level": 2,
+     "needs": "aer",
+     "hints": [
+      "La migración cambia el módulo, no el nombre que usa el resto del código.",
+      "Busca la implementación `executor_estimator` del paquete de Runtime.",
+      "La forma es `from qiskit_ibm_runtime.___ import Estimator`."
+     ],
+     "kind": "fix",
+     "id": "e2",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import EstimatorV2 as Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef medir(n, J, h, dt, pasos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1)\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    estimador = Estimator(mode=backend)\n    estimador.options.simulator.seed_simulator = 5\n    resultado = estimador.run([(isa, M.apply_layout(isa.layout)) for isa in isas]).result()\n    return [float(pub.data.evs) for pub in resultado]",
+     "cases": [
+      "4 espines y 3 pasos con el Estimator del lado del cliente en FakeManilaV2"
+     ]
+    },
+    {
+     "type": "exercise",
+     "exercise": "p9-migraciones/hito9-conteos",
+     "prompt": "Completa `magnetizacion(conteos, n)`: `magnetizacion_conteos(n, J, h, dt, pasos, disparos)` ya mide la cadena con el `Sampler` del lado del cliente sobre `FakeManilaV2` y te pasa las cuentas. Convierte las cadenas de bits y sus frecuencias en ⟨M⟩ = (1/n) Σᵢ ⟨Zᵢ⟩, donde `0` aporta `+1` y `1` aporta `-1`. La trampa: normaliza por los disparos de las cuentas y por los `n` espines.",
+     "level": 3,
+     "needs": "aer",
+     "hints": [
+      "Cada bit cero suma uno y cada bit uno resta uno, ponderados por cuántas veces salió la cadena.",
+      "Suma los valores de `conteos` para saber los disparos totales y divide al final.",
+      "La forma es `sum(cuenta * sum(1 if bit == \"0\" else -1 for bit in ___) for cadena, cuenta in conteos.items()) / (___ * disparos)`."
+     ],
+     "id": "e3",
+     "hidden": true,
+     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef magnetizacion(conteos, n):\n    return 0.0  # ✏️ cada bit 0 vale +1 y cada 1 vale -1; promedia sobre los n bits y los disparos\n\n\ndef magnetizacion_conteos(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    qc = trotter(n, J, h, dt, pasos)\n    qc.measure_all()\n    isa = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1).run(qc)\n    sampler = Sampler(mode=backend)\n    sampler.options.simulator.seed_simulator = 3\n    conteos = sampler.run([isa], shots=disparos).result()[0].data.meas.get_counts()\n    return magnetizacion(conteos, n)",
+     "cases": [
+      "4 espines, 4 pasos y 4000 disparos: la magnetización desde los conteos del Sampler en FakeManilaV2"
+     ]
+    }
+   ],
+   "actions": [
+    {
+     "do": "show",
+     "id": "a",
+     "at": "migrar"
+    },
+    {
+     "do": "show",
+     "id": "b",
+     "at": "paquete"
+    },
+    {
+     "do": "show",
+     "id": "e1",
+     "at": "hito"
+    },
+    {
+     "do": "show",
+     "id": "e2",
+     "at": "hito",
+     "t": 1
+    },
+    {
+     "do": "show",
+     "id": "e3",
+     "at": "hito",
+     "t": 2
     }
    ]
   }

@@ -31,7 +31,7 @@
   ]
  },
  "salidas": {
-  "dur": 37.08,
+  "dur": 37.584,
   "marks": {
    "ruido": 11.917,
    "post": 31.321
@@ -55,7 +55,7 @@
    ],
    [
     31.321,
-    "Todo el posprocesamiento con BitArray que viste en la Parte cuatro funciona igual."
+    "Todo el posprocesamiento con BitArray que viste en la unidad de simulación funciona igual."
    ]
   ]
  },

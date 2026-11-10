@@ -1,7 +1,7 @@
 {
  "id": "p7-dinamicos",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.1",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.7",
  "title": "Circuitos dinámicos en hardware",
  "summary": "Qué parte del control de flujo admite el hardware de IBM, la medición a mitad de circuito, store, sus límites y cómo estimar valores esperados.",
  "goals": [
@@ -13,10 +13,10 @@
   {
    "id": "intro",
    "tag": [
-    "7.1",
+    "6.7",
     "Lo que el hardware admite"
    ],
-   "say": "En la Parte dos construiste circuitos dinámicos con if, switch, for y while. En el hardware de IBM, por ahora, solo se ejecuta la instrucción if, con su else. [[trade]]Y hay un costo: medir a mitad del circuito y procesar la lógica clásica suele tardar más que una puerta de dos qubits. Ese tiempo extra puede anular la ventaja de un circuito menos profundo. [[filtrar]]Para ver qué procesadores admiten circuitos dinámicos, filtra con dynamic circuits igual a True.",
+   "say": "En la unidad de hardware construirás circuitos dinámicos con if, switch, for y while. En el hardware de IBM, por ahora, solo se ejecuta la instrucción if, con su else. [[trade]]Y hay un costo: medir a mitad del circuito y procesar la lógica clásica suele tardar más que una puerta de dos qubits. Ese tiempo extra puede anular la ventaja de un circuito menos profundo. [[filtrar]]Para ver qué procesadores admiten circuitos dinámicos, filtra con dynamic circuits igual a True.",
    "scene": [
     {
      "type": "table",
@@ -91,7 +91,7 @@
   {
    "id": "mid",
    "tag": [
-    "7.1",
+    "6.7",
     "Medir a mitad del circuito"
    ],
    "say": "Antes había una sola instrucción de medición. Pero una medición intermedia tiene otras necesidades que una final: por ejemplo, su duración importa mucho, porque mientras dura, los demás qubits esperan. [[mcm]]Desde la versión cero punto cuarenta y tres del cliente existe MidCircuitMeasure, optimizada para medir a mitad del circuito. Se añade con append. [[m2]]Corresponde a la instrucción measure dos del backend, que no todos los procesadores tienen: búscala en supported instructions. [[reglas]]Recuerda: hace falta al menos un registro clásico, y Estimator ignora las mediciones.",
@@ -130,7 +130,7 @@
   {
    "id": "store",
    "tag": [
-    "7.1",
+    "6.7",
     "store en hardware"
    ],
    "say": "Desde la cero punto cuarenta y siete puedes usar store en hardware, para guardar una expresión clásica que reutilizas. [[ojo]]Un detalle importante: el valor guardado solo vive en la memoria durante la ejecución. No se copia al resultado. Si guardas un registro en temp, el if funciona como esperas, pero al terminar, temp aparece en cero en los datos que recibes.",
@@ -168,7 +168,7 @@
   {
    "id": "difusion",
    "tag": [
-    "7.1",
+    "6.7",
     "Límite de difusiones"
    ],
    "say": "La electrónica de control tiene poca memoria, así que hay un límite de instrucciones if. Lo que cuenta son las difusiones: cada vez que datos de medición nuevos se envían a la lógica de control para evaluar una condición. [[ej]]Dos if sobre el mismo registro c cero, sin medir en medio, son una sola difusión. Un if sobre un bit de c uno es otra. En total, cuatro bits difundidos. [[cifras]]Como referencia: difundiendo sesenta bits cada vez caben unas trescientas difusiones por trabajo; difundiendo un solo bit, unas dos mil cuatrocientas.",
@@ -218,7 +218,7 @@
   {
    "id": "limites",
    "tag": [
-    "7.1",
+    "6.7",
     "Otros límites"
    ],
    "say": "Más restricciones. [[bits]]El operando de un if puede tener como máximo treinta y dos bits: no puedes comparar un registro de cincuenta bits completo, pero sí un solo bit de él. [[anidar]]No se permiten if anidados. [[dentro]]No se admiten resets ni mediciones dentro de un if. [[arit]]Ni operaciones aritméticas. [[qasm]]Y si envías OpenQASM tres, solo valen instrucciones que Qiskit pueda cargar.",
@@ -282,7 +282,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.1",
+    "6.7",
     "Comprueba"
    ],
    "say": "¿Se ejecuta en el hardware?",
@@ -316,7 +316,7 @@
   {
    "id": "pred_correccion",
    "tag": [
-    "7.1",
+    "6.7",
     "Antes de ejecutar"
    ],
    "say": "Un circuito dinámico clásico: la corrección. Ponemos un qubit en superposición con una Hadamard y lo medimos, y el resultado va al bit cero. [[if]]Si salió uno, aplicamos una X para devolverlo a cero. [[otra]]Y medimos otra vez, ahora en el bit uno. [[apuesta]]Apuesta: ¿qué vas a ver en esa segunda medición, la que viene después de la corrección?",
@@ -376,7 +376,7 @@
   {
    "id": "correccion",
    "tag": [
-    "7.1",
+    "6.7",
     "El resultado"
    ],
    "say": "Esto es lo que imprime. [[crudo]]La primera línea tiene los dos bits de cada disparo; el de la derecha es la primera medición. Es aleatoria: la mitad de las veces cero cero y la mitad cero uno. [[marg]]La segunda línea, con marginal counts, se queda solo con el bit uno, la segunda medición: mil veces cero. Si apostaste por cero siempre, acertaste. [[porque]]Cuando la primera medición dio uno, la X devolvió el qubit a cero; cuando dio cero, ya estaba en cero. Es lo que el hardware calcula en tiempo real, y la razón de ser de los circuitos dinámicos.",
@@ -430,7 +430,7 @@
   {
    "id": "estimator",
    "tag": [
-    "7.1",
+    "6.7",
     "Valores esperados con circuitos dinámicos"
    ],
    "say": "Estimator no admite circuitos dinámicos. Para obtener valores esperados, usa Sampler y haz tú el trabajo de Estimator. [[agrupar]]Primero, agrupa los términos de los observables en conjuntos que conmutan qubit a qubit, por ejemplo con PauliList punto group qubit wise commuting. [[bases]]Segundo, ejecuta un circuito de cambio de base por grupo. [[sumar]]Tercero, calcula los valores esperados de cada grupo, con BitArray punto expectation values, y súmalos.",
@@ -489,7 +489,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.1",
+    "6.7",
     "Tu turno"
    ],
    "say": "Ahora practicas la corrección, los registros clásicos y los límites de los circuitos dinámicos. [[n1]]Empieza por construir una corrección que deje la segunda medición en cero. [[n2]]Después concentra dos condiciones en un registro de dos bits. [[n3]]Y por último decide qué circuitos admite el hardware.",
@@ -568,7 +568,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.1",
+    "6.7",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -592,7 +592,7 @@
   {
    "id": "cierre",
    "tag": [
-    "7.1",
+    "6.7",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]En hardware de IBM, solo if y else. [[r2]]MidCircuitMeasure mide a mitad de circuito con menos sobrecarga. [[r3]]Hay límites de difusiones, de bits por operando y de anidamiento. [[r4]]Y para valores esperados con circuitos dinámicos, Sampler más tu propio posprocesamiento.",

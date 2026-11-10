@@ -1,7 +1,7 @@
 {
  "id": "p7-temporizacion",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.3",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.9",
  "title": "Temporización de circuitos",
  "summary": "Obtener del servicio la programación real de un circuito, sobre todo dinámico, interpretar sus datos y visualizarla.",
  "goals": [
@@ -13,10 +13,10 @@
   {
    "id": "por_que",
    "tag": [
-    "7.3",
+    "6.9",
     "Los tiempos reales"
    ],
-   "say": "En la Parte dos viste timeline draw, que dibuja los tiempos de un circuito programado. Para circuitos estáticos funciona bien, pero para los dinámicos no es exacto: hay operaciones implícitas, como difundir resultados o decidir una rama, que Qiskit no conoce. [[servicio]]Por eso el servicio de IBM puede devolver la programación real que usó. [[exp]]Es una función experimental, solo para trabajos de Sampler. [[factura]]Y ojo: el tiempo total de circuito que devuelve no es el que se usa para facturar.",
+   "say": "En las lecciones de circuitos viste timeline draw, que dibuja los tiempos de un circuito programado. Para circuitos estáticos funciona bien, pero para los dinámicos no es exacto: hay operaciones implícitas, como difundir resultados o decidir una rama, que Qiskit no conoce. [[servicio]]Por eso el servicio de IBM puede devolver la programación real que usó. [[exp]]Es una función experimental, solo para trabajos de Sampler. [[factura]]Y ojo: el tiempo total de circuito que devuelve no es el que se usa para facturar.",
    "scene": [
     {
      "type": "row",
@@ -75,7 +75,7 @@
   {
    "id": "activar",
    "tag": [
-    "7.3",
+    "6.9",
     "Pedir los datos"
    ],
    "say": "Se activa con una opción experimental del Sampler: en options punto execution, scheduler timing igual a True. [[leer]]Después, en la metadata de cada PUB, bajo compilation, scheduler timing, timing, están los datos en bruto.",
@@ -109,7 +109,7 @@
   {
    "id": "pred_datos",
    "tag": [
-    "7.3",
+    "6.9",
     "Antes de leerlos"
    ],
    "say": "Vamos a leer los datos de un circuito pequeño: una RZ, una raíz de X y una medición, todas sobre el qubit cero. [[sx]]La raíz de X dura nueve unidades dt. [[m]]La medición, sesenta y cuatro en el canal del qubit. [[rz]]¿Y la RZ? Apuesta antes de verlo.",
@@ -175,7 +175,7 @@
   {
    "id": "datos",
    "tag": [
-    "7.3",
+    "6.9",
     "Los datos en bruto"
    ],
    "say": "Cada línea describe una instrucción en un canal, con seis campos separados por comas. [[rz]]La primera línea responde la apuesta: la RZ dura cero, porque es un cambio de fase. [[rama]]La rama: main, o la rama then o else de un if. [[instr]]La instrucción y su qubit. [[canal]]El canal: Qubit x, el canal de control del qubit x, o AWGR, el generador de formas de onda de lectura. [[t0]]El instante de inicio [[dur]]y la duración, ambos en unidades dt, ciclos de programación; backend punto dt te da su valor en segundos. [[pulso]]Y el tipo de pulso: play aplica un pulso de control; capture registra el estado; shift phase cambia la fase, sin duración, como en las RZ virtuales.",
@@ -273,7 +273,7 @@
   {
    "id": "dibujar",
    "tag": [
-    "7.3",
+    "6.9",
     "Visualizarlos"
    ],
    "say": "Desde la cero punto cuarenta y tres, draw circuit schedule timing convierte esos datos en una figura interactiva. Puedes filtrar canales, ocultar los de lectura o las barreras, y guardarla como HTML. [[eje]]El eje horizontal es el tiempo en dt; el vertical, los canales. Además de los canales de qubits y de lectura, aparecen el canal de recepción, una instrucción en todos los canales que participan en una comunicación, y el Hub, que controla las difusiones.",
@@ -310,7 +310,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.3",
+    "6.9",
     "Comprueba"
    ],
    "say": "Interpreta una línea.",
@@ -335,7 +335,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.3",
+    "6.9",
     "Tu turno"
    ],
    "say": "Ahora analizas una programación, calculas sus duraciones y la construyes desde Qiskit. [[n1]]Empieza por convertir las líneas de temporización en registros. [[n2]]Después calcula los finales y el total en nanosegundos. [[n3]]Y por último devuelve la programación de un circuito local.",
@@ -413,7 +413,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.3",
+    "6.9",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -437,7 +437,7 @@
   {
    "id": "cierre",
    "tag": [
-    "7.3",
+    "6.9",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Para circuitos dinámicos, pide los tiempos al servicio. [[r2]]Se activan con scheduler timing en las opciones de ejecución del Sampler. [[r3]]Cada línea tiene rama, instrucción, canal, inicio, duración y pulso. [[r4]]Y draw circuit schedule timing los dibuja; ese tiempo no es el facturado.",
@@ -490,7 +490,7 @@
   "Convierte las duraciones de dt a nanosegundos usando `backend.dt`.",
   "Guías originales: [qiskit-runtime-circuit-timing](https://quantum.cloud.ibm.com/docs/en/guides/qiskit-runtime-circuit-timing)"
  ],
- "next": "p7-procesadores",
+ "next": "p7-modos",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

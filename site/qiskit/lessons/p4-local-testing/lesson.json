@@ -1,7 +1,7 @@
 {
  "id": "p4-local-testing",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.6",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.2",
  "title": "Modo de prueba local y backends falsos",
  "summary": "Probar programas de IBM Quantum en tu computadora con backends falsos o Aer, los métodos de simulación, y probar mitigación de errores antes de usar un QPU.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "idea",
    "tag": [
-    "4.6",
+    "5.2",
     "Probar en local, ejecutar en la nube"
    ],
    "say": "El modo de prueba local permite probar programas escritos para IBM Quantum antes de enviarlos a hardware real. Cuando funcionan, solo cambias el backend. [[fake]]Puedes usar backends falsos, de qiskit ibm runtime fake provider, que imitan procesadores reales con instantáneas: mapa de acoplamiento, puertas base y propiedades de los qubits, incluido su ruido. [[aer]]O un simulador de Aer, más rápido y flexible, con modelos de ruido propios. [[inst]]Conviene tener Qiskit Aer instalado: los backends falsos lo usan por debajo.",
@@ -77,7 +77,7 @@
   {
    "id": "fake",
    "tag": [
-    "4.6",
+    "5.2",
     "Con un backend falso"
    ],
    "say": "Un ejemplo con FakeManila, un backend falso de cinco qubits. [[cliente]]Desde qiskit ibm runtime cero punto cincuenta, Sampler y Estimator son primitivas del lado del cliente, en los módulos executor sampler y executor estimator. [[mode]]Se pasa el backend falso como mode, y una semilla en las opciones del simulador para resultados reproducibles. [[res]]Por el ruido aparecen algunos cero uno y uno cero. Fíjate también: por defecto se usan cuatro mil noventa y seis disparos.",
@@ -133,7 +133,7 @@
   {
    "id": "aer",
    "tag": [
-    "4.6",
+    "5.2",
     "Con AerSimulator"
    ],
    "say": "Con AerSimulator es igual. [[sesion]]Se puede usar la sintaxis de sesión, aunque en modo local se ignora: no hay sesiones en tu computadora. [[ruido]]Para simular con el ruido de un dispositivo real, AerSimulator from backend construye un simulador con su modelo de ruido. Pero ese modelo solo incluye algunos tipos de ruido, así que suele ser menos severo que el hardware.",
@@ -166,7 +166,7 @@
   {
    "id": "metodos",
    "tag": [
-    "4.6",
+    "5.2",
     "Métodos de simulación"
    ],
    "say": "AerSimulator tiene varios métodos. [[auto]]automatic elige solo, según el circuito y el ruido. [[sv]]statevector, vector de estado denso; con ruido, cada disparo simula un circuito ruidoso al azar. [[dm]]density matrix, matriz de densidad, ideal para ruido. [[stab]]stabilizer para Clifford, y extended stabilizer, aproximado, para Clifford más algunas T. [[mps]]matrix product state, una red tensorial, eficiente si el entrelazamiento es bajo. [[otros]]unitary y superop calculan la matriz del circuito, sin mediciones. Y tensor network, solo en GPU.",
@@ -250,7 +250,7 @@
   {
    "id": "mitigar_pred",
    "tag": [
-    "4.6",
+    "5.2",
     "Antes de mitigar"
    ],
    "say": "Una novedad importante: con las primitivas del lado del cliente, la supresión y mitigación de errores ocurren en tu computadora. Antes, con las primitivas del servidor, esas opciones no tenían efecto en modo local. [[ej]]Probemos la mitigación de errores de lectura con Estimator sobre FakeManila. El estado de Bell ideal daría Z Z igual a uno. [[apuesta]]Apuesta: ¿qué valor saldrá sin mitigación, y cuál con measure mitigation activada?",
@@ -298,7 +298,7 @@
   {
    "id": "mitigar",
    "tag": [
-    "4.6",
+    "5.2",
     "Probar la mitigación en local"
    ],
    "say": "[[ej]]Este es el código. Para cada valor de measure mitigation, un Estimator sobre FakeManila. [[sin]]Sin mitigación sale alrededor de cero coma ochenta y siete. [[con]]Con measure mitigation activada, cerca de cero coma noventa y nueve. Si apostaste por la opción b, acertaste. Los valores exactos cambian un poco en cada ejecución. [[costo]]Ojo: la mitigación añade memoria y tiempo. Para que las pruebas locales sigan siendo manejables, usa backends pequeños, simuladores sin ruido o simulación de Clifford.",
@@ -358,7 +358,7 @@
   {
    "id": "migrar",
    "tag": [
-    "4.6",
+    "5.2",
     "Adiós a los simuladores en la nube"
    ],
    "say": "IBM retiró sus simuladores en la nube el quince de mayo de dos mil veinticuatro. [[por]]Las razones: los simuladores dejan de servir alrededor de cincuenta qubits, incluso en supercomputadoras, y ningún modelo de ruido captura toda la dinámica de un QPU real. [[hw]]Trabajar con hardware enseña a usar mitigación y supresión, y a adaptar algoritmos al dispositivo. [[cuando]]Los simuladores siguen siendo útiles para desarrollar y probar, y en tu computadora rinden bien. La recomendación: simula en local, ejecuta en hardware.",
@@ -433,7 +433,7 @@
   {
    "id": "q1",
    "tag": [
-    "4.6",
+    "5.2",
     "Comprueba"
    ],
    "say": "Elige el simulador.",
@@ -466,7 +466,7 @@
   {
    "id": "q2",
    "tag": [
-    "4.6",
+    "5.2",
     "Comprueba"
    ],
    "say": "Sobre la mitigación local.",
@@ -496,7 +496,7 @@
   {
    "id": "mision",
    "tag": [
-    "4.6",
+    "5.2",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero apuestas cuántos disparos hace por defecto el Sampler sobre un backend falso, y ejecutas un estado de Bell. [[n2]]Después cambias el backend por un AerSimulator ideal, sin tocar el resto del programa. [[n3]]Y por último completas una función que estima Z Z con y sin mitigación, y compruebas que la mitigada se acerca más al valor ideal.",
@@ -578,10 +578,10 @@
   {
    "id": "proyecto",
    "tag": [
-    "4.6",
+    "5.2",
     "Tu proyecto: la magnetización en el tiempo"
    ],
-   "say": "Cierre de la parte con tu proyecto. [[hito]]El hito cuatro responde la pregunta de la cadena de espines con simuladores: cómo evoluciona la magnetización tras encender el campo, exacta frente a una simulación de Aer con ruido. Primero recalculas lo que ya tienes, el Hamiltoniano, el circuito de Trotter y el observable, y comparas la curva exacta con la del circuito. Después añades ruido despolarizante a las CX y simulas con Aer. Y por último escribes una función que dice hasta qué instante te puedes fiar de la simulación ruidosa. Ese instante te dirá cuántos pasos pedirle al QPU en la parte cinco.",
+   "say": "Cierre de esta unidad con tu proyecto. [[hito]]El hito cuatro responde la pregunta de la cadena de espines con simuladores: cómo evoluciona la magnetización tras encender el campo, exacta frente a una simulación de Aer con ruido. Primero recalculas lo que ya tienes, el Hamiltoniano, el circuito de Trotter y el observable, y comparas la curva exacta con la del circuito. Después añades ruido despolarizante a las CX y simulas con Aer. Y por último escribes una función que dice hasta qué instante te puedes fiar de la simulación ruidosa. Ese instante te dirá cuántos pasos pedirle al QPU cuando llegues al hardware.",
    "scene": [
     {
      "type": "math",
@@ -666,7 +666,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "4.6",
+    "5.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para cerrar la parte. Escribe con tus palabras; se guardan en tu navegador.",
@@ -690,10 +690,10 @@
   {
    "id": "cierre",
    "tag": [
-    "4.6",
+    "5.2",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]En modo local pasas un backend falso o un AerSimulator como mode. [[r2]]Los backends falsos imitan QPUs reales. [[r3]]Desde la cero punto cincuenta, la mitigación también se prueba en local. [[r4]]Y la recomendación de IBM: simula en local, ejecuta en hardware. Con esto cierra la Parte cuatro; en la cinco, a la nube.",
+   "say": "Resumen. [[r1]]En modo local pasas un backend falso o un AerSimulator como mode. [[r2]]Los backends falsos imitan QPUs reales. [[r3]]Desde la cero punto cincuenta, la mitigación también se prueba en local. [[r4]]Y la recomendación de IBM: simula en local, ejecuta en hardware. Con esto cierra la tercera unidad; después transpilarás antes de estudiar el ruido.",
    "scene": [
     {
      "type": "list",
@@ -744,7 +744,7 @@
   "Prueba `AerSimulator(method=\"matrix_product_state\")` con un GHZ de 60 qubits.",
   "Guías originales: [local-testing-mode](https://quantum.cloud.ibm.com/docs/en/guides/local-testing-mode) · [local-simulators](https://quantum.cloud.ibm.com/docs/en/guides/local-simulators)"
  ],
- "next": "p4-cierre",
+ "next": "p6-panorama",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

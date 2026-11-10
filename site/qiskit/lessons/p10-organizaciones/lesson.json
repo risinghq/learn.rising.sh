@@ -1,7 +1,7 @@
 {
  "id": "p10-organizaciones",
- "part": "Parte X · Organizaciones, seguridad y comunidad",
- "section": "10.1",
+ "part": "Guías",
+ "section": "",
  "title": "Organizaciones e instancias",
  "summary": "Planificar IBM Quantum Platform para una organización: instancias, planes, regiones, asignaciones y límites, la API de gestión y los registros de plataforma.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "instancia",
    "tag": [
-    "10.1",
+    "Guía",
     "¿Qué es una instancia?"
    ],
    "say": "El acceso a IBM Quantum Platform se controla con instancias: despliegues del servicio de computación cuántica que gestionan tus trabajos, cuánticos y clásicos. Cada una se identifica por su CRN, el nombre de recurso de la nube. [[plan]]Cada instancia tiene un plan y una región: necesitas una instancia por cada plan y cada región que quieras usar. [[region]]La región, Washington, us east, o Frankfurt, eu de, decide qué QPUs ves, dónde se hace la compilación y dónde quedan tus datos: circuitos, parámetros y resultados. [[uso]]Todo lo que ejecutan los colaboradores de una instancia cuenta para su uso.",
@@ -80,7 +80,7 @@
   {
    "id": "planes",
    "tag": [
-    "10.1",
+    "Guía",
     "Los planes"
    ],
    "say": "Hay cuatro planes. [[open]]Open es gratuito: hasta diez minutos de QPU en una ventana móvil de veintiocho días, y solo en la región us east. [[payg]]Pay As You Go cobra por uso, con un límite de costo opcional. [[flex]]Flex y Premium se contratan con IBM: tienen tiempo asignado, y el administrador puede limitar cada instancia; en Flex el límite vale durante el contrato, en Premium por ventana de veintiocho días. [[codigo]]En tu código, eliges la instancia por CRN o por nombre al crear el servicio; si no la indicas, ves backends y trabajos de todas, y desde la cero punto cuarenta y dos se priorizan los planes gratuitos al elegir una automáticamente.",
@@ -163,7 +163,7 @@
   {
    "id": "planificar",
    "tag": [
-    "10.1",
+    "Guía",
     "Planificar una organización"
    ],
    "say": "Para una organización, primero hay que decidir varias cosas. [[ident]]Cómo se definen las identidades: usuarios de IBM Cloud, de otro proveedor de identidad, o ambos. [[cuantas]]Cuántas instancias hacen falta y para qué: por ejemplo, una por equipo; los trabajos pertenecen a la instancia y todos sus usuarios los ven. [[quien]]Qué usuarios acceden a qué instancias, y si pueden borrar trabajos. [[grupos]]Y cómo organizar el acceso: con el grupo de colaboradores que se crea con cada instancia, con grupos propios, o con grupos de recursos, que separan instancias de forma rígida, porque una instancia no puede cambiar de grupo de recursos.",
@@ -210,7 +210,7 @@
   {
    "id": "pasos",
    "tag": [
-    "10.1",
+    "Guía",
     "Los pasos de configuración"
    ],
    "say": "Los pasos, en orden. [[iam]]Uno: ajustar IAM, la visibilidad de la lista de usuarios y quién puede crear claves de API. [[rg]]Dos, opcional: crear grupos de recursos. [[inst]]Tres: crear las instancias, con nombres pensados, como QR ml. [[ag]]Cuatro: crear un rol personalizado y un grupo de acceso por instancia, con los permisos mínimos. [[idp]]Cinco: configurar el proveedor de identidad e invitar usuarios. [[fw]]Y seis: permitir en el cortafuegos los dominios de IBM Cloud y de la región.",
@@ -289,7 +289,7 @@
   {
    "id": "limite_pred",
    "tag": [
-    "10.1",
+    "Guía",
     "Antes de ver el límite"
    ],
    "say": "Antes de ver la regla, apuesta. Una instancia Premium tiene un límite de uso, y lo alcanza cuando tiene un trabajo en ejecución y tres en cola. [[cual]]¿Qué crees que pasa con esos cuatro trabajos? No hace falta acertar: apostar primero hace que la regla se te quede.",
@@ -335,7 +335,7 @@
   {
    "id": "asignacion",
    "tag": [
-    "10.1",
+    "Guía",
     "Asignaciones y límites"
    ],
    "say": "En Premium y Flex, la cuenta tiene un tiempo contratado que se reparte entre instancias. El tiempo asignado a cada una lo usa el planificador de reparto justo para su prioridad en la cola. [[limite]]La asignación puede ser además un límite. Cuando una instancia lo alcanza: lo que se está ejecutando sigue, lo pendiente queda en cola, y nada se cancela. Los colaboradores pueden enviar trabajos, pero esperan hasta que haya tiempo: en Flex, hasta que suban el límite; en Premium, hasta la siguiente ventana. [[sinlimite]]Si no es un límite y se supera la asignación, los trabajos siguen, pero con menor prioridad y colas más largas.",
@@ -414,7 +414,7 @@
   {
    "id": "api",
    "tag": [
-    "10.1",
+    "Guía",
     "Gestión por API y registros"
    ],
    "say": "Las instancias se pueden gestionar por programa con la API Resource Controller de IBM Cloud: obtener, listar, crear y actualizar instancias, autenticándote con un token bearer. [[ext]]Además de los campos estándar, la respuesta incluye campos cuánticos: el límite de uso en segundos, la asignación en segundos, y la lista de backends permitidos, donde ANY significa todos los del plan. La misma API sirve para habilitar Qiskit Functions en una instancia. [[logs]]Y para auditoría, el servicio genera registros de plataforma cada vez que cambia el estado de un trabajo, que IBM Cloud Logs Routing envía a donde configures.",
@@ -470,7 +470,7 @@
   {
    "id": "q1",
    "tag": [
-    "10.1",
+    "Guía",
     "Comprueba"
    ],
    "say": "Ahora el caso contrario: una asignación que no es un límite.",
@@ -503,7 +503,7 @@
   {
    "id": "mision",
    "tag": [
-    "10.1",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero armas la dirección para leer una instancia con la API de gestión: el CRN va codificado en la ruta. [[n2]]Después resuelves qué backends puede usar una instancia, y qué significa la lista con ANY. [[n3]]Luego arreglas el cálculo de cuánto te queda en el plan Open: la ventana de veintiocho días se mueve, y los usos viejos dejan de contar. [[n4]]Y por último escribes qué pasa con los trabajos al llegar a un límite, con y sin límite, sin cancelar ninguno. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -608,7 +608,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "10.1",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras: lo que escribas se guarda en tu navegador.",
@@ -632,7 +632,7 @@
   {
    "id": "cierre",
    "tag": [
-    "10.1",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Una instancia tiene un plan, una región y un CRN. [[r2]]Hay cuatro planes, de Open a Premium. [[r3]]Las asignaciones dan prioridad, y los límites detienen el consumo sin cancelar nada. [[r4]]Y la configuración se planifica: identidades, instancias, grupos y cortafuegos.",

@@ -1,7 +1,7 @@
 {
  "id": "p10-comunidad",
- "part": "Parte X · Organizaciones, seguridad y comunidad",
- "section": "10.4",
+ "part": "Guías",
+ "section": "",
  "title": "Soporte, preguntas frecuentes y código abierto",
  "summary": "Dónde pedir ayuda, las preguntas frecuentes, cómo citar Qiskit y los QPUs, y cómo participar en la comunidad de código abierto.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "soporte",
    "tag": [
-    "10.4",
+    "Guía",
     "Pedir ayuda"
    ],
    "say": "Con cualquier plan, salvo las cuentas de prueba, las consultas van al centro de soporte de IBM Cloud, abriendo un caso sobre Quantum Compute: errores de trabajos, problemas de la plataforma, dudas de Qiskit o de computación cuántica. [[comunidad]]Para ayuda de la comunidad: el Slack de Qiskit, con canales temáticos, y Stack Exchange de computación cuántica. [[github]]Y para reportar errores o pedir funciones, los issues de GitHub de cada repositorio: el SDK, el cliente, Serverless o el transpilador con IA.",
@@ -66,7 +66,7 @@
   {
    "id": "cuenta",
    "tag": [
-    "10.4",
+    "Guía",
     "Problemas de cuenta"
    ],
    "say": "Si no puedes crear una cuenta, abre un caso de verificación de cuenta. Si tu país no admite cuentas personales, puedes usar la documentación y los cursos sin cuenta, una cuenta académica de SkillsBuild si eres estudiante o docente, o una cuenta de prueba de treinta días. [[inactiva]]Si ves que tu cuenta está inactiva, revisa en IBM Cloud si tienes pasos pendientes. [[invitado]]Y si te invitaron a una cuenta, basta aceptar la invitación, sin dar datos de facturación.",
@@ -106,7 +106,7 @@
   {
    "id": "faq",
    "tag": [
-    "10.4",
+    "Guía",
     "Preguntas frecuentes"
    ],
    "say": "Algunas preguntas frecuentes. [[tarjeta]]¿Uso el plan Open y puse mi tarjeta: me cobrarán? No, salvo que crees una instancia Pay As You Go y la uses. [[clave]]¿Clave de API o token de API? Son lo mismo. Un token bearer, en cambio, es temporal. [[region]]¿Tengo que elegir mi región? No: la región decide dónde se ejecuta y dónde se guardan los datos; el plan Open solo está en us east. [[proxy]]¿Puedo usar un proxy? Sí, desde la versión cero punto cuarenta y cuatro del cliente. [[aer]]¿Y dónde quedó Aer? Desde Qiskit uno punto cero, pip install qiskit solo instala el SDK: Aer y los demás se instalan aparte.",
@@ -180,7 +180,7 @@
   {
    "id": "citar_pred",
    "tag": [
-    "10.4",
+    "Guía",
     "Antes de citar"
    ],
    "say": "Antes de verlo, apuesta. Escribes un artículo y ejecutaste tu experimento en el QPU ibm fez. [[cual]]¿Qué datos del QPU debe llevar la cita?",
@@ -232,7 +232,7 @@
   {
    "id": "citar",
    "tag": [
-    "10.4",
+    "Guía",
     "Citar en tu investigación"
    ],
    "say": "Si usas Qiskit en un artículo, cítalo con el archivo BibTeX del repositorio. [[agradecer]]Para los equipos de IBM, se recomienda un agradecimiento, y citar IBM Quantum con su dirección y el año. [[qpu]]Los QPUs se citan por su nombre único, opcionalmente con la versión, y conviene mencionar el tipo de procesador.",
@@ -275,7 +275,7 @@
   {
    "id": "open",
    "tag": [
-    "10.4",
+    "Guía",
     "Código abierto"
    ],
    "say": "Desde dos mil dieciséis, IBM Quantum abrió el acceso a computadores cuánticos en la nube y liberó como código abierto partes clave de su software, empezando por Qiskit, hoy el entorno de computación cuántica más usado. [[contribuir]]Puedes contribuir de muchas formas: código mediante pull requests, documentación, o ayudando a otros en Slack. Para aportar código se firma un acuerdo de licencia de contribuidor.",
@@ -339,7 +339,7 @@
   {
    "id": "conducta",
    "tag": [
-    "10.4",
+    "Guía",
     "Código de conducta"
    ],
    "say": "La comunidad de Qiskit tiene un código de conducta: tratar a todos con respeto y dignidad, sin acoso, sin importar edad, apariencia, discapacidad, etnia, identidad de género, nivel de experiencia, nacionalidad, religión u orientación. Vale en línea y en persona. [[bien]]Se espera lenguaje acogedor e inclusivo, respeto por otros puntos de vista, aceptar la crítica constructiva, empatía, y colaborar antes que confrontar. [[mal]]No se acepta lenguaje o imágenes sexualizadas, insultos, acoso, ni publicar información privada de otros, aunque se diga en broma.",
@@ -395,7 +395,7 @@
   {
    "id": "q1",
    "tag": [
-    "10.4",
+    "Guía",
     "Comprueba"
    ],
    "say": "¿Dónde pides ayuda?",
@@ -428,7 +428,7 @@
   {
    "id": "mision",
    "tag": [
-    "10.4",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero escribes la cita de un programa de IBM Quantum con la versión que tienes instalada. [[n2]]Después haces que la cita de un QPU sirva para cualquier backend, con su nombre, su versión y su familia. [[n3]]Y por último armas la sección de citas de un artículo: el agradecimiento, una frase por QPU y la referencia con el año. Usas backends simulados, sin cuenta. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -510,93 +510,23 @@
   {
    "id": "proyecto",
    "tag": [
-    "10.4",
-    "Tu proyecto: el informe final"
+    "Guía",
+    "Referencia: el informe final"
    ],
-   "say": "Y el proyecto llega a su final. [[recalcula]]El hito diez es un informe reproducible. Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez. [[pasos]]Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado. [[informe]]Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU. Con las mismas semillas, cualquiera obtiene los mismos números.",
+   "say": "La referencia final reúne lo que necesitas para escribir un informe reproducible. [[recalcula]]Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez. [[pasos]]Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado. [[informe]]Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU. Con las mismas semillas, cualquiera obtiene los mismos números.",
    "scene": [
     {
      "type": "math",
      "tex": "M(t) = \\frac{1}{N}\\sum_i \\langle Z_i \\rangle",
      "size": 46
-    },
-    {
-     "type": "exercise",
-     "exercise": "p10-comunidad/hito10-referencia",
-     "prompt": "Completa `curvas(n, J, h, T, pasos)`: devuelve `(exacta, trotter)`, dos listas de ⟨M⟩ en `t = k·T/pasos` para `k = 0, …, pasos`. La curva de Trotter ya está; falta la exacta, que evoluciona `|0…0⟩` con `exp(-i H t)`.",
-     "level": 1,
-     "needs": "qiskit",
-     "hints": [
-      "Cada instante tiene su propia evolución `exp(-i H t)` desde el mismo estado inicial.",
-      "Recorre `k` de 0 a `pasos`, evoluciona `psi0` con `expm` y mide `M` con su matriz.",
-      "La forma es `psi = expm(-1j * H * ___) @ psi0` y `np.vdot(psi, M.to_matrix() @ psi)`."
-     ],
-     "id": "e1",
-     "hidden": true,
-     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom scipy.linalg import expm\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef curvas(n, J, h, T, pasos):\n    dt = T / pasos\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    ).to_matrix()\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi0 = np.zeros(2**n, dtype=complex)\n    psi0[0] = 1\n    exacta = []  # ✏️ en cada t = k · dt, evoluciona psi0 con e^(-iHt) y mide M\n    trot = [float(np.real(Statevector(trotter(n, J, h, dt, k)).expectation_value(M))) for k in range(pasos + 1)]\n    return exacta, trot",
-     "cases": [
-      "4 espines, T = 2 y 20 pasos: M(0) = 1, las dos curvas y menos de 0.01 entre ellas"
-     ]
-    },
-    {
-     "type": "exercise",
-     "exercise": "p10-comunidad/hito10-curva",
-     "prompt": "Completa `evaluar(n, J, h, T, pasos)` y `elegir_pasos(n, J, h, T)`. `evaluar` devuelve el mayor error `|exacta − Trotter|` entre todos los instantes y la profundidad del circuito medido en `FakeFez`. `elegir_pasos` prueba pasos crecientes desde 1 y devuelve el primero con error menor que `0.02` y profundidad de como mucho `200`. La trampa: el error que cuenta es el peor de la curva, no el del último instante.",
-     "level": 2,
-     "needs": "qiskit",
-     "hints": [
-      "Un número de pasos sirve si toda la curva queda cerca de la exacta y el circuito cabe en el hardware.",
-      "En el bucle de `evaluar`, compara `exacta` con ⟨M⟩ del circuito de Trotter de `k` pasos y conserva el máximo.",
-      "Las formas son `error = max(error, abs(exacta - ___))` y `if error < 0.02 and profundidad <= ___: return pasos`."
-     ],
-     "id": "e2",
-     "hidden": true,
-     "starter": "import numpy as np\nfrom qiskit import QuantumCircuit, transpile\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit_ibm_runtime.fake_provider import FakeFez\nfrom scipy.linalg import expm\n\nFEZ = FakeFez()\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef evaluar(n, J, h, T, pasos):\n    dt = T / pasos\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    ).to_matrix()\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi0 = np.zeros(2**n, dtype=complex)\n    psi0[0] = 1\n    error = 0.0\n    for k in range(pasos + 1):\n        psi = expm(-1j * H * k * dt) @ psi0\n        exacta = float(np.real(np.vdot(psi, M.to_matrix() @ psi)))\n        error = 0.0  # ✏️ el mayor |exacta - Trotter| entre todos los instantes\n    qc = trotter(n, J, h, dt, pasos)\n    qc.measure_all()\n    return error, transpile(qc, FEZ, optimization_level=1, seed_transpiler=7).depth()\n\n\ndef elegir_pasos(n, J, h, T):\n    return 2  # ✏️ prueba pasos crecientes con evaluar y quédate con el primero que cumpla las dos cotas",
-     "cases": [
-      "4 espines y T = 2: el error máximo y la profundidad con 6 pasos, y unos pasos con error < 0.02 y profundidad ≤ 200"
-     ]
-    },
-    {
-     "type": "exercise",
-     "exercise": "p10-comunidad/hito10-informe",
-     "prompt": "Completa `informe(n, J, h, T, pasos, disparos, semilla, qpu, anio)`: devuelve Markdown con parámetros, una tabla `| t | exacta | Trotter | Trotter con ruido |`, versiones y citas. Falta la columna con ruido: ⟨M⟩ desde los conteos simulados con el ruido de `FakeManilaV2`. Con un `qpu` añade la frase del procesador con sus datos; para `ibm_fez`, versión `1.2.8` y familia `Heron` es «In this paper we used `ibm_fez` (v1.2.8), an IBM Quantum Heron processor.». Con `None`, omítela.",
-     "level": 3,
-     "needs": "aer",
-     "hints": [
-      "La columna con ruido viene de las cuentas, no del estado ideal; cada bit `0` suma `+1` y cada `1` resta `1`.",
-      "En `resultados`, cambia `ruidosa` usando `cuentas`; en `informe`, añade la frase a `citas` solo si hay `qpu`.",
-      "La forma es `sum(v * sum(1 - 2 * int(b) for b in s) for s, v in cuentas.items()) / (___ * ___)`."
-     ],
-     "id": "e3",
-     "hidden": true,
-     "starter": "from importlib.metadata import version\n\nimport numpy as np\nfrom qiskit import QuantumCircuit, transpile\nfrom qiskit.quantum_info import SparsePauliOp, Statevector\nfrom qiskit_aer import AerSimulator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\nfrom scipy.linalg import expm\n\nAGRADECIMIENTO = (\n    \"We acknowledge the use of IBM Quantum services for this work. The views expressed are those of the \"\n    \"authors, and do not reflect the official policy or position of IBM or the IBM Quantum team.\"\n)\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef resultados(n, J, h, T, pasos, disparos, semilla):\n    dt = T / pasos\n    H = SparsePauliOp.from_sparse_list(\n        [(\"ZZ\", [i, i + 1], J) for i in range(n - 1)] + [(\"X\", [i], h) for i in range(n)], num_qubits=n\n    ).to_matrix()\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    psi0 = np.zeros(2**n, dtype=complex)\n    psi0[0] = 1\n    backend = FakeManilaV2()\n    simulador = AerSimulator.from_backend(backend)\n    circuitos = [trotter(n, J, h, dt, k) for k in range(pasos + 1)]\n    medidos = [qc.measure_all(inplace=False) for qc in circuitos]\n    isas = transpile(medidos, backend, optimization_level=1, seed_transpiler=semilla)\n    conteos = simulador.run(isas, shots=disparos, seed_simulator=semilla).result().get_counts()\n    filas = []\n    for k, (qc, cuentas) in enumerate(zip(circuitos, conteos)):\n        psi = expm(-1j * H * k * dt) @ psi0\n        exacta = float(np.real(np.vdot(psi, M.to_matrix() @ psi)))\n        ideal = float(np.real(Statevector(qc).expectation_value(M)))\n        ruidosa = ideal  # ✏️ M desde los conteos de FakeManilaV2: cada bit 0 suma +1 y cada 1 resta 1\n        filas.append((k * dt, exacta, ideal, ruidosa))\n    return filas\n\n\ndef informe(n, J, h, T, pasos, disparos, semilla, qpu, anio):\n    filas = resultados(n, J, h, T, pasos, disparos, semilla)\n    citas = [AGRADECIMIENTO]\n    # ✏️ con un qpu, añade la frase del procesador\n    citas.append(f\"IBM Quantum. https://quantum.cloud.ibm.com/, {anio}\")\n    return \"\\n\".join(\n        [\n            \"# Magnetización de una cadena de Ising tras un cambio brusco del campo\",\n            \"\",\n            \"## Parámetros\",\n            f\"N = {n} espines, J = {J}, h = {h}, T = {T}, {pasos} pasos de Trotter, {disparos} disparos, \"\n            f\"semilla {semilla}, ruido simulado con el modelo de FakeManilaV2.\",\n            \"\",\n            \"## Resultados\",\n            \"| t | exacta | Trotter | Trotter con ruido |\",\n            \"| --- | --- | --- | --- |\",\n            *(f\"| {t:.2f} | {e:.4f} | {tr:.4f} | {ru:.4f} |\" for t, e, tr, ru in filas),\n            \"\",\n            \"## Software\",\n            f\"qiskit {version('qiskit')}, qiskit-aer {version('qiskit-aer')}, qiskit-ibm-runtime {version('qiskit-ibm-runtime')}.\",\n            \"\",\n            \"## Citas\",\n            \"\\n\\n\".join(citas),\n        ]\n    )",
-     "cases": [
-      "4 espines, T = 2, 8 pasos y un QPU: parámetros, tabla con las tres curvas, versiones y citas"
-     ]
     }
    ],
-   "actions": [
-    {
-     "do": "show",
-     "id": "e1",
-     "at": "recalcula"
-    },
-    {
-     "do": "show",
-     "id": "e2",
-     "at": "pasos"
-    },
-    {
-     "do": "show",
-     "id": "e3",
-     "at": "informe"
-    }
-   ]
+   "actions": []
   },
   {
    "id": "reflexion",
    "tag": [
-    "10.4",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para cerrar el curso. Lo que escribas se guarda en tu navegador.",
@@ -620,7 +550,7 @@
   {
    "id": "cierre",
    "tag": [
-    "10.4",
+    "Guía",
     "Fin del curso"
    ],
    "say": "Resumen. [[r1]]Soporte en IBM Cloud, comunidad en Slack y Stack Exchange. [[r2]]Errores y propuestas en GitHub. [[r3]]Cita Qiskit y los QPUs que uses. [[r4]]Y participa con respeto. Con esto terminas el recorrido completo por las guías de IBM Quantum y Qiskit. ¡Felicidades! Ahora, a practicar con hardware real.",

@@ -46,7 +46,7 @@ dinamicos = lesson(
         beat(
             "intro",
             ("", "Lo que el hardware admite"),
-            """En la Parte dos construiste circuitos dinámicos con if, switch, for y while. En el hardware de IBM, por ahora, solo se ejecuta la instrucción if, con su else.
+            """En la unidad de hardware construirás circuitos dinámicos con if, switch, for y while. En el hardware de IBM, por ahora, solo se ejecuta la instrucción if, con su else.
              [[trade]]Y hay un costo: medir a mitad del circuito y procesar la lógica clásica suele tardar más que una puerta de dos qubits. Ese tiempo extra puede anular la ventaja de un circuito menos profundo.
              [[filtrar]]Para ver qué procesadores admiten circuitos dinámicos, filtra con dynamic circuits igual a True.""",
             [
@@ -715,7 +715,7 @@ temporizacion = lesson(
         beat(
             "por_que",
             ("", "Los tiempos reales"),
-            """En la Parte dos viste timeline draw, que dibuja los tiempos de un circuito programado. Para circuitos estáticos funciona bien, pero para los dinámicos no es exacto: hay operaciones implícitas, como difundir resultados o decidir una rama, que Qiskit no conoce.
+            """En las lecciones de circuitos viste timeline draw, que dibuja los tiempos de un circuito programado. Para circuitos estáticos funciona bien, pero para los dinámicos no es exacto: hay operaciones implícitas, como difundir resultados o decidir una rama, que Qiskit no conoce.
              [[servicio]]Por eso el servicio de IBM puede devolver la programación real que usó. [[exp]]Es una función experimental, solo para trabajos de Sampler.
              [[factura]]Y ojo: el tiempo total de circuito que devuelve no es el que se usa para facturar.""",
             [
@@ -1502,7 +1502,7 @@ print(f"{math.ceil(2 + circuit_duration * 4096)} s")""",
             ("", "Tiempo máximo de ejecución"),
             """El servicio impone un máximo de tres horas por trabajo; si se supera, el trabajo se cancela con RuntimeJobMaxTimeoutError. [[propio]]Puedes fijar uno menor con max execution time, en segundos. Gana el menor de los dos.
              [[qpu]]Ese límite se mide en uso de QPU, no en tiempo de reloj. [[metrics]]Y job punto metrics te dice cuántos segundos cuánticos consumió un trabajo terminado.
-             [[ttl]]Lotes y sesiones tienen además un tiempo de vida máximo, el TTL, que verás en la última lección de esta parte.""",
+             [[ttl]]Lotes y sesiones tienen además un tiempo de vida máximo, el TTL, que verás en la última lección de esta unidad.""",
             [
                 Code(
                     """estimator.options.max_execution_time = 2500     # segundos de QPU
@@ -2306,7 +2306,7 @@ with Session(backend=backend) as session:
         beat(
             "proyecto",
             ("", "Tu proyecto: hito VII"),
-            """El hito siete del proyecto de espines junta lo de esta parte. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz.
+            """El hito siete del proyecto de espines junta lo de esta unidad. [[frac]]Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz.
              [[lote]]Después mides varios pasos de tiempo en un lote, cada uno en su trabajo. [[real]]Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar.
              [[ojo]]La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos.""",
             [
@@ -2371,7 +2371,7 @@ with Session(backend=backend) as session:
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]Job, batch y session. [[r2]]Batch por defecto; session para cargas iterativas; job para una petición. [[r3]]Lotes y sesiones tienen un TTL máximo y otro interactivo.
-             [[r4]]En local los modos se ignoran, y el plan Open no admite sesiones. Con esto termina la Parte siete.""",
+             [[r4]]En local los modos se ignoran, y el plan Open no admite sesiones. Con esto termina la sexta unidad.""",
             s_cierre,
             a_cierre,
         ),

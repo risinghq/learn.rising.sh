@@ -241,5 +241,31 @@
     "Y clasificación con Singularity."
    ]
   ]
+ },
+ "hito9": {
+  "dur": 31.392,
+  "marks": {
+   "migrar": 6.029,
+   "paquete": 15.667,
+   "hito": 23.834
+  },
+  "cues": [
+   [
+    0.107,
+    "Esta guía reúne una migración importante del proyecto de la cadena de espines."
+   ],
+   [
+    6.029,
+    "Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos."
+   ],
+   [
+    15.667,
+    "Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice."
+   ],
+   [
+    23.834,
+    "La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio."
+   ]
+  ]
  }
 }

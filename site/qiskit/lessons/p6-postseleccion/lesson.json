@@ -1,7 +1,7 @@
 {
  "id": "p6-postseleccion",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.6",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.8",
  "title": "Postselección",
  "summary": "Añadir controles de error no Markoviano y filtrar muestras con verificaciones sobre qubits activos y espectadores.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.6",
+    "5.8",
     "Filtrar muestras sospechosas"
    ],
    "say": "Postseleccionar significa conservar solo algunas muestras después de medir. [[no_postselect]]En esta lección no elegimos un resultado por tener una propiedad física deseada; buscamos señales de que el dispositivo pudo sufrir un error no Markoviano y descartamos las muestras que fallan esos controles. [[costo]]La técnica cambia la distribución observada y reduce el número de disparos útiles. Hay que reportar cuántas muestras sobreviven, no solo el resultado filtrado.",
@@ -55,7 +55,7 @@
   {
    "id": "control",
    "tag": [
-    "6.6",
+    "5.8",
     "Comprobar que el bit se invierte"
    ],
    "say": "La guía añade el control al final del circuito. [[medir]]Primero se miden los qubits activos, como siempre. [[lento]]Después se aplica a cada uno un pulso X lento, una rotación RX de pi, [[otra]]y se vuelve a medir. [[esperado]]Si todo fue bien, la segunda medición es la primera invertida. Si no coincide, ese disparo probablemente sufrió un error no Markoviano, lento o correlacionado, y se descarta. [[mitigation]]Una nota de versiones: estas herramientas vienen del paquete de utilidades de los addons; en las versiones más recientes del cliente también están en el paquete qiskit mitigation, que además permite controles al inicio del circuito. [[limite]]En todo caso, es un detector parcial: no revisa todos los errores, y el pulso de control también tiene imperfecciones.",
@@ -128,7 +128,7 @@
   {
    "id": "espectadores",
    "tag": [
-    "6.6",
+    "5.8",
     "Los qubits vecinos también cuentan"
    ],
    "say": "Un qubit que el circuito no usa puede ser vecino de uno activo. [[vecino]]Por el acoplamiento, ese espectador aporta información sobre errores correlacionados, así que también se mide y se controla. [[mapa]]El pase que añade los espectadores usa el mapa de acoplamiento del backend para encontrarlos. [[frac]]Y como el pulso lento es una RX, hace falta un backend con puertas fraccionales.",
@@ -243,10 +243,10 @@
   {
    "id": "circuito",
    "tag": [
-    "6.6",
+    "5.8",
     "Añadir los controles"
    ],
-   "say": "El ejemplo de la guía prepara un GHZ de cuatro qubits y lo transpila para un backend con puertas fraccionales. [[passes]]Un PassManager con dos pases de las utilidades de los addons: AddSpectatorMeasures, que mide los espectadores, y AddPostSelectionMeasures, que añade el pulso lento y la segunda medición. [[run]]El circuito resultante se ejecuta con Executor, cuatro mil disparos. [[regs]]El resultado trae cuatro registros: meas y spec, antes del pulso, y meas ps y spec ps, después. [[auth]]Esta parte necesita una cuenta de IBM y un backend real, así que no la ejecutamos en la verificación.",
+   "say": "El ejemplo de la guía prepara un GHZ de cuatro qubits y lo transpila para un backend con puertas fraccionales. [[passes]]Un PassManager con dos pases de las utilidades de los addons: AddSpectatorMeasures, que mide los espectadores, y AddPostSelectionMeasures, que añade el pulso lento y la segunda medición. [[run]]El circuito resultante se ejecuta con Executor, cuatro mil disparos. [[regs]]El resultado trae cuatro registros: meas y spec, antes del pulso, y meas ps y spec ps, después. [[auth]]Esta unidad necesita una cuenta de IBM y un backend real, así que no la ejecutamos en la verificación.",
    "scene": [
     {
      "type": "code",
@@ -288,7 +288,7 @@
   {
    "id": "mascara",
    "tag": [
-    "6.6",
+    "5.8",
     "La máscara decide qué queda"
    ],
    "say": "PostSelector interpreta esos registros. [[selector]]Se crea a partir del circuito con los controles y del mapa de acoplamiento, y compute mask devuelve una máscara booleana con un valor por disparo. [[true]]Verdadero significa conservar; falso, descartar. [[estrategias]]Hay dos estrategias, node y edge, y la guía calcula las dos. [[and]]Después las combina con un Y lógico. [[resultado]]En el ejemplo se conserva el ochenta y tres por ciento de los disparos.",
@@ -340,7 +340,7 @@
   {
    "id": "predice_and",
    "tag": [
-    "6.6",
+    "5.8",
     "Dos reglas, un Y lógico"
    ],
    "say": "Mira qué exige cada estrategia. [[node]]Node descarta el disparo si algún qubit no invirtió su bit. [[edge]]Edge mira cada arista del mapa de acoplamiento y solo descarta si en alguna arista no se invirtió ninguno de los dos bits. [[apuesta]]La guía conserva los disparos que pasan las dos reglas. Antes de ejecutar, apuesta: ¿cuántos disparos conserva node Y edge, comparado con node solo?",
@@ -396,7 +396,7 @@
   {
    "id": "comparar",
    "tag": [
-    "6.6",
+    "5.8",
     "Las tres máscaras"
    ],
    "say": "Un GHZ de cuatro qubits en línea, con los controles de la guía, en Aer con ruido de lectura y de CNOT. No hace falta backend real. [[ps]]AddPostSelectionMeasures añade el pulso lento y la segunda medida. [[ruido]]El modelo tiene tres por ciento de error de lectura y dos por ciento por CNOT. [[selector]]PostSelector se construye con el circuito y las aristas de la línea. [[masks]]Calculamos las dos máscaras y su Y lógico. [[res]]Node conserva el setenta y ocho por ciento; edge, casi el noventa y nueve; y node Y edge, exactamente lo mismo que node. Todo disparo que pasa node ya tiene todos sus bits invertidos, así que pasa también edge: el Y lógico no añade ningún filtro. La estrategia estricta es node; edge es la permisiva.",
@@ -456,7 +456,7 @@
   {
    "id": "honesto",
    "tag": [
-    "6.6",
+    "5.8",
     "¿Mejoró el resultado?"
    ],
    "say": "La guía compara la distribución con el ideal: mitad cero cero cero cero, mitad uno uno uno uno. [[antes]]Sin postselección, la fidelidad con la distribución ideal es cero coma nueve tres ocho. [[despues]]Con postselección, cero coma nueve tres dos: en este caso, un poco peor. [[leccion]]La lección es importante: la postselección puede mejorar mucho los resultados cuando hay errores no Markovianos, pero no es una solución completa, cuesta disparos, y hay que comprobar su efecto en cada caso.",
@@ -511,7 +511,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.6",
+    "5.8",
     "Comprueba"
    ],
    "say": "Sobre una máscara de postselección.",
@@ -544,7 +544,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.6",
+    "5.8",
     "Comprueba"
    ],
    "say": "Sobre las dos estrategias.",
@@ -588,7 +588,7 @@
   {
    "id": "mision",
    "tag": [
-    "6.6",
+    "5.8",
     "Tu turno"
    ],
    "say": "Ahora te toca. Trabajas con las medidas del GHZ de cuatro qubits con controles, ya convertidas en listas de ceros y unos. [[n1]]Primero calculas la fidelidad del GHZ con los disparos que conserva una máscara. [[n2]]Después escribes la máscara node, que exige que todos los bits pasen el control. [[n3]]Y por último escribes la máscara edge, que exige un bit que pase en cada arista. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -669,7 +669,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.6",
+    "5.8",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma.",
@@ -693,7 +693,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.6",
+    "5.8",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Los controles de inversión de bit detectan algunas fluctuaciones lentas y errores correlacionados. [[r2]]Se pueden agregar al circuito en qubits activos y en sus espectadores conectados. [[r3]]PostSelector genera una máscara: True conserva y False descarta. [[r4]]Mide cuánto descartas; filtrar puede ayudar, pero también reduce la muestra y no corrige todos los errores.",

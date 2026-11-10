@@ -1,7 +1,7 @@
 {
  "id": "p3-niveles",
- "part": "Parte III · Transpilación",
- "section": "3.3",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.3",
  "title": "Niveles de optimización y parámetros",
  "summary": "Qué hace cada nivel, aproximación, semilla, layout inicial, métodos de etapa, todos los parámetros por defecto y cómo comparar configuraciones.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "tabla",
    "tag": [
-    "3.3",
+    "4.3",
     "Los cuatro niveles"
    ],
    "say": "El nivel de optimización controla cuánto esfuerzo invierte el transpilador. [[n0]]Nivel cero: sin optimización, solo traducción y un layout trivial con los SWAP necesarios. Se usa para caracterizar el hardware, cuando quieres ejecutar exactamente lo que escribiste. [[n1]]Nivel uno, ligero: intenta el layout trivial y, si hace falta, VF2 y Sabre; cancela inversas y optimiza puertas de un qubit. Es el valor por defecto. [[n2]]Nivel dos, medio: más intentos de layout y routing, sin el trivial, y cancelación por conmutación. [[n3]]Nivel tres, alto: aún más esfuerzo, re-síntesis de bloques de dos qubits con la descomposición KAK de Cartan, y pases que rompen la unitariedad, como mover mediciones para evitar SWAP o quitar puertas diagonales antes de medir.",
@@ -77,7 +77,7 @@
   {
    "id": "apuesta",
    "tag": [
-    "3.3",
+    "4.3",
     "Antes de ejecutar"
    ],
    "say": "Como las puertas de dos qubits son la mayor fuente de error, una buena medida de calidad es contarlas. Probemos con una unitaria aleatoria de dos qubits seguida de un SWAP, sobre el backend falso Sherbrooke, cuya puerta de dos qubits es la ECR. [[reto]]Un SWAP cuesta tres CNOT, y una unitaria aleatoria de dos qubits, hasta tres. Apuesta: con el nivel tres, ¿cuántas ECR quedan?",
@@ -121,7 +121,7 @@
   {
    "id": "accion",
    "tag": [
-    "3.3",
+    "4.3",
     "Los niveles en acción"
    ],
    "say": "Ejecutemos el código con los cuatro niveles. [[n01]]Con los niveles cero y uno salen seis ECR: la unitaria y el SWAP se traducen por separado, a tres cada uno. [[n23]]Con los niveles dos y tres, solo tres: la unitaria y el SWAP se fusionan en un solo bloque de dos qubits, y cualquier unitaria de dos qubits se puede hacer con tres puertas de entrelazamiento como máximo. Si apostaste por tres, acertaste. [[nota]]Subir de nivel no siempre cambia algo, pero aquí sí.",
@@ -159,7 +159,7 @@
   {
    "id": "aprox",
    "tag": [
-    "3.3",
+    "4.3",
     "Grado de aproximación"
    ],
    "say": "Se puede ir más allá. approximation degree indica cuánto debe parecerse el circuito al original: uno, el valor por defecto, es exacto; valores menores permiten aproximar. [[ej]]Con esta unitaria y cero coma noventa y nueve, el nivel tres usa solo dos ECR. [[fid]]La fidelidad de esa síntesis baja a cero coma noventa y nueve dos: introduces un error pequeño a cambio de una puerta ruidosa menos, que en hardware real puede costar más. [[qv]]Esta técnica se usó para aumentar el volumen cuántico de los equipos de IBM.",
@@ -218,7 +218,7 @@
   {
    "id": "seed",
    "tag": [
-    "3.3",
+    "4.3",
     "Semilla y layout inicial"
    ],
    "say": "Dos parámetros más. [[seed]]seed transpiler fija la semilla de las partes aleatorias: misma semilla, mismo resultado. [[lay]]initial layout fija qué qubits físicos usar al principio. Puede ser un objeto Layout, que asigna cada qubit virtual a un entero, o simplemente una lista: el elemento i es el qubit físico del virtual i. [[final]]Ojo: el layout final puede ser distinto del inicial, porque el transpilador puede permutar qubits con SWAP. [[mapa]]Para elegir buenos qubits, plot error map dibuja el chip con sus errores.",
@@ -277,7 +277,7 @@
   {
    "id": "metodos",
    "tag": [
-    "3.3",
+    "4.3",
     "Métodos de cada etapa"
    ],
    "say": "Los parámetros que terminan en method eligen qué hace cada etapa. [[lay]]layout method: trivial, dense, sabre o el nombre de un plugin. [[rou]]routing method: basic, lookahead, sabre o none. [[tra]]translation method: translator, synthesis, y los de IBM para circuitos dinámicos o puertas fraccionales. [[sch]]scheduling method: asap o alap. [[otros]]Además, init method, optimization method y unitary synthesis method aceptan plugins. Para ver los instalados, list stage plugins con el nombre de la etapa.",
@@ -320,7 +320,7 @@
   {
    "id": "todos",
    "tag": [
-    "3.3",
+    "4.3",
     "Todos los parámetros"
    ],
    "say": "Los parámetros se dividen en dos clases. [[target]]Los que describen el objetivo: backend o target, que ya traen todo, o bien sus piezas sueltas: basis gates, coupling map, timing constraints. Si das backend, no necesitas lo demás; si das algo más, como coupling map, eso tiene prioridad. [[como]]Y los que influyen en cómo trabaja el transpilador: los métodos de etapa, initial layout, approximation degree, seed, y hls config para la síntesis de alto nivel. [[regla]]Una regla importante: lo que fijas a mano, el transpilador no lo cambia.",
@@ -356,7 +356,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.3",
+    "4.3",
     "Comprueba"
    ],
    "say": "Una pregunta sobre parámetros.",
@@ -389,7 +389,7 @@
   {
    "id": "comparar",
    "tag": [
-    "3.3",
+    "4.3",
     "Comparar configuraciones"
    ],
    "say": "¿Cómo saber qué configuración es mejor? Ejecutando y comparando con el resultado ideal. Tomemos el algoritmo de Grover con un oráculo que marca uno uno uno: idealmente, uno uno uno sale con probabilidad cero coma setenta y ocho. [[cz]]Transpilado para el backend falso Torino, el nivel cero necesita veintiuna CZ; el nivel tres, solo doce. [[dd]]Añadimos una tercera versión: el nivel tres con desacoplamiento dinámico. [[sim]]Simulamos las tres con el modelo de ruido del backend, ocho mil disparos.",
@@ -439,7 +439,7 @@
   {
    "id": "hellinger",
    "tag": [
-    "3.3",
+    "4.3",
     "Fidelidad de Hellinger"
    ],
    "say": "Para comparar distribuciones usamos la fidelidad de Hellinger: uno es perfecto. [[n0]]El nivel cero llega a cero coma noventa y dos. [[n3]]El nivel tres, a cero coma noventa y nueve cuatro: menos puertas, menos error. [[dd]]Con desacoplamiento dinámico, cero coma noventa y nueve uno: en este simulador no mejora, porque su modelo de ruido no incluye los efectos que el desacoplamiento corrige, como la diafonía entre qubits. En hardware real suele ayudar. [[moral]]La moraleja: una misma configuración puede ayudar a un circuito y perjudicar a otro. Revisa siempre los circuitos transpilados antes de gastar tiempo de hardware.",
@@ -491,7 +491,7 @@
   {
    "id": "q2",
    "tag": [
-    "3.3",
+    "4.3",
     "Comprueba"
    ],
    "say": "Una pregunta sobre aproximación.",
@@ -524,7 +524,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.3",
+    "4.3",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, escribe la función que cuenta las ECR de la unitaria con SWAP en cada nivel. [[n2]]Después, usa el grado de aproximación para quitar una ECR de más. [[n3]]Y por último, simula con ruido el algoritmo de Grover y mide cuánta fidelidad gana cada nivel.",
@@ -607,7 +607,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.3",
+    "4.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -631,7 +631,7 @@
   {
    "id": "cierre",
    "tag": [
-    "3.3",
+    "4.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]El nivel de optimización va de cero, para caracterizar, a tres, con re-síntesis. [[r2]]approximation degree cambia exactitud por menos puertas. [[r3]]seed, initial layout y los métodos de etapa afinan el proceso. [[r4]]Y para elegir, compara con la distribución ideal usando la fidelidad de Hellinger.",

@@ -62,9 +62,12 @@ def other_lesson_ids(course: str) -> dict[str, str]:
     for path in sorted(SITE.glob("*/course.json")):
         if path.parent.name == course:
             continue
-        for part in json.loads(path.read_text(encoding="utf-8"))["parts"]:
+        index = json.loads(path.read_text(encoding="utf-8"))
+        for part in index["parts"]:
             for les in part["lessons"]:
                 found[les["id"]] = path.parent.name
+        for les in index.get("guides", []):
+            found[les["id"]] = path.parent.name
     return found
 
 
@@ -79,7 +82,12 @@ def walk(blocks: Iterable[dict[str, Any]]) -> Iterator[dict[str, Any]]:
         yield from walk(x for x in children if isinstance(x, dict))
 
 
-def publish_exercises(lesson: dict[str, Any], seen: set[str], runs: str) -> None:
+def publish_exercises(
+    lesson: dict[str, Any],
+    seen: set[str],
+    runs: str,
+    project_destinations: dict[str, str] | None = None,
+) -> None:
     """Add the starter code and the visible cases to each exercise, and in a browser course the
     whole check.py: the hidden cases of that course are readable by the learner."""
     for b in lesson["beats"]:
@@ -93,7 +101,11 @@ def publish_exercises(lesson: dict[str, Any], seen: set[str], runs: str) -> None
             except ValueError as exc:
                 ERRORS.append(f"{where}: {exc}")
                 continue
-            if not eid.startswith(lesson["id"] + "/"):
+            source_lesson = eid.split("/", 1)[0]
+            if (
+                not eid.startswith(lesson["id"] + "/")
+                and (project_destinations or {}).get(source_lesson) != lesson["id"]
+            ):
                 ERRORS.append(f"{where} must be in exercises/{lesson['id']}/")
             elif eid in seen:
                 ERRORS.append(f"{where} is repeated")
@@ -157,6 +169,7 @@ def main(course: str) -> None:
     sys.path.insert(0, str(source))
     plan = importlib.import_module("plan")
     parts: list[dict[str, Any]] = plan.PARTS
+    guides: list[tuple[str, str, list[str]]] = getattr(plan, "GUIDES", [])
     runs: str = getattr(plan, "RUNS", "server")
     if runs not in ("server", "browser"):
         raise SystemExit(f"{course}: RUNS must be 'server' or 'browser', not {runs!r}")
@@ -167,6 +180,7 @@ def main(course: str) -> None:
     notes = [hooks.check()] if hooks else []
     lessons = load_lessons(source)
     planned = {lesson[0] for part in parts for lesson in part["lessons"]}
+    planned.update(lesson[0] for lesson in guides)
     if planned != set(lessons):
         raise SystemExit(
             f"plan and modules do not match: without module {sorted(planned - set(lessons))}, "
@@ -175,42 +189,73 @@ def main(course: str) -> None:
     taken = other_lesson_ids(course)
     if clash := sorted(planned & set(taken)):
         raise SystemExit(f"lesson ids already used by another course: {clash}")
-    course_json: dict[str, Any] = dict(parts=[])
+    course_json: dict[str, Any] = dict(parts=[], guides=[])
     ordered: list[dict[str, Any]] = []
+    guide_lessons: list[dict[str, Any]] = []
     exercises: set[str] = set()
+    project = out / "project.json"
+    project_destinations = (
+        {
+            milestone["exercise"].split("/", 1)[0]: milestone["lesson"]
+            for milestone in json.loads(project.read_text(encoding="utf-8"))["milestones"]
+        }
+        if project.exists()
+        else {}
+    )
+
+    def publish(
+        item: dict[str, Any],
+        lesson_item: tuple[str, str, list[str]],
+        section: str,
+        part_title: str,
+        destination: list[dict[str, Any]],
+    ) -> None:
+        lid, _title, sources = lesson_item
+        les = lessons[lid]
+        les["part"], les["section"] = part_title, section
+        for b in les["beats"]:
+            b["tag"][0] = section or "Guía"
+        if hooks:
+            les["practice"] = [*les["practice"], *hooks.references(sources)]
+        check(les)
+        publish_exercises(les, exercises, runs, project_destinations)
+        destination.append(les)
+        tf = out / "lessons" / lid / "timings.json"
+        beat_ids = {b["id"] for b in les["beats"]}
+        if tf.exists():
+            secs = sum(
+                v["dur"]
+                for key, v in json.loads(tf.read_text(encoding="utf-8")).items()
+                if key in beat_ids
+            )
+        else:
+            secs = sum(len(b["say"].split()) for b in les["beats"]) / 140 * 60
+        secs += 45 * sum(1 for b in les["beats"] if "ask" in b)
+        item.update(
+            id=lid,
+            section=section,
+            title=les["title"],
+            summary=les["summary"],
+            minutes=round(secs / 60),
+        )
+
     for part in parts:
         entry: dict[str, Any] = dict(title=part["title"], desc=part["desc"], lessons=[])
-        for k, (lid, _title, *rest) in enumerate(part["lessons"], 1):
-            section = f"{part['n']}.{k}"
-            les = lessons[lid]
-            les["part"], les["section"] = part["title"], section
-            for b in les["beats"]:
-                b["tag"][0] = section
-            if hooks:
-                les["practice"] = [*les["practice"], *hooks.references(rest[0] if rest else [])]
-            check(les)
-            publish_exercises(les, exercises, runs)
-            ordered.append(les)
-            tf = out / "lessons" / lid / "timings.json"
-            beat_ids = {b["id"] for b in les["beats"]}
-            if tf.exists():
-                secs = sum(
-                    v["dur"]
-                    for key, v in json.loads(tf.read_text(encoding="utf-8")).items()
-                    if key in beat_ids
-                )
-            else:
-                secs = sum(len(b["say"].split()) for b in les["beats"]) / 140 * 60
-            secs += 45 * sum(1 for b in les["beats"] if "ask" in b)
-            item: dict[str, Any] = dict(
-                id=lid,
-                section=section,
-                title=les["title"],
-                summary=les["summary"],
-                minutes=round(secs / 60),
+        for k, (lid, title, *rest) in enumerate(part["lessons"], 1):
+            item: dict[str, Any] = {}
+            publish(
+                item,
+                (lid, title, rest[0] if rest else []),
+                f"{part['n']}.{k}",
+                part["title"],
+                ordered,
             )
             entry["lessons"].append(item)
         course_json["parts"].append(entry)
+    for lid, title, sources in guides:
+        item = {}
+        publish(item, (lid, title, sources), "", "Guías", guide_lessons)
+        course_json["guides"].append(item)
     ERRORS.extend(
         f"exercises/{eid} does not appear in any lesson"
         for eid in sorted(spec.all_ids())
@@ -224,6 +269,12 @@ def main(course: str) -> None:
         outputs[out / "lessons" / a["id"] / "lesson.json"] = json.dumps(
             a, ensure_ascii=False, indent=1
         )
+    if guide_lessons:
+        for a, b in zip(guide_lessons, [*guide_lessons[1:], None], strict=True):
+            a["next"] = b["id"] if b else None
+            outputs[out / "lessons" / a["id"] / "lesson.json"] = json.dumps(
+                a, ensure_ascii=False, indent=1
+            )
     outputs[out / "course.json"] = json.dumps(course_json, ensure_ascii=False, indent=1)
     if "--check" in sys.argv:
         stale = [
@@ -246,7 +297,7 @@ def main(course: str) -> None:
         f"{sum(len(les['beats']) for les in ordered)} steps" + "".join(f"; {n}" for n in notes)
     )
     if "--tts" in sys.argv:
-        for les in ordered:
+        for les in [*ordered, *guide_lessons]:
             subprocess.run(
                 [
                     "uv",

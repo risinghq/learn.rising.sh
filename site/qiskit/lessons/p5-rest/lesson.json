@@ -1,7 +1,7 @@
 {
  "id": "p5-rest",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.7",
+ "part": "Guías",
+ "section": "",
  "title": "La API REST",
  "summary": "Usar IBM Quantum desde cualquier lenguaje: autenticación con tokens portadores, enviar trabajos de Estimator y Sampler con OpenQASM 3, opciones, resultados y sesiones.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "idea",
    "tag": [
-    "5.7",
+    "Guía",
     "Sin Python"
    ],
    "say": "Todo lo que hace Qiskit con el servicio de IBM pasa por una API REST. Puedes usarla directamente, desde cualquier lenguaje o entorno. Los ejemplos de la guía usan el módulo requests de Python, pero valdría curl o JavaScript. [[token]]Primer paso: convertir tu clave API en un token portador del servicio de identidad de IBM Cloud, IAM. Es una credencial temporal: dura como máximo una hora.",
@@ -50,7 +50,7 @@
   {
    "id": "auth",
    "tag": [
-    "5.7",
+    "Guía",
     "Autenticar las peticiones"
    ],
    "say": "Cada petición lleva dos cabeceras: Authorization, con Bearer y el token, y Service CRN, con el CRN de tu instancia. [[env]]En un entorno de confianza, guarda la clave en una variable de entorno, IQP API TOKEN, y léela con os punto environ; aun así, queda en texto plano en tu equipo, así que protégela. [[usage]]Por ejemplo, una petición GET a la ruta usage devuelve tu consumo.",
@@ -91,7 +91,7 @@
   {
    "id": "estimator",
    "tag": [
-    "5.7",
+    "Guía",
     "Un trabajo de Estimator"
    ],
    "say": "Para enviar un trabajo, POST a la ruta jobs. El cuerpo lleva el program id, estimator o sampler, el nombre del backend, y en params, los PUBs. [[pub]]Cada PUB es una lista: el circuito como texto OpenQASM tres, ya transpilado; los observables, como un diccionario de cadena de Pauli a coeficiente; y los parámetros, o None. [[opts]]Las opciones van en params punto options, con los mismos nombres que en Qiskit: resilience con ZNE, dynamical decoupling o twirling. [[id]]La respuesta trae el id del trabajo.",
@@ -136,7 +136,7 @@
   {
    "id": "pred_resultados",
    "tag": [
-    "5.7",
+    "Guía",
     "Antes de leer los resultados"
    ],
    "say": "El trabajo de Sampler terminó, y pedimos sus resultados con un GET. [[ruta]]La respuesta es un JSON con los datos del registro c. [[cual]]Apuesta: ¿cómo viene cada disparo dentro de samples?",
@@ -176,7 +176,7 @@
   {
    "id": "resultados",
    "tag": [
-    "5.7",
+    "Guía",
     "Estado y resultados"
    ],
    "say": "Con el id, GET a jobs barra id da el estado, [[res]]y GET a jobs barra id barra results, los resultados en JSON. [[est]]Para Estimator: evs, stds y ensemble standard error, más la metadata. [[sam]]Para Sampler, los datos del registro c vienen como samples: cada disparo es un número hexadecimal, y esa es la respuesta de tu apuesta. Cero x tres es uno uno en binario.",
@@ -215,7 +215,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.7",
+    "Guía",
     "Comprueba"
    ],
    "say": "Lee un resultado de Sampler por REST.",
@@ -248,7 +248,7 @@
   {
    "id": "param",
    "tag": [
-    "5.7",
+    "Guía",
     "Circuitos con parámetros"
    ],
    "say": "Con parámetros, el flujo es: construir y transpilar el circuito en Qiskit, [[qasm]]exportarlo con qasm3 punto dumps, donde los parámetros quedan como entradas, [[vals]]y pasar los valores en el PUB, como lista o como diccionario de nombre a valor, con el número de disparos al final.",
@@ -282,7 +282,7 @@
   {
    "id": "sesiones",
    "tag": [
-    "5.7",
+    "Guía",
     "Sesiones y lotes por REST"
    ],
    "say": "Para las sesiones hay otra ruta, sessions. [[crear]]Un POST con el backend y mode dedicated crea una sesión y devuelve su id. Recuerda: el plan Open no permite sesiones. [[usar]]Cada trabajo que quieras dentro de ella lleva ese session id en su cuerpo. [[cerrar]]Al terminar, ciérrala con DELETE en sessions barra id barra close: así reduces la espera de otros usuarios. [[batch]]Un lote se crea igual, con mode batch.",
@@ -330,7 +330,7 @@
   {
    "id": "q2",
    "tag": [
-    "5.7",
+    "Guía",
     "Comprueba"
    ],
    "say": "Sobre la autenticación.",
@@ -363,7 +363,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.7",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Preparas los cuerpos de los trabajos y lees resultados, todo en tu equipo, sin enviar nada. [[n1]]Primero armas el cuerpo de un trabajo de Sampler con un circuito en OpenQASM tres. [[n2]]Después corriges la lectura de los disparos en hexadecimal para que los conteos coincidan con get counts. [[n3]]Y por último escribes la función que arma el cuerpo de un trabajo de Estimator, con su observable y sus opciones.",
@@ -448,7 +448,7 @@
   {
    "id": "proyecto",
    "tag": [
-    "5.7",
+    "Guía",
     "Tu proyecto: hito V"
    ],
    "say": "Y con esto llegas al hito cinco del proyecto: tu primera ejecución en un procesador cuántico real, con un presupuesto de como máximo un minuto de QPU. [[estimar]]Antes de enviar, estimas el tiempo de QPU con una fórmula que la lección te explica. [[falso]]La práctica corre en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí. [[real]]Un interruptor, bien marcado, manda el mismo trabajo a hardware real con tu cuenta guardada, y solo se envía si pulsas el botón y la estimación cabe en el presupuesto.",
@@ -457,87 +457,14 @@
      "type": "math",
      "tex": "M(t)=\\frac1N\\sum_i\\langle Z_i\\rangle",
      "size": 46
-    },
-    {
-     "type": "exercise",
-     "exercise": "p5-rest/hito5-referencia",
-     "prompt": "Escribe `magnetizacion_referencia(n, J, h, dt, pasos)`: devuelve ⟨M⟩ ideal, sin ruido, tras 0, 1, …, `pasos` pasos de Trotter desde `|0…0⟩`. Cada paso aplica `rzz(2·J·dt)` en cada enlace y `rx(2·h·dt)` en cada espín.",
-     "level": 1,
-     "needs": "qiskit",
-     "hints": [
-      "La lista necesita también el estado inicial.",
-      "Construye un circuito con el número de pasos de cada instante y calcula `⟨M_Z⟩`.",
-      "Recorre `range(pasos + 1)` y añade el valor esperado del observable."
-     ],
-     "id": "e1",
-     "hidden": true,
-     "starter": "def magnetizacion_referencia(n, J, h, dt, pasos):\n    return []",
-     "cases": [
-      "la referencia incluye el estado inicial y los valores posteriores"
-     ]
-    },
-    {
-     "type": "exercise",
-     "exercise": "p5-rest/hito5-uso",
-     "prompt": "Corrige `estimar_uso(n, J, h, dt, pasos, disparos)`: transpila los circuitos de 1 a `pasos` pasos para `FakeManilaV2`, programa cada uno y estima los segundos de QPU. Hoy solo cuenta la duración de cada circuito por disparo.",
-     "level": 2,
-     "needs": "qiskit",
-     "hints": [
-      "Entre un disparo y el siguiente, el qubit se reinicia y espera; ese tiempo también es de QPU.",
-      "La variable `espera` ya suma el `reset` y `default_rep_delay`; falta usarla en la línea marcada.",
-      "La forma es `uso += (___ + ___) * disparos`."
-     ],
-     "kind": "fix",
-     "id": "e2",
-     "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef estimar_uso(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    pm_t = generate_preset_pass_manager(target=backend.target, optimization_level=0, scheduling_method=\"alap\")\n    espera = backend.target[\"reset\"][(0,)].duration + backend.default_rep_delay\n    uso = 2.0\n    for isa in isas:\n        duracion = pm_t.run(isa).estimate_duration(backend.target, unit=\"s\")\n        uso += duracion * disparos\n    return uso",
-     "cases": [
-      "4 espines, 6 circuitos de 4096 disparos en FakeManilaV2: unos 8.4 s de QPU"
-     ]
-    },
-    {
-     "type": "exercise",
-     "exercise": "p5-rest/hito5-estimator",
-     "prompt": "Completa `ejecutar(n, J, h, dt, pasos, disparos)`: ejecuta los circuitos ya transpilados con el `Estimator` de `qiskit_ibm_runtime` en modo `FakeManilaV2`, con `disparos` y `seed_simulator=5`, y devuelve ⟨M⟩ de cada circuito como `float`. La trampa: cada observable debe ir con el circuito cuyo `layout` ya aplicaste, un PUB por pareja.",
-     "level": 3,
-     "needs": "aer",
-     "hints": [
-      "Un PUB reúne un circuito y el observable que quieres medir.",
-      "Crea el `Estimator` con `mode=backend` y fija `default_shots` y `simulator.seed_simulator` en sus opciones.",
-      "La forma es `estimator.run(list(zip(___, ___))).result()` y después `float(pub.data.evs)` por resultado."
-     ],
-     "id": "e3",
-     "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_estimator import Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef ejecutar(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(backend=backend, optimization_level=1, seed_transpiler=1)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    observables = [M.apply_layout(isa.layout) for isa in isas]\n    return [0.0] * len(isas)  # ✏️ un Estimator sobre backend, disparos y seed_simulator=5, un PUB por circuito",
-     "cases": [
-      "3 espines y 4 circuitos con ruido de FakeManilaV2: la curva medida sigue a la ideal"
-     ]
     }
    ],
-   "actions": [
-    {
-     "do": "show",
-     "id": "e1",
-     "at": "estimar"
-    },
-    {
-     "do": "show",
-     "id": "e2",
-     "at": "estimar",
-     "t": 1
-    },
-    {
-     "do": "show",
-     "id": "e3",
-     "at": "estimar",
-     "t": 2
-    }
-   ]
+   "actions": []
   },
   {
    "id": "reflexion",
    "tag": [
-    "5.7",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para cerrar la parte.",
@@ -561,10 +488,10 @@
   {
    "id": "cierre",
    "tag": [
-    "5.7",
+    "Guía",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]La clave API se cambia por un token portador de una hora. [[r2]]Cada petición lleva Authorization y Service CRN. [[r3]]Los trabajos se envían a jobs con program id, backend y PUBs en OpenQASM tres. [[r4]]Y las sesiones y lotes se crean en sessions. Con esto termina la Parte cinco.",
+   "say": "Resumen. [[r1]]La clave API se cambia por un token portador de una hora. [[r2]]Cada petición lleva Authorization y Service CRN. [[r3]]Los trabajos se envían a jobs con program id, backend y PUBs en OpenQASM tres. [[r4]]Y las sesiones y lotes se crean en sessions. Esta guía deja lista la ejecución remota para la sexta unidad.",
    "scene": [
     {
      "type": "list",
@@ -617,7 +544,7 @@
   "Exporta a OpenQASM 3 un circuito transpilado para un backend y envíalo como trabajo de Sampler por REST.",
   "Guías originales: [cloud-setup-rest-api](https://quantum.cloud.ibm.com/docs/en/guides/cloud-setup-rest-api) · [estimator-rest-api](https://quantum.cloud.ibm.com/docs/en/guides/estimator-rest-api) · [sampler-rest-api](https://quantum.cloud.ibm.com/docs/en/guides/sampler-rest-api) · [execution-modes-rest-api](https://quantum.cloud.ibm.com/docs/en/guides/execution-modes-rest-api)"
  ],
- "next": "p6-panorama",
+ "next": "p7-procesadores",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -72,10 +72,10 @@
   ]
  },
  "ruido": {
-  "dur": 56.904,
+  "dur": 57.168,
   "marks": {
    "ev": 19.347,
-   "muestreo": 33.076
+   "muestreo": 33.345
   },
   "cues": [
    [
@@ -88,10 +88,10 @@
    ],
    [
     19.347,
-    "Para valores esperados: PNA, la absorción de ruido propagado, que viste en la Parte seis, y Qiskit Mitigation, para construir tus propios flujos de mitigación con Samplomatic."
+    "Para valores esperados: PNA, la absorción de ruido propagado, que viste en la unidad de ruido, y Qiskit Mitigation, para construir tus propios flujos de mitigación con Samplomatic."
    ],
    [
-    33.076,
+    33.345,
     "Para resultados de muestreo: SQD, la diagonalización cuántica basada en muestras, también en versión para HPC en C más más; la postselección con comprobaciones de inversión de bits; M3, mitigación de lectura en un subespacio reducido; y Paulice, comprobaciones de Pauli basadas en códigos de espacio-tiempo."
    ]
   ]

@@ -250,11 +250,11 @@
   ]
  },
  "mision": {
-  "dur": 26.016,
+  "dur": 25.632,
   "marks": {
    "n1": 2.137,
-   "n2": 10.983,
-   "n3": 18.937
+   "n2": 10.586,
+   "n3": 18.541
   },
   "cues": [
    [
@@ -263,14 +263,14 @@
    ],
    [
     2.137,
-    "Primero, construye el backend de tres qubits de la lección y mira en qué puertas traduce una CX entre los extremos."
+    "Primero, completa el backend de tres qubits de la lección para que traduzca una CX entre los extremos sin SWAP."
    ],
    [
-    10.983,
+    10.586,
     "Después, en un anillo de cuatro qubits, quita del Target el par averiado para que el transpilador lo esquive."
    ],
    [
-    18.937,
+    18.541,
     "Y por último, escribe una función que construye un Target para una cadena de cualquier tamaño."
    ]
   ]

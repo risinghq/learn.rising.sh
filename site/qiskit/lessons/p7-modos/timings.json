@@ -311,32 +311,32 @@
   ]
  },
  "proyecto": {
-  "dur": 40.128,
+  "dur": 40.272,
   "marks": {
-   "frac": 4.883,
-   "lote": 13.842,
-   "real": 19.418,
-   "ojo": 33.104
+   "frac": 5.01,
+   "lote": 13.969,
+   "real": 19.545,
+   "ojo": 33.231
   },
   "cues": [
    [
     0.107,
-    "El hito siete del proyecto de espines junta lo de esta parte."
+    "El hito siete del proyecto de espines junta lo de esta unidad."
    ],
    [
-    4.883,
+    5.01,
     "Primero comparas la cadena de Ising con y sin puertas fraccionales: tus pasos de Trotter son justo rx y rzz."
    ],
    [
-    13.842,
+    13.969,
     "Después mides varios pasos de tiempo en un lote, cada uno en su trabajo."
    ],
    [
-    19.418,
+    19.545,
     "Y preparas la segunda ejecución real: una guardia estima el uso con la fórmula de la lección siete punto cinco, y solo si el interruptor está encendido y cabe en lo que queda de tu plan Open, deja enviar."
    ],
    [
-    33.104,
+    33.231,
     "La práctica recalcula los resultados de los hitos anteriores, así que no depende de ellos."
    ]
   ]
@@ -356,7 +356,7 @@
   ]
  },
  "cierre": {
-  "dur": 24.552,
+  "dur": 24.72,
   "marks": {
    "r1": 1.868,
    "r2": 4.458,
@@ -386,7 +386,7 @@
    ],
    [
     21.541,
-    "Con esto termina la Parte siete."
+    "Con esto termina la sexta unidad."
    ]
   ]
  }

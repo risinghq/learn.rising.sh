@@ -1,7 +1,7 @@
 {
  "id": "p3-pass-managers",
- "part": "Parte III · Transpilación",
- "section": "3.5",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.5",
  "title": "Pass managers y desacoplamiento dinámico",
  "summary": "Crear pass managers propios, pass managers por etapas, modificar uno prediseñado y construir un pass manager de desacoplamiento dinámico.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "propio",
    "tag": [
-    "3.5",
+    "4.5",
     "Un pass manager propio"
    ],
    "say": "El módulo qiskit punto transpiler punto passes tiene muchísimos pases para armar tu propio pass manager. Basta con pasarle una lista. [[ej]]Este junta las puertas de dos qubits que van seguidas en bloques, [[cons]]los consolida en una sola unitaria, [[syn]]y la sintetiza en las puertas RX, RY y RXX, las de un computador de iones atrapados, por ejemplo. [[res]]Aplicado a una Hadamard seguida de dos CX, el resultado solo contiene esas tres puertas.",
@@ -69,7 +69,7 @@
   {
    "id": "staged",
    "tag": [
-    "3.5",
+    "4.5",
     "Un pass manager por etapas"
    ],
    "say": "Un StagedPassManager está un nivel más arriba: en vez de pases, contiene pass managers, uno por etapa. [[ej]]Aquí declaramos dos etapas, init y translation. [[init]]init sintetiza unitarias de tres o más qubits y desarma las puertas grandes; [[trans]]translation es el pass manager que acabamos de crear. [[lim]]No hay límite al número de etapas.",
@@ -133,7 +133,7 @@
   {
    "id": "huecos",
    "tag": [
-    "3.5",
+    "4.5",
     "Antes de ejecutar"
    ],
    "say": "Otra forma muy útil: partir de uno prediseñado y cambiar algunas etapas. [[sub]]Cada una de las seis etapas tiene además una etapa previa, pre, y otra posterior, post, vacías por defecto. Apuesta: ¿cuántas etapas verá el pass manager en total?",
@@ -175,7 +175,7 @@
   {
    "id": "modificar",
    "tag": [
-    "3.5",
+    "4.5",
     "Modificar un pass manager prediseñado"
    ],
    "say": "Ahora el código. [[sub]]Seis etapas, cada una con su pre y su post: seis por tres, dieciocho. Si apostaste por dieciocho, acertaste. [[ej]]Aquí añadimos una etapa pre layout con InverseCancellation, que elimina pares de puertas inversas, como T seguida de T daga, antes de elegir el layout. [[gen]]Las funciones generadoras de etapas, como generate embed passmanager, ayudan a construir etapas comunes.",
@@ -213,7 +213,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.5",
+    "4.5",
     "Comprueba"
    ],
    "say": "Una pregunta sobre etapas.",
@@ -248,7 +248,7 @@
   {
    "id": "dd",
    "tag": [
-    "3.5",
+    "4.5",
     "Desacoplamiento dinámico"
    ],
    "say": "Ahora un ejemplo avanzado: un pass manager que aplica desacoplamiento dinámico, una técnica de supresión de errores. [[idea]]Mientras un qubit espera ocioso, el entorno lo va desfasando. Si le aplicamos una secuencia de pulsos que en total es la identidad, por ejemplo X, Y, X, Y, lo volteamos sobre la esfera de Bloch y el efecto del ruido se cancela, como los pulsos de reenfoque en resonancia magnética nuclear. [[cuando]]Funciona mejor cuando hay mucho tiempo ocioso: qubits esperando mientras otros trabajan.",
@@ -321,7 +321,7 @@
   {
    "id": "ddcode",
    "tag": [
-    "3.5",
+    "4.5",
     "El pass manager de DD"
    ],
    "say": "Paso a paso. [[tr]]Primero transpilamos el circuito al backend: el desacoplamiento se añade después de transpilar y programar los tiempos. [[y]]La puerta Y no es base de Sherbrooke, así que hay que añadirla al Target con la duración y el error de la X, que son iguales. [[pm]]Luego, un PassManager con dos pases: ALAPScheduleAnalysis, que calcula cuándo empieza cada instrucción, y PadDynamicalDecoupling, que llena las esperas con la secuencia. [[bt]]Por último, BasisTranslator convierte las Y en puertas base. El circuito queda listo, con instrucciones Delay explícitas.",
@@ -378,7 +378,7 @@
   {
    "id": "q2",
    "tag": [
-    "3.5",
+    "4.5",
     "Comprueba"
    ],
    "say": "Sobre el orden de los pases.",
@@ -411,7 +411,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.5",
+    "4.5",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, arma un pass manager que traduce a las puertas de un computador de iones atrapados. [[n2]]Después, cambia el pase de cancelación que vive en la etapa pre layout de uno prediseñado. [[n3]]Y por último, construye tú el pass manager de desacoplamiento dinámico sobre un circuito ya programado, y comprueba que no cambia el operador.",
@@ -494,7 +494,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.5",
+    "4.5",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -518,7 +518,7 @@
   {
    "id": "cierre",
    "tag": [
-    "3.5",
+    "4.5",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un PassManager es una lista de pases. [[r2]]Un StagedPassManager organiza pass managers por etapas. [[r3]]Puedes sustituir cualquier etapa de uno prediseñado, incluidas las pre y post. [[r4]]Y el desacoplamiento dinámico se añade al final, con análisis de tiempos y relleno.",

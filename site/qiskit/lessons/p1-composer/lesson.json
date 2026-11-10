@@ -1,7 +1,7 @@
 {
  "id": "p1-composer",
- "part": "Parte I · Primeros pasos",
- "section": "1.5",
+ "part": "Guías",
+ "section": "",
  "title": "IBM Quantum Composer",
  "summary": "La herramienta gráfica de IBM: construir con arrastrar y soltar o con OpenQASM, inspeccionar paso a paso, ejecutar en QPUs y leer sus visualizaciones.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "1.5",
+    "Guía",
     "Programar arrastrando puertas"
    ],
    "say": "IBM Quantum Composer es una herramienta gráfica: arrastras puertas sobre los cables de los qubits y construyes circuitos sin escribir código. [[vis]]Mientras construyes, ves cómo cambia el estado de los qubits. [[run]]Puedes ejecutar el circuito en hardware cuántico real. [[code]]Y genera automáticamente el código OpenQASM o Qiskit equivalente.",
@@ -93,7 +93,7 @@
   {
    "id": "interfaz",
    "tag": [
-    "1.5",
+    "Guía",
     "La interfaz"
    ],
    "say": "La interfaz tiene seis partes. [[cat]]El catálogo de operaciones: las piezas, agrupadas por color; con clic derecho e Info ves la definición de cada una. [[ed]]El editor de código: el OpenQASM se puede editar, el de Qiskit es de solo lectura. [[gr]]El editor gráfico, donde arrastras las puertas a los cables. [[bar]]La barra de herramientas, con deshacer, alineación y el modo inspección. [[disk]]Los discos de fase al final de cada cable. [[viz]]Y las visualizaciones, que vienen de un simulador de vector de estado e ignoran las mediciones.",
@@ -177,7 +177,7 @@
   {
    "id": "construir",
    "tag": [
-    "1.5",
+    "Guía",
     "Construir y editar"
    ],
    "say": "Sin iniciar sesión, las visualizaciones funcionan con hasta cuatro qubits; para más, o para ejecutar en hardware, debes iniciar sesión. [[alin]]Hay tres alineaciones: libre, a la izquierda, y por capas, que marca el orden de ejecución con columnas. [[grupo]]Puedes seleccionar varias operaciones y agruparlas en una operación propia, que aparece como una sola caja; o desagruparla, o expandir su definición sin desagrupar. [[reg]]Desde el menú Edit gestionas los registros. [[if]]Arrastrando la operación if sobre una puerta le pones una condición clásica, [[ctrl]]y el modificador de control la convierte en una puerta controlada. [[save]]Importante: para conservar tu trabajo, descarga el archivo punto qasm y vuelve a subirlo después.",
@@ -251,7 +251,7 @@
   {
    "id": "qasm",
    "tag": [
-    "1.5",
+    "Guía",
     "Construir con OpenQASM"
    ],
    "say": "También puedes escribir el circuito en el editor de código, en OpenQASM dos punto cero. [[cab]]El archivo empieza con la versión e incluye la biblioteca estándar de puertas. [[reg]]Declaras registros cuánticos y clásicos, [[ops]]aplicas puertas y mides con una flecha hacia el bit clásico. [[gate]]Y puedes definir tus propias puertas con la palabra gate: un nombre, parámetros opcionales y los qubits sobre los que actúa. Luego se usa como cualquier otra.",
@@ -304,7 +304,7 @@
   {
    "id": "inspeccion",
    "tag": [
-    "1.5",
+    "Guía",
     "Inspeccionar y ejecutar"
    ],
    "say": "El modo inspección simula el circuito capa por capa, para que veas cómo evoluciona el estado; mientras está activo no se pueden añadir operaciones. [[seed]]La aleatoriedad de las visualizaciones viene de una semilla, que puedes ver y cambiar en el menú Edit. [[run]]Para ejecutar en hardware, pulsa Run circuit, elige un procesador y una instancia, que depende de tu plan, y el número de disparos. Si no eliges, se envía al procesador menos ocupado. [[res]]Los resultados aparecen en la tabla Workloads de IBM Quantum Platform, con el circuito original y el transpilado, el histograma y el código.",
@@ -367,7 +367,7 @@
   {
    "id": "disco",
    "tag": [
-    "1.5",
+    "Guía",
     "El disco de fase"
    ],
    "say": "Las visualizaciones necesitan un poco de teoría. El estado de un qubit se puede escribir con dos números: la probabilidad p de encontrarlo en uno, y una fase fi. [[disco]]El disco de fase dibuja p como el relleno azul del disco, y la fase como una línea desde el centro hasta el borde. [[pur]]Para varios qubits, el anillo negro indica la pureza reducida: vale uno si el qubit no está entrelazado con los demás, y baja hasta un medio si lo está al máximo. [[bloch]]El disco contiene toda la información de la esfera de Bloch, y se puede convertir a sus coordenadas.",
@@ -432,7 +432,7 @@
   {
    "id": "pred_vistas",
    "tag": [
-    "1.5",
+    "Guía",
     "Antes de ver las vistas"
    ],
    "say": "Antes de ver las visualizaciones, apuesta. Tomemos un circuito de dos qubits: una Hadamard en cada uno y una puerta CZ. Las dos Hadamard dejan los cuatro estados con la misma probabilidad. [[cual]]¿Qué crees que hará la CZ con esas probabilidades?",
@@ -480,7 +480,7 @@
   {
    "id": "vistas",
    "tag": [
-    "1.5",
+    "Guía",
     "Probabilidades, vector de estado y q-esfera"
    ],
    "say": "Las otras tres vistas muestran el estado de todos los qubits juntos. Tomemos este circuito: Hadamard en los dos qubits y una CZ. [[prob]]La vista de probabilidades: barras con la probabilidad de cada estado de la base, hasta ocho qubits. Aquí, un cuarto para cada uno: la CZ no cambió ninguna probabilidad, y si apostaste por eso, acertaste. No muestra fases. [[sv]]La vista de vector de estado, hasta seis qubits, muestra las amplitudes: la altura es el módulo y el color, la fase. Aquí todas miden un medio, pero uno uno tiene fase pi: un signo menos. [[qs]]Y la q-esfera, hasta cinco qubits, pone cada estado de la base en una esfera: cero cero en el polo norte, uno uno en el sur, y los demás en paralelos según cuántos unos tienen. El tamaño de cada nodo es la probabilidad y el color, la fase.",
@@ -612,7 +612,7 @@
   {
    "id": "q1",
    "tag": [
-    "1.5",
+    "Guía",
     "Comprueba"
    ],
    "say": "Mira otra vez el estado de este circuito.",
@@ -647,7 +647,7 @@
   {
    "id": "glosario",
    "tag": [
-    "1.5",
+    "Guía",
     "Glosario de operaciones"
    ],
    "say": "Composer agrupa sus operaciones por familias. [[clas]]Las clásicas: NOT o X, CNOT, Toffoli, SWAP e identidad. [[fase]]Las de fase: Z, S, T, sus inversas, la puerta de fase P y RZ; recuerda que P de pi es Z, P de pi medios es S y P de pi cuartos es T. [[h]]La Hadamard, que crea superposiciones. [[cu]]Las demás puertas cuánticas: raíz de X y su inversa, Y, RX, RY, RXX, RZZ, la U general de tres parámetros, y las Toffoli simplificadas, RCCX y RC3X, iguales a Toffoli salvo fases relativas. [[nou]]Y las no unitarias, que no son reversibles: reset, que devuelve el qubit a cero, y la medición en la base Z. [[mod]]Más el modificador de control y la barrera, que impide que el compilador combine puertas a través de ella.",
@@ -731,7 +731,7 @@
   {
    "id": "q2",
    "tag": [
-    "1.5",
+    "Guía",
     "Comprueba"
    ],
    "say": "Una pregunta sobre las puertas de fase.",
@@ -766,7 +766,7 @@
   {
    "id": "mision",
    "tag": [
-    "1.5",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Composer corre en la web, así que aquí escribes el mismo OpenQASM como texto y se ejecuta en esta página. [[n1]]Primero escribes un programa con una puerta propia. [[n2]]Después cambias una CZ por una fase controlada y compruebas que las probabilidades no se mueven, pero la amplitud sí. [[n3]]Y por último defines tu propia puerta GHZ, para cualquier número de qubits. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -848,7 +848,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "1.5",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. No hay respuesta automática: escribe con tus palabras. Lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -872,7 +872,7 @@
   {
    "id": "cierre",
    "tag": [
-    "1.5",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Composer construye circuitos arrastrando puertas o escribiendo OpenQASM dos. [[r2]]El modo inspección muestra la evolución capa por capa. [[r3]]Run circuit envía el trabajo a un QPU y los resultados aparecen en Workloads. [[r4]]Y sus visualizaciones, disco de fase, probabilidades, vector de estado y q-esfera, muestran el estado desde ángulos distintos.",
@@ -925,7 +925,7 @@
   "Escribe en el editor de OpenQASM una puerta propia `ghz a, b, c` y úsala en un circuito de tres qubits.",
   "Guías originales: [composer](https://quantum.cloud.ibm.com/docs/en/guides/composer)"
  ],
- "next": "p1-cierre",
+ "next": "p2-qasm",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

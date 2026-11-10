@@ -278,34 +278,34 @@
   ]
  },
  "proyecto": {
-  "dur": 45.072,
+  "dur": 45.6,
   "marks": {
-   "hito": 3.255
+   "hito": 3.496
   },
   "cues": [
    [
     0.107,
-    "Cierre de la parte con tu proyecto."
+    "Cierre de esta unidad con tu proyecto."
    ],
    [
-    3.255,
+    3.496,
     "El hito cuatro responde la pregunta de la cadena de espines con simuladores: cómo evoluciona la magnetización tras encender el campo, exacta frente a una simulación de Aer con ruido."
    ],
    [
-    15.979,
+    16.219,
     "Primero recalculas lo que ya tienes, el Hamiltoniano, el circuito de Trotter y el observable, y comparas la curva exacta con la del circuito."
    ],
    [
-    26.594,
+    26.834,
     "Después añades ruido despolarizante a las CX y simulas con Aer."
    ],
    [
-    32.269,
+    32.51,
     "Y por último escribes una función que dice hasta qué instante te puedes fiar de la simulación ruidosa."
    ],
    [
-    39.232,
-    "Ese instante te dirá cuántos pasos pedirle al QPU en la parte cinco."
+    39.473,
+    "Ese instante te dirá cuántos pasos pedirle al QPU cuando llegues al hardware."
    ]
   ]
  },
@@ -324,7 +324,7 @@
   ]
  },
  "cierre": {
-  "dur": 28.488,
+  "dur": 29.904,
   "marks": {
    "r1": 1.868,
    "r2": 7.699,
@@ -354,7 +354,7 @@
    ],
    [
     23.678,
-    "Con esto cierra la Parte cuatro; en la cinco, a la nube."
+    "Con esto cierra la tercera unidad; después transpilarás antes de estudiar el ruido."
    ]
   ]
  }

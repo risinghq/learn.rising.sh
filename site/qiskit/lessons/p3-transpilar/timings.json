@@ -1,6 +1,6 @@
 {
  "intro": {
-  "dur": 40.992,
+  "dur": 40.464,
   "marks": {
    "antes": 11.79,
    "despues": 17.536,
@@ -21,11 +21,11 @@
    ],
    [
     27.202,
-    "Esta parte del curso trata de la transpilación local, que puede hacer cualquier usuario."
+    "Esta unidad trata de la transpilación local, que puede hacer cualquier usuario."
    ],
    [
-    33.614,
-    "Si solo usas las opciones por defecto del servicio de IBM, verás más en la parte de ruido."
+    33.062,
+    "Si solo usas las opciones por defecto del servicio de IBM, verás más en la unidad de ruido."
    ]
   ]
  },
@@ -207,11 +207,11 @@
   ]
  },
  "mision": {
-  "dur": 28.152,
+  "dur": 27.696,
   "marks": {
    "n1": 2.137,
-   "n2": 11.945,
-   "n3": 19.97
+   "n2": 11.506,
+   "n3": 19.531
   },
   "cues": [
    [
@@ -220,14 +220,14 @@
    ],
    [
     2.137,
-    "Primero, transpila el circuito de la lección con los cuatro niveles y mira cuántas puertas cz sobreviven; apuesta antes de ejecutar."
+    "Primero, escribe la función que transpila el circuito de la lección con un nivel dado, y compara las cz de los cuatro niveles."
    ],
    [
-    11.945,
+    11.506,
     "Después, arregla un pass manager al que le falta el backend, y por eso no produce un circuito ISA."
    ],
    [
-    19.97,
+    19.531,
     "Y por último, escribe tú mismo la función que decide si un circuito es ISA, consultando el Target."
    ]
   ]

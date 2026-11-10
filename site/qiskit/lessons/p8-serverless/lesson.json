@@ -1,7 +1,7 @@
 {
  "id": "p8-serverless",
- "part": "Parte VIII · Serverless, addons y Qiskit Functions",
- "section": "8.1",
+ "part": "Unidad 7 · Escalar",
+ "section": "7.1",
  "title": "Qiskit Serverless",
  "summary": "Ejecutar flujos cuánticos-clásicos completos en la nube de IBM: escribir un programa, subirlo, ejecutarlo, paralelizar tareas, gestionar datos y portar código existente.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "que",
    "tag": [
-    "8.1",
+    "7.1",
     "¿Para qué sirve?"
    ],
    "say": "Qiskit Serverless te deja ejecutar el patrón completo de Qiskit en la nube de IBM, no solo la parte cuántica. Es experimental y solo está disponible en los planes Premium, Flex y On-Prem. [[usos]]Sirve para tres cosas: paralelizar tareas clásicas, como el preprocesamiento y el posprocesamiento; mantener vivos trabajos largos aunque apagues tu computadora; y desplegar programas reutilizables. [[recursos]]Por defecto, cada nodo normal tiene veinticuatro núcleos y ciento veinte gigas de RAM, con hasta dos trabajos activos por usuario; también hay nodos con GPU. [[paquetes]]Se instalan dos paquetes: qiskit ibm catalog, el cliente que sube y ejecuta programas, y qiskit serverless, las herramientas del lado del servidor. Ambos piden Python tres punto once o posterior.",
@@ -95,7 +95,7 @@
   {
    "id": "programa",
    "tag": [
-    "8.1",
+    "7.1",
     "Escribir el programa"
    ],
    "say": "Un programa de Serverless es un archivo de Python dentro de una carpeta propia, por ejemplo source files, que se sube entera. [[args]]El programa lee sus entradas con get arguments. Solo admite entradas serializables: por eso se pasa el nombre del backend como texto, no el objeto backend. [[servicio]]Dentro del programa, el servicio se crea con get runtime service, no con QiskitRuntimeService. Así los trabajos que lance quedan vinculados al trabajo de Serverless, para su estado, registros y uso. [[guardar]]Al final, save result devuelve los resultados.",
@@ -135,7 +135,7 @@
   {
    "id": "subir",
    "tag": [
-    "8.1",
+    "7.1",
     "Subirlo"
    ],
    "say": "Para subirlo, te autenticas con QiskitServerless, usando tu clave de API guardada. [[funcion]]Luego describes el programa con QiskitFunction: un título, el archivo de entrada, entrypoint, y la carpeta de trabajo, working dir. [[upload]]upload comprime la carpeta, la sube y limpia el archivo temporal. [[list]]Y serverless punto list muestra tus programas, para confirmar que está ahí. También puedes declarar dependencias de pip.",
@@ -197,7 +197,7 @@
   {
    "id": "ejecutar",
    "tag": [
-    "8.1",
+    "7.1",
     "Ejecutarlo"
    ],
    "say": "Para ejecutarlo, lo cargas con load y lo llamas con run, pasando las entradas como argumentos con nombre, igual que una función de Python. [[estado]]job punto status recorre los estados: en cola, inicializando, mientras se prepara el entorno e instalan dependencias, ejecutándose y terminado. [[logs]]Mientras se ejecuta, job punto logs te da lo que el programa imprime; [[result]]al terminar, job punto result devuelve lo guardado con save result. [[stop]]Y job punto stop lo detiene.",
@@ -301,7 +301,7 @@
   {
    "id": "estados",
    "tag": [
-    "8.1",
+    "7.1",
     "Estados detallados"
    ],
    "say": "Dentro del programa puedes anunciar en qué etapa estás, con update status. Los estados detallados siguen el patrón: mapeando el problema, optimizando para el hardware, esperando al QPU, ejecutando en el QPU y posprocesando. [[auto]]Al terminar con save result, el estado pasa a terminado automáticamente.",
@@ -335,7 +335,7 @@
   {
    "id": "predice",
    "tag": [
-    "8.1",
+    "7.1",
     "Antes de paralelizar"
    ],
    "say": "Antes de ver cómo se paraleliza, apuesta. [[codigo]]Esta función lleva el decorador distribute task, y la llamamos una vez con un circuito. [[cual]]¿Qué crees que es x justo después de la llamada? No hace falta que sepas la respuesta: equivocarse en una predicción enseña más que acertar por memoria.",
@@ -381,7 +381,7 @@
   {
    "id": "paralelo",
    "tag": [
-    "8.1",
+    "7.1",
     "Paralelizar"
    ],
    "say": "La ventaja principal: paralelizar trabajo clásico. Decoras una función con distribute task, indicando los recursos que necesita cada tarea, por ejemplo un núcleo. [[refs]]Esta es la respuesta a tu apuesta: cada llamada ya no devuelve el resultado, sino una referencia a una tarea asíncrona que corre en su propio trabajador. [[get]]get, con la lista de referencias, espera y reúne los resultados. [[recursos]]Puedes pedir núcleos completos o fracciones, y memoria en bytes: dos gigas son dos por mil veinticuatro al cubo.",
@@ -432,7 +432,7 @@
   {
    "id": "datos",
    "tag": [
-    "8.1",
+    "7.1",
     "Gestionar datos"
    ],
    "say": "Serverless tiene un directorio de datos compartido entre tus programas, con dos limitaciones: solo archivos tar y h5, y sin subcarpetas. [[subir]]file upload sube un archivo asociado a una función, files los lista, [[bajar]]y desde el programa, file download lo descarga para descomprimirlo y usarlo como en local. file delete lo borra.",
@@ -470,7 +470,7 @@
   {
    "id": "portar",
    "tag": [
-    "8.1",
+    "7.1",
     "Portar código existente"
    ],
    "say": "¿Cómo pasas a Serverless un experimento que ya tienes en local? [[pasos]]Cambia las variables de entrada por get arguments; crea el servicio con get runtime service; decora con distribute task lo que quieras paralelizar y reúne con get; y devuelve con save result en lugar de imprimir. [[try]]La guía recomienda además envolver el trabajo en un try, e imprimir la traza de cualquier excepción, para verla después en los registros.",
@@ -547,7 +547,7 @@
   {
    "id": "q1",
    "tag": [
-    "8.1",
+    "7.1",
     "Comprueba"
    ],
    "say": "Una entrada a un programa.",
@@ -581,7 +581,7 @@
   {
    "id": "mision",
    "tag": [
-    "8.1",
+    "7.1",
     "Tu turno"
    ],
    "say": "Ahora practicas el contrato de Serverless en ejercicios locales. [[n1]]Primero escribe `ejecutar(circuitos)`, que devuelve una profundidad por circuito al transpilar con `FakeFez`. [[n2]]Después corrige `argumentos(circuitos)`: el programa remoto recibe el nombre serializable del backend. [[n3]]Y por último escribe `profundidades(circuitos)`, que crea una referencia por circuito con `distribute_task` y reúne los resultados con `get`. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -663,7 +663,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "8.1",
+    "7.1",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. No hay respuesta automática: escribe con tus palabras. Lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -687,7 +687,7 @@
   {
    "id": "cierre",
    "tag": [
-    "8.1",
+    "7.1",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un programa lee argumentos y guarda resultados. [[r2]]Se describe con QiskitFunction, se sube y se ejecuta con run. [[r3]]distribute task y get paralelizan el trabajo clásico. [[r4]]Y dentro del programa usa get runtime service, y el directorio de datos para tus archivos.",

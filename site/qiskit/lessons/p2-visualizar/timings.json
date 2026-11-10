@@ -247,7 +247,7 @@
   ]
  },
  "timeline": {
-  "dur": 37.752,
+  "dur": 38.496,
   "marks": {
    "back": 12.525,
    "style": 21.428,
@@ -272,7 +272,7 @@
    ],
    [
     27.471,
-    "Para circuitos dinámicos en hardware de IBM este dibujo no es exacto; para ellos existe otra herramienta, que veremos en la Parte siete."
+    "Para circuitos dinámicos en hardware de IBM este dibujo no es exacto; para ellos existe otra herramienta, que veremos en la lección de temporización."
    ]
   ]
  },
@@ -358,7 +358,7 @@
   ]
  },
  "cierre": {
-  "dur": 26.616,
+  "dur": 27.552,
   "marks": {
    "r1": 1.868,
    "r2": 8.223,
@@ -388,7 +388,7 @@
    ],
    [
     21.145,
-    "Con esto termina la Parte dos; en la siguiente, la transpilación."
+    "Con esto termina la segunda unidad; después simularás y transpilárás tus circuitos."
    ]
   ]
  }

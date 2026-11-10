@@ -1,7 +1,7 @@
 {
  "id": "p2-visualizar",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.9",
+ "part": "Unidad 2 · Operadores y observables",
+ "section": "2.5",
  "title": "Visualizar circuitos, estados y resultados",
  "summary": "Dibujar circuitos, graficar estados (city, hinton, Pauli, q-esfera, Bloch), histogramas, valores esperados y líneas de tiempo.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "draw",
    "tag": [
-    "2.9",
+    "2.5",
     "Dibujar un circuito"
    ],
    "say": "Para ver un circuito puedes imprimirlo o llamar a draw. Por defecto, los dos producen un dibujo en texto. [[dif]]La diferencia: print imprime y devuelve None; draw devuelve el dibujo sin imprimir nada. En un cuaderno parecen iguales porque Jupyter muestra el valor de la última línea. [[out]]Hay otros dos dibujantes: matplotlib, con output igual a mpl, y LaTeX, que necesita el paquete qcircuit. [[save]]Y con filename guardas el dibujo en un archivo, útil para circuitos grandes.",
@@ -58,7 +58,7 @@
   {
    "id": "opciones",
    "tag": [
-    "2.9",
+    "2.5",
     "Personalizar el dibujo"
    ],
    "say": "draw tiene muchas opciones. [[comunes]]Dos sirven en los tres dibujantes: reverse bits invierte el orden de los qubits y plot barriers en False oculta las barreras. [[fold]]fold fija el ancho máximo: en texto son caracteres por línea; en matplotlib, capas antes de partir el dibujo. [[style]]style cambia colores, solo en matplotlib, [[scale]]y scale cambia el tamaño en matplotlib y LaTeX. [[func]]También existe la función circuit drawer, que hace lo mismo pero recibe el circuito como argumento.",
@@ -152,7 +152,7 @@
   {
    "id": "estados",
    "tag": [
-    "2.9",
+    "2.5",
     "Graficar estados"
    ],
    "say": "Para aprender o depurar ayuda ver el estado del computador, aunque solo es posible para sistemas pequeños. [[dens]]Un estado puede ser un vector de estado, o una matriz de densidad, más general, que también describe mezclas. [[ej]]Tomemos este estado de dos qubits: una Hadamard y una RX controlada de pi medios. [[latex]]Lo más simple es dibujarlo en LaTeX, en notación de ket.",
@@ -224,7 +224,7 @@
   {
    "id": "graficas",
    "tag": [
-    "2.9",
+    "2.5",
     "Cinco gráficas"
    ],
    "say": "Qiskit tiene cinco gráficas de estados. [[city]]plot state city: la parte real e imaginaria de cada elemento de la matriz de densidad, como barras en tres dimensiones que parecen rascacielos. [[hinton]]plot state hinton: lo mismo, pero el tamaño de un cuadrado indica la magnitud, blanco si es positivo y negro si es negativo. [[pauli]]plot state paulivec: los valores esperados de cada cadena de Pauli; toda matriz de densidad es una suma de Paulis con esos pesos. [[qs]]plot state qsphere: la q-esfera que ya conoces de Composer. [[bloch]]Y plot bloch multivector: una esfera de Bloch por qubit, que no puede mostrar correlaciones.",
@@ -311,7 +311,7 @@
   {
    "id": "paulivec",
    "tag": [
-    "2.9",
+    "2.5",
     "El estado como suma de Paulis"
    ],
    "say": "La gráfica de Pauli tiene una versión numérica. SparsePauliOp from operator, aplicado al estado, da su matriz de densidad como suma de Paulis. [[coef]]Cada coeficiente es el valor esperado de esa cadena, dividido entre cuatro: por ejemplo, ZZ vale un octavo, así que su valor esperado es un medio.",
@@ -356,7 +356,7 @@
   {
    "id": "bloch_pred",
    "tag": [
-    "2.9",
+    "2.5",
     "Antes de la esfera de Bloch"
    ],
    "say": "Una apuesta con el estado de Bell, el más entrelazado de dos qubits. [[cual]]Si lo dibujamos con plot bloch multivector, que muestra una esfera por qubit, ¿qué esperas ver?",
@@ -399,7 +399,7 @@
   {
    "id": "bloch_res",
    "tag": [
-    "2.9",
+    "2.5",
     "Sin correlaciones"
    ],
    "say": "Dos esferas con vectores de longitud cero. [[cero]]Cada qubit, mirado por separado, está completamente indeterminado: sus valores esperados de X, Y y Z valen cero. [[corr]]Toda la información está en la correlación entre los dos, y la esfera de Bloch no puede mostrarla. Para eso sirven la ciudad, paulivec o la q-esfera.",
@@ -462,7 +462,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.9",
+    "2.5",
     "Comprueba"
    ],
    "say": "Elige la gráfica.",
@@ -497,7 +497,7 @@
   {
    "id": "hist",
    "tag": [
-    "2.9",
+    "2.5",
     "Histogramas de Sampler"
    ],
    "say": "Para los resultados de Sampler, plot histogram. [[opts]]Sus opciones: legend para nombrar varias ejecuciones en la misma gráfica, sort para ordenar ascendente o descendente, number to keep para quedarte con los más frecuentes y juntar el resto, color, bar labels para mostrar o no los números, y figsize para el tamaño. [[fuera]]Como todas estas funciones devuelven una figura de matplotlib, fuera de Jupyter usa show o savefig.",
@@ -534,7 +534,7 @@
   {
    "id": "estimator",
    "tag": [
-    "2.9",
+    "2.5",
     "Graficar valores esperados"
    ],
    "say": "Para Estimator no hay una función propia: se usa un gráfico de barras de matplotlib. [[ej]]Aquí se estiman siete observables sobre un estado. [[bc]]Para pedirlos en una sola llamada, el arreglo de observables tiene forma siete por uno; lo verás en detalle con las primitivas. [[bar]]Las barras son los valores esperados, [[err]]y con yerr se añaden las barras de error, el error estándar que Estimator devuelve en stds.",
@@ -625,10 +625,10 @@
   {
    "id": "timeline",
    "tag": [
-    "2.9",
+    "2.5",
     "Línea de tiempo"
    ],
-   "say": "Por último, puedes ver cuándo ocurre cada operación de un circuito ya transpilado con timeline draw. Sirve para encontrar qubits ociosos, que acumulan errores. [[back]]Necesita el target del backend, que sabe cuánto dura cada puerta; aquí usamos un backend genérico de cinco qubits. [[style]]Hay hojas de estilo, como IQXDebugging, pensada para depurar. [[din]]Para circuitos dinámicos en hardware de IBM este dibujo no es exacto; para ellos existe otra herramienta, que veremos en la Parte siete.",
+   "say": "Por último, puedes ver cuándo ocurre cada operación de un circuito ya transpilado con timeline draw. Sirve para encontrar qubits ociosos, que acumulan errores. [[back]]Necesita el target del backend, que sabe cuánto dura cada puerta; aquí usamos un backend genérico de cinco qubits. [[style]]Hay hojas de estilo, como IQXDebugging, pensada para depurar. [[din]]Para circuitos dinámicos en hardware de IBM este dibujo no es exacto; para ellos existe otra herramienta, que veremos en la lección de temporización.",
    "scene": [
     {
      "type": "code",
@@ -658,7 +658,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.9",
+    "2.5",
     "Comprueba"
    ],
    "say": "Una pregunta sobre draw.",
@@ -691,7 +691,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.9",
+    "2.5",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, predice la probabilidad de medir cero cero en el estado de la lección y compruébala con sus probabilidades. [[n2]]Después, personaliza un dibujo de texto: el qubit cero abajo y sin barreras. [[n3]]Y por último, escribe una función que grafique con barras los valores esperados que calcula un Estimator.",
@@ -774,7 +774,7 @@
   {
    "id": "proyecto",
    "tag": [
-    "2.9",
+    "2.5",
     "Proyecto Ising: hito II"
    ],
    "say": "Volvamos al proyecto de la cadena de espines. En el hito uno simulaste dos espines y un paso de tiempo. [[ham]]Hoy tienes todo para generalizarlo: el hamiltoniano de n espines como SparsePauliOp, [[circ]]un circuito de Trotter de varios pasos, [[mag]]y la magnetización como observable, que sigues a lo largo del tiempo. [[hito]]El hito dos recalcula lo del hito uno, así que no necesitas nada del ejercicio anterior. Al final comparas tu curva con la evolución exacta.",
@@ -886,7 +886,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.9",
+    "2.5",
     "Reflexiona"
    ],
    "say": "Antes de cerrar la parte, dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en el navegador.",
@@ -910,10 +910,10 @@
   {
    "id": "cierre",
    "tag": [
-    "2.9",
+    "2.5",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]draw dibuja circuitos en texto, matplotlib o LaTeX, con muchas opciones. [[r2]]Hay cinco gráficas de estados, más LaTeX. [[r3]]plot histogram para Sampler, barras de matplotlib para Estimator. [[r4]]Y timeline draw para ver tiempos. Con esto termina la Parte dos; en la siguiente, la transpilación.",
+   "say": "Resumen. [[r1]]draw dibuja circuitos en texto, matplotlib o LaTeX, con muchas opciones. [[r2]]Hay cinco gráficas de estados, más LaTeX. [[r3]]plot histogram para Sampler, barras de matplotlib para Estimator. [[r4]]Y timeline draw para ver tiempos. Con esto termina la segunda unidad; después simularás y transpilárás tus circuitos.",
    "scene": [
     {
      "type": "list",

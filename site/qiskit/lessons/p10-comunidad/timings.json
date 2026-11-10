@@ -237,35 +237,31 @@
   ]
  },
  "proyecto": {
-  "dur": 38.088,
+  "dur": 37.656,
   "marks": {
-   "recalcula": 3.057,
-   "pasos": 16.474,
-   "informe": 23.452
+   "recalcula": 6.114,
+   "pasos": 16.035,
+   "informe": 23.013
   },
   "cues": [
    [
     0.107,
-    "Y el proyecto llega a su final."
+    "La referencia final reúne lo que necesitas para escribir un informe reproducible."
    ],
    [
-    3.057,
-    "El hito diez es un informe reproducible."
-   ],
-   [
-    6.553,
+    6.114,
     "Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez."
    ],
    [
-    16.474,
+    16.035,
     "Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado."
    ],
    [
-    23.452,
+    23.013,
     "Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU."
    ],
    [
-    33.076,
+    32.637,
     "Con las mismas semillas, cualquiera obtiene los mismos números."
    ]
   ]

@@ -1,6 +1,6 @@
 {
  "id": "p2-biblioteca",
- "part": "Parte II · Circuitos y operadores",
+ "part": "Unidad 2 · Operadores y observables",
  "section": "2.4",
  "title": "La biblioteca de circuitos",
  "summary": "Puertas estándar, circuitos N-local, codificación de datos, evolución temporal, circuitos de referencia y aritmética.",
@@ -907,7 +907,7 @@
   "Repite la suma de tres bits con 7 + 7. ¿Cuántos bits necesita el resultado y qué registro lo deja?",
   "Guías originales: [circuit-library](https://quantum.cloud.ibm.com/docs/en/guides/circuit-library)"
  ],
- "next": "p2-operadores",
+ "next": "p2-visualizar",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

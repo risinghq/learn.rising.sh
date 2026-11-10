@@ -70,10 +70,10 @@
   ]
  },
  "predice_if": {
-  "dur": 31.056,
+  "dur": 31.8,
   "marks": {
    "cif": 10.742,
-   "cual": 18.357
+   "cual": 19.121
   },
   "cues": [
    [
@@ -86,14 +86,14 @@
    ],
    [
     10.742,
-    "Desaparece c if: las condiciones se escriben con un bloque if test, que ya viste en la Parte dos."
+    "Desaparece c if: las condiciones se escriben con un bloque if test, que ya viste en la lección de control clásico."
    ],
    [
-    18.357,
+    19.121,
     "Este circuito mide dos qubits y aplica una X al qubit cero solo si se midió uno uno."
    ],
    [
-    25.461,
+    26.226,
     "Antes de ejecutarlo, apuesta: ¿qué operaciones contará count ops?"
    ]
   ]
@@ -296,27 +296,27 @@
   ]
  },
  "proyecto": {
-  "dur": 33.0,
+  "dur": 31.392,
   "marks": {
-   "migrar": 7.643,
-   "paquete": 17.281,
-   "hito": 25.447
+   "migrar": 6.029,
+   "paquete": 15.667,
+   "hito": 23.834
   },
   "cues": [
    [
     0.107,
-    "Esta lección cierra la Parte nueve, y con ella llega el hito nueve del proyecto de la cadena de espines."
+    "Esta guía reúne una migración importante del proyecto de la cadena de espines."
    ],
    [
-    7.643,
+    6.029,
     "Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos."
    ],
    [
-    17.281,
+    15.667,
     "Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice."
    ],
    [
-    25.447,
+    23.834,
     "La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio."
    ]
   ]
@@ -336,7 +336,7 @@
   ]
  },
  "cierre": {
-  "dur": 24.072,
+  "dur": 24.552,
   "marks": {
    "r1": 1.868,
    "r2": 8.096,
@@ -366,7 +366,7 @@
    ],
    [
     21.088,
-    "Con esto termina la Parte nueve."
+    "Con esto termina esta guía de migración."
    ]
   ]
  }

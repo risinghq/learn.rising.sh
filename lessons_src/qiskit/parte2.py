@@ -633,7 +633,7 @@ qc.measure_active()""",
                     gap=30,
                 ),
                 T(
-                    "medición a mitad de circuito → circuitos dinámicos (Parte VII)",
+                    "medición a mitad de circuito → circuitos dinámicos (Unidad 6)",
                     "note",
                     id="n",
                     hidden=True,
@@ -2680,7 +2680,7 @@ circuit.barrier()""",
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]Un circuito dinámico mide a mitad de camino y decide. [[r2]]if test, switch, for loop y while loop, siempre con with. [[r3]]Las expresiones clásicas calculan paridades y store las guarda.
-             [[r4]]Y stretch deja que el compilador fije los tiempos. En la Parte siete veremos qué de esto se puede ejecutar en el hardware de IBM.""",
+             [[r4]]Y stretch deja que el compilador fije los tiempos. En la unidad de hardware veremos qué de esto se puede ejecutar en el procesador de IBM.""",
             s_cierre,
             a_cierre,
         ),
@@ -3529,7 +3529,7 @@ print(res.data.evs.flatten().round(2))""",
             ("", "Línea de tiempo"),
             """Por último, puedes ver cuándo ocurre cada operación de un circuito ya transpilado con timeline draw. Sirve para encontrar qubits ociosos, que acumulan errores.
              [[back]]Necesita el target del backend, que sabe cuánto dura cada puerta; aquí usamos un backend genérico de cinco qubits. [[style]]Hay hojas de estilo, como IQXDebugging, pensada para depurar.
-             [[din]]Para circuitos dinámicos en hardware de IBM este dibujo no es exacto; para ellos existe otra herramienta, que veremos en la Parte siete.""",
+             [[din]]Para circuitos dinámicos en hardware de IBM este dibujo no es exacto; para ellos existe otra herramienta, que veremos en la lección de temporización.""",
             [
                 Code(
                     """from qiskit.visualization.timeline import draw, IQXDebugging
@@ -3692,7 +3692,7 @@ draw(isa_circuit, style=IQXDebugging(), target=backend.target)""",
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]draw dibuja circuitos en texto, matplotlib o LaTeX, con muchas opciones. [[r2]]Hay cinco gráficas de estados, más LaTeX. [[r3]]plot histogram para Sampler, barras de matplotlib para Estimator.
-             [[r4]]Y timeline draw para ver tiempos. Con esto termina la Parte dos; en la siguiente, la transpilación.""",
+             [[r4]]Y timeline draw para ver tiempos. Con esto termina la segunda unidad; después simularás y transpilárás tus circuitos.""",
             s_cierre,
             a_cierre,
         ),
@@ -3719,8 +3719,8 @@ s_cierre, a_cierre = resumen(
 )
 cierre = lesson(
     "p2-cierre",
-    "Cierre de la Parte II: repaso y magnetización",
-    "Un repaso corto de la Parte dos y una última función del proyecto Ising: la curva de magnetización de una cadena.",
+    "Repaso: medir la cadena",
+    "Un repaso corto y una función del proyecto Ising: la curva de magnetización de una cadena.",
     [
         "recordar el orden de bits, los parámetros de un circuito N-local, los observables promedio y QPY",
         "calcular la curva de magnetización de una cadena con circuitos de Trotter",
@@ -3729,7 +3729,7 @@ cierre = lesson(
         beat(
             "repaso1",
             ("", "Repaso: orden de bits"),
-            """Empezamos con cuatro preguntas rápidas de lo que viste en esta parte. La primera, sobre el orden de los bits.""",
+            """Empezamos con cuatro preguntas rápidas de lo que viste en estas lecciones. La primera, sobre el orden de los bits.""",
             [
                 Code(
                     """from qiskit import QuantumCircuit
@@ -3851,8 +3851,8 @@ qpy.dump(circuito, archivo)""",
         beat(
             "cierre",
             ("", "Resumen"),
-            """Resumen de la parte. [[r1]]El qubit cero es el bit de la derecha. [[r2]]Los circuitos N-local tienen una capa de rotaciones más que repeticiones. [[r3]]Un observable promedio lleva uno entre n en cada término.
-             [[r4]]Y QPY guarda un circuito en memoria. Con esto cierras la Parte dos; en la siguiente, la transpilación.""",
+            """Resumen de la unidad. [[r1]]El qubit cero es el bit de la derecha. [[r2]]Los circuitos N-local tienen una capa de rotaciones más que repeticiones. [[r3]]Un observable promedio lleva uno entre n en cada término.
+             [[r4]]Y QPY guarda un circuito en memoria. Con esto cierras la segunda unidad; después simularás y transpilarás.""",
             s_cierre,
             a_cierre,
         ),

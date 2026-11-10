@@ -103,32 +103,32 @@
  "desplegar": {
   "dur": 52.896,
   "marks": {
-   "run": 13.686,
-   "backends": 35.751
+   "run": 13.672,
+   "backends": 35.737
   },
   "cues": [
    [
     0.107,
-    "Para desplegar una plantilla, descargas su carpeta source files del repositorio, y la subes con QiskitFunction, como en la primera lección de esta parte, declarando sus dependencias de pip."
+    "Para desplegar una plantilla, descargas su carpeta source files del repositorio, y la subes con QiskitFunction, como en la primera lección de esta unidad, declarando sus dependencias de pip."
    ],
    [
-    13.686,
+    13.672,
     "La de AQC más Trotter solo exige tres entradas: el Hamiltoniano, una cadena unidimensional con vecinos cercanos, el número de pasos de Trotter y el plan de compresión."
    ],
    [
-    26.735,
+    26.721,
     "Esta es la respuesta a tu apuesta: seis."
    ],
    [
-    30.599,
+    30.585,
     "Dos capas del ansatz, más los cuatro pasos que no se comprimen."
    ],
    [
-    35.751,
+    35.737,
     "Y se puede ejecutar en tres sitios con el mismo código: statevector, exacto; fake, simulación ruidosa; y runtime, en un QPU real."
    ],
    [
-    47.668,
+    47.653,
     "Prueba primero en los simuladores: no gastan tiempo de QPU."
    ]
   ]
@@ -170,11 +170,11 @@
   ]
  },
  "proyecto": {
-  "dur": 37.656,
+  "dur": 37.728,
   "marks": {
    "obp": 4.317,
-   "aqc": 12.653,
-   "hito": 24.244
+   "aqc": 12.724,
+   "hito": 24.315
   },
   "cues": [
    [
@@ -183,14 +183,14 @@
    ],
    [
     4.317,
-    "En esta parte conociste los addons, y OBP en particular: llevar las últimas capas del circuito al observable."
+    "En esta unidad conociste los addons, y OBP en particular: llevar las últimas capas del circuito al observable."
    ],
    [
-    12.653,
+    12.724,
     "AQC-Tensor, la técnica de la plantilla que acabas de ver, persigue lo mismo desde otro lado: comprimir las primeras capas en un circuito más corto."
    ],
    [
-    24.244,
+    24.315,
     "El hito ocho recalcula tu cadena de espines, reduce su profundidad con OBP, y te hace pensar en un presupuesto: cuántos términos estás dispuesto a medir a cambio de un circuito más corto."
    ]
   ]
@@ -210,7 +210,7 @@
   ]
  },
  "cierre": {
-  "dur": 21.624,
+  "dur": 21.84,
   "marks": {
    "r1": 1.868,
    "r2": 5.774,
@@ -240,7 +240,37 @@
    ],
    [
     18.583,
-    "Con esto termina la Parte ocho."
+    "Con esto termina la séptima unidad."
+   ]
+  ]
+ },
+ "hito10": {
+  "dur": 37.656,
+  "marks": {
+   "recalcula": 6.114,
+   "pasos": 16.035,
+   "informe": 23.013
+  },
+  "cues": [
+   [
+    0.107,
+    "La referencia final reúne lo que necesitas para escribir un informe reproducible."
+   ],
+   [
+    6.114,
+    "Recalculas la magnetización de tu cadena de espines: la curva exacta, los pasos de Trotter y la simulación con el ruido de Fake Fez."
+   ],
+   [
+    16.035,
+    "Eliges cuántos pasos usar, equilibrando el error con la profundidad del circuito transpilado."
+   ],
+   [
+    23.013,
+    "Y escribes el informe: parámetros, tabla de resultados, versiones de software, y la cita de Qiskit y del QPU."
+   ],
+   [
+    32.637,
+    "Con las mismas semillas, cualquiera obtiene los mismos números."
    ]
   ]
  }

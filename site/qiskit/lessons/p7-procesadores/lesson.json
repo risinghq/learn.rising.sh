@@ -1,7 +1,7 @@
 {
  "id": "p7-procesadores",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.4",
+ "part": "Guías",
+ "section": "",
  "title": "Los procesadores de IBM",
  "summary": "Familias de procesadores, cómo listar backends y leer sus propiedades estáticas y dinámicas, cómo se calibran, la inicialización de qubits y los procesadores retirados.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "familias",
    "tag": [
-    "7.4",
+    "Guía",
     "Familias y revisiones"
    ],
    "say": "Los procesadores de IBM se nombran por familia y revisión. La familia, un nombre de ave, indica el tamaño y la conectividad; la revisión, mejoras de diseño dentro de la familia. [[nh]]Nighthawk tiene una topología de cuadrícula y ciento veinte qubits programables; su revisión dos, de septiembre de dos mil veintiséis, añade un reset rápido en cada qubit, que aumenta mucho los circuitos por segundo. [[heron]]Heron tiene ciento cincuenta y seis qubits en red heavy hex en sus revisiones dos y tres, con acopladores ajustables y cableado flexible de alta densidad; la revisión tres mejoró coherencia, fidelidad y lectura. [[viejas]]Las familias anteriores, Canary, Falcon, Egret, Hummingbird, Osprey y Eagle, ya están retiradas.",
@@ -71,7 +71,7 @@
   {
    "id": "listar",
    "tag": [
-    "7.4",
+    "Guía",
     "Listar backends"
    ],
    "say": "Los procesadores en IBM Cloud se llaman ibm guion bajo y el nombre de una ciudad, que no indica dónde está el equipo. [[backends]]service punto backends lista los disponibles para ti, con filtros como simulator, operational o min num qubits, [[uno]]backend, en singular, devuelve uno por su nombre, [[least]]y least busy, el que tiene menos trabajos en cola. También se ven en la página Compute resources de la plataforma.",
@@ -114,7 +114,7 @@
   {
    "id": "pred_estatica",
    "tag": [
-    "7.4",
+    "Guía",
     "Antes de mirar"
    ],
    "say": "En un procesador, no todas las operaciones duran lo mismo. [[cz]]Una puerta de dos qubits, la CZ, es de lo más rápido que hace. [[med]]Medir un qubit es más lento, porque hay que leer la señal. [[apuesta]]Vamos a consultar Fez. Antes, apuesta: ¿cuántas veces más dura una medición que una CZ?",
@@ -165,7 +165,7 @@
   {
    "id": "estatica",
    "tag": [
-    "7.4",
+    "Guía",
     "Información estática"
    ],
    "say": "Hay información que casi no cambia: nombre, número de qubits, tipo de procesador y versión. [[ej]]Con el backend falso Fez lo vemos sin cuenta: ciento cincuenta y seis qubits, familia Heron, revisión dos. [[dur]]Y en las dos últimas líneas está la respuesta a tu apuesta: medir dura uno coma cincuenta y seis microsegundos y la CZ, ochenta y cuatro nanosegundos. Son unas dieciocho veces y media más; si apostaste por veinte, estuviste cerca. [[version]]La versión tiene la forma mayor punto menor punto revisión. Un circuito compilado para una versión siempre corre en ella; si cambia solo la revisión, sigue corriendo; si cambia la mayor o la menor, ya no está garantizado. [[instr]]Y supported instructions lista las instrucciones nativas: cz, rz, sx, x, id, delay, measure, measure dos, reset, if else y store.",
@@ -234,7 +234,7 @@
   {
    "id": "dinamica",
    "tag": [
-    "7.4",
+    "Guía",
     "Propiedades que cambian"
    ],
    "say": "Otras propiedades cambian con cada calibración. [[t1]]T uno: cuánto tarda, en promedio, un qubit en decaer de uno a cero. T dos: cuánto mantiene la coherencia de fase de una superposición, medido con un eco de Hahn. En Fez, el qubit uno tiene unos doscientos cincuenta y seis microsegundos de T uno. [[lect]]Error de lectura: la media de dos probabilidades, medir cero habiendo preparado uno, y medir uno habiendo preparado cero. [[target]]Los errores y duraciones de cada instrucción están en el Target: medir el qubit cero dura un coma cinco seis microsegundos con un uno coma uno por ciento de error; una CZ, ochenta y cuatro nanosegundos y un uno por ciento. [[mas]]Y hay métricas globales: el error de dos qubits por capas, EPLG, en una cadena de cien qubits; los circuitos por segundo; y CLOPS, capas por segundo.",
@@ -309,7 +309,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.4",
+    "Guía",
     "Comprueba"
    ],
    "say": "Sobre versiones.",
@@ -342,7 +342,7 @@
   {
    "id": "calibracion",
    "tag": [
-    "7.4",
+    "Guía",
     "Monitoreo, calibración y benchmarking"
    ],
    "say": "¿Cómo se mantiene estable un procesador? Con tres procesos. [[monitoreo]]Monitoreo: aproximadamente cada hora, trabajos breves intercalados entre los de los usuarios revisan parámetros de lectura, puertas y actividad de defectos TLS, y pruebas globales como estados de Bell. [[calib]]Calibración: cuando algo se desvía, se lanzan calibraciones solo de esos qubits o puertas, a lo largo del día. Una calibración no puede correr durante un trabajo o una sesión: en sesiones largas, el equipo puede perder estabilidad. [[bench]]Benchmarking: cada día se miden las métricas que ves en Qiskit, con benchmarking aleatorizado, tiempos de coherencia, lectura y fidelidad por capas.",
@@ -407,7 +407,7 @@
   {
    "id": "init",
    "tag": [
-    "7.4",
+    "Guía",
     "Inicialización de qubits"
    ],
    "say": "Antes de cada disparo, el QPU reinicia los qubits a cero; lo controla la opción init qubits. Como el reset no es perfecto, además se espera un tiempo entre circuitos: el rep delay. [[defecto]]En la mayoría de los backends vale doscientos cincuenta microsegundos, y se puede cambiar dentro del rango rep delay range, en Fez de cero a quinientos microsegundos. [[tradeoff]]Bajarlo reduce el tiempo total de QPU, pero aumenta el error de preparación. [[merge]]Si pones rep delay en cero y desactivas init qubits, los circuitos se encadenan: cada disparo empieza en el estado final del anterior. [[orden]]Y no hay garantía sobre el orden en que se ejecutan los circuitos de distintos PUBs.",
@@ -475,7 +475,7 @@
   {
    "id": "retirados",
    "tag": [
-    "7.4",
+    "Guía",
     "Procesadores retirados"
    ],
    "say": "Los procesadores se retiran con el tiempo: por ejemplo, Sherbrooke en julio de dos mil veinticinco, Torino en abril de dos mil veintiséis, y Strasbourg y Brussels a fines de abril de dos mil veintiséis. Sus backends falsos siguen disponibles para practicar. [[recuperar]]Tus trabajos en procesadores retirados no se pierden: service punto job con el identificador, o service punto jobs filtrando por el nombre del backend, los recuperan.",
@@ -532,7 +532,7 @@
   {
    "id": "q2",
    "tag": [
-    "7.4",
+    "Guía",
     "Comprueba"
    ],
    "say": "Sobre la inicialización.",
@@ -565,7 +565,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.4",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora lees las propiedades y eliges qubits con ellas. [[n1]]Compara la duración de medir con una `cz`. [[n2]]Busca el qubit con mayor `T1`. [[n3]]Y por último encuentra la cadena acoplada con menor error total de `cz`.",
@@ -644,7 +644,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.4",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -668,7 +668,7 @@
   {
    "id": "cierre",
    "tag": [
-    "7.4",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Nighthawk y Heron son las familias actuales. [[r2]]La información estática incluye versión e instrucciones soportadas. [[r3]]Las propiedades dinámicas, T uno, T dos y errores, están en el Target y en properties. [[r4]]Y el equipo se monitorea, calibra y mide cada día; rep delay intercambia tiempo por calidad de preparación.",

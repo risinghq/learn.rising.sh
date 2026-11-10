@@ -1,7 +1,7 @@
 {
  "id": "p9-migraciones",
- "part": "Parte IX · Extender e integrar Qiskit",
- "section": "9.5",
+ "part": "Guías",
+ "section": "",
  "title": "Versiones y migraciones",
  "summary": "La estrategia de versiones de Qiskit, las migraciones a 1.0 y 2.0, el paso a las primitivas del lado del cliente y cómo seguir las novedades.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "semver",
    "tag": [
-    "9.5",
+    "Guía",
     "Versionado semántico"
    ],
    "say": "Qiskit sigue el versionado semántico: mayor punto menor punto parche. [[mayor]]Los cambios incompatibles solo llegan en versiones mayores, como mínimo una vez al año. [[menor]]Las menores, aproximadamente cada tres meses, añaden funciones sin romper nada. [[parche]]Y los parches corrigen errores. [[soporte]]Cuando sale una mayor, la anterior recibe correcciones de errores al menos seis meses, y de seguridad un año. Por eso las bibliotecas que dependen de Qiskit no deberían exigir la nueva mayor de inmediato. [[api]]La API pública es todo lo documentado que no empieza con guion bajo. Las versiones de Python y de las dependencias no forman parte de la garantía.",
@@ -88,7 +88,7 @@
   {
    "id": "v1",
    "tag": [
-    "9.5",
+    "Guía",
     "Qiskit 1.0: el fin del metapaquete"
    ],
    "say": "Antes de la uno punto cero, el paquete qiskit era un metapaquete sin código propio: el núcleo vivía en qiskit terra, junto a Aer, el proveedor de IBM y otros paquetes. [[cambio]]Qiskit uno punto cero volvió a la estructura simple de cualquier paquete de Python: qiskit contiene el código. Fue un cambio único: [[entorno]]no se puede actualizar un entorno viejo en su sitio; hay que crear un entorno virtual nuevo, y un archivo de restricciones impide que alguna dependencia reinstale qiskit terra. [[herramienta]]Para el código, flake8 qiskit migration detecta importaciones eliminadas, como qiskit punto Aer o execute, y sugiere alternativas.",
@@ -163,10 +163,10 @@
   {
    "id": "predice_if",
    "tag": [
-    "9.5",
+    "Guía",
     "Qiskit 2.0: antes de ejecutar"
    ],
-   "say": "Qiskit dos punto cero rompió compatibilidad sin cambiar la estructura de paquetes. Tres cambios principales; empecemos por el primero. [[cif]]Desaparece c if: las condiciones se escriben con un bloque if test, que ya viste en la Parte dos. [[cual]]Este circuito mide dos qubits y aplica una X al qubit cero solo si se midió uno uno. Antes de ejecutarlo, apuesta: ¿qué operaciones contará count ops?",
+   "say": "Qiskit dos punto cero rompió compatibilidad sin cambiar la estructura de paquetes. Tres cambios principales; empecemos por el primero. [[cif]]Desaparece c if: las condiciones se escriben con un bloque if test, que ya viste en la lección de control clásico. [[cual]]Este circuito mide dos qubits y aplica una X al qubit cero solo si se midió uno uno. Antes de ejecutarlo, apuesta: ¿qué operaciones contará count ops?",
    "scene": [
     {
      "type": "code",
@@ -201,7 +201,7 @@
   {
    "id": "v2",
    "tag": [
-    "9.5",
+    "Guía",
     "Qiskit 2.0"
    ],
    "say": "[[cif]]La condición no es una puerta con un decorador: es una sola instrucción, if else, que contiene el bloque. Por eso la X no aparece en el recuento de nivel superior. [[dur]]Segundo cambio: las instrucciones ya no tienen duration ni unit; las duraciones se consultan en el Target, y para la duración del circuito, estimate duration. [[pulse]]Y tercero: qiskit punto pulse se eliminó por completo, con todo lo relacionado con calibraciones.",
@@ -254,7 +254,7 @@
   {
    "id": "v2_transp",
    "tag": [
-    "9.5",
+    "Guía",
     "El transpilador en 2.0"
    ],
    "say": "En el transpilador, se acabaron casi todas las restricciones sueltas: backend properties, instruction durations y timing constraints ya no se aceptan. Lo que antes pasabas por separado, ahora va en un Target. [[como]]Puedes construirlo desde cero, partir de GenericBackendV2, o usar Target punto from configuration. [[mezcla]]Y pasar coupling map o basis gates junto con un backend da un aviso: habría dos fuentes de verdad.",
@@ -293,7 +293,7 @@
   {
    "id": "cliente",
    "tag": [
-    "9.5",
+    "Guía",
     "Primitivas del lado del cliente"
    ],
    "say": "El cambio más reciente: desde qiskit ibm runtime cero punto cincuenta, Sampler y Estimator se reimplementan del lado del cliente, sobre Executor. Antes eran una caja negra en el servidor; ahora puedes inspeccionar lo que hacen. [[imports]]La migración es casi solo cambiar las importaciones; pronto, las de siempre apuntarán a las nuevas. [[igual]]Se mantienen el modo, las opciones, la firma de run, los PUBs y los resultados.",
@@ -330,7 +330,7 @@
   {
    "id": "predice_opciones",
    "tag": [
-    "9.5",
+    "Guía",
     "Las opciones, antes de ejecutar"
    ],
    "say": "Las opciones del Estimator también cambiaron. [[pydantic]]Ahora son modelos de Pydantic, con campos validados. Fíjate en esta asignación: seed estimator era una opción de la versión anterior, y ya no existe. [[cual]]Antes de ejecutar, apuesta: ¿qué pasa al asignarla?",
@@ -378,7 +378,7 @@
   {
    "id": "diferencias",
    "tag": [
-    "9.5",
+    "Guía",
     "Qué cambia"
    ],
    "say": "Algunas diferencias. [[pydantic]]Las opciones son modelos de Pydantic. En lugar de asdict, usa model dump; y las opciones eliminadas, como seed estimator, dan error de validación. [[mezcla]]No se pueden mezclar disparos o precisiones distintos en un trabajo: agrupa los PUBs por valor, un trabajo por grupo, todos en un lote. [[ruido]]Y para PEA y PEC ya no hay aprendizaje de ruido implícito: lo haces tú con NoiseLearnerV3 y pasas el modelo al Estimator. [[local]]Para probar en local con un backend falso, la guía sugiere cliffordizar el circuito ISA, con ConvertISAToClifford: se simula rápido, pero pierde el layout, así que el observable se adapta con el layout del circuito original.",
@@ -423,7 +423,7 @@
   {
    "id": "q1",
    "tag": [
-    "9.5",
+    "Guía",
     "Comprueba"
    ],
    "say": "Divide el trabajo.",
@@ -448,7 +448,7 @@
   {
    "id": "novedades",
    "tag": [
-    "9.5",
+    "Guía",
     "Seguir las novedades"
    ],
    "say": "Para estar al día, la documentación tiene registros de cambios: del SDK, del cliente y del servicio de computación cuántica, del servicio de transpilación, de los addons, de Functions y de las skills. [[recientes]]Algunas novedades recientes: el servicio Qiskit Runtime pasó a llamarse IBM Quantum Compute Service; llegó ibm phoenix, el primer Nighthawk r2, con reset rápido, un rep delay de un microsegundo y más de cien mil circuitos por segundo; y Composer admite OpenQASM tres.",
@@ -529,7 +529,7 @@
   {
    "id": "mision",
    "tag": [
-    "9.5",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Todo corre en tu equipo. [[n1]]Primero migras un circuito de c if a if test. [[n2]]Después conviertes las opciones del Estimator a un diccionario con model dump. [[n3]]Y por último escribes la función que reparte los PUBs en un trabajo por valor de precisión. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -611,10 +611,10 @@
   {
    "id": "proyecto",
    "tag": [
-    "9.5",
-    "Tu proyecto: el hito IX"
+    "Guía",
+    "Referencia: migrar el proyecto"
    ],
-   "say": "Esta lección cierra la Parte nueve, y con ella llega el hito nueve del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice. [[hito]]La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio.",
+   "say": "Esta guía reúne una migración importante del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice. [[hito]]La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio.",
    "scene": [
     {
      "type": "row",
@@ -649,61 +649,6 @@
       }
      ],
      "gap": 24
-    },
-    {
-     "type": "exercise",
-     "exercise": "p9-migraciones/hito9-referencia",
-     "prompt": "Escribe `curva_ideal(n, J, h, dt, pasos)`: calcula la magnetización exacta del modelo de Ising en cada instante, incluido el inicial.",
-     "level": 1,
-     "needs": "qiskit",
-     "hints": [
-      "Construye `H = J·sum(ZZ) + h·sum(X)` y `M = sum(Z) / n` como `SparsePauliOp`.",
-      "Usa `expm(-1j * H * dt)` y empieza con el estado `|0…0⟩`.",
-      "Evalúa `⟨M⟩` antes de cada evolución y devuelve `pasos + 1` valores."
-     ],
-     "id": "e1",
-     "hidden": true,
-     "starter": "def curva_ideal(n, J, h, dt, pasos):\n    return []",
-     "cases": [
-      "la curva exacta contiene el instante inicial y los pasos"
-     ]
-    },
-    {
-     "type": "exercise",
-     "exercise": "p9-migraciones/hito9-estimator",
-     "prompt": "Migra `medir(n, J, h, dt, pasos)`: mide ⟨M⟩ tras 1, …, `pasos` pasos de Trotter en `FakeManilaV2`, con ruido. Corrige la importación de `Estimator` para usar la implementación del lado del cliente de `qiskit_ibm_runtime`; el resto del código no cambia.",
-     "level": 2,
-     "needs": "aer",
-     "hints": [
-      "La migración cambia el módulo, no el nombre que usa el resto del código.",
-      "Busca la implementación `executor_estimator` del paquete de Runtime.",
-      "La forma es `from qiskit_ibm_runtime.___ import Estimator`."
-     ],
-     "kind": "fix",
-     "id": "e2",
-     "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.quantum_info import SparsePauliOp\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime import EstimatorV2 as Estimator\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef medir(n, J, h, dt, pasos):\n    backend = FakeManilaV2()\n    pm = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1)\n    M = SparsePauliOp.from_sparse_list([(\"Z\", [i], 1 / n) for i in range(n)], num_qubits=n)\n    isas = [pm.run(trotter(n, J, h, dt, k)) for k in range(1, pasos + 1)]\n    estimador = Estimator(mode=backend)\n    estimador.options.simulator.seed_simulator = 5\n    resultado = estimador.run([(isa, M.apply_layout(isa.layout)) for isa in isas]).result()\n    return [float(pub.data.evs) for pub in resultado]",
-     "cases": [
-      "4 espines y 3 pasos con el Estimator del lado del cliente en FakeManilaV2"
-     ]
-    },
-    {
-     "type": "exercise",
-     "exercise": "p9-migraciones/hito9-conteos",
-     "prompt": "Completa `magnetizacion(conteos, n)`: `magnetizacion_conteos(n, J, h, dt, pasos, disparos)` ya mide la cadena con el `Sampler` del lado del cliente sobre `FakeManilaV2` y te pasa las cuentas. Convierte las cadenas de bits y sus frecuencias en ⟨M⟩ = (1/n) Σᵢ ⟨Zᵢ⟩, donde `0` aporta `+1` y `1` aporta `-1`. La trampa: normaliza por los disparos de las cuentas y por los `n` espines.",
-     "level": 3,
-     "needs": "aer",
-     "hints": [
-      "Cada bit cero suma uno y cada bit uno resta uno, ponderados por cuántas veces salió la cadena.",
-      "Suma los valores de `conteos` para saber los disparos totales y divide al final.",
-      "La forma es `sum(cuenta * sum(1 if bit == \"0\" else -1 for bit in ___) for cadena, cuenta in conteos.items()) / (___ * disparos)`."
-     ],
-     "id": "e3",
-     "hidden": true,
-     "starter": "from qiskit import QuantumCircuit\nfrom qiskit.transpiler import generate_preset_pass_manager\nfrom qiskit_ibm_runtime.executor_sampler import Sampler\nfrom qiskit_ibm_runtime.fake_provider import FakeManilaV2\n\n\ndef trotter(n, J, h, dt, pasos):\n    qc = QuantumCircuit(n)\n    for _ in range(pasos):\n        for i in range(n - 1):\n            qc.rzz(2 * J * dt, i, i + 1)\n        for i in range(n):\n            qc.rx(2 * h * dt, i)\n    return qc\n\n\ndef magnetizacion(conteos, n):\n    return 0.0  # ✏️ cada bit 0 vale +1 y cada 1 vale -1; promedia sobre los n bits y los disparos\n\n\ndef magnetizacion_conteos(n, J, h, dt, pasos, disparos):\n    backend = FakeManilaV2()\n    qc = trotter(n, J, h, dt, pasos)\n    qc.measure_all()\n    isa = generate_preset_pass_manager(1, backend=backend, seed_transpiler=1).run(qc)\n    sampler = Sampler(mode=backend)\n    sampler.options.simulator.seed_simulator = 3\n    conteos = sampler.run([isa], shots=disparos).result()[0].data.meas.get_counts()\n    return magnetizacion(conteos, n)",
-     "cases": [
-      "4 espines, 4 pasos y 4000 disparos: la magnetización desde los conteos del Sampler en FakeManilaV2"
-     ]
     }
    ],
    "actions": [
@@ -716,30 +661,13 @@
      "do": "show",
      "id": "b",
      "at": "paquete"
-    },
-    {
-     "do": "show",
-     "id": "e1",
-     "at": "hito"
-    },
-    {
-     "do": "show",
-     "id": "e2",
-     "at": "hito",
-     "t": 1
-    },
-    {
-     "do": "show",
-     "id": "e3",
-     "at": "hito",
-     "t": 2
     }
    ]
   },
   {
    "id": "reflexion",
    "tag": [
-    "9.5",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar la parte, dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -763,10 +691,10 @@
   {
    "id": "cierre",
    "tag": [
-    "9.5",
+    "Guía",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]Qiskit usa versionado semántico, con soporte extendido para la mayor anterior. [[r2]]La uno punto cero eliminó el metapaquete. [[r3]]La dos punto cero quitó c if, pulse y las restricciones sueltas. [[r4]]Y las primitivas pasan al lado del cliente. Con esto termina la Parte nueve.",
+   "say": "Resumen. [[r1]]Qiskit usa versionado semántico, con soporte extendido para la mayor anterior. [[r2]]La uno punto cero eliminó el metapaquete. [[r3]]La dos punto cero quitó c if, pulse y las restricciones sueltas. [[r4]]Y las primitivas pasan al lado del cliente. Con esto termina esta guía de migración.",
    "scene": [
     {
      "type": "list",

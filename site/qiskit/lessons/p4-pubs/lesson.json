@@ -1,7 +1,7 @@
 {
  "id": "p4-pubs",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.2",
+ "part": "Unidad 3 · Simular",
+ "section": "3.2",
  "title": "Entradas y salidas: PUBs y broadcasting",
  "summary": "Los Primitive Unified Blocs, las reglas de broadcasting, la estructura de los resultados y el procesamiento eficiente con BitArray.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "pub",
    "tag": [
-    "4.2",
+    "3.2",
     "Primitive Unified Blocs"
    ],
    "say": "El argumento principal de run es una lista de tuplas, una por circuito. Cada tupla es un PUB, un bloque unificado de primitiva: la unidad básica de trabajo. [[est]]El PUB de Estimator tiene hasta cuatro elementos: un circuito, que puede tener parámetros; un arreglo de observables; los valores de los parámetros, si hacen falta; y, opcionalmente, la precisión deseada. [[sam]]El de Sampler tiene hasta tres: un circuito, que debe incluir mediciones; los valores de los parámetros; y, opcionalmente, el número de disparos.",
@@ -62,7 +62,7 @@
   {
    "id": "conmutan",
    "tag": [
-    "4.2",
+    "3.2",
     "Agrupar observables"
    ],
    "say": "Un detalle importante. Si dos observables que conmutan van en PUBs distintos con el mismo circuito, no se miden juntos: cada PUB representa una base de medición distinta y necesita sus propias mediciones. [[mismo]]Para que se estimen con la misma medición, ponlos en el mismo PUB.",
@@ -121,7 +121,7 @@
   {
    "id": "broadcast",
    "tag": [
-    "4.2",
+    "3.2",
     "Broadcasting"
    ],
    "say": "Los observables y los valores de parámetros se combinan con las mismas reglas de broadcasting que NumPy. [[derecha]]Las formas se comparan de derecha a izquierda. [[comp]]Dos dimensiones son compatibles si son iguales o si una vale uno. [[falta]]Si un arreglo tiene menos dimensiones, se completan con unos a la izquierda. [[res]]El resultado tiene, en cada dimensión, el tamaño mayor. Estimator devuelve un valor esperado por cada elemento de esa forma.",
@@ -202,7 +202,7 @@
   {
    "id": "forma",
    "tag": [
-    "4.2",
+    "3.2",
     "La forma de un observable"
    ],
    "say": "Ojo con qué cuenta como un elemento. Un SparsePauliOp es un solo elemento, sin importar cuántos términos tenga: su forma es vacía. [[lista]]En cambio, una lista de tres SparsePauliOp tiene forma tres: tres observables distintos, tres valores esperados. [[col]]Y una lista de listas de un elemento tiene forma tres por uno: la columna que se combina con los parámetros en producto exterior.",
@@ -245,7 +245,7 @@
   {
    "id": "ejemplo_pred",
    "tag": [
-    "4.2",
+    "3.2",
     "Antes de ejecutar"
    ],
    "say": "Una apuesta con broadcasting. Tenemos un circuito de tres qubits con un parámetro, y cuatro observables escritos como una columna, con forma cuatro por uno. [[par]]Los valores del parámetro son seis, con forma uno por seis. [[apuesta]]¿Qué forma tendrá evs?",
@@ -291,7 +291,7 @@
   {
    "id": "ejemplo",
    "tag": [
-    "4.2",
+    "3.2",
     "Un ejemplo vectorizado"
    ],
    "say": "Veamos el ejemplo completo. Un circuito con un parámetro, a, y observables. [[zip]]Con cinco valores del parámetro y cinco observables, en forma cinco, se emparejan uno a uno: cinco resultados. [[outer]]Con valores en forma uno por seis y observables en forma cuatro por uno, se combina cada valor con cada observable: veinticuatro resultados, en forma cuatro por seis. Si apostaste por la opción a, acertaste. [[una]]Todo en una sola llamada a run: así se ejecutan barridos enormes de forma eficiente.",
@@ -335,7 +335,7 @@
   {
    "id": "q1",
    "tag": [
-    "4.2",
+    "3.2",
     "Comprueba"
    ],
    "say": "Aplica las reglas de broadcasting.",
@@ -370,7 +370,7 @@
   {
    "id": "salida",
    "tag": [
-    "4.2",
+    "3.2",
     "La estructura de la salida"
    ],
    "say": "Cuando un trabajo termina, devuelve un PrimitiveResult: una lista con un PubResult por cada PUB que enviaste. [[pub]]Cada PubResult tiene data y metadata. [[est]]Para Estimator, data contiene evs, los valores esperados, y stds, sus desviaciones, con la forma del PUB. [[sam]]Para Sampler, data contiene un BitArray por cada registro clásico del circuito, con el nombre del registro: meas, si usaste measure all. [[meta]]Y la metadata depende de la implementación: por ejemplo, los disparos usados.",
@@ -421,7 +421,7 @@
   {
    "id": "bitarray",
    "tag": [
-    "4.2",
+    "3.2",
     "BitArray"
    ],
    "say": "BitArray guarda los disparos en orden, empaquetados como bytes en un arreglo de dos dimensiones: una fila por disparo y una columna por byte. [[ej]]Aquí, un GHZ de diez qubits con dos registros: alpha, con el qubit cero, y beta, con los otros nueve. Beta ocupa dos bytes por disparo. [[conv]]get counts y get bitstrings convierten a cadenas cuando hace falta.",
@@ -468,7 +468,7 @@
   {
    "id": "post",
    "tag": [
-    "4.2",
+    "3.2",
     "Posprocesar sin diccionarios"
    ],
    "say": "Los arreglos son mucho más rápidos que los diccionarios, así que conviene posprocesar directamente con BitArray. [[mask]]Puedes postseleccionar: quedarte con los disparos de beta en los que alpha valió uno. [[slice]]Recortar bits, con slice bits, o disparos, con slice shots. [[ev]]Calcular valores esperados de operadores diagonales, con expectation values. [[cat]]Y unir registros con concatenate bits.",
@@ -536,7 +536,7 @@
   {
    "id": "q2",
    "tag": [
-    "4.2",
+    "3.2",
     "Comprueba"
    ],
    "say": "Sobre la salida de Sampler.",
@@ -570,7 +570,7 @@
   {
    "id": "mision",
    "tag": [
-    "4.2",
+    "3.2",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero apuestas las formas que tienen los dos barridos de la lección. [[n2]]Después corriges la forma de los observables para que evs salga con forma tres por diez. [[n3]]Y por último, con un solo PUB de Sampler, calculas la probabilidad de medir uno para varios ángulos, posprocesando el BitArray sin diccionarios.",
@@ -652,7 +652,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "4.2",
+    "3.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras; se guardan en tu navegador.",
@@ -676,7 +676,7 @@
   {
    "id": "cierre",
    "tag": [
-    "4.2",
+    "3.2",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un PUB de Estimator lleva circuito, observables, parámetros y precisión. [[r2]]Uno de Sampler, circuito, parámetros y disparos. [[r3]]Las formas se combinan con broadcasting. [[r4]]Y la salida es un PrimitiveResult con un PubResult por PUB, que se posprocesa mejor con BitArray.",

@@ -1,7 +1,7 @@
 {
  "id": "p9-ia",
- "part": "Parte IX · Extender e integrar Qiskit",
- "section": "9.4",
+ "part": "Guías",
+ "section": "",
  "title": "IA para programar con Qiskit",
  "summary": "Modelos de lenguaje especializados en Qiskit, servidores MCP para asistentes de IA y skills reutilizables.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "assistant",
    "tag": [
-    "9.4",
+    "Guía",
     "Qiskit Code Assistant"
    ],
    "say": "Qiskit Code Assistant es una familia de modelos de lenguaje entrenados con el código, los ejemplos y la documentación de Qiskit. El modelo actual es mistral small tres punto dos, veinticuatro b, qiskit. [[abiertos]]Todos son modelos abiertos, publicados en Hugging Face. Hay versiones GGUF, más ligeras, pensadas para laptops.",
@@ -72,7 +72,7 @@
   {
    "id": "predice",
    "tag": [
-    "9.4",
+    "Guía",
     "Antes de mirar la tabla"
    ],
    "say": "Para medirlos, IBM creó el benchmark Qiskit HumanEval: unas ciento cincuenta tareas de programación con Qiskit, cada una con pruebas unitarias. Tiene una versión difícil, Q H E Hard, que quita la información sobre las importaciones: el modelo debe averiguar solo qué clases y métodos importar. Antes de ver los resultados, apuesta: ¿qué modelo de los tres crees que obtiene la mejor puntuación en la versión difícil?",
@@ -121,7 +121,7 @@
   {
    "id": "resultados",
    "tag": [
-    "9.4",
+    "Guía",
     "Resultados en QHE"
    ],
    "say": "Estos son los resultados, en porcentaje de tareas resueltas. [[hard]]En la versión difícil gana mistral, con treinta y dos coma cuarenta y cinco: sin las importaciones a la vista, es el que más tareas resuelve. [[qhe]]Pero en la versión normal, Qwen de catorce b lo supera: cuarenta y nueve contra cuarenta y siete. [[lec]]Granite, de ocho b, queda atrás en ambas. La lección: el tamaño no decide solo. Elige el modelo según el tipo de tarea, y no olvides que cada modelo se entrenó con una versión distinta de Qiskit.",
@@ -196,7 +196,7 @@
   {
    "id": "local",
    "tag": [
-    "9.4",
+    "Guía",
     "Ejecutarlo en tu equipo"
    ],
    "say": "La forma más sencilla de usarlo en tu equipo es Ollama: un comando descarga el modelo GGUF desde Hugging Face y abre un chat. [[cmds]]Con ollama list ves tus modelos, con ps los cargados, y con rm los borras. [[llama]]También puedes usar llama punto cpp. [[editores]]Y conectarlo a tu editor: a VS Code con la extensión Continue, a JupyterLab con Jupyter AI y su comando mágico ai, o a la terminal con OpenCode.",
@@ -276,7 +276,7 @@
   {
    "id": "mcp",
    "tag": [
-    "9.4",
+    "Guía",
     "Servidores MCP"
    ],
    "say": "El protocolo de contexto de modelos, MCP, permite que un asistente de IA use herramientas externas. Los servidores MCP de Qiskit le dan acceso a Qiskit y a los servicios de IBM. [[lista]]Hay varios: el de Qiskit, para crear, transpilar y serializar circuitos en local; el de Runtime, para consultar backends y enviar trabajos; el de documentación; el del transpilador con IA; el de Code Assistant; y uno de la comunidad, Qiskit Gym, con aprendizaje por refuerzo para síntesis de circuitos. [[auth]]Los de Qiskit y de documentación no necesitan credenciales; los de Runtime y el transpilador leen tu clave de la variable QISKIT IBM TOKEN.",
@@ -360,7 +360,7 @@
   {
    "id": "config",
    "tag": [
-    "9.4",
+    "Guía",
     "Configurarlos"
    ],
    "say": "Se instalan con pip, todos juntos o por separado. [[cliente]]Después se declaran en la configuración de tu cliente MCP, como Claude Desktop o Cursor: cada servidor con el comando que lo arranca. [[probar]]Y para probarlos, el inspector de MCP.",
@@ -404,7 +404,7 @@
   {
    "id": "skills",
    "tag": [
-    "9.4",
+    "Guía",
     "Skills"
    ],
    "say": "Por último, las skills de Qiskit: conjuntos de instrucciones reutilizables que enseñan a un asistente de IA a hacer una tarea concreta de forma consistente. Sirven con distintos asistentes. [[migrar]]La primera es migrate qiskit ibm runtime, para migrar código: por ejemplo, de las primitivas V1 a las V2, o a las nuevas primitivas del lado del cliente. Se la das al asistente y le dices dónde aplicarla.",
@@ -440,7 +440,7 @@
   {
    "id": "q1",
    "tag": [
-    "9.4",
+    "Guía",
     "Comprueba"
    ],
    "say": "Elige la herramienta.",
@@ -473,7 +473,7 @@
   {
    "id": "mision",
    "tag": [
-    "9.4",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. No usas ningún modelo ni red: trabajas con respuestas ya escritas, como las de Qiskit HumanEval. [[n1]]Primero escribes la función que decide si un código pasa su prueba. [[n2]]Después corriges el código de uno que escribió una CNOT al revés. [[n3]]Y por último escribes una prueba que no se deje engañar por respuestas casi correctas. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -555,7 +555,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "9.4",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -579,7 +579,7 @@
   {
    "id": "cierre",
    "tag": [
-    "9.4",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Qiskit Code Assistant son modelos abiertos que puedes ejecutar en tu equipo. [[r2]]Se integran en tu editor. [[r3]]Los servidores MCP conectan asistentes con Qiskit y los servicios de IBM. [[r4]]Y las skills enseñan tareas concretas, como migrar código.",

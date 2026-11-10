@@ -2104,9 +2104,9 @@ for mitigation in (False, True):
         beat(
             "proyecto",
             ("", "Tu proyecto: la magnetización en el tiempo"),
-            """Cierre de la parte con tu proyecto. [[hito]]El hito cuatro responde la pregunta de la cadena de espines con simuladores: cómo evoluciona la magnetización tras encender el campo, exacta frente a una simulación de Aer con ruido.
+            """Cierre de esta unidad con tu proyecto. [[hito]]El hito cuatro responde la pregunta de la cadena de espines con simuladores: cómo evoluciona la magnetización tras encender el campo, exacta frente a una simulación de Aer con ruido.
              Primero recalculas lo que ya tienes, el Hamiltoniano, el circuito de Trotter y el observable, y comparas la curva exacta con la del circuito. Después añades ruido despolarizante a las CX y simulas con Aer. Y por último escribes una función que dice hasta qué instante te puedes fiar de la simulación ruidosa.
-             Ese instante te dirá cuántos pasos pedirle al QPU en la parte cinco.""",
+             Ese instante te dirá cuántos pasos pedirle al QPU cuando llegues al hardware.""",
             [
                 M(r"M(t)=\frac1N\sum_i\langle Z_i\rangle", size=46),
                 Exercise(
@@ -2169,7 +2169,7 @@ for mitigation in (False, True):
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]En modo local pasas un backend falso o un AerSimulator como mode. [[r2]]Los backends falsos imitan QPUs reales. [[r3]]Desde la cero punto cincuenta, la mitigación también se prueba en local.
-             [[r4]]Y la recomendación de IBM: simula en local, ejecuta en hardware. Con esto cierra la Parte cuatro; en la cinco, a la nube.""",
+             [[r4]]Y la recomendación de IBM: simula en local, ejecuta en hardware. Con esto cierra la tercera unidad; después transpilarás antes de estudiar el ruido.""",
             s_cierre,
             a_cierre,
         ),
@@ -2191,8 +2191,8 @@ s_cierre, a_cierre = resumen(
 )
 cierre = lesson(
     "p4-cierre",
-    "Cierre de la Parte IV: repaso y tiempo de validez",
-    "Un repaso corto de la Parte cuatro y una pregunta del proyecto Ising: hasta qué instante una simulación con ruido sigue la curva exacta.",
+    "Repaso: cuándo fiarte de una simulación",
+    "Un repaso corto y una pregunta del proyecto Ising: hasta qué instante una simulación con ruido sigue la curva exacta.",
     [
         "recordar qué primitiva usar, cómo crece el efecto del ruido y cuándo sirve el método `stabilizer`",
         "calcular el primer instante en que una medida se aleja de la referencia más que una tolerancia",
@@ -2201,7 +2201,7 @@ cierre = lesson(
         beat(
             "repaso1",
             ("", "Repaso: primitivas"),
-            """Tres preguntas rápidas de la Parte cuatro, y después una pregunta del proyecto Ising. La primera, sobre las primitivas.""",
+            """Tres preguntas rápidas y después una pregunta del proyecto Ising. La primera, sobre las primitivas.""",
             [T("Sampler → cadenas de bits · Estimator → valores esperados", "subtitle")],
             ask=choice(
                 "Quieres la magnetización de una cadena de espines en un instante, es decir, el valor esperado de un observable. ¿Qué primitiva usas?",
@@ -2264,8 +2264,8 @@ cierre = lesson(
         beat(
             "cierre",
             ("", "Resumen"),
-            """Resumen de la parte. [[r1]]Estimator da valores esperados; Sampler, cadenas de bits. [[r2]]El error de cada puerta multiplica la supervivencia. [[r3]]El método stabilizer simula circuitos de Clifford grandes.
-             [[r4]]Y el tiempo de validez dice hasta cuándo te puedes fiar de una simulación con ruido. Con esto cierras la Parte cuatro; en la siguiente, ejecutar en IBM Quantum.""",
+            """Resumen de la unidad. [[r1]]Estimator da valores esperados; Sampler, cadenas de bits. [[r2]]El error de cada puerta multiplica la supervivencia. [[r3]]El método stabilizer simula circuitos de Clifford grandes.
+             [[r4]]Y el tiempo de validez dice hasta cuándo te puedes fiar de una simulación con ruido. Con esto cierras la tercera unidad; el camino continúa con la transpilación y el ruido.""",
             s_cierre,
             a_cierre,
         ),

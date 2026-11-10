@@ -1,7 +1,7 @@
 {
  "id": "p10-acceso",
- "part": "Parte X · Organizaciones, seguridad y comunidad",
- "section": "10.2",
+ "part": "Guías",
+ "section": "",
  "title": "Cuentas, grupos de acceso y usuarios",
  "summary": "La estructura de una cuenta de IBM Cloud, los roles de plataforma y de servicio, los grupos de acceso, los roles personalizados y la gestión de usuarios.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "estructura",
    "tag": [
-    "10.2",
+    "Guía",
     "La estructura de una cuenta"
    ],
    "say": "Una cuenta de IBM Cloud contiene usuarios e instancias de servicio. [[politicas]]A cada usuario se le asignan políticas de acceso, que dan permisos sobre instancias, [[grupos]]y las políticas se agrupan en grupos de acceso, que es la forma habitual de gestionarlas. [[visible]]Por defecto, todos los usuarios de una cuenta se ven entre sí; se puede restringir.",
@@ -71,7 +71,7 @@
   {
    "id": "roles",
    "tag": [
-    "10.2",
+    "Guía",
     "Dos familias de roles"
    ],
    "say": "Los roles son de dos familias. [[plataforma]]Los de plataforma gestionan recursos: Viewer ve instancias; Operator además gestiona credenciales; Editor crea, edita y borra instancias; y Administrator puede hacer todo, incluido asignar acceso. [[servicio]]Los de servicio actúan dentro de la instancia: Reader solo lee, por ejemplo ve trabajos; Writer además ejecuta trabajos; y Manager además crea instancias, fija límites de costo y borra o cancela trabajos de otros. [[combinar]]Muchas acciones combinan ambos: para ejecutar trabajos hace falta Writer de servicio y Viewer de plataforma sobre la instancia.",
@@ -200,7 +200,7 @@
   {
    "id": "grupos",
    "tag": [
-    "10.2",
+    "Guía",
     "Grupos de acceso"
    ],
    "say": "Cada instancia creada desde la plataforma trae su grupo de colaboradores. Para la administración, se recomienda crear además un grupo de administradores de IBM Quantum. [[politicas]]Sus políticas: Manager y Administrator sobre el servicio cuántico; Viewer sobre la gestión de la cuenta, para listar grupos de recursos; Administrator sobre la gestión de IAM, para invitar usuarios y gestionar accesos; y Administrator del centro de soporte, para abrir casos. [[cli]]Los grupos se crean desde la consola, la CLI o la API de IBM Cloud.",
@@ -279,7 +279,7 @@
   {
    "id": "custom_pred",
    "tag": [
-    "10.2",
+    "Guía",
     "Antes de los roles personalizados"
    ],
    "say": "Antes de verlos, apuesta. Un rol personalizado se compone de acciones concretas del servicio. Este tiene siete: leer dispositivos, crear, leer y cancelar trabajos, leer y borrar programas, y cerrar sesión. [[cual]]Un usuario con este rol, ¿podrá borrar un trabajo?",
@@ -309,7 +309,7 @@
   {
    "id": "custom",
    "tag": [
-    "10.2",
+    "Guía",
     "Roles personalizados"
    ],
    "say": "Cuando los roles predefinidos no encajan, se crean roles personalizados eligiendo acciones concretas del servicio. [[trabajo]]Por ejemplo, un rol para trabajar con instancias: leer dispositivos, crear, leer y cancelar trabajos, leer y borrar programas, cerrar sesión, y opcionalmente borrar trabajos. Borrar programas no es borrar trabajos: son acciones distintas. [[analitica]]O un rol que solo ve la analítica de uso. [[lector]]Un patrón útil: dos roles, uno lector sin acciones de cancelar, borrar ni actualizar, y otro escritor con todas, cada uno en su grupo.",
@@ -371,7 +371,7 @@
   {
    "id": "usuarios",
    "tag": [
-    "10.2",
+    "Guía",
     "Invitar y gestionar usuarios"
    ],
    "say": "Crea las instancias antes de invitar. Desde Access management, en la plataforma, invitas por correo y asignas grupos; el usuario recibe la invitación y verá la nueva cuenta en su selector. [[cloud]]Si ya tiene cuenta de IBM Cloud, también se le invita desde IAM; no se le puede gestionar hasta que acepte y entre una vez. [[quitar]]Al quitar a alguien de una instancia, deja de ver sus trabajos, pero los demás siguen viéndolos. [[idp]]Para inicio de sesión único, se conecta un proveedor de identidad externo, por SAML o con App ID, y con reglas dinámicas los usuarios se asignan solos a grupos. [[subcadenas]]Un cuidado: en las reglas dinámicas, no uses valores que sean subcadenas de otros, como ml y chemlab: la regla de ml también daría acceso a chemlab.",
@@ -441,7 +441,7 @@
   {
    "id": "q1",
    "tag": [
-    "10.2",
+    "Guía",
     "Comprueba"
    ],
    "say": "Roles mínimos.",
@@ -474,7 +474,7 @@
   {
    "id": "mision",
    "tag": [
-    "10.2",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero calculas qué llamadas de la API permite un rol, y confirmas si puede borrar trabajos. [[n2]]Después derivas un rol lector a partir del escritor, quitando las acciones de cancelar, borrar y actualizar. [[n3]]Y por último escribes un detector de valores que son subcadenas de otros, para que una regla dinámica no dé más acceso del que pretendes. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -556,7 +556,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "10.2",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Lo que escribas se guarda en tu navegador.",
@@ -580,7 +580,7 @@
   {
    "id": "cierre",
    "tag": [
-    "10.2",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Una cuenta tiene usuarios, instancias, políticas y grupos de acceso. [[r2]]Hay roles de plataforma y de servicio, y se combinan. [[r3]]Los roles personalizados afinan permisos. [[r4]]Y los usuarios se invitan desde la plataforma o IAM, o llegan desde un proveedor de identidad.",

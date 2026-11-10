@@ -290,11 +290,11 @@
   ]
  },
  "mision": {
-  "dur": 25.728,
+  "dur": 26.376,
   "marks": {
    "n1": 2.137,
-   "n2": 9.568,
-   "n3": 17.479
+   "n2": 10.204,
+   "n3": 18.116
   },
   "cues": [
    [
@@ -303,14 +303,14 @@
    ],
    [
     2.137,
-    "Primero, reproduce el GHZ de quince qubits en línea y compara las CNOT de cada nivel."
+    "Primero, escribe la función que cuenta las CNOT del GHZ de quince qubits en línea para cada nivel."
    ],
    [
-    9.568,
+    10.204,
     "Después, elige tú el layout inicial de un chip en forma de T para que el circuito no necesite ningún SWAP."
    ],
    [
-    17.479,
+    18.116,
     "Y por último, escribe una función que transpila varias veces con distintas semillas y devuelve el mejor resultado."
    ]
   ]

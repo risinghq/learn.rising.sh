@@ -1,7 +1,7 @@
 {
  "id": "p3-pases-propios",
- "part": "Parte III · Transpilación",
- "section": "3.6",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.6",
  "title": "Escribir pases propios: el DAG",
  "summary": "La representación DAG de un circuito, sus operaciones básicas y dos pases escritos desde cero: twirling de Pauli y un mapeador básico con SWAP.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "dag",
    "tag": [
-    "3.6",
+    "4.6",
     "Circuitos como grafos"
    ],
    "say": "Dentro del transpilador, los circuitos no son listas de puertas: son grafos dirigidos acíclicos, DAG. [[nodos]]Hay tres clases de nodos: de entrada, uno por qubit y bit clásico; de operación, uno por instrucción; y de salida. [[aristas]]Cada arista indica un flujo de datos, una dependencia: esta operación necesita el resultado de aquella. [[ventaja]]La ventaja frente a una lista es que el DAG muestra directamente qué operaciones dependen de cuáles, y cuáles se pueden reordenar o ejecutar en paralelo.",
@@ -107,7 +107,7 @@
   {
    "id": "ops",
    "tag": [
-    "3.6",
+    "4.6",
     "Operaciones con el DAG"
    ],
    "say": "circuit to dag convierte un circuito en DAG. [[nodes]]op nodes devuelve los nodos de operación; cada uno tiene su operación, sus qubits y sus bits. [[back]]apply operation back añade una operación al final; [[front]]apply operation front, al principio. [[sub]]substitute node with dag reemplaza un nodo por un DAG pequeño, conservando las conexiones. [[vuelta]]Y dag to circuit convierte de vuelta. Así trabaja todo el transpilador: circuito a DAG, transformaciones, DAG a circuito.",
@@ -178,7 +178,7 @@
   {
    "id": "tipos",
    "tag": [
-    "3.6",
+    "4.6",
     "Dos tipos de pases"
    ],
    "say": "Los pases son de dos tipos. [[an]]Los de análisis, AnalysisPass, leen el DAG y escriben lo que averiguan en el property set, un diccionario compartido; no pueden modificar el DAG. [[tr]]Los de transformación, TransformationPass, modifican el DAG y pueden leer el property set, pero no escribir en él. [[run]]En ambos casos, lo que implementas es el método run, que recibe el DAG.",
@@ -254,7 +254,7 @@
   {
    "id": "twirl",
    "tag": [
-    "3.6",
+    "4.6",
     "Un pase de twirling de Pauli"
    ],
    "say": "Primer pase propio: twirling de Pauli, una técnica que aleatoriza cómo los qubits sufren el ruido de las puertas de dos qubits, las más ruidosas. [[pares]]Rodeamos cada puerta con dos Paulis elegidos para que el efecto total sea el mismo: Pauli a la izquierda, puerta, Pauli a la derecha. Los pares válidos se encuentran probando todas las combinaciones de Paulis de dos qubits. [[run]]En run recorremos los nodos, [[mini]]construimos un DAG pequeño con el Pauli, la puerta y el otro Pauli, [[subst]]y sustituimos el nodo original por ese mini DAG.",
@@ -297,7 +297,7 @@
   {
    "id": "twirl2",
    "tag": [
-    "3.6",
+    "4.6",
     "Probar el pase"
    ],
    "say": "Probemos el pase sobre un circuito con CX y ECR. [[pm]]Lo ponemos en un PassManager y generamos cincuenta circuitos, cada uno con Paulis aleatorios distintos. [[igual]]Cada puerta de dos qubits queda entre dos Paulis. Y la comprobación clave: todos los circuitos implementan exactamente el mismo operador que el original.",
@@ -372,7 +372,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.6",
+    "4.6",
     "Comprueba"
    ],
    "say": "Sobre los pares de twirling.",
@@ -397,7 +397,7 @@
   {
    "id": "apuesta",
    "tag": [
-    "3.6",
+    "4.6",
     "Antes de ejecutar"
    ],
    "say": "Segundo ejemplo: un pase de routing muy simple, BasicSwap. Si los qubits de una puerta no son vecinos, inserta SWAP a lo largo del camino más corto, y el layout se actualiza con cada uno. [[reto]]Tenemos una línea de siete qubits, y un circuito con una CX entre los qubits cero y cuatro, y otra entre el seis y el uno. Apuesta: ¿cuántos SWAP inserta en total?",
@@ -510,7 +510,7 @@
   {
    "id": "basicswap",
    "tag": [
-    "3.6",
+    "4.6",
     "Un mapeador básico"
    ],
    "say": "Aquí está el pase. [[capas]]Recorre el DAG capa por capa; en cada capa, las operaciones actúan sobre qubits distintos. [[chk]]Para cada puerta de dos qubits mira si sus qubits físicos están a distancia uno en el mapa de acoplamiento. [[swap]]Si no, busca el camino más corto e inserta SWAP a lo largo de él, actualizando el layout. [[prueba]]Y el resultado: ocho SWAP. La primera CX necesita tres, porque entre el cero y el cuatro hay cuatro saltos; la segunda necesita cinco, porque el primer grupo de SWAP ya movió los estados. Si apostaste por ocho, acertaste.",
@@ -566,7 +566,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.6",
+    "4.6",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, escribe la función que convierte un circuito en DAG, añade puertas al principio y al final, y vuelve al circuito. [[n2]]Después, completa un pase de transformación que sustituye cada SWAP por tres CNOT. [[n3]]Y por último, escribe tú un pase de análisis que cuenta las puertas de dos qubits y las guarda en el property set.",
@@ -650,7 +650,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.6",
+    "4.6",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -674,7 +674,7 @@
   {
    "id": "cierre",
    "tag": [
-    "3.6",
+    "4.6",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]El transpilador trabaja sobre un DAG. [[r2]]Los pases de análisis escriben en el property set; los de transformación cambian el DAG. [[r3]]Las operaciones básicas son op nodes, apply operation, substitute node with dag y dag to circuit. [[r4]]Con eso escribimos un pase de twirling y un mapeador con SWAP.",

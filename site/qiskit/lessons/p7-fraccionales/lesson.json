@@ -1,7 +1,7 @@
 {
  "id": "p7-fraccionales",
- "part": "Parte VII · Ejecución avanzada y gestión de trabajos",
- "section": "7.2",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.8",
  "title": "Puertas fraccionales",
  "summary": "Rotaciones RX y RZZ ejecutadas directamente en procesadores Heron: cuándo convienen, cómo activarlas, sus límites, y el reemplazo de Qiskit Pulse.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "que",
    "tag": [
-    "7.2",
+    "6.8",
     "Rotaciones directas"
    ],
    "say": "Las puertas base de IBM han sido CZ, X, RZ, raíz de X e identidad. Con ellas, una rotación RX de un ángulo cualquiera necesita varias puertas RZ y raíz de X, y una RZZ necesita dos CZ y varias puertas de un qubit. [[frac]]Los procesadores Heron admiten dos puertas fraccionales: RX con cualquier ángulo, [[rzz]]y RZZ con ángulos entre cero y pi medios. [[ventaja]]Ejecutarlas directamente reduce hasta la mitad la duración y el error de las rotaciones de un qubit, y evita descomponer las RZZ en CZ.",
@@ -134,7 +134,7 @@
   {
    "id": "activar",
    "tag": [
-    "7.2",
+    "6.8",
     "Activarlas"
    ],
    "say": "Aunque RX y RZZ están en la biblioteca estándar de Qiskit, solo se ejecutan directamente en ciertos procesadores, y hay que pedir el backend con use fractional gates igual a True. Así el Target las incluye y el transpilador puede usarlas. [[lista]]service punto backends con use fractional gates lista los que las admiten; desde la cero punto cuarenta y ocho, least busy acepta use fractional gates. [[fake]]Los backends falsos las tienen desactivadas por defecto; se activan refrescando su configuración con el servicio. [[error]]Un detalle: el error que reporta el Target para las fraccionales es una copia del de la puerta convencional equivalente, porque todavía no se miden por separado.",
@@ -174,7 +174,7 @@
   {
    "id": "pred_ising",
    "tag": [
-    "7.2",
+    "6.8",
     "Antes de transpilar"
    ],
    "say": "Vamos a simular la dinámica de una cadena de Ising con cinco qubits y tres pasos de tiempo. [[paso]]Cada paso aplica una capa de RX y dos capas de RZZ, que en total son cuatro RZZ, una por cada par de vecinos. [[cuenta]]Recuerda que, sin puertas fraccionales, cada RZZ se descompone en dos CZ. [[apuesta]]Haz la cuenta y apuesta: ¿cuántas CZ crees que necesitará el backend convencional?",
@@ -253,7 +253,7 @@
   {
    "id": "ising",
    "tag": [
-    "7.2",
+    "6.8",
     "Ejemplo: una cadena de Ising"
    ],
    "say": "El ejemplo de la guía simula la dinámica de una cadena de Ising: capas de RX seguidas de capas de RZZ, tres pasos de tiempo, cinco qubits. [[comp]]Lo transpilamos para dos backends genéricos, uno sin y otro con puertas fraccionales, y programamos los tiempos para medir la duración. [[res]]Sin fraccionales: veinticuatro CZ, dos por cada una de las doce RZZ, y casi nueve microsegundos. Si apostaste por veinticuatro, acertaste. Con fraccionales: doce RZZ, ninguna CZ, y un coma dos microsegundos. Siete veces más corto.",
@@ -322,7 +322,7 @@
   {
    "id": "angulos",
    "tag": [
-    "7.2",
+    "6.8",
     "Restricción de ángulos"
    ],
    "say": "La RZZ solo admite ángulos entre cero y pi medios. Si tu circuito tiene una RZZ fuera de ese rango, el transpilador normalmente la corrige con una transformación equivalente, mediante el pase FoldRzzAngle. [[cuando]]¿Dónde conviene usarlas? En circuitos con muchas rotaciones de un qubit o de dos qubits que no son múltiplos de pi medios: ansatz variacionales y simulación de evolución temporal.",
@@ -364,7 +364,7 @@
   {
    "id": "cuando_no",
    "tag": [
-    "7.2",
+    "6.8",
     "Cuándo no usarlas"
    ],
    "say": "Las puertas fraccionales son experimentales: el comportamiento de la opción puede cambiar. [[transp]]El transpilador aún aprovecha poco la RZZ en sus optimizaciones, así que tendrás que cuidar más el diseño del circuito. [[incomp]]Y no se pueden combinar con twirling de puertas, aunque sí con el twirling de mediciones de TREX; tampoco con PEC ni con ZNE basada en PEA.",
@@ -431,7 +431,7 @@
   {
    "id": "pulse",
    "tag": [
-    "7.2",
+    "6.8",
     "Adiós a Qiskit Pulse"
    ],
    "say": "Con la llegada de las puertas fraccionales, IBM retiró el control a nivel de pulsos en sus procesadores, y el módulo qiskit punto pulse se eliminó en Qiskit dos punto cero. [[uso]]El uso más común de los pulsos era justamente construir rotaciones de uno y dos qubits más eficientes, modificando los pulsos ECR o RX. Eso ahora lo cubren las fraccionales. [[dyn]]Para todo lo demás, modelar la física del dispositivo, simular programas de pulsos u optimizarlos, está el paquete Qiskit Dynamics, del ecosistema.",
@@ -482,7 +482,7 @@
   {
    "id": "q1",
    "tag": [
-    "7.2",
+    "6.8",
     "Comprueba"
    ],
    "say": "Una pregunta práctica.",
@@ -515,7 +515,7 @@
   {
    "id": "mision",
    "tag": [
-    "7.2",
+    "6.8",
     "Tu turno"
    ],
    "say": "Ahora comparas las dos compilaciones y construyes una cadena parametrizable. [[n1]]Mide cuántas `cz` y `rzz` aparecen en dos backends. [[n2]]Prueba un ángulo especial para acortar la descomposición convencional. [[n3]]Y por último escribe la cadena de Ising con los parámetros que quieras.",
@@ -594,7 +594,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "7.2",
+    "6.8",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -618,7 +618,7 @@
   {
    "id": "cierre",
    "tag": [
-    "7.2",
+    "6.8",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Heron ejecuta RX y RZZ directamente. [[r2]]Se activan al pedir el backend con use fractional gates. [[r3]]Acortan mucho los circuitos con rotaciones arbitrarias. [[r4]]Pero son experimentales, incompatibles con algunas mitigaciones, y reemplazan a Qiskit Pulse.",

@@ -1273,7 +1273,7 @@ pipx run flake8-qiskit-migration src/""",
         beat(
             "predice_if",
             ("", "Qiskit 2.0: antes de ejecutar"),
-            """Qiskit dos punto cero rompió compatibilidad sin cambiar la estructura de paquetes. Tres cambios principales; empecemos por el primero. [[cif]]Desaparece c if: las condiciones se escriben con un bloque if test, que ya viste en la Parte dos.
+            """Qiskit dos punto cero rompió compatibilidad sin cambiar la estructura de paquetes. Tres cambios principales; empecemos por el primero. [[cif]]Desaparece c if: las condiciones se escriben con un bloque if test, que ya viste en la lección de control clásico.
              [[cual]]Este circuito mide dos qubits y aplica una X al qubit cero solo si se midió uno uno. Antes de ejecutarlo, apuesta: ¿qué operaciones contará count ops?""",
             [
                 Code(
@@ -1541,8 +1541,8 @@ print(clifford.layout)""",
         ),
         beat(
             "proyecto",
-            ("", "Tu proyecto: el hito IX"),
-            """Esta lección cierra la Parte nueve, y con ella llega el hito nueve del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice.
+            ("", "Referencia: migrar el proyecto"),
+            """Esta guía reúne una migración importante del proyecto de la cadena de espines. [[migrar]]Migras el código del proyecto a las primitivas del lado del cliente: el Estimator para la magnetización y el Sampler para los conteos. [[paquete]]Y lo empaquetas como un módulo que puedes importar, ising punto py, para que el informe final lo reutilice.
              [[hito]]La práctica recalcula primero lo de los hitos anteriores, para que no dependas de ningún otro ejercicio.""",
             [
                 Row(
@@ -1625,7 +1625,7 @@ print(clifford.layout)""",
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]Qiskit usa versionado semántico, con soporte extendido para la mayor anterior. [[r2]]La uno punto cero eliminó el metapaquete. [[r3]]La dos punto cero quitó c if, pulse y las restricciones sueltas.
-             [[r4]]Y las primitivas pasan al lado del cliente. Con esto termina la Parte nueve.""",
+             [[r4]]Y las primitivas pasan al lado del cliente. Con esto termina esta guía de migración.""",
             s_cierre,
             a_cierre,
         ),

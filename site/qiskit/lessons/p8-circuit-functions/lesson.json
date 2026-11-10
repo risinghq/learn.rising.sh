@@ -1,7 +1,7 @@
 {
  "id": "p8-circuit-functions",
- "part": "Parte VIII · Serverless, addons y Qiskit Functions",
- "section": "8.4",
+ "part": "Unidad 7 · Escalar",
+ "section": "7.4",
  "title": "Funciones de circuito",
  "summary": "Las cuatro funciones de circuito del catálogo: TEM, QESEM, Performance Management y Orbit: qué hacen, cuándo convienen y cómo se llaman.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "panorama",
    "tag": [
-    "8.4",
+    "7.4",
     "Cuatro funciones de circuito"
    ],
    "say": "Las funciones de circuito sustituyen a las primitivas: reciben PUBs y se encargan de transpilar, suprimir y mitigar. Hay cuatro en el catálogo, cada una con sus puntos fuertes.",
@@ -82,7 +82,7 @@
   {
    "id": "tem",
    "tag": [
-    "8.4",
+    "7.4",
     "TEM, de Algorithmiq"
    ],
    "say": "TEM, mitigación de errores con redes de tensores, mitiga el ruido completamente en el posprocesamiento clásico. Mide el circuito con una medición informacionalmente completa, y construye una red de tensores que representa la inversa del canal de ruido global. [[ventajas]]Sus ventajas: un sobrecosto de mediciones óptimo según las cotas teóricas; no añade circuitos extra al QPU; muchos observables con los mismos datos; e incluye su propia mitigación de lectura. [[uso]]Se llama con PUBs, el backend, y opciones como la precisión deseada.",
@@ -146,7 +146,7 @@
   {
    "id": "predice",
    "tag": [
-    "8.4",
+    "7.4",
     "Antes de QESEM"
    ],
    "say": "Antes de ver QESEM, una apuesta. QESEM te deja elegir la precisión que quieres: el error máximo de tu estimación. [[hoy]]Imagina que con un error de cero punto cero dos el trabajo tarda diez minutos de QPU. [[mitad]]Ahora pides la mitad del error: cero punto cero uno. [[pregunta]]¿Cuánto tarda?",
@@ -202,7 +202,7 @@
   {
    "id": "qesem",
    "tag": [
-    "8.4",
+    "7.4",
     "QESEM, de Qedma"
    ],
    "say": "QESEM produce estimaciones sin sesgo, con garantías teóricas, hasta la precisión que pidas. Para ello caracteriza el dispositivo para tu circuito, transpila teniendo en cuenta el ruido, y aplica supresión y mitigación. [[tiempo]]Esta es la respuesta a tu apuesta: su sobrecosto de QPU crece con el inverso del cuadrado de la precisión, así que la mitad del error cuesta cuatro veces más tiempo. Y crece exponencialmente con el volumen activo del circuito, el número de puertas de dos qubits que afectan al observable. [[estimar]]Por eso tiene un modo para estimar el tiempo antes de gastar: estimate time only. Con un backend simulado, como fake fez, no gasta QPU.",
@@ -233,7 +233,7 @@
   {
    "id": "qctrl",
    "tag": [
-    "8.4",
+    "7.4",
     "Performance Management, de Q-CTRL"
    ],
    "say": "Performance Management, de Fire Opal, aplica automáticamente supresión de errores guiada por IA, sin configuración. No añade tiempo de QPU ni qubits extra: a diferencia de la mitigación, evita que los errores ocurran. [[primitivas]]Ofrece dos primitivas, Sampler y Estimator, compatibles con las de IBM: solo cambias quién las ejecuta. [[bench]]En sus pruebas en Fez: Bernstein-Vazirani con cincuenta qubits y transformada de Fourier con treinta, con cien por ciento de éxito.",
@@ -287,7 +287,7 @@
   {
    "id": "orbit",
    "tag": [
-    "8.4",
+    "7.4",
     "Orbit, de Quantum Elements"
    ],
    "say": "Orbit combina tres técnicas: transpilación optimizada, desacoplamiento dinámico y mitigación de errores de lectura. Brilla en circuitos con periodos ociosos, como los dinámicos con mediciones a mitad del circuito o la corrección de errores. [[modos]]No es una caja negra: puedes activar o desactivar cada componente y comparar configuraciones. Por ejemplo, el mismo circuito en modo raw, sin Orbit, como referencia, y en modo orbit. [[bench]]En una transformada de Fourier dinámica de diez qubits, la fidelidad pasó de un dos por ciento a cerca de un cincuenta y cinco.",
@@ -340,7 +340,7 @@
   {
    "id": "q1",
    "tag": [
-    "8.4",
+    "7.4",
     "Comprueba"
    ],
    "say": "Elige la función.",
@@ -373,7 +373,7 @@
   {
    "id": "mision",
    "tag": [
-    "8.4",
+    "7.4",
     "Tu turno"
    ],
    "say": "Ahora practicas el costo de pedir precisión a una función de circuito. [[n1]]Primero escribe un barrido que mida la dispersión de un estimador para varias precisiones. [[n2]]Después corrige el exponente de la fórmula de tiempo de QPU. [[n3]]Y por último escribe `precision_alcanzable(t_max, va)`, la función inversa.",
@@ -455,7 +455,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "8.4",
+    "7.4",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda y lo verás al volver a esta lección.",
@@ -479,7 +479,7 @@
   {
    "id": "cierre",
    "tag": [
-    "8.4",
+    "7.4",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]TEM mitiga en posprocesamiento con redes de tensores. [[r2]]QESEM da valores sin sesgo y estima su costo. [[r3]]Performance Management suprime errores automáticamente. [[r4]]Y Orbit combina transpilación, desacoplamiento y mitigación de lectura.",

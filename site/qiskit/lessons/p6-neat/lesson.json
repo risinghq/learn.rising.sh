@@ -1,7 +1,7 @@
 {
  "id": "p6-neat",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.7",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.9",
  "title": "Depurar trabajos con NEAT",
  "summary": "Usar Noisy Estimator Analyzer Tool para explorar el impacto del ruido y comparar opciones antes de enviar trabajos costosos.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.7",
+    "5.9",
     "Probar antes de gastar tiempo de QPU"
    ],
    "say": "Antes de enviar un trabajo grande, conviene revisar si el circuito y sus opciones tienen sentido. [[nombre]]NEAT, el Analizador de Ruido para Estimator, ayuda a explorar cómo puede afectar el ruido a las expectativas que quieres medir. [[simular]]Usa simulación clásica sobre circuitos equivalentes de tipo Clifford: es mucho más barato que probar cada alternativa en el QPU. [[cuidado]]NEAT es una herramienta de análisis y comparación. Sus resultados no son una promesa de lo que devolverá el dispositivo real.",
@@ -68,7 +68,7 @@
   {
    "id": "clifford",
    "tag": [
-    "6.7",
+    "5.9",
     "Cliffordizar sin vaciar el circuito"
    ],
    "say": "Un circuito con rotaciones arbitrarias de un qubit suele ser difícil de simular. [[puertas]]NEAT reemplaza puertas de un qubit que no son Clifford por aproximaciones Clifford. [[conserva]]Mantiene las puertas de dos qubits, el número de qubits y la profundidad. [[proxy]]Así conserva una estructura parecida para estudiar cómo crecen los errores, pero ya no es exactamente el circuito original; esa aproximación es parte del análisis.",
@@ -123,7 +123,7 @@
   {
    "id": "pubs",
    "tag": [
-    "6.7",
+    "5.9",
     "El circuito se analiza como PUB"
    ],
    "say": "El análisis recibe PUBs, con circuitos ISA y observables ya mapeados al layout. [[isa]]Primero transpila el circuito al backend objetivo y adapta el observable con el layout que produjo el transpilador. [[par]]Después creas `Neat` con el backend y conviertes los PUBs a Clifford. [[ideal]]La simulación ideal da una referencia sin ruido. [[ruidoso]]La simulación ruidosa usa un modelo asociado al backend o uno que tú suministres.",
@@ -172,7 +172,7 @@
   {
    "id": "predice_neat",
    "tag": [
-    "6.7",
+    "5.9",
     "Antes de analizar"
    ],
    "say": "Un circuito espejo de seis qubits: rotaciones aleatorias y capas de CNOT, seguidas de su inverso. [[ideal]]Sin ruido, cada valor esperado de Z vale exactamente uno. [[capas]]Lo analizaremos con una y con seis capas, en el backend falso Sherbrooke. [[apuesta]]NEAT da una cifra: la diferencia absoluta media entre el resultado ideal y el ruidoso, en porcentaje. Apuesta cuánto vale con seis capas.",
@@ -236,7 +236,7 @@
   {
    "id": "ejemplo",
    "tag": [
-    "6.7",
+    "5.9",
     "Comparar ideal y ruidoso"
    ],
    "say": "El ejemplo de la guía, ejecutado en local con el backend falso Sherbrooke. [[espejo]]Un circuito espejo de seis qubits: rotaciones RZ aleatorias y capas de CNOT, seguidas de su inverso, así que idealmente cada valor esperado de Z vale uno. Se generan PUBs con una a seis capas. [[neat]]Neat recibe el backend; si no le das un modelo de ruido, usa el del backend. [[cliff]]to clifford convierte los PUBs, [[sim]]e ideal sim y noisy sim los simulan sin ruido y con ruido. [[res]]La figura de mérito es la diferencia absoluta media, en porcentaje: crece con la profundidad: de unos tres por ciento con una capa a unos diecisiete con seis. Fijamos la semilla del simulador, así que los números se repiten; sin ella cambiarían un poco en cada ejecución, porque la simulación ruidosa toma muestras.",
@@ -302,7 +302,7 @@
   {
    "id": "interpreta",
    "tag": [
-    "6.7",
+    "5.9",
     "Cómo interpretar la diferencia"
    ],
    "say": "Compara el valor ideal con el ruidoso y repite el análisis con distintas profundidades. [[tendencia]]Si la diferencia crece con las capas, el circuito es más sensible al modelo de ruido. También puedes cambiar el modelo: analyzer punto noise model acepta uno propio de Aer, por ejemplo, un dos por ciento de despolarización en cada puerta de dos qubits. [[decidir]]Puedes usar ese indicador para comparar circuitos, modificar niveles de resiliencia o escoger factores de ruido. [[modelo]]La simulación Aer no representa todos los fenómenos físicos del QPU y puede subestimar el ruido real. [[trabajo]]NEAT evita gastar tiempo de QPU en algunas pruebas exploratorias; el resultado final todavía requiere ejecutar y medir tu circuito real.",
@@ -379,7 +379,7 @@
   {
    "id": "reglas",
    "tag": [
-    "6.7",
+    "5.9",
     "Reglas prácticas"
    ],
    "say": "La guía da unas reglas aproximadas, según la diferencia media absoluta entre los resultados ideal y ruidoso. [[r90]]Si supera el noventa por ciento, probablemente ninguna mitigación ayude. [[pea]]Si está por debajo del noventa por ciento, PEA probablemente pueda mejorar los resultados. [[zne]]Y por debajo del ochenta por ciento, también ZNE con plegado de puertas. [[app2]]NEAT sirve además para comparar estrategias: la guía prueba cinco juegos de factores de ruido para PEA, y el que da menor diferencia, en ese caso uno, uno coma cinco y dos, sugiere qué opción usar en el experimento real.",
@@ -469,7 +469,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.7",
+    "5.9",
     "Comprueba"
    ],
    "say": "Sobre la conversión a Clifford.",
@@ -502,7 +502,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.7",
+    "5.9",
     "Comprueba"
    ],
    "say": "Sobre el uso del resultado.",
@@ -535,7 +535,7 @@
   {
    "id": "mision",
    "tag": [
-    "6.7",
+    "5.9",
     "Tu turno"
    ],
    "say": "Ahora te toca. Todo corre con un backend falso de cinco qubits, sin cuenta ni cola, y con un circuito espejo de cuatro qubits. [[n1]]Primero analizas uno, dos y tres capas y ves cómo crece la diferencia. [[n2]]Después sustituyes el modelo de ruido del backend por uno tuyo, con un dos por ciento de despolarización en cada puerta de dos qubits. [[n3]]Y por último escribes las reglas de la guía como una función: qué técnicas sugiere cada diferencia media.",
@@ -617,10 +617,10 @@
   {
    "id": "proyecto",
    "tag": [
-    "6.7",
+    "5.9",
     "Tu proyecto: mitigar la cadena de espines"
    ],
-   "say": "Cierras la parte VI con el hito seis de tu proyecto Ising. [[mide]]Recalculas la magnetización exacta y la de Trotter, y mides cuánto sesga el ruido sin mitigar. [[trex]]Después aplicas TREX a mano, dividiendo por una calibración con el circuito vacío. [[zne]]Y por último extrapolas con ZNE, plegando el circuito, y comparas los tres con el valor exacto. [[sim]]Todo corre por defecto en un simulador con el ruido de un backend falso; un interruptor te deja usar un QPU real si tienes tu cuenta. [[res]]Con el simulador, ZNE queda más cerca del exacto que TREX, y TREX más cerca que no mitigar. La mitigación apunta al valor de Trotter sin ruido: la diferencia restante es error de Trotter, y ninguna técnica de esta parte la toca.",
+   "say": "Cierras la unidad de ruido con el hito seis de tu proyecto Ising. [[mide]]Recalculas la magnetización exacta y la de Trotter, y mides cuánto sesga el ruido sin mitigar. [[trex]]Después aplicas TREX a mano, dividiendo por una calibración con el circuito vacío. [[zne]]Y por último extrapolas con ZNE, plegando el circuito, y comparas los tres con el valor exacto. [[sim]]Todo corre por defecto en un simulador con el ruido de un backend falso; un interruptor te deja usar un QPU real si tienes tu cuenta. [[res]]Con el simulador, ZNE queda más cerca del exacto que TREX, y TREX más cerca que no mitigar. La mitigación apunta al valor de Trotter sin ruido: la diferencia restante es error de Trotter, y ninguna técnica de esta unidad la toca.",
    "scene": [
     {
      "type": "math",
@@ -748,7 +748,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.7",
+    "5.9",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, para cerrar la parte.",
@@ -772,7 +772,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.7",
+    "5.9",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]NEAT analiza PUBs de Estimator con simulaciones ideales y ruidosas. [[r2]]Cliffordiza puertas de un qubit y conserva la estructura y profundidad del circuito. [[r3]]La comparación ayuda a escoger opciones antes de gastar tiempo de QPU. [[r4]]El modelo de Aer es una aproximación; valida el resultado con el hardware real.",
@@ -824,7 +824,7 @@
   "Repite el análisis con una y tres capas de entrelazamiento y compara la diferencia ideal–ruidosa sin asumir que predice el QPU.",
   "Guías originales: [debug-qiskit-runtime-jobs](https://quantum.cloud.ibm.com/docs/en/guides/debug-qiskit-runtime-jobs)"
  ],
- "next": "p7-dinamicos",
+ "next": "p5-hello-world",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

@@ -1,7 +1,7 @@
 {
  "id": "p6-mitigacion",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.3",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.5",
  "title": "Mitigación: TREX, ZNE, PEA, PEC y PNA",
  "summary": "Qué corrigen TREX, ZNE, PEA y PEC en IBM Quantum Compute, y dónde encaja PNA en el ecosistema de addons.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.3",
+    "5.5",
     "Estimar el resultado sin ruido"
    ],
    "say": "La mitigación no quita el ruido del dispositivo. [[idea]]Ejecuta circuitos relacionados y combina sus resultados para estimar una expectativa más cercana al valor ideal. [[expectativas]]Estas herramientas del servicio se enfocan en expectativas de observables, como la energía de un estado. Para corregir una distribución de muestras completa se necesitan otros métodos y otro criterio de calidad.",
@@ -61,7 +61,7 @@
   {
    "id": "trex",
    "tag": [
-    "6.3",
+    "5.5",
     "TREX corrige sesgo de lectura"
    ],
    "say": "TREX significa extinción del error de lectura con twirling. [[medicion]]Para estimar una expectativa de Pauli, intercala una aleatorización de la medición que diagonaliza el error de lectura. [[calibracion]]El servicio aprende factores de escala con circuitos de calibración y los usa para reducir el sesgo. [[costo]]Hay una ejecución adicional de calibración: la mitigación mejora el estimador si el modelo sigue describiendo bien al dispositivo, pero consume tiempo y disparos.",
@@ -103,7 +103,7 @@
   {
    "id": "zne",
    "tag": [
-    "6.3",
+    "5.5",
     "ZNE extrapola hacia ruido cero"
    ],
    "say": "La extrapolación a ruido cero ejecuta el circuito con varios niveles de ruido. [[amplificar]]En el servicio, una forma de amplificarlo es el plegado digital: reemplazar una puerta de dos qubits U por la secuencia U, U daga, U, que tiene la misma operación ideal y más puertas físicas. [[factores]]Se miden expectativas en factores de ruido, por ejemplo uno, tres y cinco. [[extrapolar]]Luego se ajusta una curva y se estima dónde estaría el resultado al extrapolar al factor cero. [[noexacta]]Esa curva depende de pocos puntos ruidosos: el ajuste puede ser sesgado y no garantiza recuperar el valor exacto.",
@@ -183,7 +183,7 @@
   {
    "id": "predice_zne",
    "tag": [
-    "6.3",
+    "5.5",
     "Antes de extrapolar"
    ],
    "say": "Un caso concreto. [[ghz]]Un estado GHZ de cuatro qubits, con un dos por ciento de error despolarizante en cada CNOT, y el observable Z cero por Z tres, cuyo valor ideal es uno. [[tabla]]Medimos con los factores de ruido uno, tres y cinco, y el valor baja: cero coma nueve cuatro, cero coma ocho tres, cero coma siete tres. [[apuesta]]Ajusta una recta por esos tres puntos y llévala al factor cero. Apuesta: ¿a qué valor llega?",
@@ -261,7 +261,7 @@
   {
    "id": "zne_ajuste",
    "tag": [
-    "6.3",
+    "5.5",
     "Recta frente a exponencial"
    ],
    "say": "Dos ajustes con numpy. [[recta]]Una recta con polyfit de grado uno; el término independiente es el valor en cero. Da cero coma nueve ocho nueve ocho: mejor que el cero coma nueve cuatro sin mitigar, pero se queda corta. [[exp]]Con ruido despolarizante cada puerta multiplica el valor por un factor fijo, así que los puntos siguen una exponencial. Una exponencial es una recta en el logaritmo: ajustamos log de los valores y deshacemos el logaritmo. [[res]]Sale uno coma cero cero cero cero. Es exacto porque este ruido es exactamente despolarizante; en un QPU real la curva es solo una aproximación, y por eso conviene elegir el modelo de extrapolación con cuidado.",
@@ -309,7 +309,7 @@
   {
    "id": "pea",
    "tag": [
-    "6.3",
+    "5.5",
     "PEA aprende antes de amplificar"
    ],
    "say": "PEA mejora la etapa de amplificación de ZNE. [[aprender]]Primero aprende un modelo de ruido twirleado para las capas de puertas de dos qubits del circuito. [[inyectar]]Después aumenta el ruido de forma probabilística, usando ese modelo, en vez de confiar solo en plegar puertas. [[extrapolar]]Por último, extrapola las expectativas a ruido cero como ZNE. [[nota]]En el Estimator nuevo del lado del cliente, el aprendizaje explícito del ruido es un trabajo separado; en la primitiva antigua el servicio podía gestionarlo internamente.",
@@ -357,7 +357,7 @@
   {
    "id": "pec",
    "tag": [
-    "6.3",
+    "5.5",
     "PEC cancela sesgo con más costo"
    ],
    "say": "La cancelación probabilística de errores expresa la operación ideal como una combinación de circuitos ruidosos que sí se pueden ejecutar. [[muestreo]]El servicio sortea esos circuitos con pesos positivos y negativos y combina sus resultados. [[sin_sesgo]]En promedio, la estimación puede ser no sesgada. [[varianza]]Pero el costo de muestreo crece rápidamente con el tamaño de esos pesos; para circuitos profundos puede volverse prohibitivo. [[modelo]]Por eso PEC necesita un modelo de ruido de las capas, y limitar el overhead puede dejar más incertidumbre de la que pediste.",
@@ -412,7 +412,7 @@
   {
    "id": "pna",
    "tag": [
-    "6.3",
+    "5.5",
     "PNA vive en los addons"
    ],
    "say": "El panorama oficial también incluye PNA, absorción de ruido propagado. [[diferencia]]Es una técnica de addons: aprende canales de ruido y absorbe sus inversas en el observable mediante propagación de Paulis. [[lugar]]No es un interruptor del mismo tipo que TREX o ZNE en la tabla de resiliencia del servicio. Se usa en flujos más personalizables junto al modelo de ejecución dirigida. [[decidir]]La idea para elegir es gradual: primero prueba las opciones administradas; pasa a un flujo de addon cuando necesitas controlar explícitamente cómo se aprende o se propaga el ruido.",
@@ -456,7 +456,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.3",
+    "5.5",
     "Comprueba"
    ],
    "say": "Una pregunta sobre el sesgo.",
@@ -489,7 +489,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.3",
+    "5.5",
     "Comprueba"
    ],
    "say": "Sobre la extrapolación a ruido cero.",
@@ -533,7 +533,7 @@
   {
    "id": "mision",
    "tag": [
-    "6.3",
+    "5.5",
     "Tu turno"
    ],
    "say": "Ahora te toca. Todo corre en un simulador exacto, sin ruido de muestreo y sin cuenta. [[n1]]Primero haces ZNE con una recta sobre el GHZ y apuestas si llega al valor ideal. [[n2]]Después arreglas el ajuste para que sea una exponencial y llegas a él. [[n3]]Y por último escribes los pesos de PEC para un qubit, con un peso negativo.",
@@ -617,7 +617,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.3",
+    "5.5",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -641,7 +641,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.3",
+    "5.5",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]TREX reduce sesgo de lectura; ZNE extrapola expectativas al factor cero. [[r2]]PEA aprende el ruido para amplificarlo mejor; PEC puede ser no sesgada, pero cuesta muchos disparos. [[r3]]PNA absorbe ruido aprendido en el observable mediante propagación de Paulis y pertenece a flujos de addons. [[r4]]La mitigación ayuda a estimar expectativas, pero su beneficio y su costo dependen del circuito.",

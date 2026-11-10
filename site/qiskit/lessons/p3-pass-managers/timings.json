@@ -184,11 +184,11 @@
   ]
  },
  "mision": {
-  "dur": 26.52,
+  "dur": 26.88,
   "marks": {
    "n1": 2.137,
    "n2": 9.157,
-   "n3": 16.205
+   "n3": 16.559
   },
   "cues": [
    [
@@ -201,10 +201,10 @@
    ],
    [
     9.157,
-    "Después, mete un pase de cancelación en la etapa pre layout de uno prediseñado."
+    "Después, cambia el pase de cancelación que vive en la etapa pre layout de uno prediseñado."
    ],
    [
-    16.205,
+    16.559,
     "Y por último, construye tú el pass manager de desacoplamiento dinámico sobre un circuito ya programado, y comprueba que no cambia el operador."
    ]
   ]

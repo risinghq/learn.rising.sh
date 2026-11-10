@@ -1,7 +1,7 @@
 {
  "id": "p8-functions",
- "part": "Parte VIII · Serverless, addons y Qiskit Functions",
- "section": "8.3",
+ "part": "Unidad 7 · Escalar",
+ "section": "7.3",
  "title": "Qiskit Functions",
  "summary": "El catálogo de funciones de IBM y sus socios: qué tipos hay, cómo acceder, ejecutarlas y seguir sus trabajos.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "tipos",
    "tag": [
-    "8.3",
+    "7.3",
     "Dos tipos de funciones"
    ],
    "say": "Las Qiskit Functions abstraen parte del flujo de trabajo cuántico. Son experimentales, para los planes Premium, Flex y On-Prem, y las ofrecen IBM y empresas socias. [[circuito]]Las funciones de circuito reciben PUBs abstractos y devuelven valores esperados mitigados: se encargan de transpilar, suprimir y mitigar errores. Son para investigadores que quieren centrarse en el algoritmo. [[aplicacion]]Las funciones de aplicación reciben datos del dominio, como moléculas o grafos, y devuelven respuestas del dominio, como energías u óptimos. Son para expertos de otras áreas que quieren integrar computación cuántica sin traducir sus datos a circuitos.",
@@ -69,7 +69,7 @@
   {
    "id": "acceso",
    "tag": [
-    "8.3",
+    "7.3",
     "Acceder al catálogo"
    ],
    "say": "Las funciones de IBM se pueden usar directamente; las de terceros requieren una licencia o una prueba gratuita, que se pide desde el catálogo indicando el identificador de tu grupo de acceso de IBM Cloud. [[instalar]]Se instala qiskit ibm catalog. [[cuenta]]Igual que con el servicio de Runtime, guardas tu cuenta una vez con save account, en un entorno de confianza, y después basta con QiskitFunctionsCatalog. La instancia debe tener habilitado el acceso a Functions. [[clave]]Y lo de siempre: nunca pongas tu clave de API en el código.",
@@ -114,7 +114,7 @@
   {
    "id": "predice",
    "tag": [
-    "8.3",
+    "7.3",
     "Antes de ejecutar"
    ],
    "say": "Una apuesta antes de ejecutar. [[carga]]Cargas la función QESEM. [[run]]Y la ejecutas nombrando un backend al que tu instancia no tiene acceso. [[pregunta]]¿Qué crees que hace run?",
@@ -160,7 +160,7 @@
   {
    "id": "ejecutar",
    "tag": [
-    "8.3",
+    "7.3",
     "Ejecutar una función"
    ],
    "say": "Cargas una función con catalog punto load y su nombre, proveedor barra nombre. [[run]]Cada función tiene sus propias entradas y opciones; esta, QESEM de Qedma, recibe PUBs y el nombre del backend. [[uno]]Por defecto solo puedes tener un trabajo de función en ejecución a la vez. [[capacidad]]Esta es la respuesta a tu apuesta: antes de enviarlo, run comprueba tu capacidad restante y el acceso al backend, y falla enseguida si algo no está bien, en vez de dejar que el trabajo falle en la cola.",
@@ -193,7 +193,7 @@
   {
    "id": "estado",
    "tag": [
-    "8.3",
+    "7.3",
     "Estados del trabajo"
    ],
    "say": "Los estados son los de Serverless: en cola, con prioridad según cuánto hayas usado Functions; inicializando; ejecutándose, con los subestados de mapeo, optimización, espera y ejecución en el QPU, y posprocesamiento; y terminado. [[error]]Además, error, si algo falló, y cancelado.",
@@ -262,7 +262,7 @@
   {
    "id": "seguir",
    "tag": [
-    "8.3",
+    "7.3",
     "Seguir y depurar"
    ],
    "say": "Para seguir un trabajo: status, result y cancel, como siempre. [[rt]]Una función lanza sus propios trabajos de Runtime; runtime jobs te da sus identificadores, y runtime sessions las sesiones o lotes que agrupó. [[logs]]logs te da los registros, y filtered logs, solo las líneas que coinciden con una expresión regular. [[jobs]]catalog punto jobs lista tus trabajos, con filtros por función, estado o fecha, y catalog punto job recupera uno por su identificador. [[err]]Si terminó en error, error message te dice por qué.",
@@ -317,7 +317,7 @@
   {
    "id": "q1",
    "tag": [
-    "8.3",
+    "7.3",
     "Comprueba"
    ],
    "say": "Elige el tipo de función.",
@@ -350,7 +350,7 @@
   {
    "id": "mision",
    "tag": [
-    "8.3",
+    "7.3",
     "Tu turno"
    ],
    "say": "Ahora practicas la interfaz de Qiskit Functions con un catálogo local. [[n1]]Primero lista el catálogo, carga una función de circuito, ejecútala y sigue sus estados. [[n2]]Después corrige el nombre de un backend al que la función sí tiene acceso. [[n3]]Y por último escribe `resumen(job)`, que reúne estados, trabajos de Runtime, registros y error.",
@@ -432,7 +432,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "8.3",
+    "7.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda y lo verás al volver a esta lección.",
@@ -456,7 +456,7 @@
   {
    "id": "cierre",
    "tag": [
-    "8.3",
+    "7.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Funciones de circuito y de aplicación. [[r2]]Se accede con QiskitFunctionsCatalog y se cargan por nombre. [[r3]]Se ejecutan con run, un trabajo a la vez. [[r4]]Y se siguen con status, logs, runtime jobs y error message.",

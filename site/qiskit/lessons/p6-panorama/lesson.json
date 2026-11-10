@@ -1,7 +1,7 @@
 {
  "id": "p6-panorama",
- "part": "Parte VI · Ruido: supresión y mitigación",
- "section": "6.1",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.3",
  "title": "Panorama de la gestión del ruido",
  "summary": "De dónde vienen los errores y cómo elegir entre supresión, mitigación, aprendizaje del ruido y postselección.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "6.1",
+    "5.3",
     "El resultado ideal y el que medimos"
    ],
    "say": "Un circuito cuántico define una evolución ideal, pero el dispositivo físico no la reproduce exactamente. [[ideal]]Si el circuito prepara un estado de Bell, en el caso ideal solo medimos cero cero o uno uno, con la misma probabilidad. [[ruido]]En un computador real también aparecen otros resultados: el ruido desvió parte de las mediciones. [[meta]]Gestionar el ruido consiste en reducir esa diferencia. No existe una sola corrección universal: hay técnicas que cambian cómo se ejecuta el circuito, otras que procesan varias ejecuciones y otras que descartan muestras sospechosas.",
@@ -73,7 +73,7 @@
   {
    "id": "fuentes",
    "tag": [
-    "6.1",
+    "5.3",
     "¿De dónde vienen los errores?"
    ],
    "say": "El ruido agrupa varios fenómenos físicos y de lectura. [[puertas]]Las puertas tienen errores: una rotación puede quedar un poco desviada, y las puertas de dos qubits suelen ser especialmente sensibles. [[lectura]]La lectura puede confundir cero con uno. [[coherencia]]Además, mientras un qubit espera, pierde coherencia; y los qubits cercanos pueden influirse entre sí. [[deriva]]Por último, el dispositivo cambia con el tiempo: una calibración describe un momento, no una verdad permanente.",
@@ -137,7 +137,7 @@
   {
    "id": "familias",
    "tag": [
-    "6.1",
+    "5.3",
     "Cuatro maneras de responder"
    ],
    "say": "Podemos responder de cuatro maneras. [[suprimir]]Suprimir es reducir la acumulación del error durante la ejecución, por ejemplo, insertar pulsos en esperas o aleatorizar las puertas. [[mitigar]]Mitigar es ejecutar variantes y combinar sus resultados para estimar uno menos sesgado. [[aprender]]Aprender el ruido es medir cómo se comporta el dispositivo para guiar una mitigación. [[filtrar]]Y postseleccionar es descartar las muestras que no pasan ciertos controles.",
@@ -200,7 +200,7 @@
   {
    "id": "costo",
    "tag": [
-    "6.1",
+    "5.3",
     "Precisión también cuesta"
    ],
    "say": "Las técnicas compran calidad con recursos. [[mas]]Más variantes suelen significar más circuitos, más disparos y más tiempo de procesador. [[sesgo]]Una estimación corregida puede reducir sesgo, pero no elimina la incertidumbre estadística. [[limite]]Y hay un límite fundamental: si el circuito ya produce resultados casi aleatorios por el ruido, ninguna extrapolación puede reconstruir información que se perdió. Primero conviene diseñar y compilar un circuito razonable.",
@@ -250,7 +250,7 @@
   {
    "id": "q1",
    "tag": [
-    "6.1",
+    "5.3",
     "Comprueba"
    ],
    "say": "Una pregunta sobre las cuatro respuestas al ruido.",
@@ -283,7 +283,7 @@
   {
    "id": "predice",
    "tag": [
-    "6.1",
+    "5.3",
     "Antes de medir el ruido"
    ],
    "say": "Pongamos un número al ruido. Preparamos el estado de Bell en un simulador con un modelo de ruido sencillo. [[cx]]Cada CNOT tiene un uno por ciento de error despolarizante. [[lectura]]Y cada lectura se equivoca un dos por ciento de las veces. [[apuesta]]Se miden cuatro mil disparos. Un Bell ideal solo da cero cero y uno uno: apuesta cuántos disparos serán cero uno o uno cero.",
@@ -345,10 +345,10 @@
   {
    "id": "ruido_real",
    "tag": [
-    "6.1",
+    "5.3",
     "El Bell sale sucio"
    ],
-   "say": "Este es el modelo y el resultado. [[modelo]]Un NoiseModel de Aer con error despolarizante en cada cx y un error de lectura simétrico. [[run]]Lo ejecutamos con una semilla fija, para que el número no cambie entre ejecuciones. [[res]]Salen unos ciento setenta disparos erróneos: un cuatro coma tres por ciento. [[suma]]No es el uno por ciento de la CNOT: se suman el error de la puerta y los de lectura de los dos qubits. Si apostaste por ninguno, ahora ves por qué hace falta toda esta parte del curso.",
+   "say": "Este es el modelo y el resultado. [[modelo]]Un NoiseModel de Aer con error despolarizante en cada cx y un error de lectura simétrico. [[run]]Lo ejecutamos con una semilla fija, para que el número no cambie entre ejecuciones. [[res]]Salen unos ciento setenta disparos erróneos: un cuatro coma tres por ciento. [[suma]]No es el uno por ciento de la CNOT: se suman el error de la puerta y los de lectura de los dos qubits. Si apostaste por ninguno, ahora ves por qué hace falta toda esta unidad del curso.",
    "scene": [
     {
      "type": "code",
@@ -432,7 +432,7 @@
   {
    "id": "simular",
    "tag": [
-    "6.1",
+    "5.3",
     "Simular no es medir el QPU"
    ],
    "say": "Una simulación con ruido es útil para experimentar, pero responde una pregunta distinta. [[aer]]En Aer eliges un modelo y ves cómo ese modelo afecta al circuito. [[real]]En un QPU intervienen ruido, calibraciones, deriva y efectos que quizá no incluya tu simulador. [[puente]]Por eso la simulación sirve para depurar y comparar hipótesis, no para prometer que una mitigación dará la misma mejora en hardware. Las lecciones siguientes muestran las herramientas del servicio y cuándo usarlas.",
@@ -487,7 +487,7 @@
   {
    "id": "q2",
    "tag": [
-    "6.1",
+    "5.3",
     "Comprueba"
    ],
    "say": "Una pregunta para ordenar el mapa.",
@@ -526,10 +526,10 @@
   {
    "id": "mision",
    "tag": [
-    "6.1",
+    "5.3",
     "Tu turno"
    ],
-   "say": "Ahora te toca. Todo corre en un simulador con ruido, sin cuenta de IBM. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte.",
+   "say": "Ahora te toca. Todo corre en un simulador con ruido, sin cuenta de IBM. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta unidad.",
    "scene": [
     {
      "type": "exercise",
@@ -609,7 +609,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "6.1",
+    "5.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con lo que mediste.",
@@ -633,7 +633,7 @@
   {
    "id": "cierre",
    "tag": [
-    "6.1",
+    "5.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]El ruido nace en las puertas, la lectura, las esperas y la interacción entre qubits; además, deriva con el tiempo. [[r2]]Suprimir cambia la ejecución; mitigar combina resultados; aprender caracteriza el ruido; postseleccionar filtra muestras. [[r3]]Cada técnica agrega costo y ninguna recupera información que el circuito perdió por completo. [[r4]]Simular con ruido ayuda a explorar, pero no reemplaza una medición en hardware.",

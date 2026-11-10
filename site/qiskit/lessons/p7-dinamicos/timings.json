@@ -1,29 +1,29 @@
 {
  "intro": {
-  "dur": 34.872,
+  "dur": 35.28,
   "marks": {
-   "trade": 13.488,
-   "filtrar": 27.74
+   "trade": 13.884,
+   "filtrar": 28.136
   },
   "cues": [
    [
     0.107,
-    "En la Parte dos construiste circuitos dinámicos con if, switch, for y while."
+    "En la unidad de hardware construirás circuitos dinámicos con if, switch, for y while."
    ],
    [
-    6.496,
+    6.893,
     "En el hardware de IBM, por ahora, solo se ejecuta la instrucción if, con su else."
    ],
    [
-    13.488,
+    13.884,
     "Y hay un costo: medir a mitad del circuito y procesar la lógica clásica suele tardar más que una puerta de dos qubits."
    ],
    [
-    22.277,
+    22.673,
     "Ese tiempo extra puede anular la ventaja de un circuito menos profundo."
    ],
    [
-    27.74,
+    28.136,
     "Para ver qué procesadores admiten circuitos dinámicos, filtra con dynamic circuits igual a True."
    ]
   ]

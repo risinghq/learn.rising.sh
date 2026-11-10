@@ -1,30 +1,30 @@
 {
  "por_que": {
-  "dur": 36.48,
+  "dur": 37.32,
   "marks": {
-   "servicio": 19.63,
-   "exp": 25.122,
-   "factura": 30.075
+   "servicio": 20.48,
+   "exp": 25.971,
+   "factura": 30.924
   },
   "cues": [
    [
     0.107,
-    "En la Parte dos viste timeline draw, que dibuja los tiempos de un circuito programado."
+    "En las lecciones de circuitos viste timeline draw, que dibuja los tiempos de un circuito programado."
    ],
    [
-    6.638,
+    7.487,
     "Para circuitos estáticos funciona bien, pero para los dinámicos no es exacto: hay operaciones implícitas, como difundir resultados o decidir una rama, que Qiskit no conoce."
    ],
    [
-    19.63,
+    20.48,
     "Por eso el servicio de IBM puede devolver la programación real que usó."
    ],
    [
-    25.122,
+    25.971,
     "Es una función experimental, solo para trabajos de Sampler."
    ],
    [
-    30.075,
+    30.924,
     "Y ojo: el tiempo total de circuito que devuelve no es el que se usa para facturar."
    ]
   ]

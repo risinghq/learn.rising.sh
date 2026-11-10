@@ -77,7 +77,7 @@ transpilar = lesson(
             ("", "Reescribir para un chip concreto"),
             """Transpilar es reescribir un circuito para que encaje en la topología de un dispositivo concreto, y optimizar sus instrucciones para ejecutarlas en un computador ruidoso.
              [[antes]]Partes de un circuito con tus instrucciones, las que te resulten cómodas. [[despues]]Y terminas con uno que solo usa las instrucciones disponibles en el backend elegido, organizadas para sufrir lo menos posible el ruido.
-             [[local]]Esta parte del curso trata de la transpilación local, que puede hacer cualquier usuario. Si solo usas las opciones por defecto del servicio de IBM, verás más en la parte de ruido.""",
+             [[local]]Esta unidad trata de la transpilación local, que puede hacer cualquier usuario. Si solo usas las opciones por defecto del servicio de IBM, verás más en la unidad de ruido.""",
             [
                 T("Transpilar", "title"),
                 Row(
@@ -2701,7 +2701,7 @@ hybrid = generate_ai_pass_manager(coupling_map=backend.coupling_map,
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]Hay plugins de etapa, de síntesis unitaria y de alto nivel. [[r2]]Se usan con los argumentos method y hls config. [[r3]]Se crean con una subclase y un entry point.
-             [[r4]]Y los pases de IA mejoran routing y síntesis. Con esto termina la transpilación; en la Parte cuatro, las primitivas.""",
+             [[r4]]Y los pases de IA mejoran routing y síntesis. Con esto termina la transpilación; en la siguiente unidad, las primitivas y la simulación.""",
             s_cierre,
             a_cierre,
         ),
@@ -2723,8 +2723,8 @@ s_cierre, a_cierre = resumen(
 )
 cierre = lesson(
     "p3-cierre",
-    "Cierre de la Parte III: repaso y cuántos pasos caben",
-    "Un repaso corto de la Parte tres y una pregunta del proyecto Ising: cuántos pasos de Trotter caben en un presupuesto de profundidad.",
+    "Repaso: presupuesto de profundidad",
+    "Un repaso corto y una pregunta del proyecto Ising: cuántos pasos de Trotter caben en un presupuesto de profundidad.",
     [
         "recordar qué etapa inserta SWAP, cuánto cuesta cada uno y cómo reproducir una transpilación",
         "medir la profundidad transpilada de un circuito de Trotter para `FakeFez` y decidir cuántos pasos caben",
@@ -2733,7 +2733,7 @@ cierre = lesson(
         beat(
             "repaso1",
             ("", "Repaso: las etapas"),
-            """Tres preguntas rápidas de la Parte tres, y después una pregunta del proyecto Ising. La primera, sobre las etapas.""",
+            """Tres preguntas rápidas y después una pregunta del proyecto Ising. La primera, sobre las etapas.""",
             [Flow(ETAPAS, id="f", numbered=True)],
             ask=choice(
                 "Una CX actúa sobre dos qubits que el layout colocó lejos uno de otro en el chip. ¿Qué etapa inserta SWAP para acercarlos?",
@@ -2801,8 +2801,8 @@ cierre = lesson(
         beat(
             "cierre",
             ("", "Resumen"),
-            """Resumen de la parte. [[r1]]El routing inserta SWAP. [[r2]]Cada SWAP cuesta tres CX. [[r3]]Fija seed transpiler para repetir un resultado.
-             [[r4]]Y la profundidad transpilada decide cuántos pasos de Trotter caben. Con esto cierras la Parte tres; en la siguiente, las primitivas y la simulación.""",
+            """Resumen de la unidad. [[r1]]El routing inserta SWAP. [[r2]]Cada SWAP cuesta tres CX. [[r3]]Fija seed transpiler para repetir un resultado.
+             [[r4]]Y la profundidad transpilada decide cuántos pasos de Trotter caben. Con esto cierras la cuarta unidad; en la siguiente, estudiarás el ruido.""",
             s_cierre,
             a_cierre,
         ),

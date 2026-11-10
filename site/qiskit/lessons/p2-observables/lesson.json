@@ -1,7 +1,7 @@
 {
  "id": "p2-observables",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.6",
+ "part": "Unidad 2 · Operadores y observables",
+ "section": "2.3",
  "title": "Observables en la base de Pauli y síntesis de unitarios",
  "summary": "Escribir observables como sumas de Pauli, descomponer matrices, medir en otras bases y sintetizar matrices unitarias en puertas.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "pauli",
    "tag": [
-    "2.6",
+    "2.3",
     "Todo observable es una suma de Paulis"
    ],
    "say": "Un observable es una propiedad física que se puede medir: la energía de un sistema, su magnetización, las correlaciones entre espines. [[suma]]Para medir un observable de n qubits en un computador cuántico, hay que escribirlo como suma de productos tensoriales de matrices de Pauli. [[mat]]Las cuatro matrices: identidad, X, Y y Z. [[herm]]Como un observable es hermítico, los coeficientes son reales. Si no lo fuera, igual se puede descomponer, pero con coeficientes complejos.",
@@ -54,7 +54,7 @@
   {
    "id": "ising_pred",
    "tag": [
-    "2.6",
+    "2.3",
     "Antes de construir el Ising"
    ],
    "say": "Un ejemplo clásico: espines en una línea, con interacción Z Z entre vecinos y un campo transversal en X. [[cual]]Para cuatro espines, ¿cuántos términos tendrá el hamiltoniano?",
@@ -100,7 +100,7 @@
   {
    "id": "ising",
    "tag": [
-    "2.6",
+    "2.3",
     "Un hamiltoniano de Ising"
    ],
    "say": "Veamos. [[int]]Las interacciones son tripletas Z Z sobre los qubits i e i más uno, con coeficiente uno. [[campo]]El campo, X sobre cada qubit, con coeficiente menos uno. [[res]]Con cuatro qubits salen siete términos: tres pares de vecinos y cuatro campos. Si dijiste ocho, contaste cuatro pares, pero en una línea hay uno menos que espines. [[mag]]Y si en vez de la energía quieres la magnetización media, el observable es la suma de las Z dividida entre n.",
@@ -164,7 +164,7 @@
   {
    "id": "promedio",
    "tag": [
-    "2.6",
+    "2.3",
     "Un observable de n qubits"
    ],
    "say": "Construyamos la magnetización media de tres espines, esta vez sobre el eje Y. [[bucle]]Es una suma de términos de un solo qubit: una tripleta por espín, con la letra de Pauli, el espín donde actúa y el coeficiente uno entre n. [[res]]Con tres espines, cada término pesa un tercio. [[eje]]La letra es el eje: cambiarla por X o por Z promedia las X o las Z, sin tocar nada más.",
@@ -210,7 +210,7 @@
   {
    "id": "descomponer",
    "tag": [
-    "2.6",
+    "2.3",
     "De matriz a Paulis"
    ],
    "say": "¿Y si tu observable viene como matriz? Las cadenas de Pauli forman una base de las matrices hermíticas, así que siempre se puede descomponer. [[coef]]Cada coeficiente es la traza de O por P, dividida entre dos a la n: la traza actúa como producto interno. [[code]]from operator hace ese cálculo. [[res]]Esta matriz de cuatro por cuatro resulta ser menos Z en el qubit cero, más un medio de X en el qubit uno, más Y Y.",
@@ -252,7 +252,7 @@
   {
    "id": "q1",
    "tag": [
-    "2.6",
+    "2.3",
     "Comprueba"
    ],
    "say": "Una descomposición a mano.",
@@ -287,7 +287,7 @@
   {
    "id": "bases",
    "tag": [
-    "2.6",
+    "2.3",
     "Medir en otras bases"
    ],
    "say": "Medir proyecta sobre la base computacional, así que directamente solo se pueden medir observables diagonales en ella: los que tienen solo I y Z. [[x]]Para medir X, primero cambias de base con una Hadamard: H X H es Z. [[y]]Para medir Y, aplicas S daga y luego H. [[circ]]En este circuito medimos el qubit cero en la base X, el uno en la Y y el dos en la Z, que no necesita nada. [[est]]Si usas Estimator, estos cambios de base se hacen solos.",
@@ -443,7 +443,7 @@
   {
    "id": "sintesis",
    "tag": [
-    "2.6",
+    "2.3",
     "Sintetizar una unitaria"
    ],
    "say": "Ahora el problema inverso: tienes una matriz unitaria y quieres un circuito que la implemente. Eso se llama síntesis. [[facil]]Para algunas clases de unitarias es eficiente, como las de Clifford o las que son un producto tensorial. Pero la mayoría no, y en general el costo crece exponencialmente con los qubits. [[unit]]Si no conoces una descomposición mejor, circuit punto unitary la añade como una puerta, y Qiskit la sintetiza al transpilar. [[ojo]]El aviso: los circuitos que salen suelen ser profundos, poco adecuados para hardware ruidoso.",
@@ -488,7 +488,7 @@
   {
    "id": "resintesis_pred",
    "tag": [
-    "2.6",
+    "2.3",
     "Antes de re-sintetizar"
    ],
    "say": "La síntesis también sirve para optimizar. Este circuito usa tres puertas de dos qubits: dos CX y una CZ. [[cual]]Si calculamos su matriz y la volvemos a sintetizar, ¿cuántas puertas de dos qubits crees que quedarán?",
@@ -568,7 +568,7 @@
   {
    "id": "resintesis",
    "tag": [
-    "2.6",
+    "2.3",
     "Re-sintetizar para acortar"
    ],
    "say": "Comprobemos. [[op]]Calculamos su matriz con Operator, [[re]]y la volvemos a sintetizar en un circuito nuevo. [[res]]¡Resultado: una sola CX, rodeada de rotaciones de un qubit! Una matriz de dos qubits nunca necesita más de tres puertas de dos qubits, y aquí bastó una. [[tr]]La función transpile hace esta re-síntesis automáticamente con niveles de optimización suficientemente altos.",
@@ -719,7 +719,7 @@
   {
    "id": "q2",
    "tag": [
-    "2.6",
+    "2.3",
     "Comprueba"
    ],
    "say": "Una pregunta sobre medición.",
@@ -754,7 +754,7 @@
   {
    "id": "mision",
    "tag": [
-    "2.6",
+    "2.3",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, predice cuántos términos tiene un hamiltoniano de Ising. [[n2]]Después, añade el cambio de base que permite medir Y con un Sampler. [[n3]]Y por último, escribe una función que construya el observable de magnetización de una cadena, en el eje que le pidas.",
@@ -837,7 +837,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "2.6",
+    "2.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma. Escribe con tus palabras; lo que escribas se guarda en el navegador.",
@@ -861,7 +861,7 @@
   {
    "id": "cierre",
    "tag": [
-    "2.6",
+    "2.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Todo observable es una suma de cadenas de Pauli. [[r2]]from operator descompone cualquier matriz. [[r3]]Para medir X o Y hay que cambiar de base, salvo con Estimator. [[r4]]Y la síntesis convierte matrices en puertas, y a veces acorta circuitos.",
@@ -915,7 +915,7 @@
   "Toma un circuito aleatorio de 2 qubits con `random_circuit(2, 10)` y re-sintetízalo. ¿Cuántas CX quedan como máximo? (la respuesta general es 3).",
   "Guías originales: [specify-observables-pauli](https://quantum.cloud.ibm.com/docs/en/guides/specify-observables-pauli) · [synthesize-unitary-operators](https://quantum.cloud.ibm.com/docs/en/guides/synthesize-unitary-operators)"
  ],
- "next": "p2-control-clasico",
+ "next": "p2-biblioteca",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

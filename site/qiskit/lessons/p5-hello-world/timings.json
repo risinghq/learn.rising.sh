@@ -276,5 +276,31 @@
     "Y a gran escala, el ruido hace decaer las correlaciones con la distancia."
    ]
   ]
+ },
+ "hito5": {
+  "dur": 36.912,
+  "marks": {
+   "estimar": 11.379,
+   "falso": 18.201,
+   "real": 25.249
+  },
+  "cues": [
+   [
+    0.107,
+    "Y con esto llegas al hito cinco del proyecto: tu primera ejecución en un procesador cuántico real, con un presupuesto de como máximo un minuto de QPU."
+   ],
+   [
+    11.379,
+    "Antes de enviar, estimas el tiempo de QPU con una fórmula que la lección te explica."
+   ],
+   [
+    18.201,
+    "La práctica corre en un procesador falso, sin cuenta, y sus comprobaciones pasan ahí."
+   ],
+   [
+    25.249,
+    "Un interruptor, bien marcado, manda el mismo trabajo a hardware real con tu cuenta guardada, y solo se envía si pulsas el botón y la estimación cabe en el presupuesto."
+   ]
+  ]
  }
 }

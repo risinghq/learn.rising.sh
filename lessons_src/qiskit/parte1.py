@@ -692,7 +692,7 @@ patrones = lesson(
                 Box(
                     "idea",
                     "La brecha",
-                    T("ideal 2 · con ruido ≈ 1,9 → supresión y mitigación (Parte VI)", "body"),
+                    T("ideal 2 · con ruido ≈ 1,9 → supresión y mitigación (Unidad 5)", "body"),
                     id="b",
                     hidden=True,
                 ),
@@ -922,14 +922,14 @@ $ pip install -U qiskit qiskit-ibm-runtime""",
         beat(
             "version",
             ("", "Comprobar la instalación"),
-            """Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto seis. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco.""",
+            """Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto seis. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM puedes consultar la guía de cuenta cuando la necesites.""",
             [
                 Code("import qiskit\nprint(qiskit.__version__)", id="c"),
                 Out("2.6.2", id="o", hidden=True, check=True),
                 Box(
                     "idea",
                     "Listo para simular",
-                    T("para hardware de IBM: cuenta de IBM Cloud (Parte V)", "body"),
+                    T("para hardware de IBM: cuenta de IBM Cloud (Guías)", "body"),
                     id="b",
                     hidden=True,
                 ),
@@ -1710,7 +1710,7 @@ print(StatevectorSampler().run([qc]).result()[0].data.meas.get_counts())""",
             ("", "Tu proyecto: una cadena de espines"),
             """Además de las misiones de cada lección, a lo largo del curso vas a construir un solo proyecto: simular una cadena de espines, el modelo de Ising con campo transversal, y terminar ejecutándolo en un computador cuántico real.
              [[terminos]]El término Z Z quiere alinear a los vecinos; el término X los hace girar. La pregunta que vas a responder: cómo evoluciona la magnetización cuando se enciende el campo de golpe.
-             [[hito]]Hoy empieza el hito uno: crea tu cuenta gratuita de IBM Quantum, y construye un paso de tiempo para dos espines. Comprobarás qué tan buena es la aproximación.""",
+             [[hito]]Hoy empieza el hito uno: construye en tu computadora un paso de tiempo para dos espines, sin cuenta de IBM. Comprobarás qué tan buena es la aproximación.""",
             [
                 M(r"H = J\sum_i Z_iZ_{i+1} + h\sum_i X_i", size=46),
                 Row(
@@ -1782,7 +1782,7 @@ print(StatevectorSampler().run([qc]).result()[0].data.meas.get_counts())""",
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]QuantumCircuit con h, cx y measure all construye un estado de Bell. [[r2]]StatevectorSampler lo ejecuta localmente, sin cuenta. [[r3]]Los conteos se leen con result, data, el nombre del registro y get counts.
-             [[r4]]Y la correlación perfecta, cero cero o uno uno, es la firma del entrelazamiento. En la próxima lección, una herramienta gráfica para hacer lo mismo sin código: Composer.""",
+             [[r4]]Y la correlación perfecta, cero cero o uno uno, es la firma del entrelazamiento. En la próxima lección, construirás circuitos a fondo.""",
             [
                 L(
                     [
@@ -2238,8 +2238,8 @@ s_cierre, a_cierre = resumen(
 )
 cierre = lesson(
     "p1-cierre",
-    "Cierre de la Parte I: repaso y un paso de Trotter",
-    "Un repaso corto de la Parte uno y el primer paso del proyecto Ising: el circuito de un paso de Trotter.",
+    "Repaso: de Bell a Ising",
+    "Un repaso corto y el primer paso del proyecto Ising: el circuito de un paso de Trotter.",
     [
         "recordar el patrón de cuatro pasos, qué es un circuito ISA y cómo se correlacionan los qubits de un GHZ",
         "escribir el circuito de un paso de Trotter para dos espines",
@@ -2248,7 +2248,7 @@ cierre = lesson(
         beat(
             "repaso1",
             ("", "Repaso: el patrón"),
-            """Tres preguntas rápidas de la Parte uno, y después una función del proyecto Ising. La primera, sobre el flujo de trabajo.""",
+            """Tres preguntas rápidas y después una función del proyecto Ising. La primera, sobre el flujo de trabajo.""",
             [T("Mapear · Optimizar · Ejecutar · Posprocesar", "subtitle")],
             ask=choice(
                 "Tienes un circuito abstracto con una Hadamard y una CNOT, y quieres que el chip de IBM lo ejecute. ¿En qué paso del patrón lo adaptas a las puertas y la conectividad del chip?",
@@ -2327,8 +2327,8 @@ cierre = lesson(
         beat(
             "cierre",
             ("", "Resumen"),
-            """Resumen de la parte. [[r1]]Todo programa sigue cuatro pasos. [[r2]]En hardware solo se ejecutan circuitos ISA. [[r3]]En un GHZ, los tres qubits coinciden siempre.
-             [[r4]]Y un paso de Trotter aplica una rzz y después una rx por espín. Con esto cierras la Parte uno; en la siguiente, los circuitos a fondo.""",
+            """Resumen de la unidad. [[r1]]Todo programa sigue cuatro pasos. [[r2]]En hardware solo se ejecutan circuitos ISA. [[r3]]En un GHZ, los tres qubits coinciden siempre.
+             [[r4]]Y un paso de Trotter aplica una rzz y después una rx por espín. Con esto cierras la primera unidad; en la siguiente, trabajarás con operadores y observables.""",
             s_cierre,
             a_cierre,
         ),

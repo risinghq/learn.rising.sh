@@ -1,7 +1,7 @@
 {
  "id": "p1-instalar",
- "part": "Parte I · Primeros pasos",
- "section": "1.3",
+ "part": "Guías",
+ "section": "",
  "title": "Instalar y configurar Qiskit",
  "summary": "Entornos virtuales, pip, Jupyter, sistemas soportados, instalación desde el código fuente, configuración local y entornos en línea.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "1.3",
+    "Guía",
     "Antes de instalar"
    ],
    "say": "Lo primero es Python. La página de Qiskit en el índice de paquetes, PyPI, indica qué versiones de Python soporta cada versión de Qiskit. [[venv]]Y lo recomendable es trabajar en un entorno virtual: un espacio aislado donde instalas lo que quieras sin tocar el Python base de tu máquina. [[ventaja]]Si algo se rompe, borras el entorno y empiezas de nuevo. [[donde]]Lo habitual es crearlo en una carpeta llamada punto venv dentro de cada proyecto.",
@@ -61,7 +61,7 @@
   {
    "id": "venv",
    "tag": [
-    "1.3",
+    "Guía",
     "Crear y activar el entorno"
    ],
    "say": "Para crearlo, entra en la carpeta del proyecto y ejecuta python guion m venv punto venv. [[act]]Luego actívalo. [[unix]]En macOS y Linux, con source punto venv barra bin barra activate. [[win]]En Windows depende de la terminal: en PowerShell ejecutas el script Activate punto ps1; en Git Bash, source con la carpeta scripts; en la consola clásica, el archivo activate.",
@@ -123,7 +123,7 @@
   {
    "id": "pip",
    "tag": [
-    "1.3",
+    "Guía",
     "Instalar con pip"
    ],
    "say": "Con el entorno activo, pip instala los paquetes. Con pip list ves lo que tienes. [[q]]Instala el SDK con pip install qiskit. [[vis]]Si vas a dibujar circuitos o usar cuadernos, añade el extra de visualización. [[jup]]Para Jupyter, instala jupyter y ábrelo con jupyter notebook. [[rt]]Si vas a usar los procesadores de IBM, instala también el cliente, qiskit ibm runtime. [[up]]Y revisa las notas de versión con frecuencia: pip install guion U actualiza.",
@@ -172,10 +172,10 @@
   {
    "id": "version",
    "tag": [
-    "1.3",
+    "Guía",
     "Comprobar la instalación"
    ],
-   "say": "Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto seis. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM falta crear tu cuenta, que veremos en la Parte cinco.",
+   "say": "Para comprobar que todo quedó bien, importa qiskit e imprime su versión. [[out]]Este curso usa Qiskit dos punto seis. [[sim]]Si solo vas a trabajar en local con los simuladores que trae Qiskit, ya terminaste. Para usar hardware de IBM puedes consultar la guía de cuenta cuando la necesites.",
    "scene": [
     {
      "type": "code",
@@ -198,7 +198,7 @@
      "body": [
       {
        "type": "text",
-       "text": "para hardware de IBM: cuenta de IBM Cloud (Parte V)",
+       "text": "para hardware de IBM: cuenta de IBM Cloud (Guías)",
        "style": "body"
       }
      ],
@@ -222,7 +222,7 @@
   {
    "id": "so",
    "tag": [
-    "1.3",
+    "Guía",
     "Sistemas operativos"
    ],
    "say": "Qiskit clasifica los sistemas en tres niveles. [[t1]]Nivel uno: se prueban en cada cambio y tienen binarios precompilados. Linux x86 64, macOS con ARM, Windows de 64 bits y Linux AArch64. [[t2]]Nivel dos: binarios publicados pero sin pruebas durante el desarrollo, como macOS en Intel. [[t3]]Nivel tres: binarios sin probar; puede hacer falta un compilador, como Linux en ppc64le o s390x. [[64]]Desde Qiskit dos punto cero solo se soportan plataformas de 64 bits, [[cpy]]y solo el intérprete CPython; PyPy, por ejemplo, no.",
@@ -293,7 +293,7 @@
   {
    "id": "errores",
    "tag": [
-    "1.3",
+    "Guía",
     "Problemas frecuentes"
    ],
    "say": "Dos problemas aparecen a menudo. [[nomod]]El primero: no module named qiskit en un cuaderno, aunque lo instalaste. Casi siempre Jupyter está corriendo en otro entorno, por ejemplo el entorno base de Anaconda. La solución es abrir Jupyter desde el entorno donde instalaste Qiskit. [[wheel]]El segundo: failed building wheel. Algún paquete no tiene binarios para tu plataforma y pip intenta compilarlo; revisa la documentación de ese paquete para instalar lo que necesita para compilar.",
@@ -343,7 +343,7 @@
   {
    "id": "q1",
    "tag": [
-    "1.3",
+    "Guía",
     "Comprueba"
    ],
    "say": "Un caso práctico.",
@@ -378,7 +378,7 @@
   {
    "id": "fuente",
    "tag": [
-    "1.3",
+    "Guía",
     "Instalar desde el código fuente"
    ],
    "say": "Si quieres la versión en desarrollo, o contribuir, puedes instalar desde el código fuente. [[rust]]Parte del SDK está escrito en Rust, así que necesitas un compilador de Rust; lo más fácil es rustup. [[clone]]Clonas el repositorio, entras a la carpeta, [[dev]]instalas los requisitos de desarrollo si vas a correr pruebas, [[edit]]e instalas en modo editable, con pip install guion e punto. [[rel]]En modo editable, las extensiones se compilan sin optimizar. Para compilarlas en modo release usa build rust con guion guion release. Y si cambias código en Rust, debes volver a compilar. [[rt]]El cliente de IBM se instala igual desde su propio repositorio, sin Rust.",
@@ -452,7 +452,7 @@
   {
    "id": "predice_config",
    "tag": [
-    "1.3",
+    "Guía",
     "Antes de configurar"
    ],
    "say": "Antes de ver la configuración, apuesta. Imagina que tu archivo settings punto conf fija el nivel de optimización por defecto en cero. [[cual]]Luego transpilas, sin indicar ningún nivel, un circuito con dos Hadamard seguidas. Dos Hadamard seguidas se cancelan entre sí. ¿Cuántas quedan?",
@@ -494,7 +494,7 @@
   {
    "id": "config",
    "tag": [
-    "1.3",
+    "Guía",
     "Configuración local"
    ],
    "say": "Qiskit lee un archivo de configuración opcional, settings punto conf, en la carpeta punto qiskit de tu usuario. [[env]]Otra ruta se indica con la variable QISKIT SETTINGS. [[draw]]Con circuit drawer eliges el dibujante por defecto: texto, matplotlib o LaTeX. [[style]]Con circuit mpl style, el estilo de matplotlib. [[state]]Con state drawer, cómo se dibujan los estados. [[opt]]transpile optimization level fija el nivel de optimización por defecto de la función transpile, de cero a tres; generate preset pass manager tiene su propio nivel por defecto. [[cero]]Con cero no se optimiza nada: las dos Hadamard se quedan, aunque se cancelen. Si apostaste por las dos, acertaste. [[par]]parallel y num processes controlan el paralelismo con varios procesos. [[qpy]]Y min qpy version rechaza archivos QPY antiguos, por seguridad.",
@@ -586,7 +586,7 @@
   {
    "id": "variables",
    "tag": [
-    "1.3",
+    "Guía",
     "Variables de entorno"
    ],
    "say": "Algunas variables de entorno cambian el comportamiento de Qiskit. [[par]]QISKIT PARALLEL activa el multiprocesamiento, y QISKIT NUM PROCS limita cuántos procesos lanza. [[ray]]RAYON NUM THREADS fija el número de hilos del código multihilo, que por defecto usa uno por cada CPU lógica. [[force]]Si Qiskit ya está en paralelo con procesos, no lanza además hilos, para no saturar la CPU; QISKIT FORCE THREADS lo obliga. [[sabre]]Y QISKIT SABRE ALL THREADS hace que el algoritmo de layout y routing use todas las CPU para sus intentos aleatorios: mejora los resultados con muchos núcleos, pero ya no son reproducibles en otra máquina.",
@@ -650,7 +650,7 @@
   {
    "id": "q2",
    "tag": [
-    "1.3",
+    "Guía",
     "Comprueba"
    ],
    "say": "Una pregunta sobre configuración.",
@@ -685,7 +685,7 @@
   {
    "id": "online",
    "tag": [
-    "1.3",
+    "Guía",
     "Sin instalar nada"
    ],
    "say": "También puedes trabajar en línea. [[pre]]Hay entornos con Qiskit ya instalado: los cuadernos de inteligencia artificial de OVHcloud, que no están disponibles en todas las regiones, y qBraid Lab, donde añades el entorno de Qiskit desde su panel. [[otros]]Y en Google Colab, Watson Studio o Azure Machine Learning Studio basta con instalarlo en una celda, con por ciento pip install qiskit.",
@@ -762,7 +762,7 @@
   {
    "id": "mision",
    "tag": [
-    "1.3",
+    "Guía",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero corriges un archivo settings punto conf para que Qiskit dibuje con matplotlib y transpile sin optimizar. [[n2]]Después lees un cuaderno de Jupyter, que por dentro es un archivo JSON, y sacas el código de sus celdas. [[n3]]Y por último construyes un cuaderno de Jupyter desde una lista de celdas. Así podrás abrir en Jupyter las guías de IBM. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -844,7 +844,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "1.3",
+    "Guía",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. No hay respuesta automática: escribe con tus palabras. Lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -868,7 +868,7 @@
   {
    "id": "cierre",
    "tag": [
-    "1.3",
+    "Guía",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Trabaja en un entorno virtual por proyecto. [[r2]]pip install qiskit para el SDK, y qiskit ibm runtime para el hardware de IBM. [[r3]]Si un cuaderno no encuentra Qiskit, revisa el entorno. [[r4]]Y settings punto conf, junto con unas pocas variables de entorno, ajustan dibujos, optimización y paralelismo.",
@@ -927,7 +927,7 @@
   "Comprueba tu intérprete: imprime `qiskit.__version__`, `platform.python_implementation()` (debe ser `CPython`) y `struct.calcsize(\"P\") * 8` (debe ser 64).",
   "Guías originales: [install-qiskit](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit) · [install-qiskit-source](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit-source) · [configure-qiskit-local](https://quantum.cloud.ibm.com/docs/en/guides/configure-qiskit-local) · [online-lab-environments](https://quantum.cloud.ibm.com/docs/en/guides/online-lab-environments) · [install-qiskit-runtime](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit-runtime) · [install-qiskit-runtime-source](https://quantum.cloud.ibm.com/docs/en/guides/install-qiskit-runtime-source)"
  ],
- "next": "p1-quickstart",
+ "next": "p1-composer",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

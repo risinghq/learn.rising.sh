@@ -203,7 +203,7 @@ panorama = lesson(
             ("", "El Bell sale sucio"),
             """Este es el modelo y el resultado. [[modelo]]Un NoiseModel de Aer con error despolarizante en cada cx y un error de lectura simétrico.
              [[run]]Lo ejecutamos con una semilla fija, para que el número no cambie entre ejecuciones. [[res]]Salen unos ciento setenta disparos erróneos: un cuatro coma tres por ciento.
-             [[suma]]No es el uno por ciento de la CNOT: se suman el error de la puerta y los de lectura de los dos qubits. Si apostaste por ninguno, ahora ves por qué hace falta toda esta parte del curso.""",
+             [[suma]]No es el uno por ciento de la CNOT: se suman el error de la puerta y los de lectura de los dos qubits. Si apostaste por ninguno, ahora ves por qué hace falta toda esta unidad del curso.""",
             [
                 Code(
                     """from qiskit import QuantumCircuit
@@ -298,7 +298,7 @@ print(f"disparos erróneos: {(cuentas['01'] + cuentas['10']) / 4000:.1%}")""",
         beat(
             "mision",
             ("", "Tu turno"),
-            """Ahora te toca. Todo corre en un simulador con ruido, sin cuenta de IBM. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta parte.""",
+            """Ahora te toca. Todo corre en un simulador con ruido, sin cuenta de IBM. [[n1]]Primero reproduces el Bell ruidoso y cuentas sus disparos erróneos. [[n2]]Después subes el error de la CNOT hasta que más del doce por ciento de las muestras salga mal. [[n3]]Y por último escribes la distancia entre la distribución medida y la ideal, la cifra con la que compararás todas las técnicas de esta unidad.""",
             [
                 Exercise(
                     "p6-panorama/bell-ruidoso",
@@ -1839,7 +1839,7 @@ postseleccion = lesson(
             """El ejemplo de la guía prepara un GHZ de cuatro qubits y lo transpila para un backend con puertas fraccionales.
              [[passes]]Un PassManager con dos pases de las utilidades de los addons: AddSpectatorMeasures, que mide los espectadores, y AddPostSelectionMeasures, que añade el pulso lento y la segunda medición.
              [[run]]El circuito resultante se ejecuta con Executor, cuatro mil disparos. [[regs]]El resultado trae cuatro registros: meas y spec, antes del pulso, y meas ps y spec ps, después.
-             [[auth]]Esta parte necesita una cuenta de IBM y un backend real, así que no la ejecutamos en la verificación.""",
+             [[auth]]Esta unidad necesita una cuenta de IBM y un backend real, así que no la ejecutamos en la verificación.""",
             [
                 Code(
                     """from qiskit.transpiler import PassManager, generate_preset_pass_manager
@@ -2478,8 +2478,8 @@ for n, (i, r) in enumerate(zip(ideal, noisy), 1):
         beat(
             "proyecto",
             ("", "Tu proyecto: mitigar la cadena de espines"),
-            """Cierras la parte VI con el hito seis de tu proyecto Ising. [[mide]]Recalculas la magnetización exacta y la de Trotter, y mides cuánto sesga el ruido sin mitigar. [[trex]]Después aplicas TREX a mano, dividiendo por una calibración con el circuito vacío. [[zne]]Y por último extrapolas con ZNE, plegando el circuito, y comparas los tres con el valor exacto.
-             [[sim]]Todo corre por defecto en un simulador con el ruido de un backend falso; un interruptor te deja usar un QPU real si tienes tu cuenta. [[res]]Con el simulador, ZNE queda más cerca del exacto que TREX, y TREX más cerca que no mitigar. La mitigación apunta al valor de Trotter sin ruido: la diferencia restante es error de Trotter, y ninguna técnica de esta parte la toca.""",
+            """Cierras la unidad de ruido con el hito seis de tu proyecto Ising. [[mide]]Recalculas la magnetización exacta y la de Trotter, y mides cuánto sesga el ruido sin mitigar. [[trex]]Después aplicas TREX a mano, dividiendo por una calibración con el circuito vacío. [[zne]]Y por último extrapolas con ZNE, plegando el circuito, y comparas los tres con el valor exacto.
+             [[sim]]Todo corre por defecto en un simulador con el ruido de un backend falso; un interruptor te deja usar un QPU real si tienes tu cuenta. [[res]]Con el simulador, ZNE queda más cerca del exacto que TREX, y TREX más cerca que no mitigar. La mitigación apunta al valor de Trotter sin ruido: la diferencia restante es error de Trotter, y ninguna técnica de esta unidad la toca.""",
             [
                 M(r"M_z=\tfrac1N\sum_i\langle Z_i\rangle", size=46),
                 Table(

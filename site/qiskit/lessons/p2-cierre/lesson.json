@@ -1,9 +1,9 @@
 {
  "id": "p2-cierre",
- "part": "Parte II · Circuitos y operadores",
- "section": "2.10",
- "title": "Cierre de la Parte II: repaso y magnetización",
- "summary": "Un repaso corto de la Parte dos y una última función del proyecto Ising: la curva de magnetización de una cadena.",
+ "part": "Unidad 2 · Operadores y observables",
+ "section": "2.6",
+ "title": "Repaso: medir la cadena",
+ "summary": "Un repaso corto y una función del proyecto Ising: la curva de magnetización de una cadena.",
  "goals": [
   "recordar el orden de bits, los parámetros de un circuito N-local, los observables promedio y QPY",
   "calcular la curva de magnetización de una cadena con circuitos de Trotter"
@@ -12,10 +12,10 @@
   {
    "id": "repaso1",
    "tag": [
-    "2.10",
+    "2.6",
     "Repaso: orden de bits"
    ],
-   "say": "Empezamos con cuatro preguntas rápidas de lo que viste en esta parte. La primera, sobre el orden de los bits.",
+   "say": "Empezamos con cuatro preguntas rápidas de lo que viste en estas lecciones. La primera, sobre el orden de los bits.",
    "scene": [
     {
      "type": "code",
@@ -47,7 +47,7 @@
   {
    "id": "repaso2",
    "tag": [
-    "2.10",
+    "2.6",
     "Repaso: biblioteca"
    ],
    "say": "Segunda pregunta, sobre la biblioteca de circuitos.",
@@ -74,7 +74,7 @@
   {
    "id": "repaso3",
    "tag": [
-    "2.10",
+    "2.6",
     "Repaso: observables"
    ],
    "say": "Tercera pregunta, sobre observables.",
@@ -101,7 +101,7 @@
   {
    "id": "repaso4",
    "tag": [
-    "2.10",
+    "2.6",
     "Repaso: guardar circuitos"
    ],
    "say": "Última pregunta, sobre cómo guardar un circuito.",
@@ -136,7 +136,7 @@
   {
    "id": "magnetizacion",
    "tag": [
-    "2.10",
+    "2.6",
     "Tu turno"
    ],
    "say": "Ahora una última función del proyecto Ising. [[ej]]Ya tienes el circuito de Trotter y la magnetización de la lección anterior. Te falta la curva: la magnetización en cada instante, desde cero hasta el último paso. [[n]]Se compara con la evolución exacta de la cadena: si tu curva la sigue, el circuito hace lo que debe.",
@@ -172,10 +172,10 @@
   {
    "id": "cierre",
    "tag": [
-    "2.10",
+    "2.6",
     "Resumen"
    ],
-   "say": "Resumen de la parte. [[r1]]El qubit cero es el bit de la derecha. [[r2]]Los circuitos N-local tienen una capa de rotaciones más que repeticiones. [[r3]]Un observable promedio lleva uno entre n en cada término. [[r4]]Y QPY guarda un circuito en memoria. Con esto cierras la Parte dos; en la siguiente, la transpilación.",
+   "say": "Resumen de la unidad. [[r1]]El qubit cero es el bit de la derecha. [[r2]]Los circuitos N-local tienen una capa de rotaciones más que repeticiones. [[r3]]Un observable promedio lleva uno entre n en cada término. [[r4]]Y QPY guarda un circuito en memoria. Con esto cierras la segunda unidad; después simularás y transpilarás.",
    "scene": [
     {
      "type": "list",
@@ -222,7 +222,7 @@
   "Dibuja la curva de `curva_trotter` junto a la exacta para n = 6 y dt = 0.3. ¿A partir de qué paso se separan?",
   "Guías originales: "
  ],
- "next": "p3-transpilar",
+ "next": "p4-primitivas",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

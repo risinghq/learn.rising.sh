@@ -1,7 +1,7 @@
 {
  "id": "p5-sampler",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.5",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.4",
  "title": "Sampler en IBM Quantum",
  "summary": "Usar Sampler en hardware: entradas y salidas, intervalos de ejecución, precedencia de los disparos, opciones e incompatibilidades.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "pasos",
    "tag": [
-    "5.5",
+    "6.4",
     "Usar Sampler"
    ],
    "say": "Sampler sigue los mismos pasos que Estimator. Acepta circuitos parametrizados y también circuitos dinámicos. [[circ]]El circuito debe tener mediciones: aquí, un efficient su2 de ciento veintisiete qubits con measure all. [[tr]]Se transpila a ISA, [[run]]y se ejecuta con sus valores de parámetros. [[res]]get bitstrings devuelve las cadenas de bits en orden: cada una tiene ciento veintisiete caracteres.",
@@ -61,10 +61,10 @@
   {
    "id": "salidas",
    "tag": [
-    "5.5",
+    "6.4",
     "Entradas y salidas"
    ],
-   "say": "El PUB de Sampler tiene circuito, parámetros y disparos. La salida, un SamplerPubResult por PUB, con un BitArray por registro clásico. [[ruido]]En hardware, un GHZ de diez qubits ya no da solo ceros y unos: aparecen muchas cadenas con algún bit cambiado por el ruido. Por ejemplo, mil seiscientas ochenta veces todos ceros, mil cuatrocientas sesenta y siete todos unos, y el resto repartido. [[post]]Todo el posprocesamiento con BitArray que viste en la Parte cuatro funciona igual.",
+   "say": "El PUB de Sampler tiene circuito, parámetros y disparos. La salida, un SamplerPubResult por PUB, con un BitArray por registro clásico. [[ruido]]En hardware, un GHZ de diez qubits ya no da solo ceros y unos: aparecen muchas cadenas con algún bit cambiado por el ruido. Por ejemplo, mil seiscientas ochenta veces todos ceros, mil cuatrocientas sesenta y siete todos unos, y el resto repartido. [[post]]Todo el posprocesamiento con BitArray que viste en la unidad de simulación funciona igual.",
    "scene": [
     {
      "type": "hist",
@@ -117,7 +117,7 @@
   {
    "id": "spans",
    "tag": [
-    "5.5",
+    "6.4",
     "Intervalos de ejecución"
    ],
    "say": "Los resultados de Sampler en un QPU incluyen información de tiempos: los intervalos de ejecución. [[que]]Con el Sampler del lado del cliente de la cero punto cincuenta, están en la metadata del Executor, como chunk timing: una lista de intervalos que envuelve ChunkTiming. [[partes]]Cada intervalo tiene un inicio, un fin y sus partes: de cada una, el índice del PUB y cuántos elementos se ejecutaron en ese intervalo. [[util]]start, stop y duration dan los tiempos globales, y draw dibuja los intervalos en una gráfica. [[ojo]]Los intervalos pueden solaparse: no porque el QPU haga dos cosas a la vez, sino por procesamiento clásico concurrente.",
@@ -158,7 +158,7 @@
   {
    "id": "pred_shots",
    "tag": [
-    "5.5",
+    "6.4",
     "¿Cuántos disparos?"
    ],
    "say": "Un Sampler con dos fuentes de disparos que no coinciden. [[def]]Fijamos default shots en quinientos. [[run]]Pero al llamar a run pedimos ciento veintiocho. [[cual]]Apuesta: ¿cuántos disparos recibirá cada PUB?",
@@ -206,7 +206,7 @@
   {
    "id": "shots",
    "tag": [
-    "5.5",
+    "6.4",
     "Los disparos"
    ],
    "say": "Para los disparos la precedencia es como la de la precisión en Estimator. [[pub]]Primero, los del PUB; [[run]]luego, el argumento shots de run, que es lo que decide tu apuesta; [[tw]]luego, si hay twirling, aleatorizaciones por disparos de cada una; [[def]]y al final default shots. [[cliente]]Un detalle que descubrimos al probar el código: con el Sampler del lado del cliente de la cero punto cincuenta, todos los PUBs de un mismo trabajo deben tener el mismo número de disparos. Si mezclas, por ejemplo sesenta y cuatro y ciento veintiocho, da error.",
@@ -289,7 +289,7 @@
   {
    "id": "local",
    "tag": [
-    "5.5",
+    "6.4",
     "Probarlo en local"
    ],
    "say": "Lo comprobamos en local: dos PUBs con default shots quinientos y shots ciento veintiocho en run. [[res]]Cada uno recibe ciento veintiocho: run gana a default shots.",
@@ -326,7 +326,7 @@
   {
    "id": "opciones",
    "tag": [
-    "5.5",
+    "6.4",
     "Opciones de Sampler"
    ],
    "say": "Las opciones de Sampler son parecidas a las de Estimator, pero sin resilience level: en Sampler activas o desactivas cada técnica por separado. [[dd]]Desacoplamiento dinámico, con sus secuencias. [[tw]]Twirling, de puertas y de mediciones; en Sampler, el de mediciones está desactivado por defecto. [[meas]]Y en execution, meas type: classified, la opción normal, que devuelve bits; kerneled o avg kerneled, que devuelven los datos analógicos de la medición. [[compat]]Algunas incompatibilidades propias: el desacoplamiento dinámico no se combina con twirling de puertas, y el twirling de mediciones no funciona con la instrucción store.",
@@ -404,7 +404,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.5",
+    "6.4",
     "Comprueba"
    ],
    "say": "Una pregunta sobre Sampler.",
@@ -438,7 +438,7 @@
   {
    "id": "ejemplos",
    "tag": [
-    "5.5",
+    "6.4",
     "Ejemplos"
    ],
    "say": "Los ejemplos de la guía cubren los casos típicos: un experimento con un circuito IQP de ciento veintisiete qubits; [[multi]]varios circuitos en un solo trabajo, pasándolos como lista; [[par]]un circuito parametrizado, real amplitudes, con tres juegos de parámetros en un PUB; [[batch]]y dos trabajos dentro de un lote, con with Batch, que se cierra solo al salir del bloque.",
@@ -487,7 +487,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.5",
+    "6.4",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Todo corre con un procesador falso, sin cuenta. [[n1]]Primero mides qué fracción de un GHZ de cinco qubits sale con algún bit cambiado. [[n2]]Después corriges el envío de dos PUBs con distinto número de disparos, que la cero punto cincuenta rechaza. [[n3]]Y por último escribes la función que calcula esa fracción y ves cómo crece con el tamaño del GHZ.",
@@ -571,7 +571,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "5.5",
+    "6.4",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -595,7 +595,7 @@
   {
    "id": "cierre",
    "tag": [
-    "5.5",
+    "6.4",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Sampler recibe circuitos con mediciones. [[r2]]Devuelve un BitArray por registro, e intervalos de ejecución en la metadata. [[r3]]Los disparos siguen una precedencia, y en la cero punto cincuenta deben coincidir en todo el trabajo. [[r4]]Y sus opciones activan cada técnica por separado.",

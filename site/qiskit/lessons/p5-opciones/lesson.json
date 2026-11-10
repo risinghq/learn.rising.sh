@@ -1,7 +1,7 @@
 {
  "id": "p5-opciones",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.3",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.2",
  "title": "Primitivas de IBM y sus opciones",
  "summary": "Estimator, Sampler y Executor; el paso a primitivas del lado del cliente; cómo funcionan las opciones; y el modelo de ejecución dirigida.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "tres",
    "tag": [
-    "5.3",
+    "6.2",
     "Tres primitivas"
    ],
    "say": "IBM ofrece tres primitivas. [[est]]Estimator calcula valores esperados y trae técnicas de supresión y mitigación de errores incorporadas. [[sam]]Sampler muestrea registros de salida. [[exe]]Y Executor, en beta, es de más bajo nivel: muestrea, pero no toma decisiones por ti; a cambio, te da control y transparencia totales, y capacidades que Sampler no tiene, como más grupos de twirling o twirling con puertas fraccionales.",
@@ -71,7 +71,7 @@
   {
    "id": "cliente",
    "tag": [
-    "5.3",
+    "6.2",
     "Primitivas del lado del cliente"
    ],
    "say": "Un cambio importante en qiskit ibm runtime cero punto cincuenta: Sampler y Estimator pasaron a ser primitivas del lado del cliente. Hacen la mayor parte del pre y posprocesamiento en tu computadora y delegan la ejecución en Executor. [[ventajas]]Eso da más transparencia, depuración más rápida, y permite probar la mitigación en local. [[import]]Para usarlas, solo cambia la importación: de qiskit ibm runtime import Estimator, a qiskit ibm runtime punto executor estimator import Estimator. Las opciones vienen de options models.",
@@ -96,7 +96,7 @@
   {
    "id": "pred_defecto",
    "tag": [
-    "5.3",
+    "6.2",
     "Antes de tocar nada"
    ],
    "say": "Creamos un Estimator local y no cambiamos ninguna opción. [[leer]]Solo imprimimos dos: el nivel de resiliencia y el número de disparos por defecto. [[cual]]Apuesta qué valor tiene cada una.",
@@ -136,7 +136,7 @@
   {
    "id": "defecto",
    "tag": [
-    "5.3",
+    "6.2",
     "Lo que valen sin fijar"
    ],
    "say": "Resultado: resilience level vale uno y default shots queda en None. [[vacio]]No todo lo que no fijas es None: algunas opciones traen ya un valor, como el nivel de resiliencia, y otras quedan vacías. [[prec]]Con los disparos vacíos manda la precisión por defecto, cero coma cero uno cinco seis dos cinco, que equivale a cuatro mil noventa y seis disparos.",
@@ -183,7 +183,7 @@
   {
    "id": "estructura",
    "tag": [
-    "5.3",
+    "6.2",
     "Estructura de las opciones"
    ],
    "say": "Las opciones tienen estructura de árbol. Las más usadas, como resilience level, están en el primer nivel; las demás se agrupan en categorías, como execution o dynamical decoupling. [[formato]]Se escriben así: options punto opción punto subopción igual a valor. [[unset]]Una opción sin fijar puede valer None, y entonces se usa su valor por defecto, que a veces depende del nivel de resiliencia.",
@@ -220,7 +220,7 @@
   {
    "id": "formas",
    "tag": [
-    "5.3",
+    "6.2",
     "Cuatro formas de fijarlas"
    ],
    "say": "Hay cuatro formas. [[clase]]Con una instancia de la clase de opciones, al crear la primitiva. [[dict]]Con un diccionario, también al crearla. En ambos casos la primitiva copia las opciones: cambiar después el original no le afecta. [[attr]]Asignando atributos después de crearla, con autocompletado. [[update]]O con update, para cambiar varias de golpe. [[dump]]Y como options es un modelo de pydantic, model dump lo convierte en diccionario.",
@@ -288,7 +288,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.3",
+    "6.2",
     "Comprueba"
    ],
    "say": "Sobre la copia de opciones.",
@@ -318,7 +318,7 @@
   {
    "id": "dirigida",
    "tag": [
-    "5.3",
+    "6.2",
     "El modelo de ejecución dirigida"
    ],
    "say": "Sampler y Estimator son ideales para desarrollar algoritmos, pero los científicos que hacen experimentos a gran escala necesitan más control. Para ellos existe el modelo de ejecución dirigida, en beta. [[pasos]]El flujo tiene cuatro pasos. Agrupas instrucciones en cajas y les pones anotaciones, que expresan la intención, por ejemplo twirling, sin generar todavía las variantes del circuito. [[build]]Construyes un circuito plantilla y un samplex, que describe cómo aleatorizar sus parámetros. [[run]]Executor genera y ejecuta las variantes en el servidor. [[post]]Y tú posprocesas: postselección, extrapolación, lo que necesites. [[nl]]Si hace falta, NoiseLearnerV3 aprende primero el modelo de ruido de las capas.",
@@ -390,7 +390,7 @@
   {
    "id": "q2",
    "tag": [
-    "5.3",
+    "6.2",
     "Comprueba"
    ],
    "say": "Elige la herramienta.",
@@ -423,7 +423,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.3",
+    "6.2",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Todo corre con un procesador falso, sin cuenta. [[n1]]Primero fijas la misma precisión de cuatro formas distintas. [[n2]]Después corriges un error típico: cambiar las opciones del objeto equivocado. [[n3]]Y por último escribes una función que crea un Estimator crudo o protegido.",
@@ -507,7 +507,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "5.3",
+    "6.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -531,7 +531,7 @@
   {
    "id": "cierre",
    "tag": [
-    "5.3",
+    "6.2",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Estimator, Sampler y Executor, de más alto a más bajo nivel. [[r2]]Desde la cero punto cincuenta, Sampler y Estimator corren del lado del cliente. [[r3]]Las opciones se fijan con clase, diccionario, atributos o update. [[r4]]Y la ejecución dirigida te da control total sobre la mitigación.",

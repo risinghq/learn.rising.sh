@@ -1,7 +1,7 @@
 {
  "id": "p3-etapas",
- "part": "Parte III · Transpilación",
- "section": "3.2",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.2",
  "title": "Las seis etapas del transpilador",
  "summary": "Init, layout, routing, translation, optimization y scheduling: qué pases usa cada etapa y qué efectos tiene sobre el circuito.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "init",
    "tag": [
-    "3.2",
+    "4.2",
     "Init"
    ],
    "say": "La primera etapa hace poco por defecto: valida las instrucciones y traduce las puertas de tres o más qubits a puertas de uno y dos, porque casi todos los algoritmos de layout y routing solo saben trabajar con esas. [[propia]]Es el lugar natural para añadir tus propias optimizaciones iniciales, con plugins o pass managers a medida.",
@@ -154,7 +154,7 @@
   {
    "id": "virtual",
    "tag": [
-    "3.2",
+    "4.2",
     "Layout: virtuales y físicos"
    ],
    "say": "Los qubits de tu circuito son virtuales: entidades abstractas. Para ejecutar, cada uno debe asignarse a un qubit físico del chip, uno a uno. Esa asignación es el layout. [[bien]]Elegirla bien es crucial: un buen layout evita SWAP y usa los qubits mejor calibrados. [[ej]]Si tu circuito tiene un qubit central que interactúa con otros tres, conviene ponerlo en el físico uno, que tiene tres vecinos.",
@@ -294,7 +294,7 @@
   {
    "id": "layouts",
    "tag": [
-    "3.2",
+    "4.2",
     "Estrategias de layout"
    ],
    "say": "Los pass managers prediseñados prueban varias estrategias. Primero buscan un layout perfecto, que no necesite ningún SWAP. [[triv]]TrivialLayout asigna el virtual i al físico i. Es el comportamiento histórico, y solo se usa en el nivel uno como primer intento. [[vf2]]VF2Layout trata el problema como un isomorfismo de subgrafos, con el algoritmo VF2 más más; si hay varias soluciones, elige la de menor error medio. [[heur]]Si no hay layout perfecto, entra la heurística. [[dense]]DenseLayout busca el subgrafo más conectado, y se usa en el nivel uno si hay control de flujo. [[sabre]]SabreLayout parte de un layout aleatorio y repite el algoritmo SabreSwap para mejorarlo.",
@@ -363,7 +363,7 @@
   {
    "id": "routing",
    "tag": [
-    "3.2",
+    "4.2",
     "Routing"
    ],
    "say": "Si dos qubits que deben interactuar no son vecinos, hay que mover sus estados con puertas SWAP hasta que lo sean. Cada SWAP es caro y ruidoso. [[np]]Encontrar el mínimo número de SWAP es un problema NP difícil: imposible de resolver exactamente salvo en casos pequeños. [[sabre]]Qiskit usa SabreSwap, una heurística estocástica: da buenas soluciones, no necesariamente óptimas, y puede dar resultados distintos en cada ejecución. Por eso mucha gente transpila varias veces y se queda con el mejor. [[juntos]]Por eficiencia, layout y routing se calculan juntos por defecto, aunque son lógicamente distintos.",
@@ -485,7 +485,7 @@
   {
    "id": "translation",
    "tag": [
-    "3.2",
+    "4.2",
     "Translation"
    ],
    "say": "Escribes con las puertas que quieras, pero el chip solo sabe hacer unas pocas: su conjunto de puertas base. Esta etapa traduce todo a ellas, lo que casi siempre alarga el circuito. [[swap]]Dos casos ilustran el costo. Un SWAP, si no es nativo, cuesta tres CNOT. [[ccx]]Y una Toffoli, de tres qubits, cuesta seis CNOT y varias puertas de un qubit. [[moral]]La moraleja: un algoritmo con muchas Toffoli termina en un circuito profundo, muy afectado por el ruido.",
@@ -576,7 +576,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.2",
+    "4.2",
     "Comprueba"
    ],
    "say": "Calcula un costo.",
@@ -600,7 +600,7 @@
   {
    "id": "optimization",
    "tag": [
-    "3.2",
+    "4.2",
     "Optimization"
    ],
    "say": "La etapa de optimización pelea contra la profundidad que añadieron el layout, el routing y la traducción, combinando o eliminando puertas. A veces el circuito final es incluso más corto que el original. [[n1]]En el nivel uno, combina cadenas de puertas de un qubit y cancela puertas inversas seguidas. [[n2]]En el nivel dos, usa la conmutación para eliminar más puertas. [[n3]]Y en el nivel tres, agrupa bloques de dos qubits, calcula su unitaria y la vuelve a sintetizar, además de todo lo anterior. [[fin]]Al final comprueba que todo esté en las puertas base.",
@@ -654,7 +654,7 @@
   {
    "id": "apuesta",
    "tag": [
-    "3.2",
+    "4.2",
     "Antes de ejecutar"
    ],
    "say": "Un ejemplo con números reales: un estado GHZ de quince qubits, con la CNOT siempre desde el qubit cero, sobre un chip donde los qubits están en línea. El circuito original tiene catorce CNOT. El qubit cero tiene que interactuar con todos, así que el routing sufre. Apuesta: con el nivel cero, ¿cuántas CNOT tendrá el resultado?",
@@ -707,7 +707,7 @@
   {
    "id": "ejemplo",
    "tag": [
-    "3.2",
+    "4.2",
     "Los niveles en acción"
    ],
    "say": "Ejecutemos el mismo ejemplo. [[n0]]Con el nivel cero salen sesenta y dos CNOT: cuatro veces las que escribiste; si apostaste por unas sesenta, acertaste. [[n1]]Con el uno, cincuenta; [[n23]]y con los niveles dos y tres, veintiséis, menos de la mitad. [[var]]Como el routing es estocástico, estos números cambian con la semilla. Para resultados reproducibles, fija seed transpiler.",
@@ -765,7 +765,7 @@
   {
    "id": "scheduling",
    "tag": [
-    "3.2",
+    "4.2",
     "Scheduling"
    ],
    "say": "La última etapa solo se ejecuta si la pides, con scheduling method: as soon as possible o as late as possible, abreviados asap y alap. [[delays]]Contabiliza los tiempos muertos: inserta instrucciones Delay donde un qubit espera sin hacer nada. Así se sabe cuánto durará el circuito en el backend. [[dos]]Funciona en dos partes: un pase de análisis, que anota cuándo empieza cada instrucción, y un pase de relleno, que inserta los retrasos o, en lugar de esperas vacías, secuencias de desacoplamiento dinámico.",
@@ -816,7 +816,7 @@
   {
    "id": "q2",
    "tag": [
-    "3.2",
+    "4.2",
     "Comprueba"
    ],
    "say": "Una pregunta conceptual.",
@@ -849,7 +849,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.2",
+    "4.2",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, escribe la función que cuenta las CNOT del GHZ de quince qubits en línea para cada nivel. [[n2]]Después, elige tú el layout inicial de un chip en forma de T para que el circuito no necesite ningún SWAP. [[n3]]Y por último, escribe una función que transpila varias veces con distintas semillas y devuelve el mejor resultado.",
@@ -932,7 +932,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.2",
+    "4.2",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -956,7 +956,7 @@
   {
    "id": "cierre",
    "tag": [
-    "3.2",
+    "4.2",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Init prepara y layout elige qubits físicos. [[r2]]Routing inserta SWAP con una heurística estocástica. [[r3]]Translation baja a puertas base y optimization recupera lo perdido, más cuanto mayor el nivel. [[r4]]Y scheduling, si lo pides, añade los tiempos de espera.",

@@ -213,11 +213,11 @@
   ]
  },
  "mision": {
-  "dur": 27.624,
+  "dur": 26.352,
   "marks": {
    "n1": 2.137,
-   "n2": 12.582,
-   "n3": 19.46
+   "n2": 11.308,
+   "n3": 18.187
   },
   "cues": [
    [
@@ -226,14 +226,14 @@
    ],
    [
     2.137,
-    "Primero, convierte un circuito en DAG, añade puertas al principio y al final, y vuelve al circuito; apuesta antes cuántas H tendrá."
+    "Primero, escribe la función que convierte un circuito en DAG, añade puertas al principio y al final, y vuelve al circuito."
    ],
    [
-    12.582,
+    11.308,
     "Después, completa un pase de transformación que sustituye cada SWAP por tres CNOT."
    ],
    [
-    19.46,
+    18.187,
     "Y por último, escribe tú un pase de análisis que cuenta las puertas de dos qubits y las guarda en el property set."
    ]
   ]

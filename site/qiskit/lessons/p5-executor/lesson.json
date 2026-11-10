@@ -1,7 +1,7 @@
 {
  "id": "p5-executor",
- "part": "Parte V · Ejecutar en IBM Quantum",
- "section": "5.6",
+ "part": "Unidad 6 · Al hardware",
+ "section": "6.5",
  "title": "Executor",
  "summary": "La primitiva de bajo nivel: programas cuánticos, elementos de circuito y de samplex, broadcasting con ejes intrínsecos y extrínsecos, PEC y cómo migrar desde Sampler.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "5.6",
+    "6.5",
     "Una primitiva sin decisiones implícitas"
    ],
    "say": "Executor muestrea registros de salida, como Sampler, pero sin supresión ni mitigación de errores incorporadas. Forma parte del modelo de ejecución dirigida: tú expresas la intención y Executor la sigue al pie de la letra. [[base]]Qiskit todavía no tiene una clase base para Executor. [[samp]]Y para usar samplex necesitas el paquete Samplomatic.",
@@ -42,7 +42,7 @@
   {
    "id": "programa",
    "tag": [
-    "5.6",
+    "6.5",
     "El programa cuántico"
    ],
    "say": "La entrada de Executor no es una lista de PUBs, sino un QuantumProgram: una lista de tareas, con un único número de disparos para todo el programa. Si necesitas otro número de disparos, es otro programa, otro trabajo. [[circ]]Un CircuitItem es un circuito con sus valores de parámetros, que se ejecuta tal cual, sin aleatorizar. Aquí, diez juegos de dos parámetros. [[samp]]Un SamplexItem lleva un circuito plantilla, un samplex que genera parámetros aleatorios en el servidor, por ejemplo para twirling, y los argumentos del samplex.",
@@ -82,7 +82,7 @@
   {
    "id": "cajas",
    "tag": [
-    "5.6",
+    "6.5",
     "Cajas, plantilla y samplex"
    ],
    "say": "El samplex se construye en dos pasos. [[box]]Primero, generate boxing pass manager agrupa las puertas de dos qubits y las mediciones en cajas, y les añade una anotación de twirling. Aquí lo enganchamos como etapa post scheduling del transpilador. [[build]]Luego, build devuelve dos cosas: la plantilla, un circuito equivalente con las puertas de un qubit convertidas en puertas parametrizadas, y el samplex, que sabe generar los parámetros aleatorios. [[shape]]Al añadirlo, shape veintiocho por diez pide veintiocho aleatorizaciones para cada uno de los diez juegos de parámetros.",
@@ -123,7 +123,7 @@
   {
    "id": "pred_resultado",
    "tag": [
-    "5.6",
+    "6.5",
     "Antes de ver la forma"
    ],
    "say": "El programa ya corrió. Mira lo que pedimos. [[circ]]El CircuitItem lleva diez juegos de dos parámetros. [[shots]]El programa usa mil veinticuatro disparos, [[bits]]y el circuito mide tres bits. [[cual]]Apuesta: ¿qué forma tiene el arreglo de la primera tarea, result de cero, meas?",
@@ -179,7 +179,7 @@
   {
    "id": "resultado",
    "tag": [
-    "5.6",
+    "6.5",
     "Los resultados"
    ],
    "say": "La salida es un QuantumProgramResult, con una entrada por tarea, en el mismo orden. Cada entrada es un diccionario con el nombre del registro como clave y un arreglo NumPy de booleanos como valor. [[c0]]Para el CircuitItem: diez juegos de parámetros, mil veinticuatro disparos, tres bits: la respuesta de tu apuesta. [[c1]]Para el SamplexItem: veintiocho aleatorizaciones por diez juegos por mil veinticuatro disparos por tres bits. [[flips]]Y measurement flips meas guarda las inversiones de bit que introdujo el twirling de mediciones: una por aleatorización. Se deshacen con un XOR clásico. Executor no corrige nada por ti.",
@@ -228,7 +228,7 @@
   {
    "id": "ejes",
    "tag": [
-    "5.6",
+    "6.5",
     "Ejes intrínsecos y extrínsecos"
    ],
    "say": "Executor también usa broadcasting, pero distingue dos tipos de ejes. [[intr]]Los intrínsecos, a la derecha, los fija el tipo de dato: para dos parámetros, la forma intrínseca es dos; para un escalar, como un factor de ruido, vacía. [[extr]]Los extrínsecos, a la izquierda, son tus barridos. Solo ellos se combinan por broadcasting. [[ej]]Parámetros con forma cuatro, uno, dos y factores de ruido con forma tres dan un barrido de cuatro por tres: doce configuraciones. [[shots]]Cada configuración recibe todos los disparos; no se reparten.",
@@ -303,7 +303,7 @@
   {
    "id": "shape",
    "tag": [
-    "5.6",
+    "6.5",
     "El parámetro shape"
    ],
    "say": "shape añade ejes de aleatorización. [[sin]]Si lo omites, hay una ejecución por configuración: aleatorizada, pero una sola, sin el beneficio de promediar. Ojo: activar twirling no basta, hay que pedir varias aleatorizaciones. [[con]]Con forma veinte por diez, veinte aleatorizaciones para cada una de diez configuraciones. [[multi]]Y puedes organizarlas en varios ejes, como dos por catorce por diez. [[regla]]La regla: shape debe poder obtenerse por broadcasting de las formas de entrada, alineando por la derecha.",
@@ -372,7 +372,7 @@
   {
    "id": "q1",
    "tag": [
-    "5.6",
+    "6.5",
     "Comprueba"
    ],
    "say": "Predice la forma.",
@@ -407,7 +407,7 @@
   {
    "id": "pec",
    "tag": [
-    "5.6",
+    "6.5",
     "Ejemplo: PEC con Executor"
    ],
    "say": "El ejemplo avanzado de la guía hace cancelación probabilística de errores, PEC, sobre un circuito espejo de diez qubits: el circuito seguido de su inverso, que idealmente devuelve todo a cero. [[cajas]]Se crean dos versiones con cajas: una solo con twirling, otra además con inyección de ruido. [[aprender]]NoiseLearnerV3 aprende el ruido de las tres cajas distintas. [[run]]Executor ejecuta novecientas aleatorizaciones de cada versión, con factores de ruido menos uno para PEC. [[res]]Resultado: con solo twirling, los valores esperados de Z rondan cero coma siete; con PEC, cero coma noventa y ocho. El valor ideal es uno.",
@@ -498,7 +498,7 @@
   {
    "id": "migrar",
    "tag": [
-    "5.6",
+    "6.5",
     "¿Migrar de Sampler a Executor?"
    ],
    "say": "¿Deberías migrar? [[si]]Sí, si eres una científica o científico que hace experimentos a escala de utilidad y necesita control fino y reproducible del twirling, del aprendizaje e inyección de ruido o de los cambios de base; o si necesitas algo que solo ofrece Executor. [[no]]No, si quieres una interfaz simple que gestione los errores por ti. [[lim]]Además, Executor está en beta, y la guía de migración cubre Sampler, no Estimator. [[mapa]]La correspondencia: PUBs pasan a ser elementos del programa; las opciones de twirling, cajas anotadas y samplex; los disparos, un único valor en el programa; y los BitArray, arreglos NumPy, con el twirling de medición deshecho a mano.",
@@ -594,7 +594,7 @@
   {
    "id": "opciones",
    "tag": [
-    "5.6",
+    "6.5",
     "Opciones de Executor"
    ],
    "say": "Executor tiene muy pocas opciones, porque casi toda la intención vive en el samplex. [[grupos]]Solo tres grupos: environment, con el nivel de registro o las etiquetas; execution, con init qubits o rep delay; y experimental. [[prog]]Lo que cambia la forma de los resultados, como los disparos o meas level, se fija en el QuantumProgram, no en las opciones. [[both]]Desde la cero punto cuarenta y ocho, meas level igual a both pide a la vez mediciones clasificadas y analógicas.",
@@ -627,7 +627,7 @@
   {
    "id": "q2",
    "tag": [
-    "5.6",
+    "6.5",
     "Comprueba"
    ],
    "say": "Sobre la migración.",
@@ -660,7 +660,7 @@
   {
    "id": "mision",
    "tag": [
-    "5.6",
+    "6.5",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. Todo corre con un procesador falso de cinco qubits, sin cuenta. [[n1]]Primero ejecutas un CircuitItem y lees la forma de sus resultados. [[n2]]Después pasas de dos a veinte aleatorizaciones con el parámetro shape. [[n3]]Y por último escribes la función que deshace el twirling de las mediciones con un XOR, y compruebas que el GHZ vuelve a dar casi solo cero cero cero y uno uno uno.",
@@ -742,7 +742,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "5.6",
+    "6.5",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -766,7 +766,7 @@
   {
    "id": "cierre",
    "tag": [
-    "5.6",
+    "6.5",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Un QuantumProgram reúne elementos de circuito y de samplex. [[r2]]El samplex sale de cajas anotadas y de build. [[r3]]Las formas combinan ejes extrínsecos e intrínsecos. [[r4]]Y los resultados son arreglos NumPy que tú posprocesas, incluido deshacer el twirling.",
@@ -824,7 +824,7 @@
   "Usa `samplex.sample(...)` para generar 3 aleatorizaciones y comprobar con `Operator` que son equivalentes al circuito original.",
   "Guías originales: [get-started-with-executor](https://quantum.cloud.ibm.com/docs/en/guides/get-started-with-executor) · [executor-input-output](https://quantum.cloud.ibm.com/docs/en/guides/executor-input-output) · [executor-broadcasting](https://quantum.cloud.ibm.com/docs/en/guides/executor-broadcasting) · [executor-options](https://quantum.cloud.ibm.com/docs/en/guides/executor-options) · [executor-examples](https://quantum.cloud.ibm.com/docs/en/guides/executor-examples) · [migrate-from-sampler-to-executor](https://quantum.cloud.ibm.com/docs/en/guides/migrate-from-sampler-to-executor)"
  ],
- "next": "p5-rest",
+ "next": "p2-control-clasico",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

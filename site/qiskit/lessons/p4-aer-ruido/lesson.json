@@ -1,7 +1,7 @@
 {
  "id": "p4-aer-ruido",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.4",
+ "part": "Unidad 5 · Ruido",
+ "section": "5.1",
  "title": "Qiskit Aer y modelos de ruido",
  "summary": "Simulación exacta y con ruido con las primitivas de Aer, el canal despolarizante, y cómo construir modelos de ruido a medida.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "exacto",
    "tag": [
-    "4.4",
+    "5.1",
     "Exacto con Aer"
    ],
    "say": "Los procesadores reales tienen ruido, así que una simulación exacta no refleja lo que verás en hardware. Qiskit Aer permite simular con ruido, y además es más rápido que las primitivas de referencia. [[ej]]Tomamos un efficient su2 de ocho qubits, con todos los ángulos en cero coma uno, y el observable Z en todos los qubits. [[tr]]El circuito se transpila para el AerSimulator. [[res]]El valor exacto es cero coma ochenta y ocho siete. [[nota]]Las primitivas de Aer implementan la misma interfaz, pero no tienen las opciones de IBM, como resilience level.",
@@ -65,7 +65,7 @@
   {
    "id": "ruido_pred",
    "tag": [
-    "4.4",
+    "5.1",
     "Antes de añadir ruido"
    ],
    "say": "Ahora un modelo de ruido simple: un error despolarizante del dos por ciento en cada CX. En la práctica, las puertas de dos qubits son la fuente de error dominante. [[cx]]Este circuito tiene veintiuna CX. [[apuesta]]El valor exacto era cero coma ochenta y ocho siete. Apuesta: ¿qué valor devolverá la Estimator con ruido?",
@@ -126,7 +126,7 @@
   {
    "id": "ruido",
    "tag": [
-    "4.4",
+    "5.1",
     "Con ruido"
    ],
    "say": "[[est]]El modelo se pasa a la Estimator de Aer en backend options. [[res]]Resultado: cero coma setenta y dos, lejos del valor exacto. Si apostaste por la opción b, acertaste. Un dos por ciento por puerta parece poco, pero se acumula en veintiuna puertas.",
@@ -200,7 +200,7 @@
   {
    "id": "depol",
    "tag": [
-    "4.4",
+    "5.1",
     "Una estimación rápida"
    ],
    "say": "¿Por qué tanto? El canal despolarizante con probabilidad p deja el estado intacto con probabilidad uno menos p, y con probabilidad p lo reemplaza por el estado completamente mezclado. [[m]]Tras m aplicaciones, la probabilidad de que el estado sobreviva es uno menos p elevado a m. [[cx]]El circuito tiene veintiuna CX, [[val]]así que cero coma noventa y ocho a la veintiuno da cero coma sesenta y cinco: una estimación conservadora de que el estado final sea correcto.",
@@ -230,7 +230,7 @@
   {
    "id": "q1",
    "tag": [
-    "4.4",
+    "5.1",
     "Comprueba"
    ],
    "say": "Usa la estimación.",
@@ -255,7 +255,7 @@
   {
    "id": "modulo",
    "tag": [
-    "4.4",
+    "5.1",
     "El módulo de ruido de Aer"
    ],
    "say": "Para modelos a medida, el módulo noise de Aer tiene tres clases. [[nm]]NoiseModel guarda el modelo completo. [[qe]]QuantumError describe errores de canal cuántico, que se aplican después de puertas o resets, o antes de mediciones. [[re]]Y ReadoutError describe errores clásicos de lectura. [[backend]]El atajo: NoiseModel from backend construye un modelo aproximado con los datos de calibración de un dispositivo.",
@@ -343,7 +343,7 @@
   {
    "id": "errores",
    "tag": [
-    "4.4",
+    "5.1",
     "Errores estándar"
    ],
    "say": "Hay funciones para los errores más comunes. [[kraus]]Generales: kraus error, con una lista de matrices de Kraus, mixed unitary error y coherent unitary error. [[pauli]]De Pauli: pauli error, con una lista de Paulis y probabilidades, y depolarizing error. [[relax]]Físicos: thermal relaxation error, con las constantes T1 y T2 y la duración de la puerta, y los de amortiguamiento de amplitud y de fase. [[comb]]Se combinan con compose, tensor y expand, como los operadores.",
@@ -419,7 +419,7 @@
   {
    "id": "combinar",
    "tag": [
-    "4.4",
+    "5.1",
     "Combinar errores"
    ],
    "say": "Un ejemplo: un error de inversión de bit del cinco por ciento, X con probabilidad cero coma cero cinco, y uno de fase, Z con la misma probabilidad. [[comp]]Compuestos, dan cuatro posibilidades: nada, con noventa por ciento; X o Z solos, con cuatro coma setenta y cinco cada uno; y ambos, con cero coma veinticinco. [[canal]]Los QuantumError se convierten a canales de Qiskit, como Kraus o SuperOp, y de vuelta. [[ro]]Y un ReadoutError se da como una matriz de probabilidades de asignación: por ejemplo, un cinco por ciento de leer uno cuando era cero, y un diez de leer cero cuando era uno.",
@@ -468,7 +468,7 @@
   {
    "id": "anadir",
    "tag": [
-    "4.4",
+    "5.1",
     "Añadir errores al modelo"
    ],
    "say": "Al añadir un error hay que decir a qué instrucciones y a qué qubits afecta. [[todos]]add all qubit quantum error lo aplica a esa instrucción en cualquier qubit. [[algunos]]add quantum error, solo en los qubits indicados; para puertas de dos qubits el orden importa: cero uno no es uno cero. [[sim]]Luego, AerSimulator con noise model crea un simulador con ese ruido y con las puertas base del modelo. Hay que transpilar para él.",
@@ -534,7 +534,7 @@
   {
    "id": "termico",
    "tag": [
-    "4.4",
+    "5.1",
     "Relajación térmica"
    ],
    "say": "Un modelo más realista se basa en la relajación térmica. Cada qubit tiene dos constantes de tiempo: T1, de relajación, y T2, de desfase, con la condición T2 menor o igual que dos T1. [[tiempos]]El error de cada instrucción depende de su duración: una puerta virtual como u1 no cuesta nada; medir, que dura un microsegundo, cuesta mucho más. [[cx]]Para una puerta de dos qubits, se combina el error de cada qubit con expand, y se añade con add quantum error par por par.",
@@ -579,7 +579,7 @@
   {
    "id": "q2",
    "tag": [
-    "4.4",
+    "5.1",
     "Comprueba"
    ],
    "say": "Sobre los modelos de ruido.",
@@ -609,7 +609,7 @@
   {
    "id": "mision",
    "tag": [
-    "4.4",
+    "5.1",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero apuestas qué fracción de los disparos de un GHZ sigue siendo correcta bajo ruido despolarizante. [[n2]]Después buscas qué probabilidad de error deja cerca de la mitad de los disparos correctos. [[n3]]Y por último escribes la función que construye un error de lectura asimétrico.",
@@ -691,7 +691,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "4.4",
+    "5.1",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar, conectadas con tu proyecto. Escribe con tus palabras; se guardan en tu navegador.",
@@ -715,7 +715,7 @@
   {
    "id": "cierre",
    "tag": [
-    "4.4",
+    "5.1",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Las primitivas de Aer aceptan un modelo de ruido en backend options. [[r2]]Uno menos p a la m da una idea rápida del daño. [[r3]]NoiseModel, QuantumError y ReadoutError construyen modelos a medida. [[r4]]Y from backend copia el ruido de un dispositivo real.",
@@ -769,7 +769,7 @@
   "Construye el modelo térmico completo de la guía original y compara sus conteos del GHZ con los del modelo de inversión de bit.",
   "Guías originales: [simulate-with-qiskit-aer](https://quantum.cloud.ibm.com/docs/en/guides/simulate-with-qiskit-aer) · [build-noise-models](https://quantum.cloud.ibm.com/docs/en/guides/build-noise-models)"
  ],
- "next": "p4-estabilizadores",
+ "next": "p4-local-testing",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

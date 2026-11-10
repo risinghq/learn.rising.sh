@@ -288,11 +288,11 @@
   ]
  },
  "mision": {
-  "dur": 24.84,
+  "dur": 26.592,
   "marks": {
    "n1": 2.137,
-   "n2": 8.931,
-   "n3": 14.917
+   "n2": 10.671,
+   "n3": 16.658
   },
   "cues": [
    [
@@ -301,14 +301,14 @@
    ],
    [
     2.137,
-    "Primero, lista los métodos que Qiskit ya trae para Clifford, unitarias y routing."
+    "Primero, escribe las tres llamadas que listan los métodos que Qiskit ya trae para Clifford, unitarias y routing."
    ],
    [
-    8.931,
+    10.671,
     "Después, cambia el método de routing de una cuadrícula para quitar CNOT."
    ],
    [
-    14.917,
+    16.658,
     "Y por último, escribe tu propio plugin de síntesis de Clifford, que se rinde con más de tres qubits y deja pasar al siguiente método."
    ]
   ]
@@ -351,7 +351,7 @@
   ]
  },
  "cierre": {
-  "dur": 24.912,
+  "dur": 26.088,
   "marks": {
    "r1": 1.868,
    "r2": 7.006,
@@ -381,7 +381,7 @@
    ],
    [
     19.206,
-    "Con esto termina la transpilación; en la Parte cuatro, las primitivas."
+    "Con esto termina la transpilación; en la siguiente unidad, las primitivas y la simulación."
    ]
   ]
  }

@@ -134,6 +134,7 @@ export function parseAuthored(
 
 interface Course {
   parts: { lessons: { id: string }[] }[];
+  guides?: { id: string }[];
 }
 
 export interface Roots {
@@ -151,9 +152,11 @@ export function courses(site: string = SITE): string[] {
 
 export function buildBank(course: string, roots: Roots = ROOTS): Bank {
   const dir = join(roots.site, course);
-  const order = (read(join(dir, "course.json")) as Course).parts.flatMap(
-    (part) => part.lessons.map((lesson) => lesson.id),
-  );
+  const index = read(join(dir, "course.json")) as Course;
+  const order = [
+    ...index.parts.flatMap((part) => part.lessons.map((lesson) => lesson.id)),
+    ...(index.guides ?? []).map((lesson) => lesson.id),
+  ];
   const authoredDir = join(roots.authored, course);
   const authored = existsSync(authoredDir) ? readdirSync(authoredDir) : [];
   for (const name of authored) {

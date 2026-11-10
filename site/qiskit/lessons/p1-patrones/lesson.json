@@ -1,7 +1,7 @@
 {
  "id": "p1-patrones",
- "part": "Parte I · Primeros pasos",
- "section": "1.2",
+ "part": "Unidad 2 · Operadores y observables",
+ "section": "2.1",
  "title": "El flujo de trabajo: patrones de Qiskit",
  "summary": "Mapear, optimizar, ejecutar y posprocesar: los cuatro pasos de todo programa cuántico, con un ejemplo completo.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "intro",
    "tag": [
-    "1.2",
+    "2.1",
     "Cuatro pasos"
    ],
    "say": "Todo programa que corre en un computador cuántico, desde un ejemplo de juguete hasta un experimento a gran escala, sigue los mismos cuatro pasos. A esa receta se le llama un patrón de Qiskit. [[m]]Mapear el problema a circuitos y operadores. [[o]]Optimizarlos para el hardware. [[e]]Ejecutarlos. [[p]]Y posprocesar los resultados. [[het]]Cada paso lo cumplen bloques de software, y el patrón puede correr en tu computadora, en la nube o desplegado con Qiskit Serverless.",
@@ -94,7 +94,7 @@
   {
    "id": "mapear",
    "tag": [
-    "1.2",
+    "2.1",
     "1 · Mapear"
    ],
    "say": "El primer paso parte de un problema clásico y lo traduce al lenguaje del computador cuántico. [[quim]]En química o en simulación cuántica, por ejemplo, se construye un circuito que representa el hamiltoniano que quieres estudiar. [[topo]]A veces conviene pensar desde ya en cómo se acomodará el problema sobre los qubits del chip, la red heavy hex de IBM, si la estructura del problema lo permite. [[prim]]Y conviene decidir ya qué resultado quieres: si necesitas muestras de bits, usarás Sampler; si quieres valores esperados de observables, Estimator, que además ofrece más opciones de mitigación. [[sal]]La salida de este paso es una colección de circuitos u operadores.",
@@ -175,7 +175,7 @@
   {
    "id": "optimizar",
    "tag": [
-    "1.2",
+    "2.1",
     "2 · Optimizar"
    ],
    "say": "En el segundo paso, los circuitos abstractos se transforman para el hardware. [[isa]]El resultado debe ser un circuito ISA, por las siglas de arquitectura del conjunto de instrucciones. [[base]]Un circuito ISA solo usa las puertas que el hardware entiende, sus puertas base, [[mapa]]y sus puertas de dos qubits respetan la conectividad del chip, el mapa de acoplamiento. [[ej]]Mira este estado de Bell. En el procesador Fez, la Hadamard y la CNOT se reescriben con rotaciones Z, raíz de X y una CZ. [[solo]]Solo los circuitos ISA se pueden ejecutar en el hardware de IBM. Antes de ejecutar, también conviene probarlos en un simulador.",
@@ -351,7 +351,7 @@
   {
    "id": "ejecutar",
    "tag": [
-    "1.2",
+    "2.1",
     "3 · Ejecutar"
    ],
    "say": "El tercer paso ejecuta los circuitos ISA con una primitiva: Sampler o Estimator, del paquete qiskit ibm runtime. [[modos]]Puedes enviarlos en un lote, que permite transpilar en paralelo, o en una sesión, que sirve para tareas iterativas sin esperar en la cola cada vez. [[mit]]Aquí también eliges opciones de supresión y mitigación de errores. [[sal]]La salida depende de la primitiva. [[s]]Sampler devuelve los bits medidos en cada disparo. [[e]]Estimator devuelve valores esperados de observables: cantidades físicas o funciones de costo.",
@@ -449,7 +449,7 @@
   {
    "id": "posprocesar",
    "tag": [
-    "1.2",
+    "2.1",
     "4 · Posprocesar"
    ],
    "say": "El último paso convierte las salidas en la respuesta al problema original. [[vis]]Puede ser algo tan simple como visualizar los resultados. [[mit]]O aplicar mitigación de errores de lectura, [[marg]]marginalizar las distribuciones para quedarte con unos pocos qubits, [[ps]]o descartar los resultados que violan una propiedad física del problema, como el número de partículas o la paridad. Eso se llama postselección.",
@@ -496,7 +496,7 @@
   {
    "id": "ejemplo",
    "tag": [
-    "1.2",
+    "2.1",
     "Los cuatro pasos en código"
    ],
    "say": "Así se ven los cuatro pasos en un programa completo, usando un backend falso de cinco qubits, que imita al procesador Belem y corre en tu computadora. [[m]]Mapear: un circuito de Bell y un observable, ZZ más XX. [[o]]Optimizar: un pass manager preparado para el backend produce el circuito ISA, [[lay]]y el observable se reacomoda a los qubits físicos con apply layout. [[e]]Ejecutar: Estimator, con el backend como modo. [[p]]Posprocesar: leer el valor esperado.",
@@ -552,7 +552,7 @@
   {
    "id": "predice",
    "tag": [
-    "1.2",
+    "2.1",
     "Antes de ejecutar"
    ],
    "say": "Antes de ejecutarlo, apuesta. Para un estado de Bell ideal, ZZ vale uno y XX también vale uno: la suma ideal es dos. [[cual]]Pero el backend falso incluye un modelo del ruido de un procesador real. ¿Qué crees que imprimirá el programa?",
@@ -580,7 +580,7 @@
   {
    "id": "resultado",
    "tag": [
-    "1.2",
+    "2.1",
     "El resultado"
    ],
    "say": "Para un estado de Bell ideal, ZZ vale uno y XX también vale uno: la suma debería dar exactamente dos. [[sal]]El backend falso incluye un modelo del ruido del procesador real, así que obtenemos un poco menos, alrededor de uno coma nueve. Si apostaste por esa opción, acertaste. [[mens]]Esa diferencia es el ruido, y buena parte del curso trata de cómo reducirla.",
@@ -611,7 +611,7 @@
      "body": [
       {
        "type": "text",
-       "text": "ideal 2 · con ruido ≈ 1,9 → supresión y mitigación (Parte VI)",
+       "text": "ideal 2 · con ruido ≈ 1,9 → supresión y mitigación (Unidad 5)",
        "style": "body"
       }
      ],
@@ -641,7 +641,7 @@
   {
    "id": "q1",
    "tag": [
-    "1.2",
+    "2.1",
     "Comprueba"
    ],
    "say": "Clasifica esta tarea en uno de los cuatro pasos.",
@@ -676,7 +676,7 @@
   {
    "id": "q2",
    "tag": [
-    "1.2",
+    "2.1",
     "Comprueba"
    ],
    "say": "Otra pregunta, sobre la ejecución.",
@@ -706,7 +706,7 @@
   {
    "id": "mision",
    "tag": [
-    "1.2",
+    "2.1",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero conviertes un circuito en ISA para el chip de cinco qubits. [[n2]]Después corriges el cálculo del valor esperado, que olvida el layout del circuito ISA. [[n3]]Y por último escribes el patrón entero como una función que sirve para cualquier circuito y cualquier nivel. [[check]]Pulsa **Comprobar** en cada ejercicio para ver los casos visibles y ocultos.",
@@ -788,7 +788,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "1.2",
+    "2.1",
     "Reflexiona"
    ],
    "say": "Antes de cerrar, dos preguntas para pensar. No hay respuesta automática: escribe con tus palabras. Lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -812,7 +812,7 @@
   {
    "id": "cierre",
    "tag": [
-    "1.2",
+    "2.1",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Todo programa sigue cuatro pasos: mapear, optimizar, ejecutar y posprocesar. [[r2]]En hardware de IBM solo se ejecutan circuitos ISA: puertas base y conectividad del chip. [[r3]]Sampler da bits; Estimator, valores esperados. [[r4]]Las próximas partes del curso siguen este mismo orden.",
@@ -865,7 +865,7 @@
   "Cambia el observable a `SparsePauliOp([\"ZZ\", \"XX\", \"YY\"])`. ¿Qué valor ideal esperas para el estado de Bell?",
   "Guías originales: [intro-to-patterns](https://quantum.cloud.ibm.com/docs/en/guides/intro-to-patterns)"
  ],
- "next": "p1-instalar",
+ "next": "p2-operadores",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }

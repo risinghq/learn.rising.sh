@@ -1,7 +1,7 @@
 {
  "id": "p4-primitivas",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.1",
+ "part": "Unidad 3 · Simular",
+ "section": "3.1",
  "title": "Las primitivas: Sampler y Estimator",
  "summary": "Por qué existen las primitivas, qué hacen Estimator y Sampler, y qué implementaciones hay: de referencia, de IBM, de backend y de Aer.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "historia",
    "tag": [
-    "4.1",
+    "3.1",
     "Subir el nivel de abstracción"
    ],
    "say": "Al principio de la computación clásica, los programadores manipulaban registros de la CPU directamente. Con los computadores cuánticos pasó algo parecido: la primera interfaz devolvía los datos crudos de la electrónica de control. [[run]]Luego llegó backend punto run, que entregaba ceros y unos en un formato familiar. [[prim]]Y cuando creció el número de usuarios y de algoritmos, hizo falta subir un escalón más: las primitivas. [[reemp]]Hoy la interfaz de primitivas sustituye a backend punto run, porque Sampler ofrece el mismo acceso directo al hardware.",
@@ -69,7 +69,7 @@
   {
    "id": "dos",
    "tag": [
-    "4.1",
+    "3.1",
     "Dos tareas básicas"
    ],
    "say": "Una primitiva es la instrucción de procesamiento más pequeña con la que se construye algo útil a un nivel de abstracción. Las dos tareas más comunes de un computador cuántico son estimar valores esperados y muestrear estados. [[est]]Estimator calcula valores esperados de observables sobre los estados que preparan los circuitos. [[sam]]Sampler muestrea el registro de salida de un circuito: devuelve los bits medidos. [[idea]]La idea es acercar la programación cuántica a la clásica: menos detalles del hardware, más foco en el resultado.",
@@ -128,7 +128,7 @@
   {
    "id": "predice",
    "tag": [
-    "4.1",
+    "3.1",
     "Antes de ejecutar"
    ],
    "say": "Probemos las dos primitivas sobre el mismo estado: un estado de Bell. [[obs]]A Estimator le damos el circuito sin mediciones y tres observables: Z Z, Z sobre el qubit uno, y X X. [[apuesta]]Apuesta: ¿qué tres valores esperados devolverá?",
@@ -207,7 +207,7 @@
   {
    "id": "mismo_estado",
    "tag": [
-    "4.1",
+    "3.1",
     "El mismo estado, dos preguntas"
    ],
    "say": "Este es el código. [[est]]Estimator devuelve uno, cero y uno. Z Z vale uno porque los dos qubits siempre coinciden. Z sobre el qubit uno vale cero, porque por sí solo es una moneda perfecta. Y X X vale uno. Si apostaste por la opción b, acertaste. [[sam]]Sampler, en cambio, no devuelve números esperados: devuelve cadenas medidas, cero cero y uno uno, mitad y mitad. [[idea]]Es el mismo estado visto de dos maneras: la primitiva que elijas decide qué pregunta le haces.",
@@ -264,7 +264,7 @@
   {
    "id": "impl",
    "tag": [
-    "4.1",
+    "3.1",
     "Clases base e implementaciones"
    ],
    "say": "Hay dos niveles. [[base]]Las clases base, en qiskit punto primitives, definen la interfaz común: BaseEstimatorV2 y BaseSamplerV2. Las V1 aún existen, pero el curso usa las V2. [[impl]]Sobre ellas se construyen implementaciones, todas con la misma forma de uso. [[ibm]]Las de IBM, en qiskit ibm runtime, ejecutan en hardware real con mitigación de errores. [[ref]]Las de referencia, StatevectorEstimator y StatevectorSampler, simulan con vectores de estado ideales en tu computadora. [[back]]BackendEstimatorV2 y BackendSamplerV2 envuelven cualquier backend en una primitiva. [[aer]]Y Qiskit Aer tiene las suyas, con ruido.",
@@ -345,7 +345,7 @@
   {
    "id": "backend",
    "tag": [
-    "4.1",
+    "3.1",
     "Primitivas de backend"
    ],
    "say": "Las primitivas de backend son genéricas: funcionan con cualquier objeto que implemente la interfaz BackendV2, aunque su proveedor no tenga primitivas propias. [[est]]BackendEstimatorV2 no trae mitigación de errores incorporada, porque corre en tu máquina. [[sam]]Y BackendSamplerV2 necesita que el backend admita la opción memory, para devolver cada disparo.",
@@ -407,7 +407,7 @@
   {
    "id": "opciones",
    "tag": [
-    "4.1",
+    "3.1",
     "Opciones y ventajas"
    ],
    "say": "El método run es igual en todas las implementaciones, pero las opciones no: cada una documenta las suyas. [[ventaja]]Esa capa extra de abstracción tiene ventajas. Con las primitivas de IBM, por ejemplo, activas técnicas avanzadas de mitigación cambiando una opción, como resilience level, en lugar de implementarlas tú. [[prov]]Y para los fabricantes de hardware, implementar primitivas es una forma de ofrecer sus mejores capacidades directamente a los usuarios.",
@@ -444,7 +444,7 @@
   {
    "id": "q1",
    "tag": [
-    "4.1",
+    "3.1",
     "Comprueba"
    ],
    "say": "Una pregunta sobre implementaciones.",
@@ -477,7 +477,7 @@
   {
    "id": "q2",
    "tag": [
-    "4.1",
+    "3.1",
     "Comprueba"
    ],
    "say": "Otra pregunta.",
@@ -507,7 +507,7 @@
   {
    "id": "mision",
    "tag": [
-    "4.1",
+    "3.1",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero apuestas los tres valores esperados que Estimator da para el estado de Bell, y los comparas con lo que calcula. [[n2]]Después cambias la implementación de Sampler por BackendSamplerV2, sin tocar el resto del código. [[n3]]Y por último escribes la función que calcula un valor esperado a partir de los conteos de Sampler, y compruebas que coincide con el de Estimator.",
@@ -590,7 +590,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "4.1",
+    "3.1",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda y lo verás cuando vuelvas a esta lección.",
@@ -614,7 +614,7 @@
   {
    "id": "cierre",
    "tag": [
-    "4.1",
+    "3.1",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]Una primitiva es el bloque básico de un nivel de abstracción. [[r2]]Estimator da valores esperados y Sampler, muestras. [[r3]]Hay clases base y varias implementaciones. [[r4]]Todas se usan igual; sus opciones cambian. En la próxima lección, sus entradas y salidas en detalle.",

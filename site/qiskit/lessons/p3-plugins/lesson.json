@@ -1,7 +1,7 @@
 {
  "id": "p3-plugins",
- "part": "Parte III · Transpilación",
- "section": "3.7",
+ "part": "Unidad 4 · Transpilar",
+ "section": "4.7",
  "title": "Plugins y transpilación con IA",
  "summary": "Los tres tipos de plugins del transpilador, cómo listarlos, usarlos y crearlos, y los pases de routing y síntesis con inteligencia artificial.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "tipos",
    "tag": [
-    "3.7",
+    "4.7",
     "Tres tipos de plugins"
    ],
    "say": "Qiskit permite que paquetes de terceros añadan funciones al transpilador mediante plugins. Hay tres tipos. [[etapa]]Un plugin de etapa ofrece un pass manager que sustituye a una de las seis etapas. [[unit]]Un plugin de síntesis unitaria recibe una matriz y devuelve un circuito. [[hl]]Y un plugin de síntesis de alto nivel sintetiza objetos abstractos, como funciones lineales u operadores de Clifford. [[eco]]Varios plugins de terceros forman parte del ecosistema de Qiskit; se instalan con pip, por ejemplo qiskit toqm para el routing.",
@@ -83,7 +83,7 @@
   {
    "id": "listar",
    "tag": [
-    "3.7",
+    "4.7",
     "Ver qué plugins hay"
    ],
    "say": "Para cada tipo hay una función que lista lo instalado. [[stage]]list stage plugins, con el nombre de la etapa. [[unit]]unitary synthesis plugin names: aquí aparecen aqc, clifford, gridsynth y sk, el algoritmo de Solovay Kitaev. [[hl]]Y high level synthesis plugin names, con el tipo de objeto: para Clifford, seis nombres, contando default.",
@@ -122,7 +122,7 @@
   {
    "id": "usar",
    "tag": [
-    "3.7",
+    "4.7",
     "Usar un plugin"
    ],
    "say": "Para usar un plugin de etapa, pasa su nombre en el argumento de esa etapa terminado en method: aquí, routing method igual a lookahead. [[unit]]Para síntesis unitaria, unitary synthesis method, y sus opciones en un diccionario libre, unitary synthesis plugin config. [[hls]]Para alto nivel, crea un HLSConfig con una lista de métodos por tipo de objeto: se prueban en orden hasta que uno funciona. Y pásalo como hls config.",
@@ -160,7 +160,7 @@
   {
    "id": "crear",
    "tag": [
-    "3.7",
+    "4.7",
     "Crear un plugin"
    ],
    "say": "Crear un plugin es una gran forma de compartir tu trabajo. Son dos pasos. [[sub]]Primero, una subclase de la clase abstracta adecuada: PassManagerStagePlugin, UnitarySynthesisPlugin o HighLevelSynthesisPlugin. [[ej]]Este plugin de layout implementa pass manager: ejecuta VF2Layout con más intentos cuanto mayor el nivel de optimización, y luego incrusta el layout en el dispositivo. [[ep]]Segundo, exponerlo como entry point en los metadatos del paquete, por ejemplo en pyproject punto toml. [[nombres]]Cada plugin necesita un nombre único; los nombres que usa Qiskit, como default o sk, están reservados.",
@@ -206,7 +206,7 @@
   {
    "id": "otros",
    "tag": [
-    "3.7",
+    "4.7",
     "Plugins de síntesis"
    ],
    "say": "Los otros dos tipos siguen el mismo esquema. [[unit]]Un UnitarySynthesisPlugin implementa run, que recibe una matriz de NumPy y devuelve un DAGCircuit, y declara qué admite con propiedades como supports basis gates o supports coupling map. [[hl]]Un HighLevelSynthesisPlugin implementa run, que recibe el objeto, por ejemplo un Clifford, y devuelve un QuantumCircuit; o None si no puede sintetizarlo, y entonces se prueba el siguiente método. [[ep]]Los entry points son qiskit punto unitary synthesis y qiskit punto synthesis; en este último, el nombre lleva el tipo de objeto, punto, el nombre del plugin.",
@@ -244,7 +244,7 @@
   {
    "id": "apuesta",
    "tag": [
-    "3.7",
+    "4.7",
     "Antes de ejecutar"
    ],
    "say": "Pongamos a prueba ese plugin. [[lista]]Lo pasamos a un HLSConfig seguido de greedy, un método que ya trae Qiskit: se prueban en orden, y el primero que devuelve un circuito gana. [[reto]]Y le damos un Clifford de cinco qubits. Apuesta: ¿quién lo sintetiza?",
@@ -303,7 +303,7 @@
   {
    "id": "respaldo",
    "tag": [
-    "3.7",
+    "4.7",
     "Un método de respaldo"
    ],
    "say": "Probamos con dos Clifford, de tres y de cinco qubits, y dos configuraciones. [[solo]]Con mi plugin solo, el de tres qubits se sintetiza, pero el de cinco queda como un Clifford sin tocar: mi plugin devolvió None. [[resp]]Con greedy detrás, se sintetizan los dos. [[res]]Si apostaste por greedy, acertaste: devolver None no es un error, es la señal de pasar al siguiente método.",
@@ -351,7 +351,7 @@
   {
    "id": "q1",
    "tag": [
-    "3.7",
+    "4.7",
     "Comprueba"
    ],
    "say": "Una pregunta sobre plugins.",
@@ -384,7 +384,7 @@
   {
    "id": "ia",
    "tag": [
-    "3.7",
+    "4.7",
     "Pases con inteligencia artificial"
    ],
    "say": "Por último, los pases de transpilación con inteligencia artificial, en beta. Sustituyen a pases tradicionales y suelen dar mejores resultados, con menos profundidad y menos CNOT, siendo mucho más rápidos que métodos exactos como los resolvedores de satisfacibilidad. Se ejecutan en tu computadora. [[inst]]Vienen en el paquete qiskit ibm transpiler. [[rout]]AIRouting hace layout y routing a la vez. Su layout mode puede ser keep, que respeta el layout anterior; improve, que lo usa como punto de partida; u optimize, el valor por defecto, que lo ignora. [[syn]]Y hay pases de síntesis: de Clifford y de funciones lineales hasta nueve qubits, de permutaciones de veintisiete, treinta y tres o sesenta y cinco qubits, y de redes de Pauli hasta seis.",
@@ -467,7 +467,7 @@
   {
    "id": "ia2",
    "tag": [
-    "3.7",
+    "4.7",
     "Usar los pases de IA"
    ],
    "say": "La forma típica: primero AIRouting, [[col]]luego un pase de recolección, que junta bloques del tipo adecuado y de tamaño admitido, [[syn]]y después el de síntesis, que los re-sintetiza. Por defecto solo reemplaza un bloque si el nuevo tiene menos CNOT. [[sub]]La síntesis necesita que el bloque esté sobre un subgrafo conexo del mapa de acoplamiento; si no, avisa y lo deja igual. [[hib]]También existe generate ai pass manager, que combina los pases heurísticos de Qiskit con los de IA, con un nivel para cada parte. [[hilos]]Y los pases usan varios hilos: se ajusta con max threads o la variable AI TRANSPILER MAX THREADS.",
@@ -516,7 +516,7 @@
   {
    "id": "q2",
    "tag": [
-    "3.7",
+    "4.7",
     "Comprueba"
    ],
    "say": "Sobre el modo de layout.",
@@ -549,7 +549,7 @@
   {
    "id": "mision",
    "tag": [
-    "3.7",
+    "4.7",
     "Tu turno"
    ],
    "say": "Ahora te toca. [[n1]]Primero, escribe las tres llamadas que listan los métodos que Qiskit ya trae para Clifford, unitarias y routing. [[n2]]Después, cambia el método de routing de una cuadrícula para quitar CNOT. [[n3]]Y por último, escribe tu propio plugin de síntesis de Clifford, que se rinde con más de tres qubits y deja pasar al siguiente método.",
@@ -631,7 +631,7 @@
   {
    "id": "proyecto",
    "tag": [
-    "3.7",
+    "4.7",
     "Tu proyecto: transpilar la cadena"
    ],
    "say": "Con esto termina la transpilación, y el hito tres de tu proyecto. [[circuito]]Ya tienes el circuito de varios pasos de Trotter de la cadena de espines. [[fez]]Transpílalo para FakeFez, [[niveles]]compara los cuatro niveles de optimización [[prof]]y mide cuánta profundidad añade cada paso. Esa profundidad decidirá cuántos pasos caben cuando ejecutes en hardware real.",
@@ -754,7 +754,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "3.7",
+    "4.7",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar con calma, conectadas con tu proyecto.",
@@ -778,10 +778,10 @@
   {
    "id": "cierre",
    "tag": [
-    "3.7",
+    "4.7",
     "Resumen"
    ],
-   "say": "Resumen. [[r1]]Hay plugins de etapa, de síntesis unitaria y de alto nivel. [[r2]]Se usan con los argumentos method y hls config. [[r3]]Se crean con una subclase y un entry point. [[r4]]Y los pases de IA mejoran routing y síntesis. Con esto termina la transpilación; en la Parte cuatro, las primitivas.",
+   "say": "Resumen. [[r1]]Hay plugins de etapa, de síntesis unitaria y de alto nivel. [[r2]]Se usan con los argumentos method y hls config. [[r3]]Se crean con una subclase y un entry point. [[r4]]Y los pases de IA mejoran routing y síntesis. Con esto termina la transpilación; en la siguiente unidad, las primitivas y la simulación.",
    "scene": [
     {
      "type": "list",

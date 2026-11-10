@@ -23,6 +23,7 @@ from lib import (
     reflect,
 )
 from parte2 import resumen
+from project import move_project_exercises
 
 # ------------------------------------------------------------------ 5.1 Cuenta y planes
 s_cierre, a_cierre = resumen(
@@ -1638,7 +1639,7 @@ print(job.result()[0].data.meas.get_bitstrings()[:10])""",
             ("", "Entradas y salidas"),
             """El PUB de Sampler tiene circuito, parámetros y disparos. La salida, un SamplerPubResult por PUB, con un BitArray por registro clásico.
              [[ruido]]En hardware, un GHZ de diez qubits ya no da solo ceros y unos: aparecen muchas cadenas con algún bit cambiado por el ruido. Por ejemplo, mil seiscientas ochenta veces todos ceros, mil cuatrocientas sesenta y siete todos unos, y el resto repartido.
-             [[post]]Todo el posprocesamiento con BitArray que viste en la Parte cuatro funciona igual.""",
+             [[post]]Todo el posprocesamiento con BitArray que viste en la unidad de simulación funciona igual.""",
             [
                 Hist(
                     [
@@ -2711,7 +2712,7 @@ requests.delete(f"{base}/sessions/{session_id}/close", headers=headers)""",
             "cierre",
             ("", "Resumen"),
             """Resumen. [[r1]]La clave API se cambia por un token portador de una hora. [[r2]]Cada petición lleva Authorization y Service CRN. [[r3]]Los trabajos se envían a jobs con program id, backend y PUBs en OpenQASM tres.
-             [[r4]]Y las sesiones y lotes se crean en sessions. Con esto termina la Parte cinco.""",
+             [[r4]]Y las sesiones y lotes se crean en sessions. Esta guía deja lista la ejecución remota para la sexta unidad.""",
             s_cierre,
             a_cierre,
         ),
@@ -2727,5 +2728,8 @@ requests.delete(f"{base}/sessions/{session_id}/close", headers=headers)""",
         "Exporta a OpenQASM 3 un circuito transpilado para un backend y envíalo como trabajo de Sampler por REST.",
     ],
 )
+
+
+move_project_exercises(rest, hola, "hito5")
 
 LESSONS = [cuenta, hola, opciones, estimator, sampler, executor, rest]

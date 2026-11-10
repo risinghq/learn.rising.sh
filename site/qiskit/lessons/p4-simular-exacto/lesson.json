@@ -1,7 +1,7 @@
 {
  "id": "p4-simular-exacto",
- "part": "Parte IV · Primitivas y simulación",
- "section": "4.3",
+ "part": "Unidad 3 · Simular",
+ "section": "3.3",
  "title": "Simulación exacta con las primitivas del SDK",
  "summary": "Cuándo y cómo simular: límites de memoria, StatevectorEstimator y StatevectorSampler, precisión, disparos y lectura de resultados.",
  "goals": [
@@ -13,7 +13,7 @@
   {
    "id": "por_que",
    "tag": [
-    "4.3",
+    "3.3",
     "Simular antes de ejecutar"
    ],
    "say": "Antes de enviar un programa a un QPU conviene probarlo en un simulador: es rápido y permite depurar. [[limite]]Pero simular cuesta exponencialmente en el número de qubits: más allá de unos cincuenta, en general no se puede. [[opciones]]Para circuitos grandes hay dos salidas: probar versiones más pequeñas, o modificarlos para que sean simulables, por ejemplo convirtiéndolos en circuitos de Clifford, que se simulan con miles de qubits. [[mem]]Una referencia: con cuatro gigabytes de RAM se simulan unos veintisiete qubits. Más memoria no da resultados más exactos; solo permite más qubits o más rapidez.",
@@ -80,7 +80,7 @@
   {
    "id": "estimator",
    "tag": [
-    "4.3",
+    "3.3",
     "StatevectorEstimator"
    ],
    "say": "Empecemos con Estimator. El circuito tiene un parámetro, theta, y no lleva mediciones. [[obs]]El observable es II más XX menos YY más ZZ. [[par]]Lo evaluamos con tres valores de theta: cero, pi sextos y pi medios. [[run]]run recibe un PUB con las tres cosas, y result devuelve los valores esperados: cuatro, tres coma setenta y tres, y dos. [[isa]]Las primitivas de referencia aceptan circuitos abstractos; transpilar es opcional, aunque puede ayudar a optimizar.",
@@ -140,7 +140,7 @@
   {
    "id": "q1",
    "tag": [
-    "4.3",
+    "3.3",
     "Comprueba"
    ],
    "say": "Verifica el primer valor.",
@@ -165,7 +165,7 @@
   {
    "id": "precision_pred",
    "tag": [
-    "4.3",
+    "3.3",
     "Antes de ejecutar"
    ],
    "say": "Por defecto, la Estimator de referencia hace un cálculo exacto. Pero un experimento real usa un número finito de disparos, y eso deja un error estadístico. [[exacto]]Los valores exactos eran cuatro, tres coma siete tres y dos. [[apuesta]]Apuesta: si pedimos una precisión de cero coma cero cinco, ¿cómo serán los tres valores?",
@@ -216,7 +216,7 @@
   {
    "id": "precision",
    "tag": [
-    "4.3",
+    "3.3",
     "Simular el ruido de disparo"
    ],
    "say": "[[prec]]Con el argumento precision introduces el ruido de muestreo que tendría un experimento real: el error estadístico por usar un número finito de disparos. [[pub]]La precisión se fija en run, para todos los PUBs o PUB por PUB. [[res]]Con cero coma cero cinco, los valores ya no son exactos: cuatro coma cero dos, tres coma setenta y siete, dos coma cero dos. Si apostaste por la opción b, acertaste: se parecen a los exactos, con errores de unas pocas centésimas.",
@@ -255,7 +255,7 @@
   {
    "id": "sampler",
    "tag": [
-    "4.3",
+    "3.3",
     "StatevectorSampler"
    ],
    "say": "Ahora Sampler. El circuito debe incluir mediciones. [[varios]]Puedes enviar varios PUBs a la vez y cada uno tiene su resultado. [[bits]]get bitstrings devuelve las cadenas en el orden en que se midieron; get counts, el recuento. [[shots]]Los disparos se fijan con shots para todos, [[pub]]o por PUB, como tercer elemento de la tupla. El None hace de marcador porque no hay parámetros.",
@@ -318,7 +318,7 @@
   {
    "id": "q2",
    "tag": [
-    "4.3",
+    "3.3",
     "Comprueba"
    ],
    "say": "Sobre los disparos.",
@@ -352,7 +352,7 @@
   {
    "id": "mision",
    "tag": [
-    "4.3",
+    "3.3",
     "Tu turno"
    ],
    "say": "Ahora te toca a ti. [[n1]]Primero apuestas los valores esperados exactos de la lección y los comparas con lo que calcula Estimator. [[n2]]Después ajustas la precisión para que el error de muestreo sea pequeño, pero no cero. [[n3]]Y por último escribes una función que estima una probabilidad con varias cantidades de disparos, un PUB por cada una, en una sola llamada a run.",
@@ -433,7 +433,7 @@
   {
    "id": "reflexion",
    "tag": [
-    "4.3",
+    "3.3",
     "Reflexiona"
    ],
    "say": "Dos preguntas para pensar. Escribe con tus palabras; lo que escribas se guarda en tu navegador.",
@@ -457,7 +457,7 @@
   {
    "id": "cierre",
    "tag": [
-    "4.3",
+    "3.3",
     "Resumen"
    ],
    "say": "Resumen. [[r1]]La simulación clásica tiene un límite exponencial. [[r2]]StatevectorEstimator calcula valores exactos, o con ruido de muestreo usando precision. [[r3]]StatevectorSampler muestrea, con disparos globales o por PUB. [[r4]]Y no hace falta transpilar para ellas. Para circuitos más grandes o con ruido, la próxima lección: Qiskit Aer.",
@@ -511,7 +511,7 @@
   "Compara el tiempo de `StatevectorSampler` para un GHZ de 10, 15 y 20 qubits.",
   "Guías originales: [simulate-with-qiskit-sdk-primitives](https://quantum.cloud.ibm.com/docs/en/guides/simulate-with-qiskit-sdk-primitives) · [debugging-tools](https://quantum.cloud.ibm.com/docs/en/guides/debugging-tools)"
  ],
- "next": "p4-aer-ruido",
+ "next": "p4-estabilizadores",
  "voice": "es-PE-AlexNeural",
  "rate": "-4%"
 }
