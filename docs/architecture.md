@@ -178,8 +178,7 @@ browser: it finishes every lesson and reads back the path page after each step.
 `mise run test:ui` runs `tests/shell_test.ts` (the path from the catalog to a
 lesson, the key migration, the streak and the offline launch),
 `tests/session_test.ts` (a drill session of every kind) and
-`tests/budget_test.ts`. `mise run test` does not run the walkthrough, because it
-takes over a minute beside the other suites.
+`tests/budget_test.ts`.
 
 ## A request
 
