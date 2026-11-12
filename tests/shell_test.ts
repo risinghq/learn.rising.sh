@@ -66,9 +66,12 @@ const stored = (page: Page, key: string) =>
 async function firstVisit(browser: Browser, base: string): Promise<void> {
   const { context, page, errors } = await visitor(browser, {});
   await page.goto(`${base}/`);
-  const primary = page.locator(".btn.primary");
-  same("filled buttons on the catalog", await primary.count(), 1);
-  await primary.tap();
+  same(
+    "no course is filled before one is started",
+    await page.locator(".btn.primary").count(),
+    0,
+  );
+  await page.locator(".course-card .btn").first().tap();
   await page.waitForURL(/lesson\.html/);
   same("a tap on the catalog reaches lesson 1", lessonId(page), qiskit[0].id);
   await showing(page, "#start-title", qiskit[0].title);
