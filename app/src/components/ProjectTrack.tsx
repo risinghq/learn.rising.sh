@@ -68,21 +68,18 @@ export function ProjectTrack({
           <h3>{current.title}</h3>
           <p>{current.desc}</p>
           {open ? (
-            <>
-              <a
-                className="btn primary"
-                href={lessonHref(slug, current.lesson)}
-              >
+            <div className="row">
+              <a className="btn" href={lessonHref(slug, current.lesson)}>
                 Continuar con el proyecto
               </a>
               <button
                 type="button"
-                className="btn"
+                className="btn quiet"
                 onClick={() => save(key, [...new Set([...done, current.n])])}
               >
                 Marcar como hecho
               </button>
-            </>
+            </div>
           ) : (
             <p className="muted">Se abre en la Unidad {current.part}.</p>
           )}

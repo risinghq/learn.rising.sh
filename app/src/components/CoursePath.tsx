@@ -1,12 +1,5 @@
-import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  Dumbbell,
-  Lock,
-  Play,
-} from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronDown, Dumbbell, Lock, Play } from "lucide-react";
+import { useId, useState } from "react";
 
 import type { CoursePage, Guide, Lesson, Part } from "../model.ts";
 import {
@@ -16,7 +9,7 @@ import {
   splitTitle,
   stateOf,
 } from "../path.ts";
-import { useDone, useReady } from "../store.ts";
+import { useDone } from "../store.ts";
 import { Layout } from "./Layout.tsx";
 import { ProjectTrack } from "./ProjectTrack.tsx";
 
@@ -107,7 +100,6 @@ function Node({
               <span className="summary">{lesson.summary}</span>
               <span className="go num">
                 {done.size ? "Continuar" : "Empezar"} · {lesson.minutes} min
-                <ArrowRight aria-hidden="true" />
               </span>
             </>
           ) : (
@@ -202,18 +194,6 @@ export function CoursePath({ page }: { page: CoursePage }) {
   const done = useDone(course.slug);
   const next = nextLesson(lessons, done);
   const finished = lessons.filter((l) => done.has(l.id)).length;
-  const ready = useReady();
-  const root = useRef<HTMLDivElement>(null);
-  const scrolled = useRef(false);
-
-  useEffect(() => {
-    if (!ready || scrolled.current) return;
-    scrolled.current = true;
-    const node = root.current?.querySelector("[data-current]");
-    if (node && node.getBoundingClientRect().bottom > innerHeight)
-      node.scrollIntoView({ block: "center" });
-  }, [ready]);
-
   const footer = (
     <>
       {course.source ? (
@@ -234,9 +214,21 @@ export function CoursePath({ page }: { page: CoursePage }) {
       drill={finished > 0 ? course.slug : undefined}
       footer={course.source || course.note ? footer : undefined}
     >
-      <div className="page" ref={root}>
-        <h1>{course.title}</h1>
-        <p className="outcome">{course.outcome}</p>
+      <div className="page">
+        <div className="intro">
+          <h1>{course.title}</h1>
+          <p className="outcome">{course.outcome}</p>
+          <a
+            className="btn primary"
+            href={
+              next
+                ? lessonHref(course.slug, next.id)
+                : `/${course.slug}/repaso/`
+            }
+          >
+            {!next ? "Repasar" : finished > 0 ? "Continuar" : "Empezar"}
+          </a>
+        </div>
         {project ? (
           <ProjectTrack slug={course.slug} project={project} parts={parts} />
         ) : null}

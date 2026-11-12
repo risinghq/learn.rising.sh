@@ -1,5 +1,3 @@
-import { ArrowRight } from "lucide-react";
-
 import type { CatalogPage } from "../model.ts";
 import { hours, lessonHref, minutesOf, nextLesson } from "../path.ts";
 import { useDoneByCourse, useHasProgress, useLastCourse } from "../store.ts";
@@ -12,12 +10,12 @@ function primaryOf(
   done: Record<string, ReadonlySet<string>>,
   last: string | null,
 ): string | undefined {
-  const open = entries.filter(
-    (e) => (done[e.course.slug]?.size ?? 0) < e.lessons.length,
-  );
-  const started = open.filter((e) => done[e.course.slug]?.size);
-  return (started.find((e) => e.course.slug === last) ?? started[0] ?? open[0])
-    ?.course.slug;
+  const started = entries.filter((e) => {
+    const finished = done[e.course.slug]?.size ?? 0;
+    return finished > 0 && finished < e.lessons.length;
+  });
+  return (started.find((e) => e.course.slug === last) ?? started[0])?.course
+    .slug;
 }
 
 function CourseCard({
@@ -57,7 +55,8 @@ function CourseCard({
         </div>
       ) : (
         <p className="meta num">
-          {lessons.length} lecciones · {hours(minutesOf(lessons))} h
+          <span>{lessons.length} lecciones</span>
+          <span>{hours(minutesOf(lessons))} h</span>
         </p>
       )}
       <a
@@ -65,7 +64,6 @@ function CourseCard({
         href={lessonHref(course.slug, next.id)}
       >
         {label}
-        <ArrowRight aria-hidden="true" />
         <span className="sr"> {course.title}</span>
       </a>
     </li>
