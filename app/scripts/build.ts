@@ -1,5 +1,6 @@
 // Builds the shell into site/: hashed assets, prerendered pages and a service worker.
 // Every route comes from site/courses.json, so adding a course requires no route code.
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -120,6 +121,18 @@ const assets = await readdir(join(dist, "assets"));
 // theme.css declares the face; the shell only preloads its main range.
 const mainFont = "/fonts/inter-latin-wght-normal.woff2";
 
+const revision =
+  process.env.GITHUB_SHA ??
+  (() => {
+    try {
+      return execFileSync("git", ["rev-parse", "HEAD"], {
+        encoding: "utf8",
+      }).trim();
+    } catch {
+      return undefined;
+    }
+  })();
+
 const pages = await readPages();
 const precache = new Set<string>([
   "/theme.css",
@@ -141,7 +154,7 @@ const rendered = pages.map(({ route, file, page }) => {
   // `<` in the data would end the script element early.
   const data = JSON.stringify(page).replaceAll("<", "\\u003c");
   const html = template
-    .replace(slot, headTags(page, mainFont))
+    .replace(slot, headTags(page, mainFont, revision))
     .replace(
       outlet,
       `<div id="root">${render(page)}</div>\n    <script id="page-data" type="application/json">${data}</script>`,

@@ -50,11 +50,18 @@ export function metaOf(page: Page): Meta {
 }
 
 /** Everything the template's head needs apart from the files Vite hashed. */
-export function headTags(page: Page, fontFile: string): string {
+export function headTags(
+  page: Page,
+  fontFile: string,
+  revision?: string,
+): string {
   const { title, description } = metaOf(page);
   return [
     `<title>${escape(title)}</title>`,
     `<meta name="description" content="${escape(description)}" />`,
+    ...(revision
+      ? [`<meta name="revision" content="${escape(revision)}" />`]
+      : []),
     `<meta name="theme-color" content="${LIGHT}" media="(prefers-color-scheme: light)" />`,
     `<meta name="theme-color" content="${DARK}" media="(prefers-color-scheme: dark)" />`,
     `<link rel="manifest" href="/manifest.webmanifest" />`,
