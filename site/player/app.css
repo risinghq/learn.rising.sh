@@ -22,7 +22,7 @@ body {
   flex: 1;
   min-width: 0;
   display: flex;
-  gap: var(--s3);
+  gap: var(--space-3);
   align-items: baseline;
   margin: 0;
   overflow: hidden;
@@ -34,26 +34,26 @@ body {
 .crumb h1 {
   margin: 0;
   overflow: hidden;
-  font-size: var(--t-md);
+  font-size: var(--text-md);
   line-height: 1.5;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .tools {
   display: flex;
-  gap: var(--s2);
+  gap: var(--space-2);
   align-items: center;
 }
 .tool {
   display: inline-flex;
   align-items: center;
-  min-height: 2.75rem;
-  padding: 0 var(--s3);
+  min-height: var(--control);
+  padding: 0 var(--space-3);
   border: 0;
   border-radius: var(--r2);
   background: transparent;
   color: var(--muted);
-  font-size: var(--t-md);
+  font-size: var(--text-md);
   white-space: nowrap;
   transition: var(--tr-control);
 }
@@ -61,7 +61,7 @@ label.tool {
   padding-right: 0;
 }
 select.tool {
-  padding: 0 var(--s1);
+  padding: 0 var(--space-1);
   cursor: pointer;
 }
 button.tool {
@@ -82,6 +82,14 @@ button.tool:where(:not(:disabled)):active {
 button.tool[aria-pressed="true"] {
   color: var(--acc-text);
 }
+.prefs-btn {
+  display: none;
+}
+@media (width > 40rem) {
+  .prefs {
+    display: contents;
+  }
+}
 
 .player {
   flex: 1;
@@ -94,7 +102,7 @@ button.tool[aria-pressed="true"] {
   /* The margin leaves room for the stage's ring. */
   overflow: clip;
   overflow-clip-margin: 2px;
-  margin: var(--s3) var(--s4) 0;
+  margin: var(--space-3) var(--space-4) 0;
 }
 #stage {
   position: absolute;
@@ -123,10 +131,10 @@ button.tool[aria-pressed="true"] {
 #caption {
   height: 4.35em;
   overflow: hidden;
-  margin: var(--s3) auto 0;
+  margin: var(--space-3) auto 0;
   max-width: 42rem;
-  width: calc(100% - 2 * var(--s4));
-  font-size: var(--t-lg);
+  width: calc(100% - 2 * var(--space-4));
+  font-size: var(--text-lg);
   line-height: 1.45;
 }
 #caption.off {
@@ -136,20 +144,20 @@ button.tool[aria-pressed="true"] {
 .controls {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--s4);
+  gap: var(--space-4);
   align-items: center;
-  padding: var(--s2) var(--s4) var(--s4);
+  padding: var(--space-2) var(--space-4) var(--space-4);
   max-width: 72rem;
   width: 100%;
   margin: 0 auto;
 }
 .btns {
   display: flex;
-  gap: var(--s2);
+  gap: var(--space-2);
 }
 .cbtn {
-  min-height: 2.75rem;
-  padding: 0 var(--s3);
+  min-height: var(--control);
+  padding: 0 var(--space-3);
   border: 1px solid var(--edge);
   border-radius: var(--r2);
   background: transparent;
@@ -178,11 +186,16 @@ button.tool[aria-pressed="true"] {
 .prog {
   min-width: 0;
 }
+.prog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 .stepno {
   display: block;
   margin: 0;
   color: var(--muted);
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
 #steps {
@@ -657,7 +670,7 @@ textarea.reflect {
   z-index: 20;
   display: grid;
   place-items: center;
-  padding: var(--s4);
+  padding: var(--space-4);
   background: color-mix(in oklch, var(--n1) 86%, transparent);
   overflow-y: auto;
   transition: opacity var(--d-base) var(--ease);
@@ -673,7 +686,7 @@ textarea.reflect {
   background: var(--card);
   border-radius: var(--r3);
   box-shadow: var(--shadow-overlay);
-  padding: var(--s8);
+  padding: var(--space-8);
   transition: transform var(--d-slow) var(--ease);
   @starting-style {
     transform: var(--enter);
@@ -682,11 +695,11 @@ textarea.reflect {
 .card .kicker {
   margin: 0;
   color: var(--muted);
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
 }
 .card h2 {
-  font-size: var(--t-2xl);
-  margin: var(--s2) 0 var(--s3);
+  font-size: var(--text-2xl);
+  margin: var(--space-2) 0 var(--space-3);
   letter-spacing: -0.01em;
 }
 .card p,
@@ -695,7 +708,7 @@ textarea.reflect {
 }
 .card ul {
   padding-left: 1.2em;
-  margin: var(--s3) 0 var(--s6);
+  margin: var(--space-3) 0 var(--space-6);
 }
 .card .meta,
 .card .score {
@@ -703,20 +716,20 @@ textarea.reflect {
 }
 .card .meta {
   color: var(--muted);
-  margin: 0 0 var(--s4);
+  margin: 0 0 var(--space-4);
 }
 .card .actions {
   display: flex;
-  gap: var(--s3);
+  gap: var(--space-3);
   flex-wrap: wrap;
-  margin-top: var(--s6);
+  margin-top: var(--space-6);
 }
 .cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.75rem;
-  padding: 0 var(--s6);
+  min-height: var(--control);
+  padding: 0 var(--space-6);
   border-radius: var(--r2);
   border: 1px solid var(--edge);
   background: transparent;
@@ -732,28 +745,28 @@ textarea.reflect {
   border-color: var(--acc);
 }
 @media (hover: hover) and (pointer: fine) {
-  .cta:where(:not(:disabled, [aria-disabled="true"])):hover {
+  .cta:not(:disabled):not([aria-disabled="true"]):hover {
     background: var(--bg2);
     color: var(--ink);
   }
-  .cta.primary:where(:not(:disabled, [aria-disabled="true"])):hover {
+  .cta.primary:not(:disabled):not([aria-disabled="true"]):hover {
     background: var(--acc-hover);
     border-color: var(--acc-hover);
     color: var(--acc-ink);
   }
 }
-.cta:where(:not(:disabled, [aria-disabled="true"])):active {
+.cta:not(:disabled):not([aria-disabled="true"]):active {
   background: var(--bg3);
   color: var(--ink);
   transform: var(--press);
 }
-.cta.primary:where(:not(:disabled, [aria-disabled="true"])):active {
+.cta.primary:not(:disabled):not([aria-disabled="true"]):active {
   background: var(--acc-active);
   border-color: var(--acc-active);
   color: var(--acc-ink);
 }
 .card .score {
-  margin: var(--s2) 0 var(--s3);
+  margin: var(--space-2) 0 var(--space-3);
 }
 .card a {
   text-underline-offset: 2px;
@@ -1082,15 +1095,15 @@ div#stage.work .mcard {
   padding: 16px 20px;
 }
 div#stage.work .mtitle {
-  font-size: var(--t-lg);
+  font-size: var(--text-lg);
   margin: 0;
 }
 .xnext {
   align-self: flex-end;
   height: auto;
-  min-height: 2.75rem;
-  padding: 0 var(--s6);
-  font-size: var(--t-md);
+  min-height: var(--control);
+  padding: 0 var(--space-6);
+  font-size: var(--text-md);
 }
 .xpanel {
   width: 100%;
@@ -1103,18 +1116,18 @@ div#stage.work .mtitle {
   gap: 6px 14px;
 }
 .xlevel {
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
   font-weight: var(--w-strong);
   color: var(--muted);
 }
 .xsolved {
   margin-left: auto;
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
   font-weight: var(--w-strong);
   color: var(--green);
 }
 .xprompt {
-  font-size: var(--t-lg);
+  font-size: var(--text-lg);
   line-height: 1.45;
   margin: 10px 0 14px;
   max-width: 44rem;
@@ -1147,7 +1160,7 @@ div#stage.work .mtitle {
   margin: 0;
   padding: 10px 12px 10px 18px;
   min-height: 9.5em;
-  font: var(--w-regular) var(--t-md) / 1.55 var(--mono);
+  font: var(--w-regular) var(--text-md) / 1.55 var(--mono);
   white-space: pre-wrap;
   color: var(--muted);
 }
@@ -1169,7 +1182,7 @@ div#stage.work .mtitle {
   flex-wrap: wrap;
   gap: 8px 12px;
   align-items: center;
-  font-size: var(--t-md);
+  font-size: var(--text-md);
 }
 .xgate a.xbtn {
   display: inline-flex;
@@ -1178,18 +1191,18 @@ div#stage.work .mtitle {
 }
 .xbtn {
   height: auto;
-  min-height: 2.75rem;
-  padding: 0 var(--s4);
-  font-size: var(--t-md);
+  min-height: var(--control);
+  padding: 0 var(--space-4);
+  font-size: var(--text-md);
 }
 .xkeys,
 div#stage.work .mhow {
   margin: 8px 0 0;
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
   color: var(--muted);
 }
 .xstatus {
-  font-size: var(--t-md);
+  font-size: var(--text-md);
   font-weight: var(--w-strong);
   min-height: 1.5em;
 }
@@ -1223,14 +1236,14 @@ div#stage.work .mhow {
 }
 .xout {
   margin-top: 8px;
-  font-size: var(--t-md);
+  font-size: var(--text-md);
 }
 .xout:empty {
   display: none;
 }
 .xlabel {
   margin: 8px 0 4px;
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
   color: var(--muted);
 }
 .xerr {
@@ -1238,7 +1251,7 @@ div#stage.work .mhow {
   padding: 8px 12px;
   border-left: 3px solid var(--bad);
   color: var(--red);
-  font: var(--w-regular) var(--t-sm) / 1.45 var(--mono);
+  font: var(--w-regular) var(--text-sm) / 1.45 var(--mono);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -1249,7 +1262,7 @@ div#stage.work .mhow {
   overflow: auto;
   border-radius: var(--r2);
   background: var(--bg2);
-  font: var(--w-regular) var(--t-sm) / 1.4 var(--mono);
+  font: var(--w-regular) var(--text-sm) / 1.4 var(--mono);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   color: var(--muted);
@@ -1291,7 +1304,7 @@ div#stage.work .mhow {
   margin-top: 8px;
   padding-left: 12px;
   border-left: 3px solid var(--teal);
-  font-size: var(--t-md);
+  font-size: var(--text-md);
   line-height: 1.45;
   transition:
     opacity var(--d-base) var(--ease),
@@ -1303,7 +1316,7 @@ div#stage.work .mhow {
 }
 .xhint b {
   display: block;
-  font-size: var(--t-sm);
+  font-size: var(--text-sm);
   color: var(--teal);
 }
 @media (pointer: coarse) {
@@ -1318,10 +1331,6 @@ div#stage.work .mhow {
   }
 }
 @media (max-width: 40rem) {
-  .top .in {
-    flex-wrap: wrap;
-    row-gap: 0;
-  }
   .crumb {
     position: absolute;
     width: 1px;
@@ -1329,45 +1338,83 @@ div#stage.work .mhow {
     overflow: hidden;
     clip-path: inset(50%);
   }
-  .top .sp,
   .brand {
     flex: 1;
-  }
-  .top .in::after {
-    content: "";
-    flex-basis: 100%;
-    order: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .tools {
     display: contents;
   }
-  .tools > :not([data-account], [data-theme-ctl]) {
-    order: 2;
+  .prefs-btn {
+    display: inline-flex;
+    anchor-name: --prefs;
+  }
+  .prefs:popover-open {
+    position: fixed;
+    inset: auto;
+    bottom: calc(var(--space-16) + var(--space-8));
+    right: var(--space-4);
+    position-anchor: --prefs;
+    bottom: calc(anchor(top) + var(--space-2));
+    right: anchor(right);
+    display: grid;
+    gap: var(--space-1);
+    min-width: 14rem;
+    margin: 0;
+    padding: var(--space-2);
+    border: 0;
+    border-radius: var(--r3);
+    background: var(--card);
+    box-shadow: var(--shadow-overlay);
+    color: var(--ink);
+    transform-origin: top right;
+    transition: opacity var(--d-base) var(--ease);
+    @starting-style {
+      opacity: 0;
+    }
+  }
+  .prefs .tool {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .prefs label.tool {
+    min-height: auto;
+    padding: var(--space-2) var(--space-3) 0;
+  }
+  .prefs select.tool {
+    padding: 0 var(--space-3);
+    background: var(--bg2);
   }
   .controls {
-    grid-template-columns: 1fr;
-    gap: var(--s2);
-    padding-bottom: var(--s3);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    padding-bottom: var(--space-3);
   }
   .btns {
     justify-content: space-between;
   }
+  .cbtn.play {
+    min-width: 0;
+  }
   /* At --t-md the four labels in Inter overflow a 390 px screen. */
   .cbtn {
-    flex: 1;
-    padding: 0 var(--s2);
-    font-size: var(--t-sm);
+    flex: 1 1 auto;
+    padding: 0 var(--space-1);
+    font-size: var(--text-sm);
   }
   #back5,
   #fwd5 {
     display: none;
   }
   #caption {
-    font-size: var(--t-md);
+    font-size: var(--text-md);
     height: 4.35em;
   }
   .card {
-    padding: var(--s6);
+    padding: var(--space-6);
   }
   div#stage.work .scene {
     padding: 44px 10px 20px;
@@ -1376,7 +1423,7 @@ div#stage.work .mhow {
     padding: 12px;
   }
   .xprompt {
-    font-size: var(--t-md);
+    font-size: var(--text-md);
   }
   .xbtn {
     flex: 1 1 40%;
