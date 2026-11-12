@@ -2,12 +2,12 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -32,3 +32,96 @@ jobs:
       - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5
       - run: mise run install
       - run: mise run test:integration
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [check, integration]
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      actions: read
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Stop when the D1 schema changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=1
+          while [ "$n" -lt "$GITHUB_RUN_ATTEMPT" ]; do
+            guard_failed="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$n/jobs" \
+              --jq '[.jobs[] | select(.name == "deploy") | .steps[] | select(.name == "Stop when the D1 schema changed") | .conclusion] | any(. == "failure")')"
+            if [ "$guard_failed" = "true" ]; then
+              echo "Attempt $n already stopped on this check; continuing."
+              exit 0
+            fi
+            n=$((n + 1))
+          done
+          host="$(sed -n 's/^const HOME_HOST = "\(.*\)";$/\1/p' runner/worker/cloudflare.config.ts)"
+          base="$(curl -fsSL "https://$host/" | sed -n 's/.*name="revision" content="\([0-9a-f]\{40\}\)".*/\1/p' | head -1 || true)"
+          for candidate in "$base" "${{ github.event.before }}"; do
+            if [ -n "$candidate" ] && [ "$candidate" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$candidate^{commit}" 2>/dev/null; then
+              base="$candidate"
+              break
+            fi
+          done
+          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "::error::The deployed commit is unknown, so the schema check cannot run. Check runner/worker/src/schema.sql against the live database (docs/deploy.md#update-a-live-database), then re-run this job."
+            exit 1
+          fi
+          changed="$(git diff --name-only "$base" HEAD -- runner/worker/src/schema.sql)"
+          if [ -n "$changed" ]; then
+            echo "::error::runner/worker/src/schema.sql changed since the deployed commit $base. Apply the schema to the live database (docs/deploy.md#update-a-live-database), then re-run this job."
+            exit 1
+          fi
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5
+      - name: Check the deploy secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=""
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::The deploy job needs these secrets on the production environment:$missing (docs/deploy.md)"
+            exit 1
+          fi
+      - run: mise run install
+      - name: Deploy to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: mise run deploy
+      - name: Smoke check
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          host="$(sed -n 's/^const HOME_HOST = "\(.*\)";$/\1/p' runner/worker/cloudflare.config.ts)"
+          slug="$(bun -e 'console.log((await Bun.file("site/courses.json").json())[0].slug)')"
+          if [ -z "$host" ] || [ -z "$slug" ]; then
+            echo "::error::Could not read HOME_HOST or a course slug"
+            exit 1
+          fi
+          for path in / "/$slug/"; do
+            live=""
+            for _ in 1 2 3 4 5 6; do
+              if html="$(curl -fsSL "https://$host$path")" && grep -q "$SHA" <<<"$html"; then
+                live=1
+                break
+              fi
+              sleep 10
+            done
+            if [ -z "$live" ]; then
+              echo "::error::https://$host$path does not serve revision $SHA"
+              exit 1
+            fi
+            echo "https://$host$path serves revision $SHA"
+          done
