@@ -156,19 +156,27 @@ async function checkProgress(page: Page): Promise<void> {
       .evaluate((bar: HTMLProgressElement) => [bar.value, bar.max]),
     [done.size, total],
   );
-  // Every lesson of the walkthrough is finished once, today, for 10 XP.
+  // The header shows the streak and the XP only once the learner has progress or an account.
   const stats = page.locator(".stats li");
-  const days = done.size ? 1 : 0;
-  await see(
-    "streak",
-    async () => (await stats.nth(0).textContent()) ?? "",
-    `Racha: ${days} ${days === 1 ? "día" : "días"}${days ? ". Empezar un repaso" : ""}`,
-  );
-  await see(
-    "xp",
-    async () => (await stats.nth(1).textContent()) ?? "",
-    `${done.size * 10} XP hoy`,
-  );
+  if (!done.size) {
+    await same(
+      "a visitor without progress sees no stats",
+      await stats.count(),
+      0,
+    );
+  } else {
+    await see(
+      "streak",
+      async () => (await stats.nth(0).textContent()) ?? "",
+      "Racha: 1 día. Empezar un repaso",
+    );
+    // Every lesson of the walkthrough is finished once, today, for 10 XP.
+    await see(
+      "xp",
+      async () => (await stats.nth(1).textContent()) ?? "",
+      `${done.size * 10} XP hoy`,
+    );
+  }
   const upcoming = lessons.find((l) => !done.has(l.id));
   const expected = course.parts.map((part) => ({
     count: `${part.lessons.filter((l) => done.has(l.id)).length}/${part.lessons.length}`,
