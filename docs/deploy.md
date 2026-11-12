@@ -289,6 +289,40 @@ look at **Billable Usage** and at the sum of `cost_nano_usd` in the Worker logs
 The 5 USD a month of the Workers Paid plan is not part of that budget: it is a
 fixed fee paid apart from what the Worker spends on Containers.
 
+## Deploy on every merge
+
+A push to `master` deploys by itself. The `deploy` job of
+[ci.yml](../.github/workflows/ci.yml) waits for `check` and `integration`, runs
+`mise run install` and `mise run deploy`, then fetches `/` and a course page of
+`<host>` and fails unless both answer 200 and carry the pushed commit in their
+`revision` meta tag. The build stamps that tag with the commit it builds, from
+`GITHUB_SHA` in the job or `git HEAD` on your machine; a build without either
+has no tag. If `runner/worker/src/schema.sql` changed since the deployed commit,
+the job stops before deploying: apply the new schema to the live database
+([below](#update-a-live-database)) and re-run the job. A re-run skips the schema
+check when an earlier attempt of the same push failed on it; after any other
+failure the check runs again.
+
+The job reads two secrets from the repository's `production` environment
+(**Settings** > **Environments** > **production**):
+
+- `CLOUDFLARE_ACCOUNT_ID` is the id of your account, on the account's home page
+  in the dashboard.
+- `CLOUDFLARE_API_TOKEN` is a token you create under **My Profile** > **API
+  Tokens**. Start from the **Edit Cloudflare Workers** template, add
+  `Containers: Edit` and `D1: Edit`, and under **Resources** include only your
+  account and, under **Zone Resources**, only the zone of `<host>`.
+
+The template's `Workers Scripts: Edit` uploads the Worker, its assets, bindings
+and cron triggers; `Containers: Edit` deploys the `duo-runner` image; `D1: Edit`
+resolves the `qiskit-guides` database of the binding; `Workers Routes: Edit` on
+the zone attaches `<host>`; `Account Settings: Read` identifies the account.
+
+A fork deploys by hand with `mise run deploy`, and so does a change to a secret,
+which `--secrets-file` uploads ([step 7](#7-deploy) and
+[step 8](#8-rotate-a-secret)). No secret goes in the repository or in the
+workflow file.
+
 ## Update a live database
 
 A change to the schema is additive, so the live database keeps its data. The
