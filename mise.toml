@@ -101,8 +101,9 @@ run = [
 ]
 
 [tasks."test:walkthrough"]
-description = "Play one learner through the whole Qiskit course in a browser, reloading and resuming, and read the path page after every step. Not part of test: it takes 25 s on an idle host and over a minute on a busy one."
+description = "Play one learner through the whole Qiskit course in a browser, reloading and resuming, and read the path page after every step"
 depends = ["generate:scripts", "generate:app"]
+wait_for = ["test:py"]
 run = "bun tests/walkthrough_test.ts"
 
 [tasks."test:tools"]
@@ -128,7 +129,7 @@ run = "uv run pytest tests/runner_test.py"
 
 [tasks.test]
 description = "Run every test that needs no service, network or secret"
-depends = ["test:py", "test:exercises","test:ui", "test:tools", "test:worker", "test:lessons"]
+depends = ["test:py", "test:exercises","test:ui", "test:tools", "test:worker", "test:lessons", "test:walkthrough"]
 
 [tasks."generate:lessons"]
 description = "Rewrite site/<course>/lessons/*/lesson.json and site/<course>/course.json of every course from lessons_src"
