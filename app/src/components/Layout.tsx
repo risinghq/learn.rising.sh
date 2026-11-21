@@ -121,7 +121,7 @@ export function Layout({
               </a>
             ) : (
               <a className="brand" href="/">
-                Rising
+                rising.sh
               </a>
             )}
           </div>

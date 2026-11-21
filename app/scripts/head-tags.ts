@@ -20,29 +20,29 @@ export function metaOf(page: Page): Meta {
   switch (page.kind) {
     case "catalog":
       return {
-        title: "Rising",
+        title: "Cursos · rising.sh",
         description:
           "Cursos cortos para aprender haciendo, con lecciones narradas y ejercicios que ejecutas en la página.",
       };
     case "course":
       return {
-        title: `${page.course.title} · Rising`,
+        title: `${page.course.title} · rising.sh`,
         description: page.course.outcome,
       };
     case "session":
       return {
-        title: `Repaso de ${page.course.title} · Rising`,
+        title: `Repaso de ${page.course.title} · rising.sh`,
         description: `Un repaso corto de ${page.course.title}, con ejercicios que respondes con un toque.`,
       };
     case "friends":
       return {
-        title: "Amigos · Rising",
+        title: "Amigos · rising.sh",
         description:
           "Compara tu semana con la de tus amigos y recibe un aviso si tu racha está en juego.",
       };
     case "privacy":
       return {
-        title: "Privacidad · Rising",
+        title: "Privacidad · rising.sh",
         description:
           "Qué se guarda de tu progreso, cuánto tiempo y cómo borrarlo.",
       };
@@ -64,6 +64,14 @@ export function headTags(
       : []),
     `<meta name="theme-color" content="${LIGHT}" media="(prefers-color-scheme: light)" />`,
     `<meta name="theme-color" content="${DARK}" media="(prefers-color-scheme: dark)" />`,
+    // One card for every page; crawlers need its URL absolute.
+    `<meta property="og:site_name" content="rising.sh" />`,
+    `<meta property="og:title" content="${escape(title)}" />`,
+    `<meta property="og:description" content="${escape(description)}" />`,
+    `<meta property="og:image" content="https://learn.rising.sh/og.png" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
     `<link rel="manifest" href="/manifest.webmanifest" />`,
     `<link rel="icon" href="/icons/icon-192.png" type="image/png" />`,
     `<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />`,

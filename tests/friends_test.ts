@@ -269,7 +269,7 @@ async function main(): Promise<void> {
     await b.page.goto(link);
     await b.page
       .getByRole("heading", {
-        name: "Te invitaron a Rising. Entra para aceptar",
+        name: "Te invitaron a rising.sh. Entra para aceptar",
       })
       .waitFor();
     await b.page.getByRole("link", { name: "Entrar con GitHub" }).click();

@@ -1,4 +1,4 @@
-"""The HTTP calls to the Rising site. The site answers errors as {"error", "reason"}."""
+"""The HTTP calls to learn.rising.sh. The site answers errors as {"error", "reason"}."""
 
 import json
 import urllib.error

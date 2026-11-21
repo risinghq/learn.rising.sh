@@ -1,7 +1,7 @@
 [project]
 name = "rising"
 version = "0.1.0"
-description = "Write Rising exercises in your editor, grade them on your machine and earn XP"
+description = "Write rising.sh exercises in your editor, grade them on your machine and earn XP"
 requires-python = ">=3.15"
 dependencies = ["platformdirs", "qgcheck[courses]"]
 

@@ -1,6 +1,6 @@
 {
-  "name": "Rising",
-  "short_name": "Rising",
+  "name": "rising.sh",
+  "short_name": "rising.sh",
   "description": "Cursos cortos para aprender haciendo.",
   "lang": "es",
   "start_url": "/",
