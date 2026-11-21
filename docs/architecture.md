@@ -1,8 +1,8 @@
 # Architecture
 
-Rising is a static site (`site/`) with a course catalog and a Worker, `duo`,
-that serves what the courses share: accounts, progress and code execution. This
-document says what each folder holds and where a request goes.
+learn.rising.sh is a static site (`site/`) with a course catalog and a Worker,
+`duo`, that serves what the courses share: accounts, progress and code
+execution. This document says what each folder holds and where a request goes.
 
 ## Folders
 

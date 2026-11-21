@@ -1,10 +1,10 @@
 <a href="https://rising.sh"><picture><source media="(prefers-color-scheme: dark)" srcset="https://rising.sh/brand/rising-sh-dark.svg"><img alt="rising.sh" src="https://rising.sh/brand/rising-sh-light.svg" height="28"></picture></a>
 
-# Rising
+# learn.rising.sh
 
-Rising is a set of courses where you learn by writing and running code. Lessons
-are narrated and animated, with exercises you run on the page, and your progress
-is kept per account.
+learn.rising.sh is a set of courses where you learn by writing and running code.
+Lessons are narrated and animated, with exercises you run on the page, and your
+progress is kept per account.
 
 There are two courses, both in Spanish: **Qiskit**, on quantum computing, with
 project exercises that grow part by part, and **Física computacional**, on

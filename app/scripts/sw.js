@@ -113,7 +113,7 @@ self.addEventListener("push", (event) => {
     note = event.data?.json() ?? {};
   } catch {}
   event.waitUntil(
-    self.registration.showNotification(note.title ?? "Rising", {
+    self.registration.showNotification(note.title ?? "rising.sh", {
       body: note.body,
       icon: "/icons/icon-192.png",
       tag: "racha",

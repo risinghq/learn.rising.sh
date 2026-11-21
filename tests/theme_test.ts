@@ -224,7 +224,7 @@ async function visit(
   for (const [key, brands] of shell) {
     for (const brand of brands) {
       report.check(
-        brand[0] === null || brand[0] === "Rising",
+        brand[0] === null || brand[0] === "rising.sh",
         `shell brand ${JSON.stringify(brand[0])}`,
       );
       report.check(

@@ -36,8 +36,8 @@ export function Reminder({ quiet = false }: { quiet?: boolean }) {
   if (state === "unsupported")
     return quiet ? null : (
       <p className="muted">
-        Este navegador no admite avisos. En iPhone, añade Rising a la pantalla
-        de inicio para activarlos.
+        Este navegador no admite avisos. En iPhone, añade rising.sh a la
+        pantalla de inicio para activarlos.
       </p>
     );
   if (state === "blocked")

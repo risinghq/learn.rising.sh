@@ -126,8 +126,8 @@ function Invite({ solo }: { solo: boolean }) {
     if (!link) return;
     navigator
       .share({
-        title: "Rising",
-        text: "Practica conmigo en Rising. Acepta mi invitación:",
+        title: "rising.sh",
+        text: "Practica conmigo en rising.sh. Acepta mi invitación:",
         url: link.url,
       })
       .then(
@@ -300,7 +300,7 @@ function Accept({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   if (!signedIn)
-    return <SignIn>Te invitaron a Rising. Entra para aceptar</SignIn>;
+    return <SignIn>Te invitaron a rising.sh. Entra para aceptar</SignIn>;
   const accept = async () => {
     setBusy(true);
     setError("");
@@ -319,7 +319,7 @@ function Accept({
   };
   return (
     <section className="card" aria-labelledby="t-accept">
-      <h2 id="t-accept">Te invitaron a Rising</h2>
+      <h2 id="t-accept">Te invitaron a rising.sh</h2>
       <p className="muted">
         Si aceptas, se ven en el tablero de la semana y en la lista de amigos.
       </p>

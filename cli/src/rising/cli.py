@@ -152,7 +152,7 @@ def status(_: argparse.Namespace) -> int:
 
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(
-        prog="rising", description="Ejercicios de Rising en tu terminal."
+        prog="rising", description="Ejercicios de rising.sh en tu terminal."
     )
     commands = root.add_subparsers(dest="command", required=True)
     one = commands.add_parser("login", help="inicia sesión con el navegador")
