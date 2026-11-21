@@ -1,3 +1,5 @@
+<a href="https://rising.sh"><picture><source media="(prefers-color-scheme: dark)" srcset="https://rising.sh/brand/rising-sh-dark.svg"><img alt="rising.sh" src="https://rising.sh/brand/rising-sh-light.svg" height="28"></picture></a>
+
 # Rising
 
 Rising is a set of courses where you learn by writing and running code. Lessons
