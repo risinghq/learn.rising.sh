@@ -20,6 +20,14 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/uv
+            ~/.cache/ms-playwright
+            ~/.bun/install/cache
+          key: check-${{ runner.os }}-${{ hashFiles('uv.lock', '**/bun.lock') }}
+          restore-keys: check-${{ runner.os }}-
       - run: mise run install
       - run: mise run check
 
@@ -30,7 +38,12 @@ jobs:
         with:
           persist-credentials: false
       - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5
-      - run: mise run install
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/uv
+          key: integration-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          restore-keys: integration-${{ runner.os }}-
+      - run: uv sync --locked --compile-bytecode
       - run: mise run test:integration
 
   deploy:
