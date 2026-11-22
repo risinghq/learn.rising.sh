@@ -10,6 +10,7 @@ import ctypes
 import os
 import platform
 import resource
+import signal
 import struct
 import sys
 
@@ -93,6 +94,10 @@ def main() -> None:
     os.setgroups([])
     os.setgid(uid)
     os.setuid(uid)
+    # The server ignores SIGCHLD so it reaps the job's orphans itself. The
+    # disposition survives the exec, so restore it: the job reaps its own
+    # children (the checker's learner process, a learner's subprocess).
+    signal.signal(signal.SIGCHLD, signal.SIG_DFL)
     install_seccomp()
     os.execv(cmd[0], cmd)
 

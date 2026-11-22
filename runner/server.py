@@ -7,9 +7,12 @@ If no slot is free, it answers 503.
 The `error` texts of the replies are in Spanish: the site shows them to the learner.
 """
 
+import contextlib
+import ctypes
 import json
 import os
 import queue
+import signal
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -33,6 +36,21 @@ LIMITS = sandbox.Limits(
 FREE_SLOTS: queue.Queue[int] = queue.Queue()
 for _slot in range(int(os.environ.get("QG_JOBS", "1"))):
     FREE_SLOTS.put(_slot)
+
+PR_SET_CHILD_SUBREAPER = 36
+
+
+def reap_orphans() -> None:
+    """Reap the processes a job leaves behind from this process, not from the init.
+
+    Without the subreaper flag they orphan to PID 1 (tini), which reaps them when
+    it is scheduled. Under load a killed process kept a slot of its uid for seconds,
+    and the next job on that uid forked or exec'd into RLIMIT_NPROC with EAGAIN.
+    Here the kernel frees the slot the moment the process dies.
+    """
+    with contextlib.suppress(OSError):
+        ctypes.CDLL(None).prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0)
+    signal.signal(signal.SIGCHLD, signal.SIG_IGN)
 
 
 class BadRequest(Exception):
@@ -138,6 +156,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    reap_orphans()
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
 
 
