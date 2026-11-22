@@ -107,8 +107,11 @@ server.
 ## Slots
 
 The server runs as many jobs at once as it has slots (`QG_JOBS`, default 1).
-Slot `n` always uses uid `20000 + n`. A job runs with that uid, with no
-capabilities and with `no_new_privs`.
+Slot `n` always uses uid `QG_UID_BASE + n` (`QG_UID_BASE` is 20000 when unset).
+A job runs with that uid, with no capabilities and with `no_new_privs`. Each
+instance must own its base: `RLIMIT_NPROC` counts the tasks of a real uid in the
+whole user namespace, which containers on one host share, so two instances on
+the same base would spend each other's process limit.
 
 The numbers of the free slots are in the `FREE_SLOTS` queue of `server.py`. A
 valid request takes a slot without waiting: if there is none, it answers 503.
@@ -117,6 +120,10 @@ processes of that uid and deletes its directory and whatever it left in
 `/scratch`, `/tmp`, `/var/tmp` and `/dev/shm`. That cleanup isolates a job from
 the previous one, because the uid is reused. Cloudflare instances share nothing:
 each has its own slots.
+
+The server is marked a child subreaper and ignores `SIGCHLD`, so a process a job
+detaches orphans to the server, and the kernel frees its slot of the uid the
+moment it dies instead of waiting on the container's init to reap it.
 
 ## The job
 

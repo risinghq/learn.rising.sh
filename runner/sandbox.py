@@ -25,7 +25,10 @@ from qgcheck.runner import REPORT_CAP, drain, job_env
 
 APP = Path(__file__).resolve().parent
 SCRATCH_ROOT = Path(os.environ.get("QG_SCRATCH", "/scratch"))
-UID_BASE = 20000
+# RLIMIT_NPROC counts tasks per real uid in the whole user namespace, and the
+# host shares it with every container. Each instance must own a uid range, or
+# the jobs of different runners eat each other's process limit with EAGAIN.
+UID_BASE = int(os.environ.get("QG_UID_BASE", "20000"))
 SHARED_DIRS = ("/scratch", "/tmp", "/var/tmp", "/dev/shm")
 PAGE = os.sysconf("SC_PAGE_SIZE")
 POLL_S = 0.02
@@ -35,6 +38,9 @@ MAX_ENTRIES = 5000
 # The time limit covers the learner's code: the interpreter start and the library imports
 # the job makes for it get their own bound, or a slow machine would charge them to the learner.
 STARTUP_S = 30.0
+# `kill_uid` keeps killing until the uid is empty; the deadline only covers a
+# task the kernel cannot finish. A leftover breaks the next job on the slot.
+DEADLINE_S = 60.0
 
 
 @dataclass(frozen=True)
@@ -106,8 +112,14 @@ def _pss_bytes(uid: int) -> int:
 
 
 def kill_uid(uid: int) -> None:
-    """Kill all processes of `uid`, including those that called setsid."""
-    deadline = time.monotonic() + 3
+    """Kill all processes of `uid`, including those that called setsid.
+
+    Keeps killing until the uid is empty: a leftover process, live or dying,
+    keeps a slot of RLIMIT_NPROC, and giving up early leaves the next job on
+    this uid to fork or exec into the limit with EAGAIN. `DEADLINE_S` is a
+    last resort for a task stuck in the kernel; it bounds nothing real.
+    """
+    deadline = time.monotonic() + DEADLINE_S
     while time.monotonic() < deadline:
         pids = list(_pids_of(uid))
         if not pids:

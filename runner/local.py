@@ -94,6 +94,7 @@ class Container:
     name: str
     url: str
     runtime: str
+    uid_base: int = 20000
 
     def stop(self) -> None:
         docker("rm", "-f", self.name, check=False)
@@ -126,6 +127,10 @@ def start(
         network = INTERNAL_NET
         internal_network()
     name = f"qg-runner-{uuid.uuid4().hex[:8]}"
+    # Jobs run as uid base+slot, and RLIMIT_NPROC counts per uid across the user
+    # namespace all the containers share. Give each instance its own base, or the
+    # jobs of parallel containers eat each other's process limit with EAGAIN.
+    uid_base = 20000 + (int(name[10:], 16) % 40000 + 1) * 10
     cap_args = [a for c in caps for a in ("--cap-add", c)]
     docker(
         "run",
@@ -152,12 +157,14 @@ def start(
         "256",
         "--cap-drop",
         "ALL",
+        "--env",
+        f"QG_UID_BASE={uid_base}",
         *cap_args,
         "--security-opt",
         "no-new-privileges",
         image,
     )
-    container = Container(name, "", runtime)
+    container = Container(name, "", runtime, uid_base)
     try:
         ip = docker(
             "inspect", "--format", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", name
