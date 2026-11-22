@@ -12,11 +12,13 @@ code runs before the block, without being shown: it gives a fragment its context
 import contextlib
 import io
 import json
+import multiprocessing
 import os
 import sys
 import tempfile
 import traceback
 from collections.abc import Iterator
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -78,23 +80,38 @@ def verify_lesson(path: Path, show: bool) -> tuple[int, int]:
     return n, fails
 
 
+def verify_alone(path: Path, show: bool) -> tuple[int, int, str]:
+    """Run one lesson in its own directory and return (blocks run, failures, what it printed)."""
+    out = io.StringIO()
+    with (
+        tempfile.TemporaryDirectory(prefix="verify-") as work,
+        contextlib.chdir(work),
+        contextlib.redirect_stdout(out),
+    ):
+        n, fails = verify_lesson(path, show)
+    return n, fails, out.getvalue()
+
+
 def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding="utf-8")
-    import matplotlib
-
-    matplotlib.use("Agg")
+    os.environ["MPLBACKEND"] = "Agg"
     every = lessons()
     ids = [a for a in sys.argv[1:] if not a.startswith("-")] or list(every)
     show = "-v" in sys.argv or "--show" in sys.argv
     fails = 0
-    os.chdir(
-        tempfile.mkdtemp(prefix="verify-")
-    )  # Isolates the temporary files that the examples create.
-    for lid in ids:
-        n, f = verify_lesson(every[lid], show)
-        fails += f
-        print(f"{lid}: {n} blocks run")
+    cpus = os.process_cpu_count() or 1
+    workers = max(1, min(cpus, len(ids)))
+    for name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "RAYON_NUM_THREADS"):
+        os.environ.setdefault(name, str(max(1, cpus // workers)))
+    fresh = multiprocessing.get_context("forkserver")
+    fresh.set_forkserver_preload(["matplotlib", "qiskit"])
+    with ProcessPoolExecutor(max_workers=workers, mp_context=fresh, max_tasks_per_child=1) as pool:
+        runs = [pool.submit(verify_alone, every[lid], show) for lid in ids]
+        for lid, run in zip(ids, runs, strict=True):
+            n, f, printed = run.result()
+            fails += f
+            print(f"{printed}{lid}: {n} blocks run", flush=True)
     print("failures:", fails)
     sys.exit(1 if fails else 0)
 
