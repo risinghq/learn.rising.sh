@@ -22,6 +22,7 @@ dependencies = [
 dev = [
     "mypy>=2.4.1",
     "pytest>=9.2.0",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.17.3",
 ]
 tools = [
@@ -41,6 +42,9 @@ runner = [
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+pytest-xdist = { git = "https://github.com/pytest-dev/pytest-xdist", rev = "9243bc1c844e27e2e8141f6223b33f12d9d5d39e" }
 
 [tool.ruff]
 line-length = 100

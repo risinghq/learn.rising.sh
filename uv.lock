@@ -396,6 +396,15 @@ wheels = [
 ]
 
 [[package]]
+name = "execnet"
+version = "2.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/89/780e11f9588d9e7128a3f87788354c7946a9cbb1401ad38a48c4db9a4f07/execnet-2.1.2.tar.gz", hash = "sha256:63d83bfdd9a23e35b9c6a3261412324f964c2ec8dcd8d3c6916ee9373e0befcd", size = 166622, upload-time = "2025-11-12T09:56:37.75Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/84/02fc1827e8cdded4aa65baef11296a9bbe595c474f0d6d758af082d849fd/execnet-2.1.2-py3-none-any.whl", hash = "sha256:67fba928dd5a544b783f6056f449e5e3931a5c378b128bc18501f7ea79e296ec", size = 40708, upload-time = "2025-11-12T09:56:36.333Z" },
+]
+
+[[package]]
 name = "executing"
 version = "2.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1343,6 +1352,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-xdist"
+version = "3.8.1.dev117+g9243bc1c8"
+source = { git = "https://github.com/pytest-dev/pytest-xdist?rev=9243bc1c844e27e2e8141f6223b33f12d9d5d39e#9243bc1c844e27e2e8141f6223b33f12d9d5d39e" }
+dependencies = [
+    { name = "execnet" },
+    { name = "pytest" },
+]
+
+[[package]]
 name = "python-dateutil"
 version = "3.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1464,6 +1482,7 @@ dependencies = [
 dev = [
     { name = "mypy" },
     { name = "pytest" },
+    { name = "pytest-xdist" },
     { name = "ruff" },
 ]
 runner = [
@@ -1499,6 +1518,7 @@ requires-dist = [
 dev = [
     { name = "mypy", specifier = ">=2.4.1" },
     { name = "pytest", specifier = ">=9.2.0" },
+    { name = "pytest-xdist", git = "https://github.com/pytest-dev/pytest-xdist?rev=9243bc1c844e27e2e8141f6223b33f12d9d5d39e" },
     { name = "ruff", specifier = ">=0.17.3" },
 ]
 runner = [
