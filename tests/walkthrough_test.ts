@@ -113,6 +113,10 @@ async function see(
 
 const text = (locator: Locator) => () => locator.innerText({ timeout: 1_000 });
 
+async function follow(page: Page, link: Locator): Promise<void> {
+  await Promise.all([page.waitForEvent("load"), link.click()]);
+}
+
 async function same<T>(what: string, got: T, expected: T): Promise<void> {
   if (JSON.stringify(got) !== JSON.stringify(expected)) {
     throw new Error(
@@ -386,7 +390,7 @@ async function main(): Promise<void> {
     });
 
     await step("start the first lesson from the path page", async () => {
-      await page.locator("a[data-current]").click();
+      await follow(page, page.locator("a[data-current]"));
       await see(
         "lesson title",
         text(page.locator("#start-title")),
@@ -463,7 +467,7 @@ async function main(): Promise<void> {
     });
 
     await step("the path shows one lesson done", async () => {
-      await page.locator("#end a.cta", { hasText: "Índice" }).click();
+      await follow(page, page.locator("#end a.cta", { hasText: "Índice" }));
       await see("progress line", text(page.locator(METER)), /lecciones$/);
       await checkHome(page);
     });
@@ -475,9 +479,10 @@ async function main(): Promise<void> {
         text(page.locator(".hcur p").first()),
         `Hito 1 de ${milestones.length} · Unidad ${milestone.part}`,
       );
-      await page
-        .locator(".hcur a.btn", { hasText: "Continuar con el proyecto" })
-        .click();
+      await follow(
+        page,
+        page.locator(".hcur a.btn", { hasText: "Continuar con el proyecto" }),
+      );
       await see(
         "milestone lesson",
         text(page.locator("#start-title")),
@@ -522,7 +527,7 @@ async function main(): Promise<void> {
     });
 
     await step("leave the second lesson half way and come back", async () => {
-      await page.locator("a[data-current]").click();
+      await follow(page, page.locator("a[data-current]"));
       await see(
         "lesson title",
         text(page.locator("#start-title")),
@@ -532,7 +537,7 @@ async function main(): Promise<void> {
       for (let n = 2; n <= 7; n++) await next(page, n, secondLength);
       await openHome(page, base);
       await checkHome(page);
-      await page.locator("a[data-current]").click();
+      await follow(page, page.locator("a[data-current]"));
       await see(
         "resume button",
         text(page.locator("#resume")),
@@ -566,14 +571,14 @@ async function main(): Promise<void> {
     await step(
       "the path shows two lessons done and the review card",
       async () => {
-        await page.locator("#end a.cta", { hasText: "Índice" }).click();
+        await follow(page, page.locator("#end a.cta", { hasText: "Índice" }));
         await see("progress line", text(page.locator(METER)), /lecciones$/);
         await checkHome(page);
       },
     );
 
     await step("finish every other lesson in order", async () => {
-      await page.locator("a[data-current]").click();
+      await follow(page, page.locator("a[data-current]"));
       for (const [k, lesson] of lessons.slice(2).entries()) {
         const total = lessonOf(lesson.id).beats.length;
         await see(
@@ -587,12 +592,13 @@ async function main(): Promise<void> {
         await checkStep(page, total, total);
         await playToEnd(page, total, total);
         await finishLesson(page, lesson.id);
-        if (k < lessons.length - 3) await page.locator("#end-next").click();
+        if (k < lessons.length - 3)
+          await follow(page, page.locator("#end-next"));
       }
     });
 
     await step("the path shows the whole course done", async () => {
-      await page.locator("#end a.cta", { hasText: "Índice" }).click();
+      await follow(page, page.locator("#end a.cta", { hasText: "Índice" }));
       await see("progress line", text(page.locator(METER)), /lecciones$/);
       await checkHome(page);
       await same(

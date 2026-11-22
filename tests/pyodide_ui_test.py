@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from playwright.sync_api import Browser, Locator, Page, Route, sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -192,12 +193,13 @@ def lazy_load(browser: Browser, base: str) -> None:
         not served,
         f"lazy: the home page, the course pages, a Qiskit exercise and an idle physics editor download nothing from Pyodide ({served[:3]})",
     )
-    panel.locator(".cm-content").click()
-    deadline = 20
-    while not served and deadline:
-        page.wait_for_timeout(250)
-        deadline -= 1
-    check(bool(served), "lazy: reaching the editor of a physics exercise starts the download")
+    try:
+        with context.expect_event("request", lambda r: "/vendor/pyodide/" in r.url, timeout=30_000):
+            panel.locator(".cm-content").click()
+        started = True
+    except PlaywrightTimeout:
+        started = False
+    check(started, "lazy: reaching the editor of a physics exercise starts the download")
     context.close()
 
 
