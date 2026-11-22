@@ -29,6 +29,7 @@ from qgcheck.runner import parse_report  # noqa: E402
 
 EXERCISES = ROOT / "exercises"
 EXERCISE_IDS = spec.all_ids()
+UNTIMED = 300
 
 
 @pytest.fixture(scope="module")
@@ -144,31 +145,21 @@ def test_image_has_qiskit_aer_and_runtime(runner: local.Container) -> None:
 
 
 @pytest.mark.parametrize("exercise", EXERCISE_IDS)
-def test_check_passes_the_solution(runner: local.Container, exercise: str) -> None:
-    out = check(runner, exercise, (EXERCISES / exercise / "solution.py").read_text())
-    assert out["passed"], out
-    assert out["tests"] and all(t["passed"] for t in out["tests"])
-
-
-@pytest.mark.parametrize("exercise", EXERCISE_IDS)
 @pytest.mark.parametrize("file", ["solution.py", "starter.py"])
 def test_check_gives_the_result_of_qgcheck_grade(
     runner: local.Container, exercise: str, file: str
 ) -> None:
     code = (EXERCISES / exercise / file).read_text()
-    local_result = grade(exercise, code)
+    local_result = grade(exercise, code, timeout=UNTIMED)
     out = check(runner, exercise, code)
     assert {k: out[k] for k in ("passed", "stdout", "error", "tests")} == {
         k: local_result[k] for k in ("passed", "stdout", "error", "tests")
     }
-
-
-@pytest.mark.parametrize("exercise", EXERCISE_IDS)
-def test_check_fails_the_starter_with_messages(runner: local.Container, exercise: str) -> None:
-    out = check(runner, exercise, (EXERCISES / exercise / "starter.py").read_text())
-    assert out["passed"] is False
     failed = [t for t in out["tests"] if not t["passed"]]
-    assert failed and all(t["message"] for t in failed)
+    if file == "solution.py":
+        assert out["passed"] and out["tests"] and not failed, out
+    else:
+        assert not out["passed"] and failed and all(t["message"] for t in failed), out
 
 
 def test_check_names_hidden_cases_by_number(runner: local.Container) -> None:
@@ -404,12 +395,13 @@ def test_unknown_path_is_404(runner: local.Container) -> None:
 
 def test_rejects_a_second_job_while_one_runs(runner: local.Container) -> None:
     first: dict[str, Any] = {}
-    t = threading.Thread(
-        target=lambda: first.update(out=run(runner, "import time; time.sleep(2); print('listo')"))
-    )
+    held = "import os, time\nwhile not os.path.exists('go'):\n    time.sleep(0.01)\nprint('listo')"
+    t = threading.Thread(target=lambda: first.update(out=run(runner, held)))
     t.start()
-    time.sleep(0.7)
+    while t.is_alive() and not runner.exec("sh", "-c", "ls /scratch/*/main.py 2>/dev/null || true"):
+        time.sleep(0.05)
     status, _ = post(runner, {"code": "print(1)"})
+    runner.exec("sh", "-c", "for d in /scratch/*/; do touch $d/go; done")
     t.join()
     assert status == 503
     assert first["out"]["stdout"] == "listo\n"

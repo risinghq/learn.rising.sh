@@ -36,8 +36,16 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 import build  # noqa: E402
 import sizing  # noqa: E402
 
-from qgcheck import grade, learner, spec  # noqa: E402
+import qgcheck  # noqa: E402
+from qgcheck import learner, spec  # noqa: E402
 from qgcheck.runner import TIMEOUT, job_env  # noqa: E402
+from qgcheck.source import preload  # noqa: E402
+
+UNTIMED = 300
+
+
+def grade(exercise_id: str, code: str, **options: Any) -> dict[str, Any]:
+    return qgcheck.grade(exercise_id, code, **{"timeout": UNTIMED, **options})
 
 
 def load_tool(name: str, filename: str) -> types.ModuleType:
@@ -1082,22 +1090,23 @@ def cpu_limit(slower: float) -> float:
     return CPU_SHARE * CPU_BUDGET_S * slower
 
 
-@functools.cache
-def first_slowdown() -> float:
-    return slowdown()
+load_slowdown = slowdown()
 
 
 def measure_against_limit(exercise_id: str, code: str) -> tuple[float, float]:
     """The CPU of a solution and the limit it is judged by.
 
-    A quiet host costs one solution run, against the slowdown measured once for the session. A
-    solution that goes over that limit is measured again after a fresh calibration, so a loaded
-    host judges it by the load of that moment, and the second pair decides.
+    A quiet host costs one solution run, against the latest slowdown, first measured when the
+    module loads. A solution that goes over that limit is measured again after a fresh
+    calibration, so a loaded host judges it by the load of that moment, and the second pair
+    decides. The fresh calibration becomes the latest, so the next solutions are judged by it.
     """
+    global load_slowdown
     cpu = solution_cpu(exercise_id, code)
-    limit = cpu_limit(first_slowdown())
+    limit = cpu_limit(load_slowdown)
     if cpu > limit:
-        limit = cpu_limit(slowdown())
+        load_slowdown = slowdown()
+        limit = cpu_limit(load_slowdown)
         cpu = solution_cpu(exercise_id, code)
     return cpu, limit
 
@@ -1112,10 +1121,43 @@ def test_solution_passes_within_the_cpu_budget(exercise_id: str) -> None:
     )
 
 
+PUBLISHED = exercises_tool.published()
+
+
+def test_every_exercise_is_in_a_lesson() -> None:
+    assert set(PUBLISHED) == set(REAL)
+
+
+@pytest.mark.parametrize("exercise_id", REAL)
+def test_hints_that_cases_name_exist(exercise_id: str) -> None:
+    assert exercises_tool.hint_problems(exercise_id, len(PUBLISHED[exercise_id]["hints"])) == []
+
+
+@pytest.mark.parametrize("exercise_id", REAL)
+def test_solution_needs_what_its_lesson_declares(exercise_id: str) -> None:
+    needs = PUBLISHED[exercise_id]["needs"]
+    solution = read(exercise_id, "solution.py")
+    assert exercises_tool.needs_problems(exercise_id, needs, solution, timeout=UNTIMED) == []
+
+
+def unnamed_inputs(exercise_id: str, result: dict[str, Any]) -> list[str]:
+    """The failed hidden cases whose message does not say which input they failed on."""
+    return [
+        f"{t['name']} does not name its input: {t['message']}"
+        for t in failed(result)
+        if not t["visible"] and not names_its_input(exercise_id, t["message"])
+    ]
+
+
 @pytest.mark.parametrize("exercise_id", REAL)
 def test_starter_fails(exercise_id: str) -> None:
-    result = grade(exercise_id, read(exercise_id, "starter.py"))
+    starter = read(exercise_id, "starter.py")
+    result = grade(exercise_id, starter)
     assert result["error"] is None and not result["passed"] and failed(result)
+    kind = PUBLISHED[exercise_id].get("kind", "write")
+    solution = read(exercise_id, "solution.py")
+    assert exercises_tool.starter_problems(starter, solution, result, kind) == []
+    assert unnamed_inputs(exercise_id, result) == []
 
 
 @pytest.mark.parametrize(
@@ -1127,6 +1169,7 @@ def test_wrong_solution_fails_with_message(exercise_id: str, code: str, expected
     assert any(expected in t["message"] for t in failed(result)), [
         t["message"] for t in failed(result)
     ]
+    assert unnamed_inputs(exercise_id, result) == []
 
 
 def test_wrong_solutions_cover_every_exercise() -> None:
@@ -1149,25 +1192,6 @@ def names_its_input(exercise_id: str, message: str) -> bool:
     return bool(re.search(r"\b\w+ = \S", message)) or any(
         f"`{name}" in message for name in learner_names(exercise_id)
     )
-
-
-def graded_attempts(exercise_id: str) -> list[str]:
-    """The starter code and each wrong code in WRONG for this exercise."""
-    return [
-        read(exercise_id, "starter.py"),
-        *(code for eid, code, *_ in WRONG if eid == exercise_id),
-    ]
-
-
-@pytest.mark.parametrize("exercise_id", REAL)
-def test_graded_hidden_messages_name_their_input(exercise_id: str) -> None:
-    """What `grade` returns for a failing hidden case says which input it failed on."""
-    for code in graded_attempts(exercise_id):
-        for test in failed(grade(exercise_id, code)):
-            if not test["visible"]:
-                assert names_its_input(exercise_id, test["message"]), (
-                    f"{test['name']} does not name its input: {test['message']}"
-                )
 
 
 # An `assert` in a case looks at the learner's code through these expressions, and it carries the
@@ -1348,6 +1372,12 @@ class Site:
         return tainted, inputs - tainted
 
 
+preload(
+    *(read(eid, name) for eid in REAL for name in ("check.py", "solution.py")),
+    *(code for _, code in MUTANTS),
+)
+
+
 def run_hidden_case(
     exercise_id: str,
     code: str,
@@ -1394,24 +1424,24 @@ def run_hidden_case(
 
         return on_line
 
-    here = os.getcwd()
-    os.chdir(tempfile.mkdtemp(prefix="qg-"))
     message: str | None = None
     lineno: int | None = None
     tb: types.TracebackType | None = None
-    try:
-        with contextlib.redirect_stdout(io.StringIO()):
-            namespace: dict[str, Any] = {"__name__": "__main__"}
-            exec(compile(code, "tu_codigo.py", "exec"), namespace)
-            learner._bind(namespace)
-            sys.settrace(on_call)
-            try:
-                fn()
-            except AssertionError as exc:
-                message, tb = str(exc), exc.__traceback__
-    finally:
-        sys.settrace(None)
-        os.chdir(here)
+    with (
+        tempfile.TemporaryDirectory(prefix="qg-") as work,
+        contextlib.chdir(work),
+        contextlib.redirect_stdout(io.StringIO()),
+    ):
+        namespace: dict[str, Any] = {"__name__": "__main__"}
+        exec(compile(code, "tu_codigo.py", "exec"), namespace)
+        learner._bind(namespace)
+        sys.settrace(on_call)
+        try:
+            fn()
+        except AssertionError as exc:
+            message, tb = str(exc), exc.__traceback__
+        finally:
+            sys.settrace(None)
     while tb is not None:
         if tb.tb_frame.f_code.co_filename == str(check):
             lineno = tb.tb_lineno
@@ -1485,7 +1515,11 @@ def returned_roots(
 
 
 @pytest.mark.parametrize(
-    "exercise_id,code", MUTANTS, ids=[f"{eid}#{k}" for k, (eid, _) in enumerate(MUTANTS)]
+    "exercise_id,code",
+    [
+        pytest.param(eid, code, id=f"{eid}#{k}", marks=pytest.mark.xdist_group(eid))
+        for k, (eid, code) in enumerate(MUTANTS)
+    ],
 )
 def test_hidden_messages_show_the_input_and_the_return_but_not_the_expected_value(
     exercise_id: str, code: str
@@ -1535,7 +1569,9 @@ def test_hidden_messages_show_the_input_and_the_return_but_not_the_expected_valu
         assert not leaked, f"{case} shows the expected value {leaked}: {message}"
 
 
-@pytest.mark.parametrize("exercise_id", REAL)
+@pytest.mark.parametrize(
+    "exercise_id", [pytest.param(eid, marks=pytest.mark.xdist_group(eid)) for eid in REAL]
+)
 def test_every_hidden_case_is_checked_against_a_wrong_answer(exercise_id: str) -> None:
     reached = {
         case
