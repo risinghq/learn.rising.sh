@@ -4,7 +4,7 @@ import {
   type Harness,
   type Options,
   TOKEN,
-  clearOfMinuteEnd,
+  NOON_AHEAD,
   start as startWorker,
 } from "./harness.ts";
 import { signIn } from "./signin.ts";
@@ -326,10 +326,9 @@ describe("POST /api/xp", () => {
   });
 
   it("counts the XP route against the per-user limit", async () => {
-    // The limiter's alarm deletes its counter at once under a clock in the
-    // past, so this test runs on the real one.
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "3" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "3" },
+    });
     const ada = await user(h, "ada");
     const statuses: number[] = [];
     for (let i = 0; i < 4; i++) {

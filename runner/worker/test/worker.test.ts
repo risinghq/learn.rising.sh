@@ -7,7 +7,7 @@ import {
   SPENT_SECRET,
   TOKEN,
   VARS,
-  clearOfMinuteEnd,
+  NOON_AHEAD,
   start,
 } from "./harness.ts";
 import { signIn } from "./signin.ts";
@@ -97,8 +97,9 @@ describe("the site and /run in a single Worker", () => {
 
 describe("per-IP limit", () => {
   it("answers 429 with Retry-After when the per-minute limit is passed", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "3" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "3" },
+    });
     for (let i = 0; i < 3; i++)
       expect((await h.post(run, verified)).status).toBe(200);
 
@@ -114,8 +115,9 @@ describe("per-IP limit", () => {
   });
 
   it("with simultaneous requests it lets exactly the limit through", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "3" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "3" },
+    });
     const replies = await Promise.all(
       Array.from({ length: 10 }, () => h.post(run, verified)),
     );
@@ -124,8 +126,9 @@ describe("per-IP limit", () => {
   });
 
   it("counts each IP separately", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "1" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "1" },
+    });
     expect(
       (await h.post(run, { ...verified, ip: "198.51.100.1" })).status,
     ).toBe(200);
@@ -138,7 +141,9 @@ describe("per-IP limit", () => {
   });
 
   it("answers 429 with Retry-After when the daily limit is passed", async () => {
-    const h = await worker({ vars: { RATE_PER_DAY: "2" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_DAY: "2" },
+    });
     await h.post(run, verified);
     await h.post(run, verified);
 
@@ -152,8 +157,9 @@ describe("per-IP limit", () => {
   });
 
   it("also limits the requests that Turnstile rejects", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "2" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "2" },
+    });
     expect((await h.post(run)).status).toBe(403);
     expect((await h.post(run)).status).toBe(403);
     expect((await h.post(run)).status).toBe(429);
@@ -334,8 +340,7 @@ function costs(h: Harness): number[] {
 }
 
 describe("monthly budget", () => {
-  // With a reservation of 0.05 s a run that hangs is stopped at 50 ms;
-  // without a cap it would cost the 1500 ms it takes.
+  // A run that hangs never ends on its own: only the cap stops it.
   const hang = { code: "colgar", mode: "run" };
 
   it("charges the on-window of an isolated run and only the extension of the next one", async () => {
@@ -392,7 +397,6 @@ describe("monthly budget", () => {
       .workerLogs()
       .map((entry) => JSON.parse(entry))
       .find((entry) => entry.outcome === "run_too_long");
-    expect(line.busy_ms).toBeLessThan(1000);
     // What is charged is the window set aside, not the one the job would have lasted.
     expect(line.cost_nano_usd).toBeLessThanOrEqual(reserved);
     expect(line.cost_nano_usd).toBeGreaterThan(500_000);
@@ -401,12 +405,13 @@ describe("monthly budget", () => {
   it("when the cap is reached it stops only the request's instance, not the one serving another learner", async () => {
     // The first attempt lands on instance 0, which serves another learner and answers
     // 503; the retry lands on 1, where the job hangs.
-    const h = await worker({ vars: { RESERVED_BUSY_SECONDS: "0.4" } });
+    const h = await worker({ vars: { RESERVED_BUSY_SECONDS: "5" } });
     const other = h.get("/other-learner");
     while (h.runnerCalls().length < 1)
       await new Promise((resolve) => setTimeout(resolve, 10));
 
     const reply = await h.post(hang, verified);
+    await h.get("/other-learner/finish");
     expect(reply.status).toBe(504);
     expect(reply.body.reason).toBe("run_too_long");
     // The other learner's job, the first attempt (503) and the retry.
@@ -639,8 +644,9 @@ describe("logging", () => {
   const IP = "203.0.113.77";
 
   it("stores no code, IP, token or cookie on any path", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { RATE_PER_MINUTE: "5" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "5" },
+    });
     const code = `print("${MARK}")`;
     const cookie = (
       (
@@ -750,20 +756,30 @@ describe("real Turnstile", async () => {
 
   it.skipIf(!reachable)(
     "accepts with the test secret that always passes",
-    async () => {
+    async ({ skip }) => {
       const h = await worker({ siteverify: "real" });
-      expect((await h.post(run, verified)).status).toBe(200);
+      const reply = await h.post(run, verified);
+      skip(
+        reply.body.reason === "turnstile_unavailable",
+        "siteverify did not answer",
+      );
+      expect(reply.status).toBe(200);
     },
   );
 
   it.skipIf(!reachable)(
     "rejects with the test secret that always fails",
-    async () => {
+    async ({ skip }) => {
       const h = await worker({
         siteverify: "real",
         vars: { TURNSTILE_SECRET: FAIL_SECRET },
       });
-      expect((await h.post(run, verified)).status).toBe(403);
+      const reply = await h.post(run, verified);
+      skip(
+        reply.body.reason === "turnstile_unavailable",
+        "siteverify did not answer",
+      );
+      expect(reply.status).toBe(403);
     },
   );
 });

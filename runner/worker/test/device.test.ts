@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import {
-  type Harness,
-  clearOfMinuteEnd,
-  start as startWorker,
-} from "./harness.ts";
+import { type Harness, NOON_AHEAD, start as startWorker } from "./harness.ts";
 import { signIn } from "./signin.ts";
 
 const open: Harness[] = [];
@@ -216,10 +212,9 @@ describe("device flow", () => {
   });
 
   it("a poll does not count against the per-IP limit of /auth", async () => {
-    // The limiter's alarm fires at once under a fake clock earlier than the
-    // real date, so this test runs on the real one.
-    await clearOfMinuteEnd();
-    const h = await startWorker({ vars: { AUTH_PER_MINUTE: "2" } });
+    const h = await startWorker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, AUTH_PER_MINUTE: "2" },
+    });
     open.push(h);
     const codes = await begin(h);
     const statuses: number[] = [];
@@ -368,8 +363,9 @@ describe("bearer token", () => {
   });
 
   it("the per-user limit applies to a bearer request", async () => {
-    await clearOfMinuteEnd();
-    const h = await startWorker({ vars: { RATE_PER_MINUTE: "2" } });
+    const h = await startWorker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, RATE_PER_MINUTE: "2" },
+    });
     open.push(h);
     const { token } = await login(h);
     const statuses: number[] = [];

@@ -111,6 +111,11 @@ export default {
         }),
       );
     }
+    if (url.pathname === "/other-learner/finish") {
+      return runners
+        .get(runners.idFromName("instance-0"))
+        .fetch(new Request("http://runner/finish", { method: "POST" }));
+    }
     return real.fetch(request, env as never, ctx);
   },
   scheduled: (controller: ScheduledController, env: never) =>
@@ -121,8 +126,17 @@ export class Runner extends DurableObject {
   // True while the instance serves another learner's job.
   private busy = false;
   private killed = false;
+  private end?: () => void;
+
+  private waitForEnd(): Promise<void> {
+    return new Promise((resolve) => (this.end = resolve));
+  }
 
   async fetch(request: Request): Promise<Response> {
+    if (new URL(request.url).pathname === "/finish") {
+      this.end?.();
+      return new Response(null, { status: 204 });
+    }
     const headers = [...request.headers.keys()].toSorted();
     console.log(
       `FAKE_RUNNER_CALL ${JSON.stringify({ path: new URL(request.url).pathname, headers, instance: this.ctx.id.name })}`,
@@ -133,16 +147,18 @@ export class Runner extends DurableObject {
     if (code === "ajeno") {
       this.busy = true;
       this.killed = false;
-      await scheduler.wait(900);
+      await this.waitForEnd();
       this.busy = false;
       if (this.killed)
         throw new Error("ContainerKilled: the instance was stopped");
     } else if (this.busy) {
       // Like runner/server.py: with no free slot it answers 503 and does not wait.
       return Response.json({ error: "ocupado" }, { status: 503 });
+    } else if (code === "colgar") {
+      // A job that never finishes: only the Worker can cut it off.
+      await this.waitForEnd();
     } else {
-      // A job that does not finish in time: only the Worker can cut it off.
-      await scheduler.wait(code === "colgar" ? 1500 : 15);
+      await scheduler.wait(15);
       // A job that lasts as long as the code says, on the stopped clock.
       const work = /TRABAJO-(\d+)/.exec(code);
       if (work && frozen !== undefined) frozen += Number(work[1]);
@@ -153,6 +169,7 @@ export class Runner extends DurableObject {
   // Container.destroy() kills the instance.
   async destroy(): Promise<void> {
     if (this.busy) this.killed = true;
+    this.end?.();
     console.log("FAKE_RUNNER_STOP");
   }
 }

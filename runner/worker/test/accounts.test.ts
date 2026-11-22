@@ -5,7 +5,7 @@ import {
   HOME_HOST,
   type Options,
   TOKEN,
-  clearOfMinuteEnd,
+  NOON_AHEAD,
   start as startWorker,
 } from "./harness.ts";
 import { PII } from "./provider.ts";
@@ -368,8 +368,9 @@ describe("OAuth sign-in", () => {
   });
 
   it("limits sign-in attempts per IP", async () => {
-    await clearOfMinuteEnd();
-    const h = await worker({ vars: { AUTH_PER_MINUTE: "3" } });
+    const h = await worker({
+      vars: { FAKE_CLOCK: NOON_AHEAD, AUTH_PER_MINUTE: "3" },
+    });
     const statuses: number[] = [];
     for (let i = 0; i < 4; i++)
       statuses.push((await h.request("GET", "/auth/google")).status);
@@ -464,9 +465,9 @@ describe("/run with an account", () => {
   });
 
   it("a GitHub maintainer runs without Turnstile or a per-user limit", async () => {
-    await clearOfMinuteEnd();
     const h = await worker({
       vars: {
+        FAKE_CLOCK: NOON_AHEAD,
         MAINTAINERS: "7,20960328",
         RATE_PER_MINUTE: "2",
         SIGNED_IN_IP_FACTOR: "100",
@@ -484,9 +485,9 @@ describe("/run with an account", () => {
   });
 
   it("the same number on Google does not make a maintainer, and the per-user limit does apply", async () => {
-    await clearOfMinuteEnd();
     const h = await worker({
       vars: {
+        FAKE_CLOCK: NOON_AHEAD,
         MAINTAINERS: "20960328",
         RATE_PER_MINUTE: "2",
         SIGNED_IN_IP_FACTOR: "100",
@@ -538,9 +539,12 @@ describe("/run with an account", () => {
   });
 
   it("each user has their own per-minute limit", async () => {
-    await clearOfMinuteEnd();
     const h = await worker({
-      vars: { RATE_PER_MINUTE: "2", SIGNED_IN_IP_FACTOR: "100" },
+      vars: {
+        FAKE_CLOCK: NOON_AHEAD,
+        RATE_PER_MINUTE: "2",
+        SIGNED_IN_IP_FACTOR: "100",
+      },
     });
     const ada = await signIn(h, "google", "ada");
     const bea = await signIn(h, "google", "bea");
@@ -555,10 +559,13 @@ describe("/run with an account", () => {
   });
 
   it("with an account the IP allows four times the anonymous cap", async () => {
-    await clearOfMinuteEnd();
     // Each user has their own allowance (3) and the shared IP only 2 × 4.
     const h = await worker({
-      vars: { RATE_PER_MINUTE: "2", SIGNED_IN_IP_FACTOR: "4" },
+      vars: {
+        FAKE_CLOCK: NOON_AHEAD,
+        RATE_PER_MINUTE: "2",
+        SIGNED_IN_IP_FACTOR: "4",
+      },
     });
     const users = await Promise.all(
       ["a", "b", "c", "d", "e"].map((subject) => signIn(h, "google", subject)),

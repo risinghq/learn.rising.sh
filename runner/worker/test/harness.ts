@@ -252,7 +252,7 @@ export async function start(options: Options = {}): Promise<Harness> {
     };
   };
   const db = await mf.getD1Database("DB");
-  for (const statement of SCHEMA) await db.prepare(statement).run();
+  await db.batch(SCHEMA.map((statement) => db.prepare(statement)));
   const sessions = new Map<string, Promise<string>>();
   const harness: Harness = {
     siteverify,
@@ -379,9 +379,9 @@ export async function start(options: Options = {}): Promise<Harness> {
   return harness;
 }
 
-// A per-minute limit counts clock windows. If less than `ms` remains before the
-// window ends, wait for the next one so the test does not cross it.
-export async function clearOfMinuteEnd(ms = 8000): Promise<void> {
-  const left = 60_000 - (Date.now() % 60_000);
-  if (left < ms) await new Promise((resolve) => setTimeout(resolve, left + 50));
-}
+// A per-minute limit counts clock windows. This FAKE_CLOCK stops at noon UTC two
+// days ahead, so a test never crosses a minute or a day, and the limiter's alarm,
+// which workerd fires on the real clock, never fires during the test.
+export const NOON_AHEAD = new Date(
+  (Math.floor(Date.now() / 86_400_000) + 2) * 86_400_000 + 43_200_000,
+).toISOString();
