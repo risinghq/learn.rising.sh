@@ -74,31 +74,67 @@ description = "Run every type check"
 depends = ["typecheck:*"]
 
 [tasks."test:py"]
-description = "Run the pytest suites that need no browser"
-# The grader tests time learner code against a 10 s limit. This suite runs only beside the exercise check,
-# each on its own core, and the browser, Worker and lesson suites wait for it.
+description = "Run the pytest suites that need no browser, one worker per physical core; they also grade every exercise"
 wait_for = ["lint", "typecheck", "build"]
-run = "uv run pytest tests/exercises_test.py tests/courses_test.py"
-
-[tasks."test:exercises"]
-description = "Grade every exercise: its solution passes, its starter fails, its hints and needs hold"
-run = "uv run python tools/exercises.py"
+run = "uv run pytest -n auto --dist loadgroup tests/exercises_test.py tests/courses_test.py"
 
 [tasks."test:ui"]
 description = "Drive the exercise editor, the browser-graded exercises, the project panel, the shell, the drill session, the theme, the optional account and the friends board in a browser, and hold the shell to its script budget"
+depends = ["test:ui:*"]
+
+[tasks."test:ui:editor"]
+description = "Drive the exercise editor against tools/serve.py"
 depends = ["generate:vendor", "generate:scripts", "generate:app"]
 wait_for = ["test:py"]
-run = [
-  "uv run python tests/exercise_ui_test.py",
-  "uv run python tests/proyecto_test.py",
-  "uv run --group tools python tests/pyodide_ui_test.py",
-  "bun tests/account_ui_test.ts",
-  "bun tests/friends_test.ts",
-  "bun tests/theme_test.ts",
-  "bun tests/shell_test.ts",
-  "bun tests/session_test.ts",
-  "bun tests/budget_test.ts",
-]
+run = "uv run python tests/exercise_ui_test.py"
+
+[tasks."test:ui:project"]
+description = "Drive the project panel"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "uv run python tests/proyecto_test.py"
+
+[tasks."test:ui:pyodide"]
+description = "Grade the browser-graded exercises in Pyodide with /run refused"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "uv run --group tools python tests/pyodide_ui_test.py"
+
+[tasks."test:ui:account"]
+description = "Walk through the optional account against the local Worker"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "bun tests/account_ui_test.ts"
+
+[tasks."test:ui:friends"]
+description = "Drive the friends board against the local Worker"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "bun tests/friends_test.ts"
+
+[tasks."test:ui:theme"]
+description = "Check the light and dark themes and the fonts of every page"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "bun tests/theme_test.ts"
+
+[tasks."test:ui:shell"]
+description = "Walk the shell from the catalog to a lesson"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "bun tests/shell_test.ts"
+
+[tasks."test:ui:session"]
+description = "Play a drill session"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "bun tests/session_test.ts"
+
+[tasks."test:ui:budget"]
+description = "Hold every shell page to its script budget"
+depends = ["generate:vendor", "generate:scripts", "generate:app"]
+wait_for = ["test:py"]
+run = "bun tests/budget_test.ts"
 
 [tasks."test:walkthrough"]
 description = "Play one learner through the whole Qiskit course in a browser, reloading and resuming, and read the path page after every step"
@@ -119,17 +155,17 @@ wait_for = ["test:py"]
 run = "vitest run"
 
 [tasks."test:lessons"]
-description = "Run the Python code shown in every lesson and compare the checked outputs"
+description = "Run the Python code shown in every lesson, one lesson per core, and compare the checked outputs"
 wait_for = ["test:py"]
-run ="uv run python tools/verify.py"
+run = "uv run python tools/verify.py"
 
 [tasks."test:integration"]
-description = "Build the runner image and run the runner tests against it (needs Docker)"
-run = "uv run pytest tests/runner_test.py"
+description = "Build the runner image and run the runner tests against it, one container per physical core (needs Docker)"
+run = "uv run pytest -n auto tests/runner_test.py"
 
 [tasks.test]
 description = "Run every test that needs no service, network or secret"
-depends = ["test:py", "test:exercises","test:ui", "test:tools", "test:worker", "test:lessons", "test:walkthrough"]
+depends = ["test:py", "test:ui", "test:tools", "test:worker", "test:lessons", "test:walkthrough"]
 
 [tasks."generate:lessons"]
 description = "Rewrite site/<course>/lessons/*/lesson.json and site/<course>/course.json of every course from lessons_src"
@@ -195,5 +231,5 @@ dir = "runner/worker"
 run = "bunx cf deploy"
 
 [tasks.check]
-description = "Run lint, typecheck, test and build. Writes nothing tracked."
-depends = ["lint", "typecheck", "test", "build"]
+description = "Run lint, typecheck, test and build, and finish every task even when one fails. Writes nothing tracked."
+run = "mise run --continue-on-error lint ::: typecheck ::: test ::: build"
