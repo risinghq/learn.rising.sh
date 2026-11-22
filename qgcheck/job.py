@@ -92,8 +92,19 @@ class Host(Channel):
         return reply
 
 
+def _started() -> None:
+    # The sandbox starts the learner's time budget here, not at the process's birth, so
+    # interpreter start and library imports are not charged to it.
+    fd = os.environ.get("QG_STARTED_FD")
+    if fd:
+        os.write(int(fd), b"\x00")
+        os.close(int(fd))
+
+
 def run(code_path: str) -> dict[str, Any]:
     source = Path(code_path).read_text(encoding="utf-8")
+    preload(source)
+    _started()
     try:
         exec(compile(source, CODE_NAME, "exec"), {"__name__": "__main__"})
     except BaseException as e:

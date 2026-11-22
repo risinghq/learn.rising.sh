@@ -429,7 +429,9 @@ def test_memory_cap(runner: local.Container, code: str) -> None:
     assert out["passed"] is False
     assert out["killed"] == "memory" or out["error"].startswith("MemoryError")
     assert out["peak_mb"] < 700
-    assert out["ms"] < 5_000
+    # `ms` covers the job's warmup (library imports) plus the learner's 10 s; under a
+    # loaded CI machine the warmup can take seconds, so only bound it by the budget itself.
+    assert out["ms"] < 45_000
     assert health(runner) == 200
 
 

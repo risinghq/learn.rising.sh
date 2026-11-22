@@ -32,6 +32,9 @@ POLL_S = 0.02
 PEAK_POLL_S = 0.5
 DISK_POLL_S = 0.1
 MAX_ENTRIES = 5000
+# The time limit covers the learner's code: the interpreter start and the library imports
+# the job makes for it get their own bound, or a slow machine would charge them to the learner.
+STARTUP_S = 30.0
 
 
 @dataclass(frozen=True)
@@ -224,6 +227,10 @@ def run_job(
     Standard output and standard error go together, in the order they were written.
     `killed` is `time`, `memory`, `disk` or `output` if the job passed that limit,
     or `scan` if the watch failed and the job was killed without being measured.
+    With `report=True` the child also gets `QG_STARTED_FD`: a byte on it marks the start
+    of the learner's code, and the time limit runs from there. Before the byte, the job
+    has `STARTUP_S` to boot and import its libraries. Without `report` there is no marker
+    and the limit runs from the start of `run_job`.
     """
     uid = slot_uid(slot)
     start = time.monotonic()
@@ -255,11 +262,13 @@ def run_job(
             *cmd,
         ]
         pass_fds: tuple[int, ...] = ()
-        rep_r = rep_w = None
+        rep_r = rep_w = st_r = st_w = None
         if report:
             rep_r, rep_w = os.pipe()
+            st_r, st_w = os.pipe()
             child_env["QG_REPORT_FD"] = str(rep_w)
-            pass_fds = (rep_w,)
+            child_env["QG_STARTED_FD"] = str(st_w)
+            pass_fds = (rep_w, st_w)
 
         proc = subprocess.Popen(
             launch,
@@ -273,10 +282,12 @@ def run_job(
         )
         if rep_w is not None:
             os.close(rep_w)
+        if st_w is not None:
+            os.close(st_w)
         assert proc.stdout is not None
 
         over = threading.Event()
-        out, rep = bytearray(), bytearray()
+        out, rep, st = bytearray(), bytearray(), bytearray()
         readers = [
             threading.Thread(
                 target=drain, args=(proc.stdout.fileno(), limits.out_bytes, out, over)
@@ -284,18 +295,24 @@ def run_job(
         ]
         if rep_r is not None:
             readers.append(threading.Thread(target=drain, args=(rep_r, REPORT_CAP, rep, over)))
+        if st_r is not None:
+            readers.append(threading.Thread(target=drain, args=(st_r, 16, st, over)))
         for t in readers:
             t.start()
 
         scan = _Scan(uid, work, limits)
         scan.start()
         killed: str | None = None
-        deadline = start + limits.wall_s
+        armed = rep_r is None
+        deadline = start + (limits.wall_s if armed else STARTUP_S)
         while proc.poll() is None:
             if over.is_set():
                 killed = "output"
             elif scan.tripped.is_set():
                 killed = scan.killed
+            elif not armed and st:
+                armed = True
+                deadline = time.monotonic() + limits.wall_s
             elif time.monotonic() > deadline:
                 killed = "time"
             if killed:
@@ -313,6 +330,8 @@ def run_job(
         proc.stdout.close()
         if rep_r is not None:
             os.close(rep_r)
+        if st_r is not None:
+            os.close(st_r)
         return Outcome(
             output=out.decode("utf-8", "replace"),
             report=bytes(rep),

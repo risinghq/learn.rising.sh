@@ -70,12 +70,18 @@ def encoded(value: Any, name: Any) -> dict[str, Any]:
 
 def serve(sock: socket.socket, code_path: str, check_path: str) -> None:
     sock_fd = sock.fileno()
+    # See `_started` in `qgcheck.job`: the learner's time budget begins at its code.
+    started = os.environ.get("QG_STARTED_FD")
+    started_fd = int(started) if started else -1
     # Closing only the inherited descriptors avoids the cost of walking a huge range.
     for fd in sorted(int(name) for name in os.listdir("/proc/self/fd")):
-        if fd > 2 and fd != sock_fd:
+        if fd > 2 and fd != sock_fd and fd != started_fd:
             with contextlib.suppress(OSError):
                 os.close(fd)
     source = Path(code_path).read_text(encoding="utf-8")
+    if started_fd > 0:
+        os.write(started_fd, b"\x00")
+        os.close(started_fd)
     namespace: dict[str, Any] = {"__name__": "__main__"}
     error: str | None = None
     check: Any = None
