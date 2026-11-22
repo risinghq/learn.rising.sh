@@ -388,6 +388,10 @@ uv run --group tools python tests/exercise_ui_test.py
    it does not pass without it.
 4. Each `@hint(n)` names a hint that the exercise has in `hints`.
 
+`tests/exercises_test.py` runs the same four checks as one test per exercise, so
+`mise run check` does not run the tool itself. `mise run test:py` runs the tests
+with `pytest -n auto`, one worker per physical core it may use.
+
 [`tests/exercises_test.py`](../tests/exercises_test.py) runs each exercise with
 its solution, with a wrong solution that must fail with a useful message and
 with the wrong programs of `tests/mutants/<exercise>/` (the ones that make each

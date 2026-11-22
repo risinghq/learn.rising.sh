@@ -40,7 +40,9 @@ mise run check
 ```
 
 This runs the linters, the type checks, the tests and the build check. It
-changes no tracked file. `mise run fix` applies the safe fixes and the format.
+changes no tracked file. When one task fails, the others still run to the end,
+so one run shows every failure. `mise run fix` applies the safe fixes and the
+format.
 
 `mise run test:integration` also builds the runner image and needs Docker, so
 `check` does not run it.

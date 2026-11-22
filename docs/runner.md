@@ -307,7 +307,8 @@ python runner/bench.py --runs 50
 `tests/runner_test.py` builds the image, starts it and talks to `/run` over
 HTTP. It covers the contract, that the result of each exercise is that of
 `qgcheck.grade`, attempts to forge a result and each limit. It is skipped if
-Docker does not respond.
+Docker does not respond. `mise run test:integration` runs it with
+`pytest -n auto`: each pytest worker starts its own container.
 
 ```sh
 mise run test:worker
