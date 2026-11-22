@@ -12,10 +12,12 @@ Python and uv versions from mise.toml with `mise current`.
 """
 
 import argparse
+import fcntl
 import json
 import os
 import shlex
 import subprocess
+import tempfile
 import time
 import urllib.request
 import uuid
@@ -47,19 +49,38 @@ def mise_version(tool: str) -> str:
 
 
 def build(image: str = IMAGE) -> None:
-    docker(
-        "build",
-        "-f",
-        str(ROOT / "runner" / "Dockerfile"),
-        "--build-arg",
-        f"PYTHON_VERSION={mise_version('python')}",
-        "--build-arg",
-        f"UV_VERSION={mise_version('uv')}",
-        "-t",
-        image,
-        str(ROOT),
-        capture=False,
-    )
+    """Build the image. Builds started at once, as by parallel test workers, run one at a time."""
+    lock = Path(tempfile.gettempdir()) / f"{image}.build.lock"
+    with lock.open("w") as held:
+        fcntl.flock(held, fcntl.LOCK_EX)
+        docker(
+            "build",
+            "-f",
+            str(ROOT / "runner" / "Dockerfile"),
+            "--build-arg",
+            f"PYTHON_VERSION={mise_version('python')}",
+            "--build-arg",
+            f"UV_VERSION={mise_version('uv')}",
+            "-t",
+            image,
+            str(ROOT),
+            capture=False,
+        )
+
+
+def internal_network() -> None:
+    """Create the internal network if it is missing, even when another process creates it too."""
+
+    def exists() -> bool:
+        return docker("network", "ls", "-q", "--filter", f"name=^{INTERNAL_NET}$") != ""
+
+    if exists():
+        return
+    try:
+        docker("network", "create", "--internal", INTERNAL_NET)
+    except subprocess.CalledProcessError:
+        if not exists():
+            raise
 
 
 def ensure_image(image: str = IMAGE) -> None:
@@ -103,8 +124,7 @@ def start(
         network = "bridge"
     else:
         network = INTERNAL_NET
-        if docker("network", "ls", "-q", "--filter", f"name=^{INTERNAL_NET}$") == "":
-            docker("network", "create", "--internal", INTERNAL_NET)
+        internal_network()
     name = f"qg-runner-{uuid.uuid4().hex[:8]}"
     cap_args = [a for c in caps for a in ("--cap-add", c)]
     docker(
