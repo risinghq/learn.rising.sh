@@ -28,6 +28,7 @@ sys.path[:0] = [str(ROOT), str(ROOT / "lessons_src")]
 from build import walk  # noqa: E402
 
 from qgcheck import grade, spec  # noqa: E402
+from qgcheck.runner import TIMEOUT  # noqa: E402
 
 SITE = ROOT / "site"
 # The modules an exercise must not need, by the `needs` it declares.
@@ -78,40 +79,59 @@ def fix_problems(broken: str, solution: str, starter: dict[str, Any]) -> list[st
     return found
 
 
+def hint_problems(eid: str, hints: int | None) -> list[str]:
+    """Return each case of check.py that names a hint the exercise does not have."""
+    if hints is None:
+        return []
+    found: list[str] = []
+    for fn, _ in spec.load_cases(spec.folder(eid) / "check.py"):
+        number = getattr(fn, "qg_hint", None)
+        if number is not None and number > hints:
+            found.append(f"{fn.__name__} names hint {number} and the exercise has {hints}")
+    return found
+
+
+def starter_problems(
+    broken: str, solution: str, starter: dict[str, Any], kind: str = "write"
+) -> list[str]:
+    """Return what is wrong with a starter, given what grading it returned."""
+    if starter["error"]:
+        return [f"starter.py fails to run: {starter['error']}"]
+    if starter["passed"]:
+        return ["starter.py already passes every case"]
+    if kind == "fix":
+        return fix_problems(broken, solution, starter)
+    return []
+
+
+def needs_problems(eid: str, needs: str, solution: str, timeout: float = TIMEOUT) -> list[str]:
+    """Return a problem if a solution that passes does not need what `needs` declares."""
+    if needs in WITHOUT:
+        without = grade(eid, solution, block=WITHOUT[needs], timeout=timeout)
+        if not without["passed"]:
+            return [
+                f'needs="{needs}" but solution.py needs {" or ".join(WITHOUT[needs])}: '
+                f"{failures(without)}"
+            ]
+    elif grade(eid, solution, block=("qiskit_aer",), timeout=timeout)["passed"]:
+        return ['needs="aer" but solution.py passes without qiskit_aer']
+    return []
+
+
 def problems(eid: str, needs: str, hints: int | None = None, kind: str = "write") -> list[str]:
     """Return the exercise's problems and validate its hint references."""
     d = spec.folder(eid)
     if missing := spec.missing_files(eid):
         return [f"missing {', '.join(missing)}"]
     solution = (d / "solution.py").read_text(encoding="utf-8")
-    found: list[str] = []
-    if hints is not None:
-        for fn, _ in spec.load_cases(d / "check.py"):
-            number = getattr(fn, "qg_hint", None)
-            if number is not None and number > hints:
-                found.append(f"{fn.__name__} names hint {number} and the exercise has {hints}")
+    found = hint_problems(eid, hints)
     solved = grade(eid, solution)
     if not solved["passed"]:
         found.append(f"solution.py does not pass: {failures(solved)}")
     broken = (d / "starter.py").read_text(encoding="utf-8")
-    starter = grade(eid, broken)
-    if starter["error"]:
-        found.append(f"starter.py fails to run: {starter['error']}")
-    elif starter["passed"]:
-        found.append("starter.py already passes every case")
-    elif kind == "fix":
-        found.extend(fix_problems(broken, solution, starter))
+    found.extend(starter_problems(broken, solution, grade(eid, broken), kind))
     if solved["passed"]:
-        if needs in WITHOUT:
-            without = grade(eid, solution, block=WITHOUT[needs])
-            if not without["passed"]:
-                found.append(
-                    f'needs="{needs}" but solution.py needs {" or ".join(WITHOUT[needs])}: '
-                    f"{failures(without)}"
-                )
-        else:
-            if grade(eid, solution, block=("qiskit_aer",))["passed"]:
-                found.append('needs="aer" but solution.py passes without qiskit_aer')
+        found.extend(needs_problems(eid, needs, solution))
     return found
 
 
