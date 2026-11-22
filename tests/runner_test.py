@@ -510,7 +510,7 @@ def test_job_runs_without_privileges(runner: local.Container) -> None:
         "print([l for l in open('/proc/self/status') if l.startswith('CapEff')][0].split()[1])",
     )
     uid, groups, caps = out["stdout"].split("\n")[:3]
-    assert (uid, groups, int(caps, 16)) == ("20000", "[]", 0)
+    assert (uid, groups, int(caps, 16)) == (str(runner.uid_base), "[]", 0)
 
 
 NETWORK_CODE = """
@@ -593,7 +593,7 @@ def test_detached_process_does_not_outlive_the_job(runner: local.Container) -> N
         runner,
         "import os, time\nif os.fork() == 0:\n    os.setsid()\n    time.sleep(300)\n    os._exit(0)",
     )
-    assert out["passed"] is True
+    assert out["passed"], out
     assert len(processes(runner)) <= before
 
 
